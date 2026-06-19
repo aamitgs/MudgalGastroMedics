@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #14242b;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+nav,
+button {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+[data-hi] {
+  display: none;
+}
+
+body.lang-hi [data-en] {
+  display: none;
+}
+
+body.lang-hi [data-hi] {
+  display: revert;
+}
+
+body.lang-hi .inline-lang [data-hi] {
+  display: inline;
+}
+
+.hero-bg {
+  background:
+    linear-gradient(90deg, rgba(7, 57, 66, 0.94), rgba(7, 73, 74, 0.74)),
+    url("/placeholders/hospital-front-view.svg") center / cover;
+}
+
+.page-hero-bg {
+  background:
+    linear-gradient(90deg, rgba(8, 50, 58, 0.94), rgba(15, 122, 120, 0.76)),
+    url("/placeholders/reception-waiting-area.svg") center / cover;
+}
+
+.masonry {
+  columns: 3 280px;
+  column-gap: 18px;
+}
+
+.masonry > * {
+  break-inside: avoid;
+  margin-bottom: 18px;
+}
