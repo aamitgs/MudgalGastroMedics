@@ -50,21 +50,11 @@ body.lang-hi .inline-lang [data-hi] {
 .hero-bg {
   background:
     linear-gradient(90deg, rgba(7, 57, 66, 0.94), rgba(7, 73, 74, 0.74)),
-    url("/placeholders/hospital-front-view.svg") center / cover;
+    url("/images/hospital/hospital-front-view.jpg") center / cover;
 }
 
 .page-hero-bg {
   background:
     linear-gradient(90deg, rgba(8, 50, 58, 0.94), rgba(15, 122, 120, 0.76)),
-    url("/placeholders/reception-waiting-area.svg") center / cover;
-}
-
-.masonry {
-  columns: 3 280px;
-  column-gap: 18px;
-}
-
-.masonry > * {
-  break-inside: avoid;
-  margin-bottom: 18px;
+    url("/images/hospital/reception-waiting-area.jpg") center / cover;
 }

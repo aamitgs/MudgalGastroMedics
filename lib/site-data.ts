@@ -224,65 +224,58 @@ export const procedures = [
 ];
 
 export const galleryItems = [
-  ["Hospital Exterior", "Hospital Front View", "hospital-front-view"],
-  ["Hospital Exterior", "Entrance", "entrance"],
-  ["Reception", "Reception Desk", "reception-desk"],
-  ["Reception", "Waiting Area", "reception-waiting-area"],
-  ["Consultation Areas", "Doctor Chamber", "doctor-chamber"],
-  ["Endoscopy Unit", "Endoscopy Room", "endoscopy-room"],
-  ["Consultation Areas", "Duty Doctor Chamber", "duty-doctor-chamber"],
-  ["HDU", "HDU Cabin", "hdu-cabin"],
-  ["HDU", "HDU Ward", "hdu-ward"],
-  ["Patient Rooms", "IPD Waiting Area", "ipd-waiting-area"],
-  ["Patient Rooms", "Private Room 1", "private-room-1"],
-  ["Patient Rooms", "Private Room 2", "private-room-2"],
-  ["Patient Rooms", "Private Room Lobby", "private-room-lobby"],
-  ["Facilities", "Lift", "lift"],
-  ["Facilities", "Pharmacy", "pharmacy"]
-].map(([category, title, slug]) => ({
-  category,
-  title,
-  slug,
-  src: `/placeholders/${slug}.svg`
-}));
+  ["Hospital Exterior", "Hospital Front View", "hospital-front-view", "/images/hospital/hospital-front-view.jpg"],
+  ["Hospital Exterior", "Entrance", "entrance", "/images/hospital/entrance.jpg"],
+  ["Reception", "Reception Desk", "reception-desk", "/images/hospital/reception-desk.jpg"],
+  ["Reception", "Waiting Area", "reception-waiting-area", "/images/hospital/reception-waiting-area.jpg"],
+  ["Consultation Areas", "Doctor Chamber", "doctor-chamber", "/images/hospital/doctor-chamber.jpg"],
+  ["Endoscopy Unit", "Endoscopy Room", "endoscopy-room", "/images/hospital/endoscopy-room.jpg"],
+  ["Consultation Areas", "Duty Doctor Chamber", "duty-doctor-chamber", "/images/hospital/duty-doctor-chamber.jpg"],
+  ["HDU", "HDU Cabin", "hdu-cabin", "/images/hospital/hdu-cabin.jpg"],
+  ["HDU", "HDU Ward", "hdu-ward", "/images/hospital/hdu-ward.jpg"],
+  ["Patient Rooms", "IPD Waiting Area", "ipd-waiting-area", "/images/hospital/ipd-waiting-area.jpg"],
+  ["Patient Rooms", "Private Room 1", "private-room-1", "/images/hospital/private-room-1.jpg"],
+  ["Patient Rooms", "Private Room 2", "private-room-2", "/images/hospital/private-room-2.jpg"],
+  ["Patient Rooms", "Private Room Lobby", "private-room-lobby", "/images/hospital/private-room-lobby.jpg"]
+].map(([category, title, slug, src]) => ({ category, title, slug, src }));
 
 export const equipment = [
   {
     name: "Colonoscope",
     uses: "Colonoscopy, polyp detection, bleeding evaluation",
     benefits: "High-resolution colon assessment with therapeutic capability",
-    src: "/placeholders/colonoscope.svg"
+    src: "/images/hospital/colonoscope.jpg"
   },
   {
     name: "Endoscope",
     uses: "Upper GI evaluation, biopsy, bleeding control",
     benefits: "Clear visualization of food pipe, stomach, and duodenum",
-    src: "/placeholders/endoscope.svg"
+    src: "/images/hospital/endoscope.jpg"
   },
   {
     name: "ERCP Scope",
     uses: "Bile duct stones, strictures, jaundice care",
     benefits: "Specialized access for therapeutic pancreato-biliary care",
-    src: "/placeholders/ercp-scope.svg"
+    src: "/images/hospital/ercp-scope.jpg"
   },
   {
     name: "C-Arm Machine",
     uses: "Fluoroscopy support for ERCP and stenting",
     benefits: "Real-time imaging support during advanced procedures",
-    src: "/placeholders/c-arm-machine.svg"
+    src: "/images/hospital/c-arm-machine.jpg"
   },
   {
     name: "Cautery Machine",
     uses: "Bleeding control, polypectomy, therapeutic endoscopy",
     benefits: "Precise tissue treatment and hemostasis support",
-    src: "/placeholders/cautery-machine.svg"
+    src: "/images/hospital/cautery-machine.jpg"
   }
 ];
 
 export const allImagePlaceholders = [
   ...galleryItems.map((item) => ({ slug: item.slug, title: item.title, category: item.category })),
   ...equipment.map((item) => ({
-    slug: item.src.split("/").pop()?.replace(".svg", "") ?? item.name,
+    slug: item.src.split("/").pop()?.replace(/\.(svg|jpe?g|png|webp)$/i, "") ?? item.name,
     title: item.name,
     category: "Medical Equipment"
   })),
@@ -297,7 +290,7 @@ export function hospitalSchema() {
     alternateName: site.shortName,
     url: site.url,
     logo: `${site.url}/mgm-logo.png`,
-    image: `${site.url}/placeholders/hospital-front-view.svg`,
+    image: `${site.url}/images/hospital/hospital-front-view.jpg`,
     telephone: [site.phone, site.mobile],
     email: [site.email, site.emailAlt],
     additionalType: ["Gastroenterology Hospital", "Liver Care Centre", "Endoscopy Centre"],

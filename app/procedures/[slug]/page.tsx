@@ -78,7 +78,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             </div>
           </div>
           <article className="overflow-hidden rounded border border-line bg-white shadow-[0_8px_20px_rgba(18,52,61,0.06)]">
-            <Image src="/placeholders/endoscopy-room.svg" alt={`${procedure.title} facility dummy photo`} width={1200} height={900} />
+            <Image src="/images/hospital/endoscopy-room.jpg" alt={`${procedure.title} facility at Mudgal Gastromedics Hospital`} width={1200} height={900} />
             <div className="p-6">
               <h3 className="text-2xl font-black">When to consult</h3>
               <p className="mt-2 text-muted">Persistent digestive symptoms, bleeding, jaundice, liver concerns, abdominal pain, swallowing difficulty, unexplained anemia or doctor-advised screening should be evaluated promptly.</p>

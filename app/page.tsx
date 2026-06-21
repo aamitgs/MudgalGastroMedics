@@ -135,7 +135,7 @@ export default function Home() {
         <div className="grid gap-5 md:grid-cols-3">
           {equipment.map((item) => (
             <article key={item.name} className="overflow-hidden rounded border border-line bg-white shadow-[0_8px_20px_rgba(18,52,61,0.06)]">
-              <Image src={item.src} alt={`${item.name} dummy equipment photo`} width={1200} height={900} />
+              <Image src={item.src} alt={`${item.name} at Mudgal Gastromedics Hospital`} width={1200} height={900} />
               <div className="p-5">
                 <h3 className="text-xl font-black">{item.name}</h3>
                 <p className="mt-2 text-muted"><b>Clinical uses:</b> {item.uses}</p>

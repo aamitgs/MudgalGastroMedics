@@ -24,7 +24,7 @@ export default function GalleryPage() {
           <p className="mb-3 text-xs font-black uppercase tracking-[0.08em] text-gold">Photo Gallery</p>
           <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Facilities, rooms and equipment</h1>
           <p className="mt-5 max-w-3xl text-lg text-white/85">
-            Named dummy photos are ready for replacement with real MGM hospital images. Gallery supports categories, lightbox viewing and mobile-friendly browsing.
+            Explore Mudgal Gastromedics Hospital, including our reception, consultation rooms, endoscopy unit, HDU, patient rooms and clinical equipment.
           </p>
         </div>
       </section>
