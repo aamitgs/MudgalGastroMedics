@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
+import { MapPin, ShieldCheck } from "lucide-react";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CtaBand } from "@/components/CtaBand";
@@ -13,35 +13,23 @@ export default function Home() {
   return (
     <main>
       <section className="hero-bg text-white">
-        <div className="mx-auto grid min-h-[640px] w-[min(1160px,calc(100%-32px))] items-center gap-10 py-16 lg:grid-cols-[1fr_410px]">
-          <div>
+        <div className="mx-auto grid min-h-[640px] w-[min(1160px,calc(100%-32px))] items-start py-20 md:py-24">
+          <div className="max-w-[390px]">
             <p className="mb-3 text-xs font-black uppercase tracking-[0.08em] text-gold">{site.tagline}</p>
-            <h1 className="max-w-4xl text-5xl font-black leading-[0.98] md:text-7xl">Mudgal Gastromedics Hospital</h1>
-            <p className="mt-5 max-w-2xl text-lg text-white/85" data-en>
+            <h1 className="text-4xl font-black leading-[0.98] sm:text-5xl">Mudgal Gastromedics Hospital</h1>
+            <p className="mt-5 text-base leading-relaxed text-white/85" data-en>
               A Gastro & Liver Superspeciality Centre in Agra for endoscopy, liver care, ERCP, colonoscopy, GI bleeding management and advanced therapeutic procedures.
             </p>
-            <p className="mt-5 max-w-2xl text-lg text-white/85" data-hi>
+            <p className="mt-5 text-base leading-relaxed text-white/85" data-hi>
               आगरा में एंडोस्कोपी, लिवर केयर, ईआरसीपी, कोलोनोस्कोपी और उन्नत गैस्ट्रो उपचार के लिए सुपरस्पेशियलिटी सेंटर।
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-7 flex max-w-[390px] flex-wrap gap-3">
               <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
               <ButtonLink href={site.directionsUrl} variant="ghost">Get Directions</ButtonLink>
             </div>
           </div>
 
-          <aside className="rounded border border-white/50 bg-white/95 p-6 text-ink shadow-soft">
-            <h2 className="text-2xl font-black">Need expert gastro & liver care?</h2>
-            <p className="mt-2 text-muted">Call {site.phone} or WhatsApp {site.mobile} for appointment assistance.</p>
-            <ul className="mt-5 grid gap-3">
-              {["Consultant Gastroenterologist & Hepatologist", "Advanced endoscopy and ERCP support", "HDU, pharmacy, lift and accessible entry"].map((item) => (
-                <li key={item} className="flex gap-3">
-                  <CheckCircle2 className="mt-1 text-teal" size={20} />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </aside>
         </div>
       </section>
 

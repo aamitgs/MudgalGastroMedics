@@ -15,6 +15,7 @@ const navItems = [
     label: "About Us",
     children: [
       { href: "/#doctor", label: "Doctor Profile" },
+      { href: "/duty-doctor", label: "Duty Doctor" },
       { href: "/#procedures", label: "Treatments" },
       { href: "/contact", label: "Book Appointment" }
     ]
@@ -60,7 +61,11 @@ const navItems = [
       { href: "/contact#appointment", label: "Blood in Stool" }
     ]
   },
-  { href: "/gallery", label: "Hospital" },
+  {
+    href: "/life-at-mgm",
+    label: "MGM",
+    children: [{ href: "/life-at-mgm", label: "Life@MGM" }]
+  },
   { href: "/contact", label: "Contact Us" }
 ] satisfies Array<{
   href: string;

@@ -738,6 +738,12 @@ video {
 .max-w-xl {
   max-width: 36rem;
 }
+.max-w-\[520px\] {
+  max-width: 520px;
+}
+.max-w-\[390px\] {
+  max-width: 390px;
+}
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -855,6 +861,9 @@ video {
 .border-t {
   border-top-width: 1px;
 }
+.border-dashed {
+  border-style: dashed;
+}
 .border-\[\#c9dddf\] {
   --tw-border-opacity: 1;
   border-color: rgb(201 221 223 / var(--tw-border-opacity, 1));
@@ -882,9 +891,6 @@ video {
 }
 .border-white\/30 {
   border-color: rgb(255 255 255 / 0.3);
-}
-.border-white\/50 {
-  border-color: rgb(255 255 255 / 0.5);
 }
 .bg-\[\#111111\] {
   --tw-bg-opacity: 1;
@@ -933,9 +939,6 @@ video {
 }
 .bg-white\/5 {
   background-color: rgb(255 255 255 / 0.05);
-}
-.bg-white\/95 {
-  background-color: rgb(255 255 255 / 0.95);
 }
 .bg-\[conic-gradient\(\#ea4335_0_25\%\2c \#fbbc05_0_50\%\2c \#34a853_0_75\%\2c \#4285f4_0\)\] {
   background-image: conic-gradient(#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);
@@ -1022,6 +1025,18 @@ video {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
 .pb-7 {
   padding-bottom: 1.75rem;
 }
@@ -1075,6 +1090,10 @@ video {
   font-size: 0.75rem;
   line-height: 1rem;
 }
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
 .font-black {
   font-weight: 900;
 }
@@ -1105,6 +1124,9 @@ video {
 .leading-tight {
   line-height: 1.25;
 }
+.leading-relaxed {
+  line-height: 1.625;
+}
 .tracking-\[0\.08em\] {
   letter-spacing: 0.08em;
 }
@@ -1113,6 +1135,9 @@ video {
 }
 .tracking-wider {
   letter-spacing: 0.05em;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
 }
 .text-\[\#19c7f3\] {
   --tw-text-opacity: 1;
@@ -1278,7 +1303,7 @@ body.lang-hi .inline-lang [data-hi] {
 .hero-bg {
   background:
     linear-gradient(90deg, rgba(7, 57, 66, 0.94), rgba(7, 73, 74, 0.74)),
-    url("/images/hospital/hospital-front-view.jpg") center / cover;
+    url("/images/hospital/hospital-front-banner.jpg") center / cover;
 }
 
 .page-hero-bg {
@@ -1373,6 +1398,11 @@ body.lang-hi .inline-lang [data-hi] {
   .sm\:p-6 {
     padding: 1.5rem;
   }
+
+  .sm\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1428,6 +1458,11 @@ body.lang-hi .inline-lang [data-hi] {
     padding-bottom: 5rem;
   }
 
+  .md\:py-24 {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+
   .md\:text-5xl {
     font-size: 3rem;
     line-height: 1;
@@ -1435,6 +1470,11 @@ body.lang-hi .inline-lang [data-hi] {
 
   .md\:text-7xl {
     font-size: 4.5rem;
+    line-height: 1;
+  }
+
+  .md\:text-6xl {
+    font-size: 3.75rem;
     line-height: 1;
   }
 }
@@ -1478,8 +1518,8 @@ body.lang-hi .inline-lang [data-hi] {
     grid-template-columns: 1.35fr 0.75fr 0.8fr 0.9fr 1.1fr 1fr;
   }
 
-  .lg\:grid-cols-\[1fr_410px\] {
-    grid-template-columns: 1fr 410px;
+  .lg\:grid-cols-\[0\.9fr_1\.1fr\] {
+    grid-template-columns: 0.9fr 1.1fr;
   }
 
   .lg\:text-left {

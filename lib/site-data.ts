@@ -227,6 +227,8 @@ export const galleryItems = [
   ["Hospital Exterior", "Hospital Front View", "hospital-front-view", "/images/hospital/hospital-front-view.jpg"],
   ["Hospital Exterior", "Entrance", "entrance", "/images/hospital/entrance.jpg"],
   ["Reception", "Reception Desk", "reception-desk", "/images/hospital/reception-desk.jpg"],
+  ["Patient Facilities", "Pharmacy", "pharmacy", "/images/hospital/pharmacy.jpg"],
+  ["Patient Facilities", "Lift", "lift", "/images/hospital/lift.jpg"],
   ["Reception", "Waiting Area", "reception-waiting-area", "/images/hospital/reception-waiting-area.jpg"],
   ["Consultation Areas", "Doctor Chamber", "doctor-chamber", "/images/hospital/doctor-chamber.jpg"],
   ["Endoscopy Unit", "Endoscopy Room", "endoscopy-room", "/images/hospital/endoscopy-room.jpg"],
