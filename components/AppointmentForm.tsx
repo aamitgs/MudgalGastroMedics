@@ -33,15 +33,15 @@ export function AppointmentForm() {
     <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
       <label>
         <span className="mb-1 block font-extrabold">Name</span>
-        <input name="name" required autoComplete="name" className="min-h-12 w-full rounded border border-line px-3" />
+        <input name="name" required autoComplete="name" className="min-h-12 w-full rounded border border-line bg-white px-3 transition focus:border-brand" />
       </label>
       <label>
         <span className="mb-1 block font-extrabold">Phone</span>
-        <input name="phone" required autoComplete="tel" className="min-h-12 w-full rounded border border-line px-3" />
+        <input name="phone" required autoComplete="tel" className="min-h-12 w-full rounded border border-line bg-white px-3 transition focus:border-brand" />
       </label>
       <label>
         <span className="mb-1 block font-extrabold">Service</span>
-        <select name="service" required className="min-h-12 w-full rounded border border-line px-3">
+        <select name="service" required className="min-h-12 w-full rounded border border-line bg-white px-3 transition focus:border-brand">
           <option value="">Select service</option>
           {procedures.slice(0, 10).map((procedure) => (
             <option key={procedure.slug}>{procedure.title}</option>
@@ -52,20 +52,20 @@ export function AppointmentForm() {
       </label>
       <label>
         <span className="mb-1 block font-extrabold">Preferred Date</span>
-        <input name="date" type="date" className="min-h-12 w-full rounded border border-line px-3" />
+        <input name="date" type="date" className="min-h-12 w-full rounded border border-line bg-white px-3 transition focus:border-brand" />
       </label>
       <label className="md:col-span-2">
         <span className="mb-1 block font-extrabold">Message</span>
-        <textarea name="message" className="min-h-28 w-full rounded border border-line px-3 py-2" placeholder="Symptoms, preferred time, or appointment notes" />
+        <textarea name="message" className="min-h-28 w-full rounded border border-line bg-white px-3 py-2 transition focus:border-brand" placeholder="Symptoms, preferred time, or appointment notes" />
       </label>
       <div className="flex flex-wrap gap-3 md:col-span-2">
-        <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded border border-brand bg-brand px-5 font-extrabold text-white">
+        <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded border border-brand bg-brand px-5 font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-brand-dark">
           <Send size={18} /> Submit Request
         </button>
-        <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center gap-2 rounded border border-teal bg-teal px-5 font-extrabold text-white">
+        <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center gap-2 rounded border border-teal bg-teal px-5 font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-teal-dark">
           <MessageCircle size={18} /> WhatsApp Now
         </a>
-        <a href={`tel:${site.phone}`} className="inline-flex min-h-11 items-center gap-2 rounded border border-line bg-white px-5 font-extrabold text-ink">
+        <a href={`tel:${site.phone}`} className="inline-flex min-h-11 items-center gap-2 rounded border border-line bg-white px-5 font-extrabold text-ink transition hover:-translate-y-0.5 hover:border-brand hover:text-brand">
           <Phone size={18} /> Call Reception
         </a>
       </div>

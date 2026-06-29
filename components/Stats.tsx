@@ -42,11 +42,11 @@ export function Stats() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {stats.map(([target, label]) => (
-        <div key={label} className="rounded border border-line bg-white p-5 shadow-[0_8px_20px_rgba(18,52,61,0.06)]">
-          <strong className="block text-4xl font-black leading-none text-brand">
+        <div key={label} className="rounded border border-line bg-white/95 p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand">
+          <strong className="block text-4xl font-black leading-none text-brand md:text-5xl">
             <Counter target={target} />
           </strong>
-          <span className="mt-3 block font-extrabold leading-snug text-muted">{label}</span>
+          <span className="mt-3 block text-sm font-extrabold leading-snug text-muted">{label}</span>
         </div>
       ))}
     </div>

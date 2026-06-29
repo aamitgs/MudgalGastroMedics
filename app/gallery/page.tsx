@@ -21,7 +21,7 @@ export default function GalleryPage() {
     <main>
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.08em] text-gold">Photo Gallery</p>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Photo Gallery</p>
           <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Facilities, rooms and equipment</h1>
           <p className="mt-5 max-w-3xl text-lg text-white/85">
             Explore Mudgal Gastromedics Hospital, including our reception, consultation rooms, endoscopy unit, HDU, patient rooms and clinical equipment.

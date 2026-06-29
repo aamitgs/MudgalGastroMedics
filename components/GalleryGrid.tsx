@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 type GalleryItem = {
   category: string;
@@ -14,6 +15,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
   const categories = ["All", ...Array.from(new Set(items.map((item) => item.category)))];
   const [filter, setFilter] = useState("All");
   const [active, setActive] = useState<GalleryItem | null>(null);
+  const reducedMotion = useReducedMotion();
   const visible = filter === "All" ? items : items.filter((item) => item.category === filter);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             type="button"
             onClick={() => setFilter(category)}
             aria-pressed={filter === category}
-            className={`rounded-full border px-4 py-2 font-extrabold ${filter === category ? "border-teal bg-teal text-white" : "border-line bg-white text-ink"}`}
+            className={`rounded-full border px-4 py-2 font-extrabold transition ${filter === category ? "border-brand bg-brand text-white shadow-soft" : "border-line bg-white text-ink hover:border-brand hover:text-brand"}`}
           >
             {category}
           </button>
@@ -50,7 +52,15 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((item, index) => (
-          <button key={`${item.category}-${item.title}`} type="button" onClick={() => setActive(item)} className="group overflow-hidden rounded border border-line bg-white text-left shadow-[0_8px_18px_rgba(18,52,61,0.06)] transition hover:-translate-y-1 hover:border-teal hover:shadow-soft">
+          <motion.button
+            key={`${item.category}-${item.title}`}
+            type="button"
+            onClick={() => setActive(item)}
+            className="group overflow-hidden rounded border border-line bg-white text-left shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift"
+            initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+            animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: Math.min(index * 0.025, 0.18) }}
+          >
             <span className="relative block aspect-[4/3] overflow-hidden bg-soft">
               <Image
                 src={item.src}
@@ -65,23 +75,40 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
               <b className="block">{item.title}</b>
               <span className="text-sm text-muted">{item.category}</span>
             </span>
-          </button>
+          </motion.button>
         ))}
       </div>
 
-      {active ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4 sm:p-6" role="dialog" aria-modal="true" aria-label={`${active.title} image preview`} onClick={() => setActive(null)}>
+      <AnimatePresence>
+        {active ? (
+        <motion.div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${active.title} image preview`}
+          onClick={() => setActive(null)}
+          initial={reducedMotion ? false : { opacity: 0 }}
+          animate={reducedMotion ? undefined : { opacity: 1 }}
+          exit={reducedMotion ? undefined : { opacity: 0 }}
+        >
           <button type="button" onClick={() => setActive(null)} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded border border-white/30 bg-white/10 text-white" aria-label="Close image">
             <X size={22} />
           </button>
-          <div className="w-[min(1100px,100%)]" onClick={(event) => event.stopPropagation()}>
+          <motion.div
+            className="w-[min(1100px,100%)]"
+            onClick={(event) => event.stopPropagation()}
+            initial={reducedMotion ? false : { scale: 0.98 }}
+            animate={reducedMotion ? undefined : { scale: 1 }}
+            exit={reducedMotion ? undefined : { scale: 0.98 }}
+          >
             <div className="relative h-[min(76vh,800px)] w-full overflow-hidden rounded bg-black">
               <Image src={active.src} alt={`${active.title} at Mudgal Gastromedics Hospital`} fill sizes="100vw" className="object-contain" />
             </div>
             <p className="mt-3 text-center font-extrabold text-white">{active.title}</p>
-          </div>
-        </div>
-      ) : null}
+          </motion.div>
+        </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

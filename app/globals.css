@@ -1,9 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 :root {
   color-scheme: light;
+  --color-primary: #0891b2;
+  --color-on-primary: #ffffff;
+  --color-secondary: #22d3ee;
+  --color-accent: #059669;
+  --color-background: #ecfeff;
+  --color-foreground: #164e63;
+  --color-muted: #e8f1f6;
+  --color-border: #a5f3fc;
+  --color-destructive: #dc2626;
+  --color-ring: #0891b2;
 }
 
 * {
@@ -16,8 +25,28 @@ html {
 
 body {
   margin: 0;
-  background: #ffffff;
-  color: #14242b;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.14), transparent 24rem),
+    linear-gradient(180deg, #f7fbfb 0%, #ffffff 18rem);
+  color: #12313b;
+  font-size: 16px;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  outline-color: var(--color-ring);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(8, 145, 178, 0.35);
+  outline-offset: 3px;
 }
 
 h1,
@@ -48,13 +77,42 @@ body.lang-hi .inline-lang [data-hi] {
 }
 
 .hero-bg {
+  position: relative;
+  isolation: isolate;
   background:
-    linear-gradient(90deg, rgba(7, 57, 66, 0.94), rgba(7, 73, 74, 0.74)),
-    url("/images/hospital/hospital-front-banner.jpg") center / cover;
+    linear-gradient(90deg, rgba(7, 43, 52, 0.96) 0%, rgba(9, 67, 77, 0.74) 40%, rgba(7, 87, 76, 0.16) 76%, rgba(7, 87, 76, 0.12) 100%),
+    url("/images/hospital/premium-hero-from-facade.png") 58% center / cover;
+}
+
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, transparent 72%, rgba(2, 22, 29, 0.22) 100%),
+    linear-gradient(180deg, rgba(2, 22, 29, 0.06), rgba(2, 22, 29, 0.18)),
+    radial-gradient(circle at 20% 25%, rgba(34, 211, 238, 0.18), transparent 24rem);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .hero-bg {
+    background:
+      linear-gradient(90deg, rgba(7, 43, 52, 0.96) 0%, rgba(9, 67, 77, 0.72) 58%, rgba(7, 87, 76, 0.24) 100%),
+      url("/images/hospital/premium-hero-from-facade.png") 62% center / cover;
+  }
 }
 
 .page-hero-bg {
   background:
-    linear-gradient(90deg, rgba(8, 50, 58, 0.94), rgba(15, 122, 120, 0.76)),
+    linear-gradient(90deg, rgba(13, 56, 66, 0.95), rgba(8, 145, 178, 0.72), rgba(5, 150, 105, 0.38)),
     url("/images/hospital/reception-waiting-area.jpg") center / cover;
+}
+
+.clinical-grid {
+  background-image:
+    linear-gradient(rgba(8, 145, 178, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 145, 178, 0.07) 1px, transparent 1px);
+  background-size: 36px 36px;
 }

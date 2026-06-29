@@ -232,6 +232,7 @@ export const galleryItems = [
   ["Reception", "Waiting Area", "reception-waiting-area", "/images/hospital/reception-waiting-area.jpg"],
   ["Consultation Areas", "Doctor Chamber", "doctor-chamber", "/images/hospital/doctor-chamber.jpg"],
   ["Endoscopy Unit", "Endoscopy Room", "endoscopy-room", "/images/hospital/endoscopy-room.jpg"],
+  ["Endoscopy Unit", "CBD Stone Removal", "cbd-stone-removal", "/images/hospital/cbd-stone-removal.jpg"],
   ["Consultation Areas", "Duty Doctor Chamber", "duty-doctor-chamber", "/images/hospital/duty-doctor-chamber.jpg"],
   ["HDU", "HDU Cabin", "hdu-cabin", "/images/hospital/hdu-cabin.jpg"],
   ["HDU", "HDU Ward", "hdu-ward", "/images/hospital/hdu-ward.jpg"],
@@ -265,6 +266,12 @@ export const equipment = [
     uses: "Fluoroscopy support for ERCP and stenting",
     benefits: "Real-time imaging support during advanced procedures",
     src: "/images/hospital/c-arm-machine.jpg"
+  },
+  {
+    name: "Fibroscan",
+    uses: "Liver stiffness and fatty liver assessment",
+    benefits: "Non-invasive liver evaluation for chronic liver disease monitoring",
+    src: "/images/hospital/fibroscan.jpg"
   },
   {
     name: "Cautery Machine",

@@ -7,8 +7,8 @@ export function LanguageToggle() {
 
   useEffect(() => {
     const saved = localStorage.getItem("mgmLang") ?? "en";
-    setLang(saved);
     document.body.classList.toggle("lang-hi", saved === "hi");
+    queueMicrotask(() => setLang(saved));
   }, []);
 
   function toggle() {

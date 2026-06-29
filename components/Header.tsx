@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Clock, MapPin, Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/ButtonLink";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -75,30 +76,39 @@ const navItems = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   return (
     <>
-      <div className="border-b border-line bg-white text-sm text-ink">
-        <div className="mx-auto flex w-[min(1500px,calc(100%-40px))] flex-col justify-between gap-1 py-2 md:flex-row">
-          <div>
-            <a href={`tel:${site.phone}`}>{site.phone}</a> | <a href={`https://wa.me/${site.whatsapp}`}>{site.mobile}</a>
+      <div className="border-b border-line bg-ink text-sm text-white">
+        <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-col justify-between gap-2 py-2 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <a href={`tel:${site.phone}`} className="inline-flex items-center gap-1.5 hover:text-cyan-200">
+              <Phone size={15} /> {site.phone}
+            </a>
+            <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex items-center gap-1.5 hover:text-cyan-200">
+              WhatsApp {site.mobile}
+            </a>
           </div>
-          <div>16 HIG, Shaheed Nagar, Agra | Behind Shaheed Nagar Police Chowki</div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/75">
+            <span className="inline-flex items-center gap-1.5"><Clock size={15} /> Mon-Sat, 10 AM-6 PM</span>
+            <span className="inline-flex items-center gap-1.5"><MapPin size={15} /> Shaheed Nagar, Agra</span>
+          </div>
         </div>
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-white text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)]">
-        <div className="mx-auto flex min-h-[74px] w-[min(1500px,calc(100%-40px))] items-center gap-8">
-          <Link href="/" className="shrink-0" aria-label="Mudgal Gastromedics Hospital home">
-            <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="h-auto w-32 rounded bg-white p-1 md:w-36" />
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
+        <div className="mx-auto flex min-h-[88px] w-[min(1560px,calc(100%-32px))] items-center gap-8">
+          <Link href="/" className="shrink-0 rounded bg-white p-1" aria-label="Mudgal Gastromedics Hospital home">
+            <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "150px", height: "auto" }} />
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-start gap-4 font-extrabold tracking-normal text-ink xl:gap-6 lg:flex">
+          <nav className="hidden flex-1 items-center justify-center gap-5 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-7">
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1.5 whitespace-nowrap py-6 text-sm transition hover:text-[#19c7f3] xl:text-base ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
+                  className={`flex items-center gap-1.5 whitespace-nowrap py-8 text-[15px] font-semibold transition hover:text-[#19c7f3] xl:text-base ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
                 >
                   {item.label}
                   {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
@@ -106,7 +116,7 @@ export function Header() {
                 {item.children?.length ? (
                   <div className="invisible absolute left-0 top-full min-w-60 translate-y-2 rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-sm text-ink/80 hover:bg-soft hover:text-[#19c7f3]">
+                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-sm text-ink/80 hover:bg-soft hover:text-brand">
                         {child.label}
                       </Link>
                     ))}
@@ -118,14 +128,14 @@ export function Header() {
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageToggle />
-            <ButtonLink href="/contact#appointment" className="hidden whitespace-nowrap md:inline-flex">
+            <ButtonLink href="/contact#appointment" className="hidden whitespace-nowrap border-coral bg-coral px-7 text-lg hover:bg-brand-dark md:inline-flex">
               <span data-en>Book Appointment</span>
               <span data-hi>बुक करें</span>
             </ButtonLink>
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="grid h-10 w-11 place-items-center rounded border border-line bg-white lg:hidden"
+              className="grid h-11 w-11 place-items-center rounded border border-line bg-white min-[1280px]:hidden"
               aria-label="Open menu"
               aria-expanded={open}
             >
@@ -134,18 +144,25 @@ export function Header() {
           </div>
         </div>
 
+        <AnimatePresence>
         {open ? (
-          <nav className="grid gap-1 border-t border-line bg-white px-5 py-4 font-extrabold text-ink shadow-soft lg:hidden">
+          <motion.nav
+            className="grid max-h-[calc(100vh-88px)] gap-1 overflow-y-auto border-t border-line bg-white px-5 py-4 font-extrabold text-ink shadow-soft min-[1280px]:hidden"
+            initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+            animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`}>
-                <Link href={item.href} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded px-2 py-3 hover:bg-white ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}>
+                <Link href={item.href} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded px-2 py-3 hover:bg-soft ${item.label === "Home" ? "text-brand" : ""}`}>
                   {item.label}
                   {item.children?.length ? <ChevronDown size={18} /> : null}
                 </Link>
                 {item.children?.length ? (
                   <div className="ml-3 grid border-l border-line pl-3">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-white hover:text-[#19c7f3]">
+                      <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand">
                         {child.label}
                       </Link>
                     ))}
@@ -156,8 +173,9 @@ export function Header() {
             <ButtonLink href="/contact#appointment" className="mt-2">
               Book Appointment
             </ButtonLink>
-          </nav>
+          </motion.nav>
         ) : null}
+        </AnimatePresence>
       </header>
     </>
   );

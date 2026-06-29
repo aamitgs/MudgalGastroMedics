@@ -9,21 +9,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#14242b",
-        muted: "#5d6c73",
-        line: "#dce7e8",
-        soft: "#f4f8f8",
-        brand: "#d7142d",
-        "brand-dark": "#9b1022",
-        teal: "#0f7a78",
-        "teal-dark": "#085c5b",
-        gold: "#b9852f"
+        ink: "#12313b",
+        muted: "#5d7279",
+        line: "#cce7ec",
+        soft: "#ecfeff",
+        brand: "#0891b2",
+        "brand-dark": "#0e7490",
+        teal: "#059669",
+        "teal-dark": "#047857",
+        gold: "#b9852f",
+        coral: "#dc2626",
+        mist: "#f7fbfb",
+        navy: "#164e63"
       },
       borderRadius: {
         DEFAULT: "8px"
       },
       boxShadow: {
-        soft: "0 18px 45px rgba(10, 45, 55, 0.12)"
+        soft: "0 18px 45px rgba(8, 64, 84, 0.12)",
+        lift: "0 22px 60px rgba(8, 64, 84, 0.16)"
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
