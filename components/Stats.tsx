@@ -1,13 +1,14 @@
 "use client";
 
+import { Activity, ClipboardCheck, Microscope, ShieldCheck, Stethoscope } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const stats = [
-  ["24", "Advanced Endoscopy Services"],
-  ["360", "Comprehensive Liver Care"],
-  ["5", "Modern Diagnostic Facilities"],
-  ["12", "Specialized Gastroenterology Care"],
-  ["100", "Personalized Treatment Plans"]
+  { target: "24", label: "Advanced Endoscopy Services", detail: "Diagnostic and therapeutic procedures", icon: Stethoscope },
+  { target: "360", label: "Comprehensive Liver Care", detail: "Focused hepatology support", icon: ShieldCheck },
+  { target: "5", label: "Modern Diagnostic Facilities", detail: "Clinical evaluation infrastructure", icon: Microscope },
+  { target: "12", label: "Specialized Gastroenterology Care", detail: "Digestive and pancreato-biliary care", icon: Activity },
+  { target: "100", label: "Personalized Treatment Plans", detail: "Patient-specific care planning", icon: ClipboardCheck }
 ];
 
 function Counter({ target }: { target: string }) {
@@ -40,15 +41,29 @@ function Counter({ target }: { target: string }) {
 
 export function Stats() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {stats.map(([target, label]) => (
-        <div key={label} className="rounded border border-line bg-white/95 p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand">
-          <strong className="block text-4xl font-black leading-none text-brand md:text-5xl">
-            <Counter target={target} />
-          </strong>
-          <span className="mt-3 block text-sm font-extrabold leading-snug text-muted">{label}</span>
-        </div>
-      ))}
+    <div className="relative overflow-hidden rounded border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(236,254,255,0.92))] p-3 shadow-[0_28px_80px_rgba(8,64,84,0.16)]">
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal" />
+      <div aria-hidden="true" className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-100/60" />
+      <div className="relative grid gap-3 lg:grid-cols-5">
+        {stats.map(({ target, label, detail, icon: Icon }, index) => (
+          <div
+            key={label}
+            className="group relative overflow-hidden rounded border border-line/80 bg-white/82 p-5 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft"
+          >
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded border border-line bg-soft text-brand transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
+                <Icon size={19} />
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{String(index + 1).padStart(2, "0")}</span>
+            </div>
+            <strong className="block text-4xl font-bold leading-none text-brand md:text-5xl">
+              <Counter target={target} />
+            </strong>
+            <span className="mt-4 block text-base font-semibold leading-snug text-ink">{label}</span>
+            <span className="mt-2 block text-sm leading-relaxed text-muted">{detail}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,14 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Activity, ArrowRight, Award, CheckCircle2, GraduationCap, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, Award, CalendarCheck, CheckCircle2, ClipboardList, FileText, GraduationCap, HeartPulse, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { ButtonLink } from "@/components/ButtonLink";
-import { CtaBand } from "@/components/CtaBand";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { MotionReveal } from "@/components/MotionReveal";
-import { Section, SectionHead, Eyebrow } from "@/components/Section";
+import { Section, Eyebrow } from "@/components/Section";
 import { Stats } from "@/components/Stats";
-import { doctor, equipment, fullAddress, galleryItems, patientFacilities, procedures, site, whyChoose } from "@/lib/site-data";
+import { doctor, equipment, galleryItems, patientFacilities, procedures, site, whyChoose } from "@/lib/site-data";
 
 export default function Home() {
   const treatmentGroups = [
@@ -27,6 +26,46 @@ export default function Home() {
     {
       title: "Nutrition & Support",
       links: procedures.filter((procedure) => ["ryles-tube-placement", "nasojejunal-tube-placement", "peg-tube-placement", "intragastric-balloon-placement"].includes(procedure.slug))
+    }
+  ];
+  const procedureBadges = ["Diagnostic", "Therapeutic", "Liver Care", "Screening", "Access", "Support"];
+  const trustReasons = [
+    {
+      title: "Specialist-led decisions",
+      text: "Consultation and procedure planning are guided by gastroenterology and hepatology expertise.",
+      icon: Stethoscope
+    },
+    {
+      title: "Advanced endoscopy focus",
+      text: "Upper GI, colonoscopy, ERCP and therapeutic endoscopy care are handled through a focused workflow.",
+      icon: Activity
+    },
+    {
+      title: "Clear patient pathway",
+      text: "Preparation, procedure expectations, reports and follow-up steps are explained before discharge.",
+      icon: FileText
+    },
+    {
+      title: "Accessible hospital setup",
+      text: "Lift, wheelchair access, pharmacy and waiting support help patients and attendants move comfortably.",
+      icon: HeartPulse
+    }
+  ];
+  const patientJourney = [
+    {
+      title: "Consultation",
+      text: "Symptoms, history and prior reports are reviewed before advising tests or procedures.",
+      icon: Stethoscope
+    },
+    {
+      title: "Preparation",
+      text: "Fasting, medicines, attendant needs and recovery guidance are explained clearly.",
+      icon: ClipboardList
+    },
+    {
+      title: "Follow-up",
+      text: "Reports, biopsy guidance and treatment planning are discussed after the procedure.",
+      icon: FileText
     }
   ];
 
@@ -72,18 +111,11 @@ export default function Home() {
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-14 px-7 text-lg">WhatsApp</ButtonLink>
               <ButtonLink href={site.directionsUrl} variant="ghost" className="min-h-14 border-white/25 bg-white/95 px-7 text-lg text-ink">Get Directions</ButtonLink>
             </div>
-            <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
-              {["Gastroenterology", "Hepatology", "Therapeutic Endoscopy"].map((item) => (
-                <div key={item} className="rounded border border-white/20 bg-white/12 px-4 py-3 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur">
-                  {item}
-                </div>
-              ))}
-            </div>
           </MotionReveal>
         </div>
       </section>
 
-      <Section className="-mt-8 relative z-10 pt-0">
+      <Section className="relative z-10 pt-12 md:pt-14">
         <Stats />
       </Section>
 
@@ -105,11 +137,39 @@ export default function Home() {
                   <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/25 bg-white/14 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-md">
                     <Award size={15} /> Consultant
                   </div>
+                  <div className="absolute right-5 top-5 hidden w-36 overflow-hidden rounded-xl border border-white/55 bg-white p-1 shadow-[0_22px_60px_rgba(2,22,29,0.32)] sm:block lg:w-40">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-soft">
+                      <Image
+                        src="/images/hospital/dr-deepak-kumar-sharma.jpg"
+                        alt="Dr. Deepak Kumar Sharma"
+                        fill
+                        sizes="160px"
+                        className="object-cover object-[52%_18%]"
+                      />
+                    </div>
+                    <div className="bg-white px-3 py-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">Dr. Deepak</p>
+                      <p className="text-xs font-bold leading-tight text-ink">Gastroenterologist</p>
+                    </div>
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
                     <div className="max-w-xl rounded border border-white/20 bg-white/94 p-5 text-ink shadow-[0_24px_70px_rgba(2,22,29,0.28)] backdrop-blur-md">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Lead Gastroenterologist</p>
-                      <h2 className="mt-2 text-3xl font-bold leading-tight">{doctor.name}</h2>
-                      <p className="mt-2 text-base leading-relaxed text-muted">{doctor.designation}</p>
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white bg-soft shadow-[0_14px_32px_rgba(8,64,84,0.18)] sm:hidden">
+                          <Image
+                            src="/images/hospital/dr-deepak-kumar-sharma.jpg"
+                            alt="Dr. Deepak Kumar Sharma"
+                            fill
+                            sizes="80px"
+                            className="object-cover object-[52%_18%]"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Lead Gastroenterologist</p>
+                          <h2 className="mt-2 text-3xl font-bold leading-tight">{doctor.name}</h2>
+                          <p className="mt-2 text-base leading-relaxed text-muted">{doctor.designation}</p>
+                        </div>
+                      </div>
                       <div className="mt-4 grid gap-2 sm:grid-cols-2">
                         <span className="rounded-full border border-line bg-soft/80 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-teal-dark">{doctor.registration}</span>
                         <span className="rounded-full border border-line bg-soft/80 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-teal-dark">MGM 2019-Present</span>
@@ -176,159 +236,319 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section id="procedures">
-        <SectionHead eyebrow="Treatments" title="Advanced procedures & treatments">
-          <p>Major gastroenterology and liver procedures are organized for quick scanning, with dedicated pages for patient information and appointment flow.</p>
-        </SectionHead>
-        <div className="grid gap-5 md:grid-cols-3">
-          {procedures.slice(0, 9).map((procedure, index) => (
-            <MotionReveal key={procedure.slug} className="h-full" delay={Math.min(index * 0.03, 0.18)}>
-            <Link href={`/procedures/${procedure.slug}`} className="group block h-full rounded border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-              <span className="mb-4 grid h-11 w-11 place-items-center rounded bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
-                <Stethoscope size={20} />
-              </span>
-              <h3 className="inline-lang text-xl font-black">
-                <span data-en>{procedure.title}</span>
-                <span data-hi>{procedure.hiTitle}</span>
-              </h3>
-              <p className="mt-2 text-muted" data-en>{procedure.summary}</p>
-              <p className="mt-2 text-muted" data-hi>{procedure.hiSummary}</p>
-              <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand">Read more <ArrowRight size={16} /></span>
-            </Link>
-            </MotionReveal>
-          ))}
-        </div>
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {treatmentGroups.map((group) => (
-            <div key={group.title} className="rounded border border-line bg-soft/70 p-5">
-              <h3 className="font-black text-ink">{group.title}</h3>
-              <div className="mt-4 grid gap-2">
-                {group.links.map((procedure) => (
-                  <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="rounded bg-white px-3 py-2 text-sm font-black text-muted transition hover:text-brand">
-                    {procedure.title}
-                  </Link>
+      <Section id="procedures" className="overflow-hidden">
+        <div className="relative">
+          <div aria-hidden="true" className="absolute -right-24 -top-16 hidden h-64 w-64 rounded-full border border-line/70 bg-soft/50 lg:block" />
+          <div className="relative mb-10 grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-end">
+            <div>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-gold" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Treatments</span>
+              </div>
+              <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+                Advanced procedures, organized around clear care decisions.
+              </h2>
+            </div>
+            <div className="grid gap-4">
+              <p className="max-w-2xl text-lg leading-relaxed text-muted">
+                Focused gastroenterology, hepatology and therapeutic endoscopy services with dedicated patient information and appointment pathways.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  [CalendarCheck, "Planned consult"],
+                  [Stethoscope, "Specialist procedure"],
+                  [FileText, "Report guidance"]
+                ].map(([Icon, label]) => (
+                  <div key={label as string} className="flex items-center gap-3 rounded-full border border-line bg-white/85 px-4 py-3 text-sm font-semibold text-teal-dark shadow-sm">
+                    <Icon className="text-brand" size={18} />
+                    <span>{label as string}</span>
+                  </div>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section muted>
-        <SectionHead eyebrow="Why Choose MGM" title="Patient-centered gastro and liver care" />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {whyChoose.slice(0, 8).map((item, index) => (
-            <MotionReveal key={item} className="h-full" delay={Math.min(index * 0.025, 0.16)}>
-            <div className="h-full rounded border border-line bg-white p-6 shadow-soft">
-              <ShieldCheck className="mb-3 text-teal" />
-              <h3 className="text-lg font-black">{item}</h3>
-              <p className="mt-2 text-muted">Premium, clean and clinically focused care pathway for patients and families.</p>
-            </div>
-            </MotionReveal>
-          ))}
-        </div>
-      </Section>
-
-      <Section>
-        <SectionHead eyebrow="Facilities & Infrastructure" title="Built for comfortable clinical care">
-          <ButtonLink href="/gallery" variant="ghost">View Gallery</ButtonLink>
-        </SectionHead>
-        <GalleryGrid items={galleryItems.slice(0, 6)} />
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {patientFacilities.map((item) => (
-            <div key={item} className="rounded border border-line bg-white p-5 shadow-soft">
-              <CheckCircle2 className="mb-3 text-teal" size={20} />
-              <h3 className="font-black">{item}</h3>
-              <p className="mt-2 text-sm text-muted">Designed to support safer, easier movement and waiting comfort for patients and attendants.</p>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section muted>
-        <SectionHead eyebrow="Technology" title="Modern medical equipment">
-          <p>Clinical systems selected for advanced endoscopy, liver assessment, fluoroscopy support and therapeutic procedure safety.</p>
-        </SectionHead>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {equipment.map((item, index) => (
-            <MotionReveal key={item.name} className="h-full" delay={Math.min(index * 0.035, 0.18)}>
-            <article className="group flex h-full flex-col overflow-hidden rounded border border-line/80 bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-              <div className="relative isolate border-b border-line bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_32%),linear-gradient(135deg,#f7ffff,#e8fbfb)] p-5">
-                <div className="absolute right-4 top-4 z-10 rounded-full border border-brand/15 bg-white/85 px-3 py-1 text-xs font-black text-brand shadow-sm backdrop-blur">
-                  {String(index + 1).padStart(2, "0")}
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {procedures.slice(0, 9).map((procedure, index) => (
+              <MotionReveal key={procedure.slug} className="h-full" delay={Math.min(index * 0.03, 0.18)}>
+                <Link
+                  href={`/procedures/${procedure.slug}`}
+                  className="group relative isolate flex h-full min-h-[285px] flex-col overflow-hidden rounded border border-line/80 bg-white p-6 shadow-[0_18px_55px_rgba(8,64,84,0.08)] transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-[0_28px_80px_rgba(8,64,84,0.14)]"
+                >
+                  <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal opacity-75" />
+                  <div aria-hidden="true" className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-soft transition duration-300 group-hover:scale-125" />
+                  <div className="relative flex items-start justify-between gap-4">
+                    <span className="grid h-12 w-12 place-items-center rounded border border-line bg-soft text-brand shadow-sm transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
+                      <Stethoscope size={21} />
+                    </span>
+                    <span className="rounded-full border border-line bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                      {procedureBadges[index % procedureBadges.length]}
+                    </span>
+                  </div>
+                  <div className="relative mt-8 flex flex-1 flex-col">
+                    <span className="mb-4 text-sm font-semibold text-brand">{String(index + 1).padStart(2, "0")}</span>
+                    <h3 className="inline-lang text-2xl font-bold leading-tight text-ink">
+                      <span data-en>{procedure.title}</span>
+                      <span data-hi>{procedure.hiTitle}</span>
+                    </h3>
+                    <p className="mt-4 leading-relaxed text-muted" data-en>{procedure.summary}</p>
+                    <p className="mt-4 leading-relaxed text-muted" data-hi>{procedure.hiSummary}</p>
+                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-brand">
+                      View patient guide <ArrowRight size={16} className="transition group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
+              </MotionReveal>
+            ))}
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {treatmentGroups.map((group) => (
+              <div key={group.title} className="rounded border border-line/80 bg-[linear-gradient(180deg,#ffffff,#f7fbfb)] p-5 shadow-sm">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink">{group.title}</h3>
+                <div className="mt-4 grid gap-2">
+                  {group.links.map((procedure) => (
+                    <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
+                      <span>{procedure.title}</span>
+                      <ArrowRight size={14} className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
+                    </Link>
+                  ))}
                 </div>
-                <div className="relative aspect-[4/3] rounded bg-white/85 shadow-[inset_0_0_0_1px_rgba(165,243,252,0.65)]">
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      <Section muted className="overflow-hidden">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+          <MotionReveal>
+            <div className="relative h-full overflow-hidden rounded border border-line/80 bg-[linear-gradient(135deg,#0b3a46,#0f766e)] p-7 text-white shadow-[0_28px_80px_rgba(8,64,84,0.18)] md:p-8">
+              <div aria-hidden="true" className="absolute -right-16 -top-16 h-48 w-48 rounded-full border border-white/15" />
+              <div aria-hidden="true" className="absolute -bottom-20 right-12 h-56 w-56 rounded-full bg-cyan-200/10" />
+              <div className="relative">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-100 backdrop-blur">
+                  <ShieldCheck size={15} /> Why Choose MGM
+                </div>
+                <h2 className="max-w-xl text-4xl font-bold leading-[1.07] md:text-5xl">
+                  Patient-first gastro and liver care with specialist attention.
+                </h2>
+                <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/78">
+                  A focused centre for digestive, liver, pancreatic and biliary conditions, built around explanation, procedure readiness and practical follow-up.
+                </p>
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {["Consultation", "Preparation", "Procedure", "Follow-up"].map((step, index) => (
+                    <div key={step} className="rounded border border-white/16 bg-white/10 p-4 backdrop-blur">
+                      <span className="text-sm font-semibold text-cyan-100">{String(index + 1).padStart(2, "0")}</span>
+                      <p className="mt-2 font-semibold">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </MotionReveal>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {trustReasons.map(({ title, text, icon: Icon }, index) => (
+              <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
+                <article className="group h-full rounded border border-line/80 bg-white/90 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
+                  <div className="mb-6 flex items-center justify-between gap-4">
+                    <span className="grid h-12 w-12 place-items-center rounded border border-line bg-soft text-teal transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
+                      <Icon size={21} />
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{String(index + 1).padStart(2, "0")}</span>
+                  </div>
+                  <h3 className="text-xl font-bold leading-tight text-ink">{title}</h3>
+                  <p className="mt-3 leading-relaxed text-muted">{text}</p>
+                </article>
+              </MotionReveal>
+            ))}
+            <MotionReveal className="sm:col-span-2" delay={0.18}>
+              <div className="flex flex-wrap gap-2 rounded border border-line/80 bg-white/80 p-4 shadow-sm">
+                {whyChoose.slice(0, 8).map((item) => (
+                  <span key={item} className="rounded-full border border-line bg-soft/70 px-3 py-2 text-sm font-semibold text-teal-dark">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </MotionReveal>
+          </div>
+        </div>
+      </Section>
+
+      <Section className="overflow-hidden">
+        <div className="mb-9 grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-gold" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Facilities & Infrastructure</span>
+            </div>
+            <h2 className="max-w-4xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+              A clean, accessible hospital environment for focused clinical care.
+            </h2>
+          </div>
+          <div className="max-w-xl lg:text-right">
+            <p className="mb-5 text-lg leading-relaxed text-muted">
+              Preview the entrance, reception, waiting areas and patient support spaces before your visit.
+            </p>
+            <ButtonLink href="/gallery" variant="ghost">View Gallery</ButtonLink>
+          </div>
+        </div>
+        <GalleryGrid items={galleryItems.slice(0, 6)} />
+        <div className="mt-7 rounded border border-line/80 bg-[linear-gradient(135deg,#ffffff,#f7fbfb)] p-4 shadow-sm">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-ink">Patient Comfort Supports</h3>
+            <span className="text-sm font-medium text-muted">Designed for patients and attendants</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+          {patientFacilities.map((item) => (
+            <span key={item} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-teal-dark shadow-sm">
+              <CheckCircle2 className="text-teal" size={16} />
+              {item}
+            </span>
+          ))}
+          </div>
+        </div>
+      </Section>
+
+      <Section muted className="overflow-hidden">
+        <div className="mb-9 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-gold" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Technology</span>
+            </div>
+            <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+              Equipment selected for advanced endoscopy and liver care.
+            </h2>
+          </div>
+          <div className="rounded border border-line/80 bg-white/80 p-5 shadow-sm backdrop-blur">
+            <p className="text-lg leading-relaxed text-muted">
+              Clinical systems support diagnostic visualization, therapeutic endoscopy, fluoroscopy-guided care and non-invasive liver assessment.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {["Endoscopy", "Fluoroscopy", "Liver Assessment"].map((item) => (
+                <span key={item} className="rounded-full border border-line bg-soft/70 px-3 py-2 text-center text-sm font-semibold text-teal-dark">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-5 lg:grid-cols-[1.05fr_1fr]">
+          <MotionReveal className="h-full">
+            <article className="relative isolate flex h-full min-h-[520px] flex-col overflow-hidden rounded border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
+              <div className="relative flex-1 bg-[radial-gradient(circle_at_22%_18%,rgba(34,211,238,0.2),transparent_30%),linear-gradient(135deg,#ffffff,#e9fbfb)] p-7">
+                <div className="absolute right-5 top-5 z-10 rounded-full border border-brand/15 bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-sm">Featured</div>
+                <div className="relative h-full min-h-[330px]">
                   <Image
-                    src={item.src}
-                    alt={`${item.name} at Mudgal Gastromedics Hospital`}
+                    src={equipment[3]?.src ?? equipment[0].src}
+                    alt={`${equipment[3]?.name ?? equipment[0].name} at Mudgal Gastromedics Hospital`}
                     fill
-                    sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-                    className="object-contain p-5 transition duration-300 group-hover:scale-[1.03]"
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="object-contain p-4"
                   />
                 </div>
               </div>
-              <div className="flex flex-1 flex-col p-6">
-                <span className="mb-3 w-fit rounded-full bg-soft px-3 py-1 text-xs font-black uppercase tracking-wider text-teal-dark">Medical Technology</span>
-                <h3 className="text-2xl font-black leading-tight text-ink">{item.name}</h3>
-                <div className="mt-5 grid gap-4 text-muted">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wider text-ink/55">Clinical Uses</p>
-                    <p className="mt-1 leading-relaxed">{item.uses}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wider text-ink/55">Patient Benefit</p>
-                    <p className="mt-1 leading-relaxed">{item.benefits}</p>
-                  </div>
-                </div>
+              <div className="border-t border-line bg-white p-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Procedure Support System</p>
+                <h3 className="mt-3 text-3xl font-bold leading-tight text-ink">{equipment[3]?.name ?? equipment[0].name}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{equipment[3]?.benefits ?? equipment[0].benefits}</p>
               </div>
             </article>
-            </MotionReveal>
-          ))}
-        </div>
-      </Section>
-
-      <Section>
-        <SectionHead eyebrow="Care Pathway" title="A clear patient journey">
-          <p>From consultation to follow-up, the care flow is built around explanation, preparation and comfort.</p>
-        </SectionHead>
-        <div className="grid gap-5 md:grid-cols-3">
-          {[
-            ["Consultation", "Symptoms, history and prior reports are reviewed before advising tests or procedures."],
-            ["Procedure Preparation", "Fasting, medicines, attendant needs and recovery guidance are explained clearly."],
-            ["Follow-up", "Reports, biopsy guidance and treatment planning are discussed after the procedure."]
-          ].map(([title, text]) => (
-            <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
-              <span className="mb-4 grid h-10 w-10 place-items-center rounded bg-soft text-brand">
-                <CheckCircle2 size={20} />
-              </span>
-              <h3 className="text-xl font-black">{title}</h3>
-              <p className="mt-2 text-muted">{text}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section muted>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div id="appointment" className="rounded border border-line bg-white p-6 shadow-soft">
-            <h2 className="mb-5 text-3xl font-black">Book your appointment</h2>
-            <AppointmentForm />
-          </div>
-          <div className="rounded border border-line bg-white p-6 shadow-soft">
-            <h2 className="text-3xl font-black">Visit MGM</h2>
-            <p className="mt-2 text-muted">{fullAddress}</p>
-            <div className="mt-4 flex items-start gap-3 text-muted"><MapPin className="text-brand" /> Landmark: Behind Shaheed Nagar Police Chowki</div>
-            <iframe className="mt-5 h-80 w-full rounded border-0" src={site.mapEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Mudgal Gastromedics Hospital map" />
-            <div className="mt-4 flex flex-wrap gap-3">
-              <ButtonLink href={`tel:${site.phone}`}>Call</ButtonLink>
-              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-              <ButtonLink href={site.directionsUrl} variant="ghost">Directions</ButtonLink>
-            </div>
+          </MotionReveal>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {equipment.map((item, index) => (
+              <MotionReveal key={item.name} className="h-full" delay={Math.min(index * 0.03, 0.18)}>
+                <article className="group flex h-full flex-col rounded border border-line/80 bg-white/90 p-4 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
+                  <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded border border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)]">
+                    <Image
+                      src={item.src}
+                      alt={`${item.name} at Mudgal Gastromedics Hospital`}
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-contain p-4 transition duration-300 group-hover:scale-[1.03]"
+                    />
+                    <span className="absolute right-3 top-3 rounded-full border border-line bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand shadow-sm">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold leading-tight text-ink">{item.name}</h3>
+                  <div className="mt-4 grid gap-3 text-sm text-muted">
+                    <p><span className="font-semibold text-ink">Use:</span> {item.uses}</p>
+                    <p><span className="font-semibold text-ink">Benefit:</span> {item.benefits}</p>
+                  </div>
+                </article>
+              </MotionReveal>
+            ))}
           </div>
         </div>
       </Section>
 
-      <CtaBand />
+      <Section className="overflow-hidden">
+        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-gold" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Care Pathway</span>
+            </div>
+            <h2 className="max-w-2xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+              A clear journey from consult to recovery.
+            </h2>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
+              Every visit is organized around explanation, preparation and follow-up so patients know what to expect at each stage.
+            </p>
+          </div>
+          <div className="relative">
+            <div aria-hidden="true" className="absolute left-6 top-8 hidden h-[calc(100%-4rem)] w-px bg-gradient-to-b from-brand via-line to-teal md:block" />
+            <div className="grid gap-4">
+              {patientJourney.map(({ title, text, icon: Icon }, index) => (
+                <MotionReveal key={title} delay={Math.min(index * 0.04, 0.12)}>
+                  <article className="relative grid gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_1fr] md:items-start md:pl-4">
+                    <span className="relative z-10 grid h-12 w-12 place-items-center rounded-full border border-line bg-soft text-brand shadow-sm">
+                      <Icon size={21} />
+                    </span>
+                    <div>
+                      <div className="mb-2 flex flex-wrap items-center gap-3">
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Step {String(index + 1).padStart(2, "0")}</span>
+                        <span className="h-px w-10 bg-line" />
+                      </div>
+                      <h3 className="text-2xl font-bold leading-tight text-ink">{title}</h3>
+                      <p className="mt-2 leading-relaxed text-muted">{text}</p>
+                    </div>
+                  </article>
+                </MotionReveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section muted className="overflow-hidden">
+        <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-gold" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Appointment Request</span>
+            </div>
+            <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+              Book a visit or reach reception directly.
+            </h2>
+          </div>
+          <div className="rounded border border-line/80 bg-white/85 p-4 text-muted shadow-sm">
+            <p className="font-semibold text-ink">Mon-Sat, 10 AM-6 PM</p>
+            <p className="mt-1 text-sm">Shaheed Nagar, Agra</p>
+          </div>
+        </div>
+        <div>
+          <div id="appointment" className="overflow-hidden rounded border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.12)]">
+            <div className="border-b border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)] p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Appointment Request</p>
+              <h3 className="mt-2 text-3xl font-bold text-ink">Share patient details</h3>
+            </div>
+            <div className="p-6">
+              <AppointmentForm />
+            </div>
+          </div>
+        </div>
+      </Section>
     </main>
   );
 }

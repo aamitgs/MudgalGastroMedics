@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CakeSlice, Camera, HeartHandshake, PartyPopper, Sparkles, Trophy, Users } from "lucide-react";
-import { CtaBand } from "@/components/CtaBand";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 
@@ -114,7 +113,6 @@ export default function LifeAtMgmPage() {
         </div>
       </Section>
 
-      <CtaBand />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
+import { CtaBand } from "@/components/CtaBand";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { hospitalSchema, site } from "@/lib/site-data";
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <Header />
         {children}
+        <CtaBand />
         <Footer />
       </body>
     </html>

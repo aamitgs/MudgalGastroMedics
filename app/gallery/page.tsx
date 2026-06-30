@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { CtaBand } from "@/components/CtaBand";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { Section } from "@/components/Section";
 import { equipment, galleryItems } from "@/lib/site-data";
@@ -31,7 +30,6 @@ export default function GalleryPage() {
       <Section>
         <GalleryGrid items={[...galleryItems, ...equipmentGallery]} />
       </Section>
-      <CtaBand />
     </main>
   );
 }

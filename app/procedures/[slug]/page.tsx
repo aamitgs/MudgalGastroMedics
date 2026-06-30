@@ -3,7 +3,6 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartPulse, MessageCircle, Phone, ShieldCheck, Stethoscope } from "lucide-react";
 import { ButtonLink } from "@/components/ButtonLink";
-import { CtaBand } from "@/components/CtaBand";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { procedures, site } from "@/lib/site-data";
@@ -183,7 +182,6 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
           </div>
         </div>
       </Section>
-      <CtaBand />
     </main>
   );
 }

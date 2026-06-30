@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { X } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
@@ -36,44 +36,55 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
 
   return (
     <>
-      <div className="mb-7 flex flex-wrap gap-2" aria-label="Filter gallery by category">
+      <div className="mb-7 flex flex-wrap items-center gap-2" aria-label="Filter gallery by category">
         {categories.map((category) => (
           <button
             key={category}
             type="button"
             onClick={() => setFilter(category)}
             aria-pressed={filter === category}
-            className={`rounded-full border px-4 py-2 font-extrabold transition ${filter === category ? "border-brand bg-brand text-white shadow-soft" : "border-line bg-white text-ink hover:border-brand hover:text-brand"}`}
+            className={`rounded-full border px-4 py-2 text-sm font-bold tracking-[0.01em] transition duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 ${filter === category ? "border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] text-white shadow-[0_14px_34px_rgba(8,145,178,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]" : "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-sm hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand hover:shadow-soft"}`}
           >
             {category}
           </button>
         ))}
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((item, index) => (
           <motion.button
             key={`${item.category}-${item.title}`}
             type="button"
             onClick={() => setActive(item)}
-            className="group overflow-hidden rounded border border-line bg-white text-left shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift"
+            className="group flex h-full flex-col overflow-hidden rounded border border-line/80 bg-white text-left shadow-[0_18px_55px_rgba(8,64,84,0.08)] transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
             initial={reducedMotion ? false : { opacity: 0, y: 12 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: Math.min(index * 0.025, 0.18) }}
           >
-            <span className="relative block aspect-[4/3] overflow-hidden bg-soft">
-              <Image
-                src={item.src}
-                alt={`${item.title} at Mudgal Gastromedics Hospital`}
-                fill
-                priority={index === 0 && filter === "All"}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover transition duration-300 group-hover:scale-[1.03]"
-              />
+            <span className="relative isolate block border-b border-line bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_32%),linear-gradient(135deg,#f7ffff,#e8fbfb)] p-5">
+              <span className="absolute right-4 top-4 z-10 rounded-full border border-brand/15 bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-sm backdrop-blur">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="relative block aspect-[4/3] overflow-hidden rounded border border-cyan-100 bg-white shadow-[inset_0_0_0_1px_rgba(165,243,252,0.55)]">
+                <Image
+                  src={item.src}
+                  alt={`${item.title} at Mudgal Gastromedics Hospital`}
+                  fill
+                  priority={index === 0 && filter === "All"}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                />
+              </span>
             </span>
-            <span className="block p-4">
-              <b className="block">{item.title}</b>
-              <span className="text-sm text-muted">{item.category}</span>
+            <span className="flex flex-1 flex-col p-6">
+              <span className="mb-3 w-fit rounded-full bg-soft px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-teal-dark">
+                {item.category}
+              </span>
+              <b className="block text-2xl font-bold leading-tight text-ink">{item.title}</b>
+              <span className="mt-3 block leading-relaxed text-muted">Preview this hospital area before your visit.</span>
+              <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-brand">
+                View image <Maximize2 size={15} className="transition group-hover:scale-110" />
+              </span>
             </span>
           </motion.button>
         ))}
@@ -91,7 +102,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
           animate={reducedMotion ? undefined : { opacity: 1 }}
           exit={reducedMotion ? undefined : { opacity: 0 }}
         >
-          <button type="button" onClick={() => setActive(null)} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded border border-white/30 bg-white/10 text-white" aria-label="Close image">
+          <button type="button" onClick={() => setActive(null)} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded border border-white/30 bg-white/12 text-white shadow-[0_16px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-white/50" aria-label="Close image">
             <X size={22} />
           </button>
           <motion.div

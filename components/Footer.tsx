@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
-import { fullAddress, site } from "@/lib/site-data";
+import { Mail, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
+import { site } from "@/lib/site-data";
 
 const companyLinks = [
   { href: "/#doctor", label: "About MGM" },
@@ -63,11 +63,6 @@ export function Footer() {
 
           <div>
             <FooterColumn title="Support" links={supportLinks} />
-            <div className="mt-7">
-              <p className="text-xs font-black uppercase tracking-wider text-white/70">Business Hours</p>
-              <p className="mt-3 leading-6">Mon-Sat, 10 AM-6 PM</p>
-              <p className="leading-6">Call reception for urgent assistance</p>
-            </div>
           </div>
 
           <div>
@@ -76,11 +71,6 @@ export function Footer() {
               <ContactLine icon={<Phone size={16} />} label="Landline" value={site.phone} href={`tel:${site.phone}`} />
               <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile}`} />
               <ContactLine icon={<MessageCircle size={16} />} label="WhatsApp" value={site.mobile} href={`https://wa.me/${site.whatsapp}`} />
-              <ContactLine icon={<Mail size={16} />} label="Email" value={site.email} href={`mailto:${site.email}`} />
-            </div>
-            <div className="mt-4 flex gap-2 text-sm leading-6">
-              <MapPin className="mt-1 shrink-0 text-brand" size={17} />
-              <span>{fullAddress}</span>
             </div>
           </div>
 
@@ -103,25 +93,20 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs md:flex-row md:items-center md:justify-between">
-          <p>
-            © {new Date().getFullYear()} Mudgal Gastromedics Hospital. Made by{" "}
-            <a href="https://www.edata4you.com/" target="_blank" rel="noreferrer" className="font-bold text-white hover:text-cyan-200">
-              eData4You
-            </a>{" "}
-            with ❤️ in Delhi,India.
-          </p>
+          <p>© {new Date().getFullYear()} Mudgal Gastromedics Hospital.</p>
           <div className="inline-flex w-fit items-center overflow-hidden rounded-full border border-white/10 bg-white/10 font-black uppercase tracking-wider">
             <span className="inline-flex items-center gap-2 bg-brand px-3 py-1.5 text-white">
               <ShieldCheck size={15} /> Healthcare
             </span>
             <span className="px-3 py-1.5 text-white/60">Information Protected</span>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/sitemap.xml" className="hover:text-white">Sitemap</Link>
-            <Link href="/terms" className="hover:text-white">Disclaimer</Link>
-            <Link href="/terms" className="hover:text-white">Terms of Use</Link>
-            <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
-          </div>
+          <p>
+            Made by{" "}
+            <a href="https://www.edata4you.com/" target="_blank" rel="noreferrer" className="font-bold text-white hover:text-cyan-200">
+              eData4You
+            </a>{" "}
+            with ❤️ in Delhi,India.
+          </p>
         </div>
       </div>
 
@@ -181,15 +166,23 @@ function SocialPill({ href, label, icon }: { href: string; label: string; icon?:
 
 function GoogleQr() {
   return (
-    <div className="rounded-[28px] bg-[conic-gradient(#ea4335_0_25%,#fbbc05_0_50%,#34a853_0_75%,#4285f4_0)] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
-      <div className="relative grid h-36 w-36 place-items-center rounded-[20px] bg-white p-3">
-        <div className="grid h-full w-full grid-cols-5 grid-rows-5 gap-1">
-          {Array.from({ length: 25 }).map((_, index) => (
-            <span key={index} className={`${index % 3 === 0 || index % 7 === 0 ? "bg-black" : "bg-white"} rounded-[2px]`} />
-          ))}
-        </div>
-        <span className="absolute text-2xl font-black text-[#4285f4]">G</span>
-      </div>
+    <div className="relative h-40 w-40 overflow-hidden rounded-[28px] shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
+      <Image
+        src="/images/qr/google-reviews-qr-code.png"
+        alt=""
+        fill
+        sizes="160px"
+        className="object-contain"
+        aria-hidden="true"
+      />
+      <Image
+        src="/images/qr/google-reviews-qr-pattern.png"
+        alt="Google review QR code for Mudgal Gastromedics Hospital"
+        width={228}
+        height={228}
+        sizes="126px"
+        className="absolute left-[10.9%] top-[10.9%] h-[78.3%] w-[78.3%]"
+      />
     </div>
   );
 }

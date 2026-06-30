@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { CalendarCheck, Clock3, Languages, MessageCircle, Moon, Phone, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
 import { ButtonLink } from "@/components/ButtonLink";
-import { CtaBand } from "@/components/CtaBand";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { site } from "@/lib/site-data";
@@ -149,7 +148,6 @@ export default function DutyDoctorPage() {
         </div>
       </Section>
 
-      <CtaBand />
     </main>
   );
 }
