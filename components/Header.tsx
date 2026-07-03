@@ -8,6 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/ButtonLink";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { LiveClockWeather } from "@/components/LiveClockWeather";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -62,17 +63,43 @@ const navItems = [
       { href: "/contact#appointment", label: "Blood in Stool" }
     ]
   },
-  {
-    href: "/life-at-mgm",
-    label: "MGM",
-    children: [{ href: "/life-at-mgm", label: "Life@MGM" }]
-  },
+  { href: "/life-at-mgm", label: "Life@MGM" },
   { href: "/contact", label: "Contact Us" }
 ] satisfies Array<{
   href: string;
   label: string;
   children?: Array<{ href: string; label: string }>;
 }>;
+
+/** Hindi nav labels shown when the language toggle is on; entries without one stay English. */
+const navHindi: Record<string, string> = {
+  "Home": "होम",
+  "About Us": "हमारे बारे में",
+  "Facilities": "सुविधाएँ",
+  "Special Procedures": "विशेष प्रक्रियाएँ",
+  "GI Diseases": "जीआई रोग",
+  "Symptoms": "लक्षण",
+  "Contact Us": "संपर्क करें",
+  "Abdominal Pain": "पेट दर्द",
+  "Acidity / Reflux": "एसिडिटी / रिफ्लक्स",
+  "Jaundice": "पीलिया",
+  "Blood in Stool": "मल में खून",
+  "Doctor Profile": "डॉक्टर प्रोफ़ाइल",
+  "Duty Doctor": "ड्यूटी डॉक्टर",
+  "Treatments": "उपचार",
+  "Book Appointment": "बुक करें"
+};
+
+function NavLabel({ label }: { label: string }) {
+  const hindi = navHindi[label];
+  if (!hindi) return <>{label}</>;
+  return (
+    <>
+      <span data-en>{label}</span>
+      <span data-hi lang="hi">{hindi}</span>
+    </>
+  );
+}
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -91,8 +118,9 @@ export function Header() {
             </a>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/75">
+            <LiveClockWeather variant="site" />
             <span className="inline-flex items-center gap-1.5"><Clock size={15} /> Mon-Sat, 10 AM-6 PM</span>
-            <span className="inline-flex items-center gap-1.5"><MapPin size={15} /> Shaheed Nagar, Agra</span>
+            <span className="hidden items-center gap-1.5 sm:inline-flex"><MapPin size={15} /> Shaheed Nagar, Agra</span>
           </div>
         </div>
       </div>
@@ -110,14 +138,14 @@ export function Header() {
                   href={item.href}
                   className={`flex items-center gap-1.5 whitespace-nowrap py-8 text-[15px] font-semibold transition hover:text-[#19c7f3] xl:text-base ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
                 >
-                  {item.label}
+                  <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
                 </Link>
                 {item.children?.length ? (
                   <div className="invisible absolute left-0 top-full min-w-60 translate-y-2 rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {item.children.map((child) => (
                       <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-sm text-ink/80 hover:bg-soft hover:text-brand">
-                        {child.label}
+                        <NavLabel label={child.label} />
                       </Link>
                     ))}
                   </div>
@@ -128,9 +156,9 @@ export function Header() {
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageToggle />
-            <ButtonLink href="/contact#appointment" className="hidden whitespace-nowrap border-coral bg-coral px-7 text-lg hover:bg-brand-dark md:inline-flex">
+            <ButtonLink href="/portal#book" className="hidden whitespace-nowrap border-coral bg-coral px-7 text-lg hover:bg-brand-dark md:inline-flex">
               <span data-en>Book Appointment</span>
-              <span data-hi>बुक करें</span>
+              <span data-hi lang="hi">बुक करें</span>
             </ButtonLink>
             <button
               type="button"
@@ -156,14 +184,14 @@ export function Header() {
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`}>
                 <Link href={item.href} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded px-2 py-3 hover:bg-soft ${item.label === "Home" ? "text-brand" : ""}`}>
-                  {item.label}
+                  <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={18} /> : null}
                 </Link>
                 {item.children?.length ? (
                   <div className="ml-3 grid border-l border-line pl-3">
                     {item.children.map((child) => (
                       <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand">
-                        {child.label}
+                        <NavLabel label={child.label} />
                       </Link>
                     ))}
                   </div>

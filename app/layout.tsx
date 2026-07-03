@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import { CtaBand } from "@/components/CtaBand";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import { AppChrome } from "@/components/AppChrome";
 import { hospitalSchema, site } from "@/lib/site-data";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -34,16 +36,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" className={cn("font-sans", geist.variable)}>
       <body className={`${GeistSans.variable} font-sans antialiased`} suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}
         />
-        <Header />
-        {children}
-        <CtaBand />
-        <Footer />
+        <AppChrome>{children}</AppChrome>
       </body>
     </html>
   );

@@ -9,18 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#12313b",
-        muted: "#5d7279",
-        line: "#cce7ec",
-        soft: "#ecfeff",
-        brand: "#0891b2",
-        "brand-dark": "#0e7490",
-        teal: "#059669",
-        "teal-dark": "#047857",
-        gold: "#b9852f",
-        coral: "#dc2626",
-        mist: "#f7fbfb",
-        navy: "#164e63"
+        ink: "var(--site-ink)",
+        muted: "var(--site-muted)",
+        line: "var(--site-line)",
+        soft: "var(--site-soft)",
+        brand: "var(--site-brand)",
+        "brand-dark": "var(--site-brand-dark)",
+        teal: "var(--site-teal)",
+        "teal-dark": "var(--site-teal-dark)",
+        gold: "var(--site-gold)",
+        coral: "var(--site-coral)",
+        mist: "var(--site-mist)",
+        navy: "var(--site-navy)",
+        surface: "var(--site-surface)"
       },
       borderRadius: {
         DEFAULT: "8px"

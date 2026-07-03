@@ -7,9 +7,12 @@ import { GalleryGrid } from "@/components/GalleryGrid";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, Eyebrow } from "@/components/Section";
 import { Stats } from "@/components/Stats";
-import { doctor, equipment, galleryItems, patientFacilities, procedures, site, whyChoose } from "@/lib/site-data";
+import { getPublicGalleryItems, getPublicProcedures } from "@/lib/cms-public";
+import { doctor, equipment, patientFacilities, site, whyChoose } from "@/lib/site-data";
 
 export default function Home() {
+  const procedures = getPublicProcedures();
+  const galleryItems = getPublicGalleryItems();
   const treatmentGroups = [
     {
       title: "Diagnostic Endoscopy",
@@ -103,7 +106,7 @@ export default function Home() {
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/82" data-en>
               Mudgal Gastromedics Hospital provides focused care for digestive, liver, pancreatic and biliary diseases with modern endoscopy and patient-centered treatment planning.
             </p>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/82" data-hi>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/82" data-hi lang="hi">
               आगरा में एंडोस्कोपी, लिवर केयर, ईआरसीपी, कोलोनोस्कोपी और उन्नत गैस्ट्रो उपचार के लिए सुपरस्पेशियलिटी सेंटर।
             </p>
             <div className="mt-8 flex max-w-[620px] flex-wrap gap-3">
@@ -146,10 +149,6 @@ export default function Home() {
                         sizes="160px"
                         className="object-cover object-[52%_18%]"
                       />
-                    </div>
-                    <div className="bg-white px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">Dr. Deepak</p>
-                      <p className="text-xs font-bold leading-tight text-ink">Gastroenterologist</p>
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
@@ -288,10 +287,10 @@ export default function Home() {
                     <span className="mb-4 text-sm font-semibold text-brand">{String(index + 1).padStart(2, "0")}</span>
                     <h3 className="inline-lang text-2xl font-bold leading-tight text-ink">
                       <span data-en>{procedure.title}</span>
-                      <span data-hi>{procedure.hiTitle}</span>
+                      <span data-hi lang="hi">{procedure.hiTitle}</span>
                     </h3>
                     <p className="mt-4 leading-relaxed text-muted" data-en>{procedure.summary}</p>
-                    <p className="mt-4 leading-relaxed text-muted" data-hi>{procedure.hiSummary}</p>
+                    <p className="mt-4 leading-relaxed text-muted" data-hi lang="hi">{procedure.hiSummary}</p>
                     <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-brand">
                       View patient guide <ArrowRight size={16} className="transition group-hover:translate-x-1" />
                     </span>

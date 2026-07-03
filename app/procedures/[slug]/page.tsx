@@ -5,32 +5,33 @@ import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartP
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
-import { procedures, site } from "@/lib/site-data";
+import { getPublicProcedure, getPublicProcedures } from "@/lib/cms-public";
+import { site } from "@/lib/site-data";
 
 type ProcedurePageProps = {
   params: Promise<{ slug: string }>;
 };
 
 export function generateStaticParams() {
-  return procedures.map((procedure) => ({ slug: procedure.slug }));
+  return getPublicProcedures().map((procedure) => ({ slug: procedure.slug }));
 }
 
 export async function generateMetadata({ params }: ProcedurePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const procedure = procedures.find((item) => item.slug === slug);
+  const procedure = getPublicProcedure(slug);
 
   if (!procedure) return {};
 
   return {
-    title: `${procedure.title} in Agra`,
-    description: `${procedure.title} at Mudgal Gastromedics Hospital, Agra. ${procedure.summary}`,
+    title: procedure.seoTitle || `${procedure.title} in Agra`,
+    description: procedure.seoDescription || `${procedure.title} at Mudgal Gastromedics Hospital, Agra. ${procedure.summary}`,
     alternates: { canonical: `/procedures/${procedure.slug}` }
   };
 }
 
 export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const { slug } = await params;
-  const procedure = procedures.find((item) => item.slug === slug);
+  const procedure = getPublicProcedure(slug);
   if (!procedure) notFound();
   const isBleeding = procedure.slug === "gastrointestinal-bleeding-management";
 
@@ -78,7 +79,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Gastroenterology Hospital in Agra</p>
             <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">{procedure.title} in Agra</h1>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-en>{procedure.summary}</p>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi>{procedure.hiSummary}</p>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">{procedure.hiSummary}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/contact#appointment" className="gap-2"><CalendarCheck size={18} /> Book Appointment</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>

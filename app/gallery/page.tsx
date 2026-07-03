@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { Section } from "@/components/Section";
-import { equipment, galleryItems } from "@/lib/site-data";
+import { getPublicGalleryItems } from "@/lib/cms-public";
+import { equipment } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function GalleryPage() {
+  const galleryItems = getPublicGalleryItems();
   const equipmentGallery = equipment.map((item) => ({
     category: "Equipment",
     title: item.name,

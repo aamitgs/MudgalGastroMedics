@@ -7,3 +7,8 @@ dist
 .env.local
 .vercel
 *.log
+.data
+database/local-data-export.sql
+test-results
+playwright-report
+tsconfig.tsbuildinfo

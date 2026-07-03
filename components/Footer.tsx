@@ -21,6 +21,7 @@ const serviceLinks = [
 
 const supportLinks = [
   { href: "/contact#appointment", label: "Appointment Form" },
+  { href: "/portal", label: "Patient Portal" },
   { href: site.directionsUrl, label: "Get Directions" },
   { href: "/gallery", label: "Hospital Gallery" },
   { href: "/privacy", label: "Privacy Policy" },

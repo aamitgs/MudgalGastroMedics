@@ -2,7 +2,28 @@
 
 import { CalendarClock, HeartPulse, MessageCircle, Paperclip, Phone, Send, UserRound } from "lucide-react";
 import { FormEvent, useState } from "react";
+import type { AppointmentRecord } from "@/lib/appointment-types";
 import { procedures, site } from "@/lib/site-data";
+
+/** Display-only Hindi labels; the submitted symptom value stays English so records remain consistent. */
+const symptomHindi: Record<string, string> = {
+  "Acidity / reflux": "एसिडिटी / रिफ्लक्स",
+  "Abdominal pain": "पेट दर्द",
+  "Vomiting": "उल्टी",
+  "Loose motion": "दस्त",
+  "Constipation": "कब्ज़",
+  "Jaundice": "पीलिया",
+  "Blood in stool": "मल में खून",
+  "Black stool": "काला मल",
+  "Weight loss": "वज़न घटना",
+  "Bloating / gas": "पेट फूलना / गैस",
+  "Loss of appetite": "भूख न लगना",
+  "Difficulty swallowing": "निगलने में कठिनाई",
+  "Nausea": "जी मिचलाना",
+  "Fatty liver concern": "फैटी लिवर की चिंता",
+  "Pancreatitis pain": "पैंक्रियास (अग्न्याशय) दर्द",
+  "Liver swelling / ascites": "लिवर सूजन / पेट में पानी"
+};
 
 const commonSymptoms = [
   "Acidity / reflux",
@@ -39,13 +60,18 @@ export function AppointmentForm() {
     const data = Object.fromEntries(formData.entries());
     const payload = { ...data, symptoms, report: reportFileName };
     setStatus("Preparing appointment request...");
+    let savedAppointment: AppointmentRecord | null = null;
 
     try {
-      await fetch("/api/appointment", {
+      const response = await fetch("/api/appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && result.ok) {
+        savedAppointment = result.appointment;
+      }
     } catch {
       // The WhatsApp and email handoff remains available even in static previews.
     }
@@ -53,7 +79,7 @@ export function AppointmentForm() {
     const text = encodeURIComponent(
       `Appointment request:\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email || "-"}\nAge: ${data.age || "-"}\nGender: ${data.gender || "-"}\nPatient type: ${data.patientType || "-"}\nPreferred contact: ${data.contactMethod || "Phone / WhatsApp"}\nService: ${data.service}\nPreferred date: ${data.date || "Flexible"}\nPreferred time: ${data.timeSlot || "Flexible"}\nPriority: ${data.priority || "Routine"}\nSymptoms: ${symptoms.length ? symptoms.join(", ") : "-"}\nDuration: ${data.duration || "-"}\nCurrent medicines/allergies: ${data.medicines || "-"}\nNeeds assistance: ${data.assistance ? "Yes" : "No"}\nReport attached: ${reportFileName || "No"}\nMessage: ${data.message || "-"}`
     );
-    setStatus(`Request prepared. Please send it on WhatsApp: https://wa.me/${site.whatsapp}?text=${text}`);
+    setStatus(`${savedAppointment ? `Request saved as ${savedAppointment.id}. ` : "Request prepared. "}Please send it on WhatsApp: https://wa.me/${site.whatsapp}?text=${text}`);
   }
 
   return (
@@ -65,26 +91,26 @@ export function AppointmentForm() {
               <UserRound size={18} />
             </span>
             <div>
-              <p className="font-bold text-ink">Patient details</p>
+              <p className="font-bold text-ink"><span data-en>Patient details</span><span data-hi lang="hi">रोगी की जानकारी</span></p>
               <p className="text-sm text-muted">Basic details help reception prepare your appointment.</p>
             </div>
           </div>
         </div>
         <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-12">
           <label className="lg:col-span-4">
-            <span className="mb-2 block text-sm font-semibold text-ink">Patient Name</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Patient Name</span><span data-hi lang="hi">रोगी का नाम</span></span>
             <input name="name" required autoComplete="name" className={fieldClass} placeholder="Full name" />
           </label>
           <label className="lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-ink">Phone</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Phone</span><span data-hi lang="hi">फ़ोन नंबर</span></span>
             <input name="phone" required autoComplete="tel" inputMode="tel" className={fieldClass} placeholder="Mobile number" />
           </label>
           <label className="lg:col-span-2">
-            <span className="mb-2 block text-sm font-semibold text-ink">Age</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Age</span><span data-hi lang="hi">आयु</span></span>
             <input name="age" type="number" min="0" max="120" inputMode="numeric" className={fieldClass} placeholder="Years" />
           </label>
           <label className="lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-ink">Gender</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Gender</span><span data-hi lang="hi">लिंग</span></span>
             <select name="gender" className={fieldClass}>
               <option value="">Select gender</option>
               <option>Female</option>
@@ -94,11 +120,11 @@ export function AppointmentForm() {
             </select>
           </label>
           <label className="lg:col-span-5">
-            <span className="mb-2 block text-sm font-semibold text-ink">Email</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Email</span><span data-hi lang="hi">ईमेल</span></span>
             <input name="email" type="email" autoComplete="email" className={fieldClass} placeholder="Optional email" />
           </label>
           <label className="lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-ink">Preferred Contact</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Contact</span><span data-hi lang="hi">संपर्क का माध्यम</span></span>
             <select name="contactMethod" className={fieldClass}>
               <option>Phone / WhatsApp</option>
               <option>Call only</option>
@@ -107,12 +133,15 @@ export function AppointmentForm() {
             </select>
           </label>
           <div className="lg:col-span-4">
-            <p className="mb-2 text-sm font-semibold text-ink">Patient Type</p>
+            <p className="mb-2 text-sm font-semibold text-ink"><span data-en>Patient Type</span><span data-hi lang="hi">रोगी का प्रकार</span></p>
             <div className="grid gap-3 sm:grid-cols-2">
               {["New Patient", "Follow-up Visit"].map((option) => (
                 <label key={option} className={optionClass}>
                   <input type="radio" name="patientType" value={option} className="h-4 w-4 accent-brand" />
-                  <span className="text-sm font-semibold text-ink">{option}</span>
+                  <span className="text-sm font-semibold text-ink">
+                    <span data-en>{option}</span>
+                    <span data-hi lang="hi">{option === "New Patient" ? "नया रोगी" : "फ़ॉलो-अप विज़िट"}</span>
+                  </span>
                 </label>
               ))}
             </div>
@@ -127,14 +156,14 @@ export function AppointmentForm() {
               <CalendarClock size={18} />
             </span>
             <div>
-              <p className="font-bold text-ink">Appointment preference</p>
+              <p className="font-bold text-ink"><span data-en>Appointment preference</span><span data-hi lang="hi">अपॉइंटमेंट की पसंद</span></p>
               <p className="text-sm text-muted">Choose the care type and a convenient visit window.</p>
             </div>
           </div>
         </div>
         <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-12">
           <label className="lg:col-span-6">
-            <span className="mb-2 block text-sm font-semibold text-ink">Service</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Service</span><span data-hi lang="hi">सेवा</span></span>
             <select name="service" required className={fieldClass}>
               <option value="">Select service</option>
               {procedures.slice(0, 10).map((procedure) => (
@@ -145,11 +174,11 @@ export function AppointmentForm() {
             </select>
           </label>
           <label className="lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-ink">Preferred Date</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Date</span><span data-hi lang="hi">पसंदीदा तारीख़</span></span>
             <input name="date" type="date" className={fieldClass} />
           </label>
           <label className="lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-ink">Preferred Time</span>
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Time</span><span data-hi lang="hi">पसंदीदा समय</span></span>
             <select name="timeSlot" className={fieldClass}>
               <option>Flexible</option>
               <option>10 AM-1 PM</option>
@@ -166,7 +195,7 @@ export function AppointmentForm() {
               <HeartPulse size={18} />
             </span>
             <div>
-              <p className="font-bold text-ink">Symptoms and support</p>
+              <p className="font-bold text-ink"><span data-en>Symptoms and support</span><span data-hi lang="hi">लक्षण और सहायता</span></p>
               <p className="text-sm text-muted">Optional details help the team guide the right next step.</p>
             </div>
           </div>
@@ -196,12 +225,12 @@ export function AppointmentForm() {
             <input name="medicines" className={fieldClass} placeholder="Medicine names, allergies, or leave blank" />
           </label>
           <div className="lg:col-span-12">
-            <p className="mb-2 text-sm font-semibold text-ink">Common symptoms</p>
+            <p className="mb-2 text-sm font-semibold text-ink"><span data-en>Common symptoms</span><span data-hi lang="hi">सामान्य लक्षण</span></p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {commonSymptoms.map((option) => (
                 <label key={option} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm shadow-sm transition hover:border-brand hover:bg-soft/45">
                   <input type="checkbox" name="symptoms" value={option} className="h-4 w-4 accent-brand" />
-                  <span className="font-semibold text-ink">{option}</span>
+                  <span className="font-semibold text-ink"><span data-en>{option}</span><span data-hi lang="hi">{symptomHindi[option] ?? option}</span></span>
                 </label>
               ))}
             </div>
@@ -238,13 +267,13 @@ export function AppointmentForm() {
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(8,145,178,0.42),inset_0_1px_0_rgba(255,255,255,0.28)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
-          <Send size={18} /> Submit Request
+          <Send size={18} /> <span data-en>Submit Request</span><span data-hi lang="hi">अनुरोध भेजें</span>
         </button>
         <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(5,150,105,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(5,150,105,0.38),inset_0_1px_0_rgba(255,255,255,0.26)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <MessageCircle size={18} /> WhatsApp Now
         </a>
         <a href={`tel:${site.phone}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-5 font-bold tracking-[0.01em] text-ink shadow-[0_18px_42px_rgba(8,64,84,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
-          <Phone size={18} /> Call Reception
+          <Phone size={18} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
         </a>
       </div>
       {status ? <p className="break-words rounded border border-teal/20 bg-soft/80 p-3 text-sm font-semibold text-teal-dark md:col-span-2">{status}</p> : null}
