@@ -4,6 +4,7 @@ import { BadgeIndianRupee, ClipboardList, CreditCard, Download, RefreshCw } from
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const billingExportHeaders = ["Token", "Patient", "Phone", "Service", "Billing Status", "Amount", "Payment Method", "Receipt ID"];
@@ -92,21 +93,15 @@ export function AdminBillingSummary() {
           <h2 className="mt-1 text-xl font-bold text-ink">Revenue and receipts</h2>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
             onClick={() => downloadCsv(billingExportHeaders, visits.map(billingExportRow), "billing.csv")}
             disabled={visits.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadBilling()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-          >
+          </ActionButton>
+          <ActionButton onClick={() => void loadBilling()}>
             <RefreshCw size={17} /> Refresh Billing
-          </button>
+          </ActionButton>
         </div>
       </div>
 

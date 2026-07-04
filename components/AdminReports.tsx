@@ -2,6 +2,7 @@
 
 import { BarChart3, CalendarDays, ClipboardList, PackageX, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AdminReport = {
@@ -189,13 +190,9 @@ export function AdminReports() {
           <h2 className="mt-1 text-xl font-bold text-ink">Daily operating summary</h2>
           {report ? <p className="mt-1 text-sm text-muted">Generated {new Date(report.generatedAt).toLocaleString("en-IN")}</p> : null}
         </div>
-        <button
-          type="button"
-          onClick={() => void loadReport()}
-          className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-        >
+        <ActionButton onClick={() => void loadReport()}>
           <RefreshCw size={17} /> Refresh Reports
-        </button>
+        </ActionButton>
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
