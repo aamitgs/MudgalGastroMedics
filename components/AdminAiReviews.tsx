@@ -1,6 +1,7 @@
 "use client";
 
 import { BrainCircuit, ClipboardCheck, Download, RefreshCw, Sparkles } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
 import { aiReviewStatuses } from "@/lib/ai-types";
@@ -200,7 +201,13 @@ export function AdminAiReviews() {
 
         <div className="grid gap-4">
           {loading ? <ModuleSkeleton /> : null}
-          {!loading && reviews.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-8 text-center font-semibold text-muted">No AI reviews generated yet.</p> : null}
+          {!loading && reviews.length === 0 ? (
+            <ModuleEmptyState
+              icon={Sparkles}
+              title="No AI reviews yet"
+              description="AI clinical case reviews appear here as visits are processed. Nothing needs your attention right now."
+            />
+          ) : null}
           {reviews.map((review) => (
             <article key={review.id} className="rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">

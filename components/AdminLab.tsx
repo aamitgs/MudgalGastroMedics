@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FlaskConical, RefreshCw, Search, TestTube2 } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
@@ -222,7 +223,13 @@ export function AdminLab() {
           </label>
           <div className="mt-4 grid max-h-[760px] gap-3 overflow-auto pr-1">
             {loading ? <ModuleSkeleton /> : null}
-            {!loading && filteredOrders.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No lab orders yet.</p> : null}
+            {!loading && filteredOrders.length === 0 ? (
+              <ModuleEmptyState
+                icon={FlaskConical}
+                title="No lab orders here"
+                description="Lab tests raised for patients appear in this queue. Order a test above, or adjust your search if you expected results."
+              />
+            ) : null}
             {filteredOrders.map((order) => (
               <article key={order.id} className="rounded border border-line bg-surface p-4 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">

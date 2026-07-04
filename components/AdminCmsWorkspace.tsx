@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Eye, FileText, History, ImageIcon, Plus, RefreshCw, SearchCheck } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus } from "@/lib/cms-types";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
@@ -248,7 +249,13 @@ export function AdminCmsWorkspace() {
 
         <div className="grid max-h-[760px] gap-3 overflow-auto pr-1">
           {loading ? <ModuleSkeleton /> : null}
-          {!loading && items.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No CMS records yet.</p> : null}
+          {!loading && items.length === 0 ? (
+            <ModuleEmptyState
+              icon={FileText}
+              title="No CMS records yet"
+              description="Website content — services, articles and gallery items — is managed here and published to the public site. Create your first record above."
+            />
+          ) : null}
           {items.map((item) => (
             <article key={item.id} className="rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">

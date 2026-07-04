@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, MessageCircle, Phone, RefreshCw, Send, UsersRound } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
 import { communicationChannels, communicationStatuses } from "@/lib/communication-types";
@@ -230,7 +231,13 @@ export function AdminCommunication() {
       <div className="grid gap-3 border-t border-line p-4">
         <p className="text-sm font-bold text-ink">Recent communication logs</p>
         {loading ? <ModuleSkeleton /> : null}
-        {logs.length === 0 ? <p className="rounded border border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No communication logs yet.</p> : null}
+        {!loading && logs.length === 0 ? (
+          <ModuleEmptyState
+            icon={MessageCircle}
+            title="No communication logs yet"
+            description="Calls, SMS and follow-up messages sent to patients are logged here. Send a message above to start the trail."
+          />
+        ) : null}
         {logs.slice(0, 14).map((log) => (
           <article key={log.id} className="rounded border border-line bg-surface p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">

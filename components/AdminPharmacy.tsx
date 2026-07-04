@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeIndianRupee, Download, PackageCheck, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/lib/inventory-types";
 import type { OpdVisit } from "@/lib/opd-types";
@@ -265,7 +266,13 @@ export function AdminPharmacy() {
           </div>
           <div className="grid max-h-[760px] gap-3 overflow-auto p-4">
             {loading ? <ModuleSkeleton /> : null}
-            {!loading && dispenses.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No pharmacy dispenses yet.</p> : null}
+            {!loading && dispenses.length === 0 ? (
+              <ModuleEmptyState
+                icon={PackageCheck}
+                title="No pharmacy dispenses yet"
+                description="Medicines dispensed to patients are recorded here with billing status. Record a dispense above to begin."
+              />
+            ) : null}
             {dispenses.map((record) => (
               <article key={record.id} className="rounded border border-line bg-soft/40 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, ClipboardCheck, Download, RefreshCw, ShieldCheck } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { useEffect, useMemo, useState } from "react";
 import type { AuditEvent, AuditSeverity } from "@/lib/audit-types";
 import { downloadCsv } from "@/lib/table-export";
@@ -138,7 +139,13 @@ export function AdminAuditLog() {
 
       <div className="grid max-h-[560px] gap-3 overflow-auto p-4">
         {loading ? <ModuleSkeleton /> : null}
-        {!loading && events.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No audit events yet.</p> : null}
+        {!loading && events.length === 0 ? (
+          <ModuleEmptyState
+            icon={ShieldCheck}
+            title="No audit events yet"
+            description="Every privileged action — logins, record changes, approvals — is recorded here for compliance. The trail starts as staff begin working."
+          />
+        ) : null}
         {events.map((event) => (
           <article key={event.id} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">

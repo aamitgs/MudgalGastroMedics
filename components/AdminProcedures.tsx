@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarClock, ClipboardCheck, Download, RefreshCw, Search } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { ProcedureChecklist, ProcedureSchedule, ProcedureScheduleStatus } from "@/lib/procedure-types";
@@ -235,7 +236,13 @@ export function AdminProcedures() {
           </label>
           <div className="mt-4 grid max-h-[820px] gap-3 overflow-auto pr-1">
             {loading ? <ModuleSkeleton /> : null}
-            {!loading && filteredSchedules.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No procedure schedules yet.</p> : null}
+            {!loading && filteredSchedules.length === 0 ? (
+              <ModuleEmptyState
+                icon={CalendarClock}
+                title="No procedures scheduled"
+                description="Endoscopies, colonoscopies and other procedures you schedule appear here. Add one above, or adjust your search if you expected results."
+              />
+            ) : null}
             {filteredSchedules.map((schedule) => (
               <article key={schedule.id} className="rounded border border-line bg-surface p-4 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">

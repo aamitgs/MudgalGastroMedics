@@ -1,6 +1,7 @@
 "use client";
 
 import { BedDouble, FileDown, RefreshCw, Search } from "lucide-react";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedWardMap";
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
@@ -264,7 +265,13 @@ export function AdminIpdBeds() {
           </label>
           <div className="mt-4 grid max-h-[820px] gap-3 overflow-auto pr-1">
             {loading ? <ModuleSkeleton /> : null}
-            {!loading && filteredAdmissions.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No IPD admissions yet.</p> : null}
+            {!loading && filteredAdmissions.length === 0 ? (
+              <ModuleEmptyState
+                icon={BedDouble}
+                title="No IPD admissions"
+                description="Admitted in-patients and their bed allocations show here. Admit a patient above, or adjust your search if you expected results."
+              />
+            ) : null}
             {filteredAdmissions.map((admission) => (
               <article key={admission.id} className="rounded border border-line bg-surface p-4 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">
