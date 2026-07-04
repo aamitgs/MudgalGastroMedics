@@ -4,6 +4,7 @@ import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, P
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
+import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { site } from "@/lib/site-data";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { toast } from "sonner";
@@ -125,6 +126,48 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
         <CheckCircle2 size={16} /> {saving ? "Recording..." : "Acknowledge — reviewed"}
       </button>
     </div>
+  );
+}
+
+/**
+ * Prescription entry with live duplicate-medication detection (Clinical Safety,
+ * Track 0.4). Advisory only — the overlap check is a free-text heuristic, so it
+ * warns "may duplicate, verify" and never blocks. Saving is unchanged (onBlur).
+ */
+function PrescriptionField({
+  visit,
+  currentMedicines,
+  onSave
+}: {
+  visit: OpdVisit;
+  currentMedicines?: string;
+  onSave: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState(visit.prescription ?? "");
+  const overlap = useMemo(
+    () => detectMedicationOverlap(draft, currentMedicines ?? ""),
+    [draft, currentMedicines]
+  );
+
+  return (
+    <label>
+      <span className="mb-2 block text-sm font-bold text-ink">Prescription</span>
+      <textarea
+        defaultValue={visit.prescription}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={(event) => onSave(event.target.value)}
+        className={textareaClass}
+        placeholder="Medicine, dose, frequency, duration, instructions"
+      />
+      {overlap.length ? (
+        <div className="mt-2 flex items-start gap-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950 p-2.5 text-xs" role="alert">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600" />
+          <p className="font-semibold leading-relaxed text-amber-900 dark:text-amber-200">
+            May duplicate current medication: <span className="uppercase">{overlap.join(", ")}</span>. Verify before prescribing.
+          </p>
+        </div>
+      ) : null}
+    </label>
   );
 }
 
@@ -464,15 +507,12 @@ function DoctorConsultationCard({
               placeholder="History, examination, impression, procedure note"
             />
           </label>
-          <label>
-            <span className="mb-2 block text-sm font-bold text-ink">Prescription</span>
-            <textarea
-              defaultValue={visit.prescription}
-              onBlur={(event) => void updateVisit(visit.id, { prescription: event.target.value })}
-              className={textareaClass}
-              placeholder="Medicine, dose, frequency, duration, instructions"
-            />
-          </label>
+          <PrescriptionField
+            key={visit.id}
+            visit={visit}
+            currentMedicines={patient?.currentMedicines}
+            onSave={(value) => void updateVisit(visit.id, { prescription: value })}
+          />
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Advice / Procedure Instructions</span>
             <textarea
