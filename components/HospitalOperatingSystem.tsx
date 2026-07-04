@@ -114,6 +114,7 @@ import {
   dashboardMetrics,
   hospitalRoles,
   liveEvents,
+  navGroupOrder,
   navItems,
   patientFlowRows,
   roleFallbackMessage,
@@ -815,25 +816,36 @@ function HospitalOsApp() {
               </div>
             ) : null}
 
-            <nav ref={navRef} onKeyDown={onSidebarKeyDown} className="grid gap-1" aria-label="Hospital OS sections">
-              {visibleNav.map(({ label, icon: Icon, badge, href }) => (
-                <a
-                  href={href}
-                  key={label}
-                  data-nav-item
-                  onClick={() => {
-                    setActiveNav(label);
-                    setMobileNav(false);
-                  }}
-                  className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-[var(--hos-muted)] ${activeNav === label ? "bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]" : "text-[var(--hos-muted-text)]"}`}
-                  title={sidebarCollapsed ? label : undefined}
-                  aria-current={activeNav === label ? "page" : undefined}
-                >
-                  <Icon size={18} className="shrink-0" />
-                  {!sidebarCollapsed ? <span className="min-w-0 flex-1 truncate">{label}</span> : null}
-                  {!sidebarCollapsed && badge ? <Badge className="bg-white/15 text-white hover:bg-white/15">{badge}</Badge> : null}
-                </a>
-              ))}
+            <nav ref={navRef} onKeyDown={onSidebarKeyDown} className="grid gap-2" aria-label="Hospital OS sections">
+              {navGroupOrder.map((group) => {
+                const items = visibleNav.filter((item) => item.group === group);
+                if (!items.length) return null;
+                return (
+                  <div key={group} className="grid gap-1" role="group" aria-label={group}>
+                    {!sidebarCollapsed ? (
+                      <p className="px-3 pb-0.5 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--hos-muted-text)]/70">{group}</p>
+                    ) : null}
+                    {items.map(({ label, icon: Icon, badge, href }) => (
+                      <a
+                        href={href}
+                        key={label}
+                        data-nav-item
+                        onClick={() => {
+                          setActiveNav(label);
+                          setMobileNav(false);
+                        }}
+                        className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-[var(--hos-muted)] ${activeNav === label ? "bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]" : "text-[var(--hos-muted-text)]"}`}
+                        title={sidebarCollapsed ? label : undefined}
+                        aria-current={activeNav === label ? "page" : undefined}
+                      >
+                        <Icon size={18} className="shrink-0" />
+                        {!sidebarCollapsed ? <span className="min-w-0 flex-1 truncate">{label}</span> : null}
+                        {!sidebarCollapsed && badge ? <Badge className="bg-white/15 text-white hover:bg-white/15">{badge}</Badge> : null}
+                      </a>
+                    ))}
+                  </div>
+                );
+              })}
             </nav>
 
             <Button type="button" variant="outline" onClick={toggleSidebar} className="mt-auto hidden min-h-10 gap-2 border-[var(--hos-border)] bg-[var(--hos-bg)] lg:inline-flex">

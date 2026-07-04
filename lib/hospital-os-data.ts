@@ -28,12 +28,19 @@ export type CommandEntity = "Patient" | "Doctor" | "Invoice" | "Medicine" | "App
 export type PatientStatus = "In Consultation" | "Vitals Pending" | "Lab Review" | "Scheduled" | "Billing Hold" | "Discharged";
 export type BillingStatus = "Open" | "Paid" | "Insurance" | "Preauth" | "Refund Review";
 
+export type NavGroup = "Overview" | "Clinical" | "Diagnostics" | "Operations" | "Finance" | "Administration";
+
+/** Sidebar section order (Part 2/6 information architecture). Empty groups are hidden per role. */
+export const navGroupOrder: NavGroup[] = ["Overview", "Clinical", "Diagnostics", "Operations", "Finance", "Administration"];
+
 export type NavItem = {
   label: string;
   icon: LucideIcon;
   roles: HospitalRole[];
   /** In-page section anchor or cross-surface route this item opens. */
   href: string;
+  /** IA group this item belongs to. */
+  group: NavGroup;
   badge?: string;
 };
 
@@ -131,26 +138,26 @@ function rolesWithPermission(resource: AccessResource | null, action: AccessActi
 }
 
 export const navItems: NavItem[] = [
-  { label: "Dashboard", href: "#analytics", icon: LayoutDashboard, roles: rolesWithPermission(null) },
-  { label: "Patients", href: "#operations-table", icon: UsersRound, roles: rolesWithPermission("patients") },
-  { label: "Doctors", href: "#doctor-workspace", icon: Stethoscope, roles: rolesWithPermission("appointments") },
-  { label: "Departments", href: "/admin#module-hr", icon: Building2, roles: rolesWithPermission("hr-records") },
-  { label: "Appointments", href: "#appointment-flow", icon: CalendarClock, roles: rolesWithPermission("appointments") },
-  { label: "OPD", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments"), badge: "Live" },
-  { label: "IPD", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
-  { label: "Prescriptions", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
-  { label: "Pharmacy", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory"), badge: "4" },
-  { label: "Laboratory", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders"), badge: "9" },
-  { label: "Billing", href: "#billing", icon: CreditCard, roles: rolesWithPermission("billing") },
-  { label: "Insurance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
-  { label: "Accounts", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
-  { label: "HR", href: "/admin#module-hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
-  { label: "Inventory", href: "/admin#module-inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
-  { label: "Reports", href: "/admin#module-reports", icon: BarChart3, roles: rolesWithPermission("reports") },
-  { label: "CMS", href: "/admin#module-cms", icon: Activity, roles: rolesWithPermission("cms") },
-  { label: "Settings", href: "/admin#module-settings", icon: Settings, roles: rolesWithPermission("system-settings") },
-  { label: "Notifications", href: "#realtime-feed", icon: Bell, roles: rolesWithPermission(null) },
-  { label: "AI Assistant", href: "#patient-portal-preview", icon: Sparkles, roles: rolesWithPermission("patients") }
+  { label: "Dashboard", group: "Overview", href: "#analytics", icon: LayoutDashboard, roles: rolesWithPermission(null) },
+  { label: "Patients", group: "Clinical", href: "#operations-table", icon: UsersRound, roles: rolesWithPermission("patients") },
+  { label: "Doctors", group: "Clinical", href: "#doctor-workspace", icon: Stethoscope, roles: rolesWithPermission("appointments") },
+  { label: "Departments", group: "Administration", href: "/admin#module-hr", icon: Building2, roles: rolesWithPermission("hr-records") },
+  { label: "Appointments", group: "Clinical", href: "#appointment-flow", icon: CalendarClock, roles: rolesWithPermission("appointments") },
+  { label: "OPD", group: "Clinical", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments"), badge: "Live" },
+  { label: "IPD", group: "Clinical", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
+  { label: "Prescriptions", group: "Clinical", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
+  { label: "Pharmacy", group: "Operations", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory"), badge: "4" },
+  { label: "Laboratory", group: "Diagnostics", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders"), badge: "9" },
+  { label: "Billing", group: "Finance", href: "#billing", icon: CreditCard, roles: rolesWithPermission("billing") },
+  { label: "Insurance", group: "Finance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
+  { label: "Accounts", group: "Finance", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
+  { label: "HR", group: "Administration", href: "/admin#module-hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
+  { label: "Inventory", group: "Operations", href: "/admin#module-inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
+  { label: "Reports", group: "Administration", href: "/admin#module-reports", icon: BarChart3, roles: rolesWithPermission("reports") },
+  { label: "CMS", group: "Administration", href: "/admin#module-cms", icon: Activity, roles: rolesWithPermission("cms") },
+  { label: "Settings", group: "Administration", href: "/admin#module-settings", icon: Settings, roles: rolesWithPermission("system-settings") },
+  { label: "Notifications", group: "Overview", href: "#realtime-feed", icon: Bell, roles: rolesWithPermission(null) },
+  { label: "AI Assistant", group: "Overview", href: "#patient-portal-preview", icon: Sparkles, roles: rolesWithPermission("patients") }
 ];
 
 export type HospitalOsSection =
