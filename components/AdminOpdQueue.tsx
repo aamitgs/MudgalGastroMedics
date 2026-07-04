@@ -6,7 +6,7 @@ import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import { opdVisitStatuses } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 const opdExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
 
@@ -55,7 +55,7 @@ export function AdminOpdQueue() {
       return;
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
-    toast.success("Visit updated");
+    notify.success("Visit updated");
   }
 
   useEffect(() => {

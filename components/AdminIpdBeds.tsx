@@ -8,7 +8,7 @@ import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionSta
 import { ipdAdmissionStatuses } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 type IpdResponse = {
   ok: boolean;
@@ -107,7 +107,7 @@ export function AdminIpdBeds() {
       return null;
     }
     setError("");
-    toast.success("IPD update saved");
+    notify.success("IPD update saved");
     return data;
   }
 
@@ -171,7 +171,7 @@ export function AdminIpdBeds() {
     }
     setAdmissions((items) => [data.admission as IpdAdmission, ...items.filter((item) => item.id !== data.admission?.id)]);
     setBeds(data.beds ?? beds);
-    toast.success("Patient admitted");
+    notify.success("Patient admitted");
     event.currentTarget.reset();
     setError("");
   }

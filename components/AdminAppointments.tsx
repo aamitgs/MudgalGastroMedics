@@ -7,7 +7,7 @@ import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-typ
 import { appointmentStatuses } from "@/lib/appointment-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 const appointmentExportHeaders = ["Name", "Phone", "Service", "Date", "Time Slot", "Priority", "Status", "Created"];
 
@@ -71,7 +71,7 @@ export function AdminAppointments() {
       return;
     }
     setAppointments((items) => items.map((item) => (item.id === id ? data.appointment : item)));
-    toast.success("Appointment updated");
+    notify.success("Appointment updated");
   }
 
   async function logout() {

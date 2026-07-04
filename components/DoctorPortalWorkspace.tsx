@@ -7,7 +7,7 @@ import type { PatientRecord } from "@/lib/patient-types";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { site } from "@/lib/site-data";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 type AiSummaryResponse = {
   ok: boolean;
@@ -88,11 +88,11 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
         body: JSON.stringify({ visitId, allergies: recorded })
       });
       if (!response.ok) {
-        toast.error("Could not record acknowledgement. Try again.");
+        notify.error("Could not record acknowledgement. Try again.");
         return;
       }
       setAcknowledged(true);
-      toast.success("Allergies reviewed", { id: "allergy-ack" });
+      notify.success("Allergies reviewed", { id: "allergy-ack" });
     } finally {
       setSaving(false);
     }
@@ -241,7 +241,7 @@ export function DoctorPortalWorkspace() {
       return;
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
-    toast.success("Saved", { id: "doctor-autosave", duration: 1600 });
+    notify.saved("Saved", { id: "doctor-autosave" });
   }
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Gender", "Blood Group", "City", "Status", "Last Visit"];
 
@@ -86,7 +86,7 @@ export function AdminPatients() {
       return;
     }
     setPatients((items) => [data.patient as PatientRecord, ...items.filter((item) => item.id !== data.patient?.id)]);
-    toast.success(duplicateMatch ? "Existing patient updated" : "Patient saved");
+    notify.success(duplicateMatch ? "Existing patient updated" : "Patient saved");
     form.reset();
     setDuplicateMatch(null);
     setTypedName("");
@@ -104,7 +104,7 @@ export function AdminPatients() {
       return;
     }
     setPatients((items) => items.map((item) => (item.id === id ? data.patient as PatientRecord : item)));
-    toast.success("Patient updated");
+    notify.success("Patient updated");
   }
 
   useEffect(() => {
