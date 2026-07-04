@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, Sparkles, Stethoscope, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stethoscope, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -62,6 +62,68 @@ function AiPatientSummaryPanel({ phone }: { phone: string }) {
       ) : !error && !loading ? (
         <p className="mt-2 text-xs text-muted">Summarizes this patient&apos;s appointments, OPD visits and admissions into a short review brief.</p>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Active allergy alert at prescribe time (Clinical Safety, Track 0.1). Renders
+ * only when the patient has a recorded allergy. Non-blocking — the prescription
+ * still autosaves — but the clinician must actively acknowledge review, which
+ * is audit-logged. Resets per visit (keyed on visit id at the call site).
+ */
+function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: string }) {
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const recorded = allergies?.trim();
+  if (!recorded) return null;
+
+  async function acknowledge() {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/clinical/allergy-acknowledged", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitId, allergies: recorded })
+      });
+      if (!response.ok) {
+        toast.error("Could not record acknowledgement. Try again.");
+        return;
+      }
+      setAcknowledged(true);
+      toast.success("Allergies reviewed", { id: "allergy-ack" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (acknowledged) {
+    return (
+      <div className="flex items-center gap-2 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+        <ShieldCheck size={17} className="shrink-0" /> Allergies reviewed before prescribing: {recorded}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border-2 border-red-300 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-600" />
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.1em] text-red-700">Allergy alert</p>
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-red-900">
+            Allergies on record: {recorded}. Confirm the prescription accounts for these before finalizing.
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => void acknowledge()}
+        disabled={saving}
+        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded border border-red-600 bg-red-600 px-4 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+      >
+        <CheckCircle2 size={16} /> {saving ? "Recording..." : "Acknowledge — reviewed"}
+      </button>
     </div>
   );
 }
@@ -389,6 +451,8 @@ function DoctorConsultationCard({
         ) : null}
 
         <AiPatientSummaryPanel phone={visit.phone} />
+
+        <AllergyGuard key={visit.id} visitId={visit.id} allergies={patient?.allergies} />
 
         <div className="grid gap-4 lg:grid-cols-2">
           <label>
