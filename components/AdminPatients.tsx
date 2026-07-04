@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileHeart, Plus, RefreshCw, Search, UserRoundCheck } from "lucide-react";
+import { Download, FileHeart, Plus, RefreshCw, Search, UserRoundCheck, UsersRound } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
@@ -34,11 +34,28 @@ type PatientResponse = {
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
+type DuplicateMatch = { id: string; uhid: string; name: string; phone: string };
+
 export function AdminPatients() {
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
+  const [typedName, setTypedName] = useState("");
+
+  // Duplicate-patient detection (Track 0.3): the store merges on phone match, so
+  // a "new" registration silently updates the existing record. Look the number
+  // up as staff type it so they see the match before submitting.
+  async function checkDuplicate(phone: string) {
+    if (phone.replace(/\D/g, "").length < 6) {
+      setDuplicateMatch(null);
+      return;
+    }
+    const response = await fetch(`/api/patients/match?phone=${encodeURIComponent(phone)}`, { cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    setDuplicateMatch(response.ok && data.ok ? data.match : null);
+  }
 
   async function loadPatients() {
     setLoading(true);
@@ -69,8 +86,10 @@ export function AdminPatients() {
       return;
     }
     setPatients((items) => [data.patient as PatientRecord, ...items.filter((item) => item.id !== data.patient?.id)]);
-    toast.success("Patient saved");
+    toast.success(duplicateMatch ? "Existing patient updated" : "Patient saved");
     form.reset();
+    setDuplicateMatch(null);
+    setTypedName("");
   }
 
   async function updateStatus(id: string, status: PatientStatus) {
@@ -177,8 +196,8 @@ export function AdminPatients() {
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Plus size={19} /> Create patient record</p>
           <div className="grid gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
-              <input name="name" className={fieldClass} placeholder="Patient name" required />
-              <input name="phone" className={fieldClass} placeholder="Mobile number" inputMode="tel" required />
+              <input name="name" className={fieldClass} placeholder="Patient name" required onChange={(event) => setTypedName(event.target.value)} />
+              <input name="phone" className={fieldClass} placeholder="Mobile number" inputMode="tel" required onBlur={(event) => void checkDuplicate(event.target.value)} />
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <input name="age" className={fieldClass} placeholder="Age" inputMode="numeric" />
@@ -199,6 +218,25 @@ export function AdminPatients() {
             <textarea name="allergies" className={`${fieldClass} min-h-20 py-3`} placeholder="Allergies / drug reactions" />
             <textarea name="chronicConditions" className={`${fieldClass} min-h-20 py-3`} placeholder="Chronic conditions, liver disease history, diabetes, hypertension..." />
             <textarea name="currentMedicines" className={`${fieldClass} min-h-20 py-3`} placeholder="Current medicines" />
+            {duplicateMatch ? (
+              <div className="flex items-start gap-2.5 rounded border-2 border-amber-300 bg-amber-50 dark:bg-amber-950 p-3" role="alert">
+                <UsersRound size={18} className="mt-0.5 shrink-0 text-amber-600" />
+                <div className="text-sm text-amber-900 dark:text-amber-200">
+                  <p className="font-black uppercase tracking-[0.1em] text-amber-700 dark:text-amber-300">Possible existing patient</p>
+                  <p className="mt-1 font-semibold">
+                    {duplicateMatch.name} · {duplicateMatch.uhid} · {duplicateMatch.phone}
+                  </p>
+                  <p className="mt-1 leading-relaxed">
+                    This number is already on file, so saving will <span className="font-bold">update that record</span>, not create a new one.
+                    {typedName.trim() && typedName.trim().toLowerCase() !== duplicateMatch.name.toLowerCase() ? (
+                      <span className="mt-1 block font-bold text-red-700 dark:text-red-300">
+                        Different name entered — verify this is the same person before saving (shared number?).
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+            ) : null}
             <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
               Save Patient + Generate UHID
             </button>
