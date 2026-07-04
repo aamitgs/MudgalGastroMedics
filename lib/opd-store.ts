@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
@@ -8,60 +7,36 @@ type OpdStore = {
   visits: OpdVisit[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmOpdStore?: OpdStore;
-};
+const store = createDocumentStore<OpdStore>("opd-queue", (parsed) => {
+  const doc = parsed as Partial<OpdStore> | undefined;
+  return { visits: Array.isArray(doc?.visits) ? (doc.visits as OpdVisit[]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "opd-queue.json");
-
-function readVisitsFromDisk(): OpdVisit[] {
-  try {
-    if (!existsSync(storeFile)) return [];
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<OpdStore>;
-    return Array.isArray(parsed.visits) ? parsed.visits : [];
-  } catch {
-    return [];
-  }
+export async function listOpdVisits() {
+  return (await store.load()).visits;
 }
 
-function writeVisitsToDisk(visits: OpdVisit[]) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify({ visits }, null, 2));
+export async function getOpdVisitById(id: string) {
+  return (await store.load()).visits.find((visit) => visit.id === id) ?? null;
 }
 
-function getStore() {
-  globalStore.__mgmOpdStore ??= { visits: readVisitsFromDisk() };
-  return globalStore.__mgmOpdStore;
-}
-
-function todaysVisitCount() {
-  const today = new Date().toISOString().slice(0, 10);
-  return getStore().visits.filter((visit) => visit.createdAt.slice(0, 10) === today).length;
-}
-
-export function listOpdVisits() {
-  return getStore().visits;
-}
-
-export function getOpdVisitById(id: string) {
-  return getStore().visits.find((visit) => visit.id === id) ?? null;
-}
-
-export function listPatientOpdVisits(phone: string) {
+export async function listPatientOpdVisits(phone: string) {
   const normalizedPhone = phone.replace(/\D/g, "");
   if (normalizedPhone.length < 6) return [];
 
-  return getStore().visits.filter((visit) => {
+  return (await store.load()).visits.filter((visit) => {
     const visitPhone = visit.phone.replace(/\D/g, "");
     return visitPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(visitPhone);
   });
 }
 
-export function createOpdVisit(appointment: AppointmentRecord) {
-  const existing = getStore().visits.find((visit) => visit.appointmentId === appointment.id && visit.status !== "Cancelled");
+export async function createOpdVisit(appointment: AppointmentRecord) {
+  const doc = await store.load();
+  const existing = doc.visits.find((visit) => visit.appointmentId === appointment.id && visit.status !== "Cancelled");
   if (existing) return existing;
 
-  const sequence = todaysVisitCount() + 1;
+  const today = new Date().toISOString().slice(0, 10);
+  const sequence = doc.visits.filter((visit) => visit.createdAt.slice(0, 10) === today).length + 1;
   const visit: OpdVisit = {
     id: `OPD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
     token: `MGM-${String(sequence).padStart(3, "0")}`,
@@ -87,19 +62,19 @@ export function createOpdVisit(appointment: AppointmentRecord) {
     followUpDate: ""
   };
 
-  getStore().visits.unshift(visit);
-  writeVisitsToDisk(getStore().visits);
+  doc.visits.unshift(visit);
+  await store.save(doc);
   return visit;
 }
 
-function createReceiptId() {
+function createReceiptId(visits: OpdVisit[]) {
   const date = new Date();
   const day = date.toISOString().slice(0, 10).replaceAll("-", "");
-  const paidCount = getStore().visits.filter((visit) => visit.paidAt?.slice(0, 10) === date.toISOString().slice(0, 10)).length + 1;
+  const paidCount = visits.filter((visit) => visit.paidAt?.slice(0, 10) === date.toISOString().slice(0, 10)).length + 1;
   return `MGM-R-${day}-${String(paidCount).padStart(3, "0")}`;
 }
 
-export function updateOpdVisit(input: {
+export async function updateOpdVisit(input: {
   id: string;
   status?: OpdVisitStatus;
   billingStatus?: OpdVisit["billingStatus"];
@@ -111,7 +86,8 @@ export function updateOpdVisit(input: {
   advice?: string;
   followUpDate?: string;
 }) {
-  const visit = getStore().visits.find((item) => item.id === input.id);
+  const doc = await store.load();
+  const visit = doc.visits.find((item) => item.id === input.id);
   if (!visit) return null;
 
   if (input.status) visit.status = input.status;
@@ -119,7 +95,7 @@ export function updateOpdVisit(input: {
     visit.billingStatus = input.billingStatus;
     if (input.billingStatus === "Paid") {
       visit.paidAt ||= new Date().toISOString();
-      visit.receiptId ||= createReceiptId();
+      visit.receiptId ||= createReceiptId(doc.visits);
     }
     if (input.billingStatus !== "Paid") {
       visit.paidAt = "";
@@ -134,6 +110,6 @@ export function updateOpdVisit(input: {
   if (typeof input.advice === "string") visit.advice = input.advice.trim();
   if (typeof input.followUpDate === "string") visit.followUpDate = input.followUpDate.trim();
 
-  writeVisitsToDisk(getStore().visits);
+  await store.save(doc);
   return visit;
 }

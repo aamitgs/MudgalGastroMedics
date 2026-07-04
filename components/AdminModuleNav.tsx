@@ -29,7 +29,7 @@ export function AdminModuleNav() {
   return (
     <nav
       aria-label="Operations modules"
-      className="sticky top-14 z-30 border-b border-line bg-white/95 backdrop-blur"
+      className="sticky top-14 z-30 border-b border-line bg-surface/95 backdrop-blur"
     >
       <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] items-center gap-1 overflow-x-auto py-2 [scrollbar-width:thin]">
         {moduleLinks.map((link) => (

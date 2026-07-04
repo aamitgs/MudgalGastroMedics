@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
 
-  const user = getAccessUserByUsername(username);
+  const user = await getAccessUserByUsername(username);
 
   const auditFailure = (reason: string) =>
     recordAuditEvent({
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   }
 
   if (!verifyPassword(password, user.passwordHash)) {
-    recordLoginFailure(user.id);
+    await recordLoginFailure(user.id);
     await auditFailure("bad-password");
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
@@ -87,9 +87,9 @@ export async function POST(request: Request) {
     activeRole = requestedRole;
   }
 
-  recordLoginSuccess(user.id);
+  await recordLoginSuccess(user.id);
   const status = initialSessionStatus(user);
-  const { token, session } = createAccessSession({
+  const { token, session } = await createAccessSession({
     userId: user.id,
     activeRole,
     status,

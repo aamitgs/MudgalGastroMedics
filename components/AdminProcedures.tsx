@@ -6,6 +6,7 @@ import type { OpdVisit } from "@/lib/opd-types";
 import type { ProcedureChecklist, ProcedureSchedule, ProcedureScheduleStatus } from "@/lib/procedure-types";
 import { procedureRooms, procedureScheduleStatuses } from "@/lib/procedure-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const procedureExportHeaders = ["Patient", "Phone", "Procedure", "Scheduled Date", "Scheduled Time", "Room", "Doctor", "Priority", "Status"];
 
@@ -198,25 +199,25 @@ export function AdminProcedures() {
         <form onSubmit={createSchedule} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><CalendarClock size={19} /> Schedule procedure</p>
           <div className="grid gap-3">
-            <select name="visitId" className={fieldClass} required>
+            <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
               ))}
             </select>
-            <select name="procedureSlug" className={fieldClass} required>
+            <select aria-label="Procedure" name="procedureSlug" className={fieldClass} required>
               <option value="">Select procedure</option>
               {procedureOptions.map((procedure) => <option key={procedure.slug} value={procedure.slug}>{procedure.title}</option>)}
             </select>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="scheduledDate" className={fieldClass} type="date" required />
-              <input name="scheduledTime" className={fieldClass} type="time" required />
+              <input aria-label="Scheduled date" name="scheduledDate" className={fieldClass} type="date" required />
+              <input aria-label="Scheduled time" name="scheduledTime" className={fieldClass} type="time" required />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <select name="room" className={fieldClass} defaultValue="Endoscopy Room">
+              <select aria-label="Room" name="room" className={fieldClass} defaultValue="Endoscopy Room">
                 {procedureRooms.map((room) => <option key={room}>{room}</option>)}
               </select>
-              <select name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
+              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
             </div>
             <input name="doctor" className={fieldClass} placeholder="Doctor" defaultValue="Dr. Deepak Kumar Sharma" />
             <input name="anesthesiaPlan" className={fieldClass} placeholder="Sedation / anesthesia plan" />
@@ -233,7 +234,7 @@ export function AdminProcedures() {
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search procedure, UHID, patient, room" className="min-h-10 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
           </label>
           <div className="mt-4 grid max-h-[820px] gap-3 overflow-auto pr-1">
-            {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading procedures...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && filteredSchedules.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No procedure schedules yet.</p> : null}
             {filteredSchedules.map((schedule) => (
               <article key={schedule.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -243,7 +244,7 @@ export function AdminProcedures() {
                     <h3 className="mt-1 text-lg font-bold text-ink">{schedule.procedureTitle}</h3>
                     <p className="mt-1 text-sm text-muted">{schedule.patientName} | {schedule.scheduledDate} {schedule.scheduledTime} | {schedule.room}</p>
                   </div>
-                  <select value={schedule.status} onChange={(event) => void updateSchedule(schedule.id, { status: event.target.value as ProcedureScheduleStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                  <select aria-label="Status" value={schedule.status} onChange={(event) => void updateSchedule(schedule.id, { status: event.target.value as ProcedureScheduleStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                     {procedureScheduleStatuses.map((status) => <option key={status}>{status}</option>)}
                   </select>
                 </div>

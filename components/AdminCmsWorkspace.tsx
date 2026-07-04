@@ -6,6 +6,7 @@ import type { CmsContentItem, CmsContentRevision, CmsContentStatus } from "@/lib
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const cmsExportHeaders = ["Title", "Type", "Status", "Slug", "Owner", "Published At", "Updated"];
 
@@ -186,10 +187,10 @@ export function AdminCmsWorkspace() {
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Plus size={19} /> Add content item</p>
             <div className="grid gap-3">
               <div className="grid gap-3 md:grid-cols-2">
-                <select name="type" className={fieldClass} defaultValue="Page">
+                <select aria-label="Type" name="type" className={fieldClass} defaultValue="Page">
                   {cmsContentTypes.map((type) => <option key={type}>{type}</option>)}
                 </select>
-                <select name="status" className={fieldClass} defaultValue="Draft">
+                <select aria-label="Status" name="status" className={fieldClass} defaultValue="Draft">
                   {cmsContentStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>
               </div>
@@ -246,7 +247,7 @@ export function AdminCmsWorkspace() {
         </div>
 
         <div className="grid max-h-[760px] gap-3 overflow-auto pr-1">
-          {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading CMS content...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {!loading && items.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No CMS records yet.</p> : null}
           {items.map((item) => (
             <article key={item.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -256,7 +257,7 @@ export function AdminCmsWorkspace() {
                   <h3 className="mt-1 text-xl font-bold text-ink">{item.title}</h3>
                   <p className="mt-1 text-sm font-semibold text-muted">{item.slug}</p>
                 </div>
-                <select
+                <select aria-label="Status"
                   value={item.status}
                   onChange={(event) => void updateStatus(item.id, event.target.value as CmsContentStatus)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-bold ${statusTone[item.status]}`}

@@ -1,37 +1,15 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 
 type PatientStore = {
   patients: PatientRecord[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmPatientStore?: PatientStore;
-};
-
-const storeFile = join(process.cwd(), ".data", "patients.json");
-
-function readPatientsFromDisk(): PatientRecord[] {
-  try {
-    if (!existsSync(storeFile)) return [];
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<PatientStore>;
-    return Array.isArray(parsed.patients) ? parsed.patients : [];
-  } catch {
-    return [];
-  }
-}
-
-function writePatientsToDisk(patients: PatientRecord[]) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify({ patients }, null, 2));
-}
-
-function getStore() {
-  globalStore.__mgmPatientStore ??= { patients: readPatientsFromDisk() };
-  return globalStore.__mgmPatientStore;
-}
+const store = createDocumentStore<PatientStore>("patients", (parsed) => {
+  const doc = parsed as Partial<PatientStore> | undefined;
+  return { patients: Array.isArray(doc?.patients) ? (doc.patients as PatientRecord[]) : [] };
+});
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -41,34 +19,39 @@ function normalizePhone(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-function createUhid() {
+function createUhid(existingCount: number) {
   const year = new Date().getFullYear();
-  const sequence = getStore().patients.length + 1;
-  return `MGM-${year}-${String(sequence).padStart(5, "0")}`;
+  return `MGM-${year}-${String(existingCount + 1).padStart(5, "0")}`;
 }
 
-export function listPatients() {
-  return getStore().patients;
-}
-
-export function getPatientById(id: string) {
-  return getStore().patients.find((patient) => patient.id === id || patient.uhid === id) ?? null;
-}
-
-export function findPatientByPhone(phone: string) {
+function findByPhoneIn(patients: PatientRecord[], phone: string) {
   const normalizedPhone = normalizePhone(phone);
   if (normalizedPhone.length < 6) return null;
-
-  return getStore().patients.find((patient) => {
-    const patientPhone = normalizePhone(patient.phone);
-    return patientPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(patientPhone);
-  }) ?? null;
+  return (
+    patients.find((patient) => {
+      const patientPhone = normalizePhone(patient.phone);
+      return patientPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(patientPhone);
+    }) ?? null
+  );
 }
 
-export function upsertPatientFromInput(input: Record<string, unknown>) {
+export async function listPatients() {
+  return (await store.load()).patients;
+}
+
+export async function getPatientById(id: string) {
+  return (await store.load()).patients.find((patient) => patient.id === id || patient.uhid === id) ?? null;
+}
+
+export async function findPatientByPhone(phone: string) {
+  return findByPhoneIn((await store.load()).patients, phone);
+}
+
+export async function upsertPatientFromInput(input: Record<string, unknown>) {
   const phone = normalizeText(input.phone);
   const name = normalizeText(input.name);
-  const existing = findPatientByPhone(phone);
+  const doc = await store.load();
+  const existing = findByPhoneIn(doc.patients, phone);
   const now = new Date().toISOString();
 
   if (existing) {
@@ -79,13 +62,13 @@ export function upsertPatientFromInput(input: Record<string, unknown>) {
     existing.currentMedicines = normalizeText(input.medicines) || existing.currentMedicines;
     existing.updatedAt = now;
     existing.lastVisitAt = now;
-    writePatientsToDisk(getStore().patients);
+    await store.save(doc);
     return existing;
   }
 
   const patient: PatientRecord = {
     id: `PAT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
-    uhid: createUhid(),
+    uhid: createUhid(doc.patients.length),
     createdAt: now,
     updatedAt: now,
     status: "Active",
@@ -99,23 +82,24 @@ export function upsertPatientFromInput(input: Record<string, unknown>) {
     lastVisitAt: now
   };
 
-  getStore().patients.unshift(patient);
-  writePatientsToDisk(getStore().patients);
+  doc.patients.unshift(patient);
+  await store.save(doc);
   return patient;
 }
 
-export function createPatient(input: Record<string, unknown>) {
+export async function createPatient(input: Record<string, unknown>) {
   const name = normalizeText(input.name);
   const phone = normalizeText(input.phone);
   if (!name || normalizePhone(phone).length < 6) return null;
 
-  const existing = findPatientByPhone(phone);
-  if (existing) return updatePatient({ ...input, id: existing.id });
+  const doc = await store.load();
+  const existing = findByPhoneIn(doc.patients, phone);
+  if (existing) return (await updatePatient({ ...input, id: existing.id }));
 
   const now = new Date().toISOString();
   const patient: PatientRecord = {
     id: `PAT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
-    uhid: createUhid(),
+    uhid: createUhid(doc.patients.length),
     createdAt: now,
     updatedAt: now,
     status: "Active",
@@ -135,14 +119,15 @@ export function createPatient(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().patients.unshift(patient);
-  writePatientsToDisk(getStore().patients);
+  doc.patients.unshift(patient);
+  await store.save(doc);
   return patient;
 }
 
-export function updatePatient(input: Record<string, unknown>) {
+export async function updatePatient(input: Record<string, unknown>) {
   const id = normalizeText(input.id);
-  const patient = getPatientById(id);
+  const doc = await store.load();
+  const patient = doc.patients.find((item) => item.id === id || item.uhid === id);
   if (!patient) return null;
 
   const status = normalizeText(input.status);
@@ -163,6 +148,6 @@ export function updatePatient(input: Record<string, unknown>) {
   if (typeof input.notes === "string") patient.notes = normalizeText(input.notes);
   patient.updatedAt = new Date().toISOString();
 
-  writePatientsToDisk(getStore().patients);
+  await store.save(doc);
   return patient;
 }

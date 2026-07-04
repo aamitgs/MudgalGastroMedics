@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
 import { communicationTemplates } from "@/lib/communication-types";
 import { getPatientById, listPatients } from "@/lib/patient-store";
@@ -9,33 +8,15 @@ type CommunicationStore = {
   logs: CommunicationLog[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmCommunicationStore?: CommunicationStore;
-};
+const docStore = createDocumentStore<CommunicationStore>("communication", (parsed) => {
+  const doc = parsed as Partial<CommunicationStore> | undefined;
+  return { logs: Array.isArray(doc?.logs) ? (doc.logs as CommunicationStore["logs"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "communication.json");
 
-function readStoreFromDisk(): CommunicationStore {
-  try {
-    if (!existsSync(storeFile)) return { logs: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<CommunicationStore>;
-    return {
-      logs: Array.isArray(parsed.logs) ? parsed.logs : []
-    };
-  } catch {
-    return { logs: [] };
-  }
-}
 
-function writeStoreToDisk(store: CommunicationStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmCommunicationStore ??= readStoreFromDisk();
-  return globalStore.__mgmCommunicationStore;
-}
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -49,13 +30,15 @@ function findTemplate(key: string) {
   return communicationTemplates.find((template) => template.key === key) ?? communicationTemplates[0];
 }
 
-export function listCommunicationLogs() {
-  return getStore().logs;
+export async function listCommunicationLogs() {
+  const doc = await docStore.load();
+  return doc.logs;
 }
 
-export function createCommunicationLog(input: Record<string, unknown>) {
+export async function createCommunicationLog(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const patientId = normalizeText(input.patientId);
-  const patient = patientId ? getPatientById(patientId) : null;
+  const patient = patientId ? (await getPatientById(patientId)) : null;
   const patientName = normalizeText(input.patientName) || patient?.name || "";
   const phone = normalizeText(input.phone) || patient?.phone || "";
   if (!patientName || phone.replace(/\D/g, "").length < 6) return { error: "Patient name and valid phone are required." };
@@ -81,12 +64,12 @@ export function createCommunicationLog(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().logs.unshift(log);
-  writeStoreToDisk(getStore());
+  doc.logs.unshift(log);
+  await docStore.save(doc);
   return { log };
 }
 
-export function updateCommunicationLog(input: {
+export async function updateCommunicationLog(input: {
   id: string;
   status?: CommunicationStatus;
   channel?: CommunicationChannel;
@@ -96,7 +79,8 @@ export function updateCommunicationLog(input: {
   owner?: string;
   notes?: string;
 }) {
-  const log = getStore().logs.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const log = doc.logs.find((item) => item.id === input.id);
   if (!log) return null;
   if (input.status) {
     log.status = input.status;
@@ -109,12 +93,12 @@ export function updateCommunicationLog(input: {
   if (typeof input.owner === "string") log.owner = input.owner.trim();
   if (typeof input.notes === "string") log.notes = input.notes.trim();
   log.updatedAt = new Date().toISOString();
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return log;
 }
 
-export function getCommunicationRecipients() {
-  return listPatients().map((patient) => ({
+export async function getCommunicationRecipients() {
+  return (await listPatients()).map((patient) => ({
     id: patient.id,
     uhid: patient.uhid,
     name: patient.name,

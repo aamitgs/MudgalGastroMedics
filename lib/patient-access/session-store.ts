@@ -1,8 +1,7 @@
 import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 
 export const patientSessionCookie = "mgm_patient_session";
 
@@ -29,37 +28,16 @@ type PatientSessionStore = {
   sessions: PatientSession[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmPatientSessionStore?: PatientSessionStore;
-};
-
-const storeFile = join(process.cwd(), ".data", "patient-sessions.json");
-
-function readStoreFromDisk(): PatientSessionStore {
-  if (!existsSync(storeFile)) return { sessions: [] };
-  try {
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<PatientSessionStore>;
-    return { sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [] };
-  } catch {
-    return { sessions: [] };
-  }
-}
-
-function writeStoreToDisk(store: PatientSessionStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, `${JSON.stringify(store, null, 2)}\n`);
-}
-
-function getStore() {
-  globalStore.__mgmPatientSessionStore ??= readStoreFromDisk();
-  return globalStore.__mgmPatientSessionStore;
-}
+const store = createDocumentStore<PatientSessionStore>("patient-sessions", (parsed) => {
+  const doc = parsed as Partial<PatientSessionStore> | undefined;
+  return { sessions: Array.isArray(doc?.sessions) ? (doc.sessions as PatientSession[]) : [] };
+});
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("base64url");
 }
 
-export function createPatientSession(input: { identityId: string; phone: string; ip: string; userAgent: string }) {
+export async function createPatientSession(input: { identityId: string; phone: string; ip: string; userAgent: string }) {
   const token = randomBytes(32).toString("base64url");
   const now = new Date();
   const session: PatientSession = {
@@ -72,41 +50,41 @@ export function createPatientSession(input: { identityId: string; phone: string;
     ip: input.ip,
     userAgent: input.userAgent
   };
-  const store = getStore();
-  store.sessions = [session, ...store.sessions].slice(0, 5000);
-  writeStoreToDisk(store);
+  const doc = await store.load();
+  doc.sessions = [session, ...doc.sessions].slice(0, 5000);
+  await store.save(doc);
   return { token, session };
 }
 
-export function getPatientSessionByToken(token: string | null | undefined): PatientSession | null {
+export async function getPatientSessionByToken(token: string | null | undefined): Promise<PatientSession | null> {
   if (!token) return null;
   const tokenHash = hashToken(token);
-  const session = getStore().sessions.find((item) => item.tokenHash === tokenHash);
+  const session = (await store.load()).sessions.find((item) => item.tokenHash === tokenHash);
   if (!session || session.revokedAt) return null;
   if (new Date(session.expiresAt).getTime() <= Date.now()) return null;
   return session;
 }
 
-export function revokePatientSession(id: string) {
-  const store = getStore();
-  const session = store.sessions.find((item) => item.id === id);
+export async function revokePatientSession(id: string) {
+  const doc = await store.load();
+  const session = doc.sessions.find((item) => item.id === id);
   if (!session || session.revokedAt) return null;
   session.revokedAt = new Date().toISOString();
-  writeStoreToDisk(store);
+  await store.save(doc);
   return session;
 }
 
-export function revokePatientSessionsForIdentity(identityId: string) {
-  const store = getStore();
+export async function revokePatientSessionsForIdentity(identityId: string) {
+  const doc = await store.load();
   const now = new Date().toISOString();
   let count = 0;
-  for (const session of store.sessions) {
+  for (const session of doc.sessions) {
     if (session.identityId === identityId && !session.revokedAt) {
       session.revokedAt = now;
       count += 1;
     }
   }
-  if (count) writeStoreToDisk(store);
+  if (count) await store.save(doc);
   return count;
 }
 
@@ -134,7 +112,7 @@ export function clearPatientSessionCookie() {
   };
 }
 
-export function getPatientSessionFromRequest(request: Request) {
+export async function getPatientSessionFromRequest(request: Request) {
   const cookieHeader = request.headers.get("cookie");
   if (!cookieHeader) return null;
   const entry = cookieHeader.split(";").find((cookie) => cookie.trim().startsWith(`${patientSessionCookie}=`));

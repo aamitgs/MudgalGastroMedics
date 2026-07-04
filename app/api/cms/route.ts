@@ -6,7 +6,7 @@ import { listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } f
 import { getAdminAuthContext, requirePermission } from "@/lib/rbac";
 
 export async function GET(request: Request) {
-  const context = getAdminAuthContext(request);
+  const context = await getAdminAuthContext(request);
   const allowed = requirePermission(context, "cms:read");
   if (!allowed.ok) return NextResponse.json({ ok: false, error: allowed.error }, { status: allowed.status });
 
@@ -14,14 +14,14 @@ export async function GET(request: Request) {
   const itemId = url.searchParams.get("itemId") || undefined;
   return NextResponse.json({
     ok: true,
-    items: listCmsContent(url.searchParams.get("type") || undefined),
-    revisions: listCmsRevisions(itemId),
+    items: (await listCmsContent(url.searchParams.get("type") || undefined)),
+    revisions: (await listCmsRevisions(itemId)),
     currentUser: context.staff
   });
 }
 
 export async function POST(request: Request) {
-  const context = getAdminAuthContext(request);
+  const context = await getAdminAuthContext(request);
   const writeAllowed = requirePermission(context, "cms:write");
   if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     if (!publishAllowed.ok) return NextResponse.json({ ok: false, error: "CMS publish permission required." }, { status: 403 });
   }
 
-  const item = upsertCmsContent({ ...body, type, status });
+  const item = (await upsertCmsContent({ ...body, type, status }));
 
   if (!item) return NextResponse.json({ ok: false, error: "Title and slug are required." }, { status: 400 });
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const context = getAdminAuthContext(request);
+  const context = await getAdminAuthContext(request);
   const writeAllowed = requirePermission(context, "cms:write");
   if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
 
@@ -66,7 +66,7 @@ export async function PATCH(request: Request) {
     if (!publishAllowed.ok) return NextResponse.json({ ok: false, error: "CMS publish permission required." }, { status: 403 });
   }
 
-  const item = updateCmsStatus(id, status);
+  const item = (await updateCmsStatus(id, status));
   if (!item) return NextResponse.json({ ok: false, error: "CMS item not found." }, { status: 404 });
 
   await recordAuditEvent({

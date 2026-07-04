@@ -4,10 +4,10 @@ import { roleMeta, rolePermissions } from "@/lib/access/matrix";
 import { isElevated } from "@/lib/access/session-store";
 
 export async function GET(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) {
     // Legacy admin/doctor cookies have no RBAC session but still map to a role.
-    const legacy = getRequestAccessContext(request);
+    const legacy = await getRequestAccessContext(request);
     if (legacy.authenticated && legacy.legacy) {
       return NextResponse.json({
         ok: true,

@@ -6,6 +6,8 @@ import { createAppointmentPlanningNote } from "@/lib/ai-planning";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { toast } from "sonner";
 
 const appointmentExportHeaders = ["Name", "Phone", "Service", "Date", "Time Slot", "Priority", "Status", "Created"];
 
@@ -69,6 +71,7 @@ export function AdminAppointments() {
       return;
     }
     setAppointments((items) => items.map((item) => (item.id === id ? data.appointment : item)));
+    toast.success("Appointment updated");
   }
 
   async function logout() {
@@ -195,7 +198,7 @@ export function AdminAppointments() {
         {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
         <div className="grid gap-4 p-4">
-          {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading appointments...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {!loading && filteredAppointments.length === 0 ? (
             <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
               <p className="text-xl font-bold text-ink">No appointment requests yet.</p>
@@ -259,7 +262,7 @@ export function AdminAppointments() {
                   >
                     Create OPD Token
                   </button>
-                  <select
+                  <select aria-label="Appointment status"
                     value={appointment.status}
                     onChange={(event) => void updateStatus(appointment.id, event.target.value as AppointmentStatus)}
                     className="rounded border border-line bg-surface px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"

@@ -42,11 +42,11 @@ const unauthenticated: AccessContext = {
  * to main-doctor. Both mappings keep existing logins and the e2e suite working
  * while new named users get least-privilege RBAC sessions.
  */
-export function getAccessContext(cookieHeader: string | null): AccessContext {
+export async function getAccessContext(cookieHeader: string | null): Promise<AccessContext> {
   const sessionToken = getSessionTokenFromCookieHeader(cookieHeader);
-  const session = getSessionByToken(sessionToken);
+  const session = await getSessionByToken(sessionToken);
   if (session && session.status === "active") {
-    const user = getAccessUserById(session.userId);
+    const user = await getAccessUserById(session.userId);
     if (user && user.status === "active") {
       return {
         authenticated: true,
@@ -67,7 +67,7 @@ export function getAccessContext(cookieHeader: string | null): AccessContext {
     return {
       authenticated: true,
       userId: staffId,
-      userName: getStaffById(staffId)?.name ?? "Administrator",
+      userName: (await getStaffById(staffId))?.name ?? "Administrator",
       roles: ["super-admin"],
       activeRole: "super-admin",
       elevated: false,
@@ -99,11 +99,11 @@ export function getRequestAccessContext(request: Request) {
  * the auth flow routes themselves (MFA challenge, forced password change),
  * which must operate on sessions that are not yet "active".
  */
-export function getSessionAndUser(request: Request) {
+export async function getSessionAndUser(request: Request) {
   const token = getSessionTokenFromCookieHeader(request.headers.get("cookie"));
-  const session = getSessionByToken(token);
+  const session = await getSessionByToken(token);
   if (!session) return null;
-  const user = getAccessUserById(session.userId);
+  const user = await getAccessUserById(session.userId);
   if (!user || user.status !== "active") return null;
   return { session, user };
 }
@@ -123,7 +123,7 @@ export async function authorize(
   resource: AccessResource,
   action: AccessAction
 ): Promise<AuthorizeResult> {
-  const context = getRequestAccessContext(request);
+  const context = await getRequestAccessContext(request);
 
   if (!context.authenticated) {
     return { ok: false, status: 401, error: "Staff login required." };
@@ -153,9 +153,9 @@ export async function authorize(
 
   // Break-glass: emergency, time-boxed clinical READ access for doctors.
   if (action === "view" && breakGlassResources.includes(resource) && breakGlassRoles.includes(context.activeRole)) {
-    const grant = getActiveBreakGlassGrant(context.userId);
+    const grant = await getActiveBreakGlassGrant(context.userId);
     if (grant) {
-      recordBreakGlassUse(grant.id);
+      await recordBreakGlassUse(grant.id);
       await recordAuditEvent({
         actorRole: context.activeRole,
         actorId: context.userId,

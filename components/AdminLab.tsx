@@ -6,6 +6,7 @@ import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const labExportHeaders = ["Token", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created"];
 
@@ -184,7 +185,7 @@ export function AdminLab() {
         <form onSubmit={createOrder} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><FlaskConical size={19} /> Create lab order</p>
           <div className="grid gap-3">
-            <select value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
+            <select aria-label="Selected visit id" value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
@@ -202,11 +203,11 @@ export function AdminLab() {
             </div>
             <input value={customTests} onChange={(event) => setCustomTests(event.target.value)} className={fieldClass} placeholder="Other tests, comma separated" />
             <div className="grid gap-3 md:grid-cols-3">
-              <select name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
+              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
               <input name="sampleType" className={fieldClass} placeholder="Sample type" />
               <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" />
             </div>
-            <select name="paymentStatus" className={fieldClass} defaultValue="Unpaid"><option>Unpaid</option><option>Paid</option></select>
+            <select aria-label="Payment status" name="paymentStatus" className={fieldClass} defaultValue="Unpaid"><option>Unpaid</option><option>Paid</option></select>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Lab notes, fasting status, sample remarks" />
             <button type="submit" className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
               <TestTube2 size={17} /> Save Lab Order
@@ -220,7 +221,7 @@ export function AdminLab() {
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search lab orders" className="min-h-10 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
           </label>
           <div className="mt-4 grid max-h-[760px] gap-3 overflow-auto pr-1">
-            {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading lab...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && filteredOrders.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No lab orders yet.</p> : null}
             {filteredOrders.map((order) => (
               <article key={order.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -230,7 +231,7 @@ export function AdminLab() {
                     <h3 className="mt-1 text-lg font-bold text-ink">{order.patientName}</h3>
                     <p className="mt-1 text-sm text-muted">{order.tests.join(", ")}</p>
                   </div>
-                  <select value={order.status} onChange={(event) => void updateOrder(order.id, { status: event.target.value as LabOrderStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                  <select aria-label="Order status" value={order.status} onChange={(event) => void updateOrder(order.id, { status: event.target.value as LabOrderStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                     {labOrderStatuses.map((status) => <option key={status}>{status}</option>)}
                   </select>
                 </div>

@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { listAppointments } from "@/lib/appointment-store";
 import { listAiReviews } from "@/lib/ai-review-store";
 import { listCommunicationLogs } from "@/lib/communication-store";
@@ -16,31 +15,16 @@ type AutomationStore = {
   tasks: AutomationTask[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmAutomationStore?: AutomationStore;
-};
+const docStore = createDocumentStore<AutomationStore>("automation", (parsed) => {
+  const doc = parsed as Partial<AutomationStore> | undefined;
+  return { tasks: Array.isArray(doc?.tasks) ? (doc.tasks as AutomationStore["tasks"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "automation.json");
 
-function readStoreFromDisk(): AutomationStore {
-  try {
-    if (!existsSync(storeFile)) return { tasks: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<AutomationStore>;
-    return { tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [] };
-  } catch {
-    return { tasks: [] };
-  }
-}
 
-function writeStoreToDisk(store: AutomationStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmAutomationStore ??= readStoreFromDisk();
-  return globalStore.__mgmAutomationStore;
-}
+
+
 
 function makeId() {
   return `AUT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
@@ -60,8 +44,8 @@ function addDays(days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function upsertGeneratedTask(input: Omit<AutomationTask, "id" | "createdAt" | "updatedAt" | "status"> & { status?: AutomationTaskStatus }) {
-  const existing = getStore().tasks.find((task) => task.key === input.key);
+function upsertGeneratedTask(doc: AutomationStore, input: Omit<AutomationTask, "id" | "createdAt" | "updatedAt" | "status"> & { status?: AutomationTaskStatus }) {
+  const existing = doc.tasks.find((task) => task.key === input.key);
   const now = new Date().toISOString();
   if (existing) {
     if (["Done", "Skipped"].includes(existing.status)) return existing;
@@ -88,15 +72,16 @@ function upsertGeneratedTask(input: Omit<AutomationTask, "id" | "createdAt" | "u
     status: input.status || "Open",
     ...input
   };
-  getStore().tasks.unshift(task);
+  doc.tasks.unshift(task);
   return task;
 }
 
-export function listAutomationTasks() {
-  return getStore().tasks;
+export async function listAutomationTasks() {
+  return (await docStore.load()).tasks;
 }
 
-export function createAutomationTask(input: Record<string, unknown>) {
+export async function createAutomationTask(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const title = normalizeText(input.title);
   if (!title) return { error: "Task title is required." };
   const now = new Date().toISOString();
@@ -116,12 +101,12 @@ export function createAutomationTask(input: Record<string, unknown>) {
     owner: normalizeText(input.owner),
     notes: normalizeText(input.notes)
   };
-  getStore().tasks.unshift(task);
-  writeStoreToDisk(getStore());
+  doc.tasks.unshift(task);
+  await docStore.save(doc);
   return { task };
 }
 
-export function updateAutomationTask(input: {
+export async function updateAutomationTask(input: {
   id: string;
   status?: AutomationTaskStatus;
   priority?: AutomationTaskPriority;
@@ -129,7 +114,8 @@ export function updateAutomationTask(input: {
   owner?: string;
   notes?: string;
 }) {
-  const task = getStore().tasks.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const task = doc.tasks.find((item) => item.id === input.id);
   if (!task) return null;
   if (input.status) task.status = input.status;
   if (input.priority) task.priority = input.priority;
@@ -137,17 +123,18 @@ export function updateAutomationTask(input: {
   if (typeof input.owner === "string") task.owner = input.owner.trim();
   if (typeof input.notes === "string") task.notes = input.notes.trim();
   task.updatedAt = new Date().toISOString();
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return task;
 }
 
-export function generateAutomationTasks() {
+export async function generateAutomationTasks() {
+  const doc = await docStore.load();
   const generated: AutomationTask[] = [];
   const todayKey = today();
 
-  for (const appointment of listAppointments()) {
+  for (const appointment of await listAppointments()) {
     if (["New", "Contacted"].includes(appointment.status)) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `appointment-follow:${appointment.id}`,
         dueAt: todayKey,
         type: "Appointment Follow-up",
@@ -165,9 +152,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const visit of listOpdVisits()) {
+  for (const visit of await listOpdVisits()) {
     if (visit.followUpDate) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `opd-follow:${visit.id}:${visit.followUpDate}`,
         dueAt: visit.followUpDate,
         type: "OPD Follow-up",
@@ -184,7 +171,7 @@ export function generateAutomationTasks() {
       }));
     }
     if (visit.billingStatus !== "Paid" && Number(String(visit.estimatedAmount || "").replace(/[^\d.]/g, "")) > 0) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `opd-payment:${visit.id}`,
         dueAt: todayKey,
         type: "Payment Reminder",
@@ -202,10 +189,10 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const procedure of listProcedureSchedules()) {
+  for (const procedure of await listProcedureSchedules()) {
     const progress = procedureChecklistProgress(procedure);
     if (!["Completed", "Cancelled"].includes(procedure.status) && progress < 100) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `procedure-prep:${procedure.id}`,
         dueAt: procedure.scheduledDate || todayKey,
         type: "Procedure Prep",
@@ -223,9 +210,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const order of listLabOrders()) {
+  for (const order of await listLabOrders()) {
     if (order.status === "Result Ready") {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `lab-delivery:${order.id}`,
         dueAt: todayKey,
         type: "Lab Delivery",
@@ -242,7 +229,7 @@ export function generateAutomationTasks() {
       }));
     }
     if (order.paymentStatus === "Unpaid" && Number(order.amount || 0) > 0) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `lab-payment:${order.id}`,
         dueAt: todayKey,
         type: "Payment Reminder",
@@ -260,9 +247,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const dispense of listPharmacyDispenses()) {
+  for (const dispense of await listPharmacyDispenses()) {
     if (dispense.paymentStatus === "Unpaid" && dispense.total > 0) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `pharmacy-payment:${dispense.id}`,
         dueAt: todayKey,
         type: "Payment Reminder",
@@ -280,9 +267,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const item of listInventoryItems()) {
+  for (const item of await listInventoryItems()) {
     if (item.quantity <= item.reorderLevel) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `low-stock:${item.id}`,
         dueAt: todayKey,
         type: "Low Stock",
@@ -296,9 +283,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const review of listAiReviews()) {
+  for (const review of await listAiReviews()) {
     if (["Needs Review", "Escalated"].includes(review.status)) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `ai-review:${review.id}`,
         dueAt: todayKey,
         type: "AI Review",
@@ -316,9 +303,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const log of listCommunicationLogs()) {
+  for (const log of await listCommunicationLogs()) {
     if (["Queued", "Follow-up Needed", "Failed"].includes(log.status)) {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `communication:${log.id}`,
         dueAt: log.scheduledFor?.slice(0, 10) || todayKey,
         type: "Communication Follow-up",
@@ -336,9 +323,9 @@ export function generateAutomationTasks() {
     }
   }
 
-  for (const admission of listIpdAdmissions()) {
+  for (const admission of await listIpdAdmissions()) {
     if (admission.status === "Admitted") {
-      generated.push(upsertGeneratedTask({
+      generated.push(upsertGeneratedTask(doc, {
         key: `ipd-review:${admission.id}:${todayKey}`,
         dueAt: addDays(1),
         type: "IPD Review",
@@ -356,6 +343,6 @@ export function generateAutomationTasks() {
     }
   }
 
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return generated;
 }

@@ -17,7 +17,7 @@ const staffChromeRoutes = ["/admin", "/doctor", "/login"];
 export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/hospital-os")) {
+  if (pathname?.startsWith("/mudgalgastromedics-os")) {
     return <>{children}</>;
   }
 

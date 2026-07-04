@@ -6,6 +6,8 @@ import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedW
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
 import { ipdAdmissionStatuses } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { toast } from "sonner";
 
 type IpdResponse = {
   ok: boolean;
@@ -104,6 +106,7 @@ export function AdminIpdBeds() {
       return null;
     }
     setError("");
+    toast.success("IPD update saved");
     return data;
   }
 
@@ -167,6 +170,7 @@ export function AdminIpdBeds() {
     }
     setAdmissions((items) => [data.admission as IpdAdmission, ...items.filter((item) => item.id !== data.admission?.id)]);
     setBeds(data.beds ?? beds);
+    toast.success("Patient admitted");
     event.currentTarget.reset();
     setError("");
   }
@@ -221,18 +225,18 @@ export function AdminIpdBeds() {
         <form onSubmit={createAdmission} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><BedDouble size={19} /> Admit patient</p>
           <div className="grid gap-3">
-            <select name="visitId" className={fieldClass} required>
+            <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
               ))}
             </select>
-            <select name="bedId" className={fieldClass} required>
+            <select aria-label="Bed" name="bedId" className={fieldClass} required>
               <option value="">Select vacant bed</option>
               {beds.filter((bed) => bed.status === "Vacant").map((bed) => <option key={bed.id} value={bed.id}>{bed.label} | {bed.ward}</option>)}
             </select>
             <div className="grid gap-3 md:grid-cols-2">
-              <select name="admissionType" className={fieldClass} defaultValue="Observation">
+              <select aria-label="Admission type" name="admissionType" className={fieldClass} defaultValue="Observation">
                 {["Observation", "Post Procedure", "Planned", "Emergency"].map((type) => <option key={type}>{type}</option>)}
               </select>
               <input name="depositAmount" className={fieldClass} type="number" min="0" placeholder="Deposit amount" />
@@ -243,7 +247,7 @@ export function AdminIpdBeds() {
             </div>
             <label className="grid gap-1 text-xs font-semibold text-muted">
               Expected discharge
-              <input name="expectedDischargeDate" className={fieldClass} type="datetime-local" />
+              <input aria-label="Expected discharge date" name="expectedDischargeDate" className={fieldClass} type="datetime-local" />
             </label>
             <input name="diagnosis" className={fieldClass} placeholder="Provisional diagnosis" required />
             <textarea name="carePlan" className={`${fieldClass} min-h-24 py-3`} placeholder="Care plan / monitoring instructions" />
@@ -259,7 +263,7 @@ export function AdminIpdBeds() {
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search admission, UHID, patient, bed" className="min-h-10 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
           </label>
           <div className="mt-4 grid max-h-[820px] gap-3 overflow-auto pr-1">
-            {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading IPD...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && filteredAdmissions.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No IPD admissions yet.</p> : null}
             {filteredAdmissions.map((admission) => (
               <article key={admission.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -269,12 +273,12 @@ export function AdminIpdBeds() {
                     <h3 className="mt-1 text-lg font-bold text-ink">{admission.patientName}</h3>
                     <p className="mt-1 text-sm text-muted">{admission.bedLabel} | {admission.ward} | {admission.diagnosis}</p>
                   </div>
-                  <select value={admission.status} onChange={(event) => void updateAdmission(admission.id, { status: event.target.value as IpdAdmissionStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                  <select aria-label="Admission status" value={admission.status} onChange={(event) => void updateAdmission(admission.id, { status: event.target.value as IpdAdmissionStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                     {ipdAdmissionStatuses.map((status) => <option key={status}>{status}</option>)}
                   </select>
                 </div>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  <select value={admission.bedId} onChange={(event) => void updateAdmission(admission.id, { bedId: event.target.value })} className={fieldClass} disabled={admission.status !== "Admitted"}>
+                  <select aria-label="Bed" value={admission.bedId} onChange={(event) => void updateAdmission(admission.id, { bedId: event.target.value })} className={fieldClass} disabled={admission.status !== "Admitted"}>
                     <option value={admission.bedId}>{admission.bedLabel}</option>
                     {beds.filter((bed) => bed.status === "Vacant").map((bed) => <option key={bed.id} value={bed.id}>{bed.label} | {bed.ward}</option>)}
                   </select>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Eye, EyeOff, KeyRound, LockKeyhole, ShieldCheck, Smartphone } from "lucide-react";
+import { Eye, EyeOff, FileCheck2, KeyRound, LockKeyhole, ShieldCheck, Smartphone, UserCheck } from "lucide-react";
 import { useState } from "react";
 import { roleMeta, staffLoginRoles, type AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
@@ -14,13 +14,21 @@ const inputClass =
 const buttonClass =
   "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70";
 
-export function AccessLogin() {
+export function AccessLogin({
+  initialRole = "",
+  landingOverride,
+  workspaceLabel
+}: {
+  initialRole?: string;
+  landingOverride?: string;
+  workspaceLabel?: string;
+} = {}) {
   const [step, setStep] = useState<Step>("credentials");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState("");
-  const [landing, setLanding] = useState("/admin");
+  const [role, setRole] = useState(initialRole);
+  const [landing, setLanding] = useState(landingOverride ?? "/admin");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
@@ -33,7 +41,9 @@ export function AccessLogin() {
   const [mfaCode, setMfaCode] = useState("");
 
   function advance(status: string, landingPath?: string) {
-    if (landingPath) setLanding(landingPath);
+    // A workspace tile's destination wins over the role's default landing.
+    const resolved = landingOverride ?? landingPath;
+    if (resolved) setLanding(resolved);
     setError("");
     if (status === "password-change-required") {
       setCurrentPassword(password);
@@ -44,7 +54,7 @@ export function AccessLogin() {
     } else if (status === "mfa-pending") {
       setStep("mfa-verify");
     } else {
-      window.location.assign(landingPath ?? landing);
+      window.location.assign(landingOverride ?? landingPath ?? landing);
     }
   }
 
@@ -139,6 +149,11 @@ export function AccessLogin() {
           <Image src="/mgm-logo.png" alt={site.name} width={64} height={64} className="h-16 w-16 object-contain" />
           <h1 className="mt-4 text-2xl font-bold leading-tight text-ink">{site.name}</h1>
           <p className="mt-1 text-sm font-semibold text-muted">{site.secondaryTagline}</p>
+          {workspaceLabel ? (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-line bg-soft px-3 py-1 text-xs font-bold text-brand">
+              {workspaceLabel}
+            </p>
+          ) : null}
         </div>
 
         {step === "credentials" ? (
@@ -150,6 +165,7 @@ export function AccessLogin() {
                 onChange={(event) => setUsername(event.target.value)}
                 className={inputClass}
                 autoComplete="username"
+                autoFocus={Boolean(workspaceLabel)}
                 required
               />
             </label>
@@ -305,7 +321,13 @@ export function AccessLogin() {
           </p>
         ) : null}
       </div>
-      <p className="mt-5 text-center text-xs leading-relaxed text-muted">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold text-muted" aria-label="Security posture">
+        <span className="inline-flex items-center gap-1"><LockKeyhole size={12} aria-hidden="true" /> Encrypted connection</span>
+        <span className="inline-flex items-center gap-1"><UserCheck size={12} aria-hidden="true" /> RBAC enforced</span>
+        <span className="inline-flex items-center gap-1"><FileCheck2 size={12} aria-hidden="true" /> Audit logged</span>
+        <span className="inline-flex items-center gap-1"><ShieldCheck size={12} aria-hidden="true" /> MFA</span>
+      </div>
+      <p className="mt-4 text-center text-xs leading-relaxed text-muted">
         Staff access only. Patients can view their records via the{" "}
         <a href="/portal" className="font-semibold text-brand hover:underline">patient portal</a>.
       </p>

@@ -4,6 +4,7 @@ import { AlertTriangle, ClipboardCheck, Download, RefreshCw, ShieldCheck } from 
 import { useEffect, useMemo, useState } from "react";
 import type { AuditEvent, AuditSeverity } from "@/lib/audit-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const auditExportHeaders = ["Created", "Actor Role", "Actor ID", "Action", "Entity Type", "Entity ID", "Severity"];
 
@@ -136,7 +137,7 @@ export function AdminAuditLog() {
       </div>
 
       <div className="grid max-h-[560px] gap-3 overflow-auto p-4">
-        {loading ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">Loading audit events...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {!loading && events.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No audit events yet.</p> : null}
         {events.map((event) => (
           <article key={event.id} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4 shadow-sm">

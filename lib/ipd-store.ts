@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import { recordAuditEvent } from "@/lib/audit-store";
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
@@ -12,12 +11,6 @@ type IpdStore = {
   transfers: BedTransfer[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmIpdStore?: IpdStore;
-};
-
-const storeFile = join(process.cwd(), ".data", "ipd-beds.json");
-
 const starterBeds: HospitalBed[] = [
   { id: "BED-HDU-01", ward: "HDU", label: "HDU 01", status: "Vacant", dailyRate: 4500 },
   { id: "BED-HDU-02", ward: "HDU", label: "HDU 02", status: "Vacant", dailyRate: 4500 },
@@ -27,30 +20,15 @@ const starterBeds: HospitalBed[] = [
   { id: "BED-GEN-01", ward: "General", label: "General 1", status: "Vacant", dailyRate: 1500 }
 ];
 
-function readStoreFromDisk(): IpdStore {
-  try {
-    if (!existsSync(storeFile)) return { beds: starterBeds, admissions: [], vitals: [], transfers: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<IpdStore>;
-    return {
-      beds: Array.isArray(parsed.beds) ? parsed.beds : starterBeds,
-      admissions: Array.isArray(parsed.admissions) ? parsed.admissions : [],
-      vitals: Array.isArray(parsed.vitals) ? parsed.vitals : [],
-      transfers: Array.isArray(parsed.transfers) ? parsed.transfers : []
-    };
-  } catch {
-    return { beds: starterBeds, admissions: [], vitals: [], transfers: [] };
-  }
-}
-
-function writeStoreToDisk(store: IpdStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
-
-function getStore() {
-  globalStore.__mgmIpdStore ??= readStoreFromDisk();
-  return globalStore.__mgmIpdStore;
-}
+const store = createDocumentStore<IpdStore>("ipd-beds", (parsed) => {
+  const doc = parsed as Partial<IpdStore> | undefined;
+  return {
+    beds: Array.isArray(doc?.beds) ? (doc.beds as HospitalBed[]) : starterBeds,
+    admissions: Array.isArray(doc?.admissions) ? (doc.admissions as IpdAdmission[]) : [],
+    vitals: Array.isArray(doc?.vitals) ? (doc.vitals as VitalsReading[]) : [],
+    transfers: Array.isArray(doc?.transfers) ? (doc.transfers as BedTransfer[]) : []
+  };
+});
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -69,38 +47,38 @@ function setBedStatus(bed: HospitalBed, status: BedStatus) {
 /** Beds sitting in Cleaning status longer than this are flagged as overdue turnover. */
 const turnoverOverdueMinutes = 120;
 
-export function listBeds() {
-  return getStore().beds;
+export async function listBeds() {
+  return (await store.load()).beds;
 }
 
-export function listIpdAdmissions() {
-  return getStore().admissions;
+export async function listIpdAdmissions() {
+  return (await store.load()).admissions;
 }
 
-export function listPatientIpdAdmissions(phone: string) {
+export async function listPatientIpdAdmissions(phone: string) {
   const normalizedPhone = phone.replace(/\D/g, "");
   if (normalizedPhone.length < 6) return [];
 
-  return getStore().admissions.filter((admission) => {
+  return (await store.load()).admissions.filter((admission) => {
     const admissionPhone = admission.phone.replace(/\D/g, "");
     return admissionPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(admissionPhone);
   });
 }
 
-export function listVitals(admissionId?: string) {
-  const vitals = getStore().vitals;
+export async function listVitals(admissionId?: string) {
+  const vitals = (await store.load()).vitals;
   return admissionId ? vitals.filter((item) => item.admissionId === admissionId) : vitals;
 }
 
-export function listTransfers(admissionId?: string) {
-  const transfers = getStore().transfers;
+export async function listTransfers(admissionId?: string) {
+  const transfers = (await store.load()).transfers;
   return admissionId ? transfers.filter((item) => item.admissionId === admissionId) : transfers;
 }
 
-export function recordVitals(input: Record<string, unknown>) {
-  const store = getStore();
+export async function recordVitals(input: Record<string, unknown>) {
+  const doc = await store.load();
   const admissionId = normalizeText(input.admissionId);
-  const admission = store.admissions.find((item) => item.id === admissionId && item.status === "Admitted");
+  const admission = doc.admissions.find((item) => item.id === admissionId && item.status === "Admitted");
   if (!admission) return { error: "Active admission not found." };
 
   const reading: VitalsReading = {
@@ -115,29 +93,29 @@ export function recordVitals(input: Record<string, unknown>) {
     notes: normalizeText(input.notes) || undefined
   };
 
-  store.vitals.unshift(reading);
-  writeStoreToDisk(store);
+  doc.vitals.unshift(reading);
+  await store.save(doc);
   return { reading };
 }
 
-export function setEscalation(input: { id: string; escalated: boolean; reason?: string }) {
-  const store = getStore();
-  const admission = store.admissions.find((item) => item.id === input.id);
+export async function setEscalation(input: { id: string; escalated: boolean; reason?: string }) {
+  const doc = await store.load();
+  const admission = doc.admissions.find((item) => item.id === input.id);
   if (!admission) return null;
   admission.escalated = input.escalated;
   admission.escalationReason = input.escalated ? normalizeText(input.reason) : undefined;
   admission.updatedAt = new Date().toISOString();
-  writeStoreToDisk(store);
+  await store.save(doc);
   return admission;
 }
 
 export async function transferBed(input: { admissionId: string; toBedId: string; reason: string; movedBy: string }) {
-  const store = getStore();
-  const admission = store.admissions.find((item) => item.id === input.admissionId && item.status === "Admitted");
+  const doc = await store.load();
+  const admission = doc.admissions.find((item) => item.id === input.admissionId && item.status === "Admitted");
   if (!admission) return { error: "Active admission not found." };
 
-  const fromBed = store.beds.find((bed) => bed.id === admission.bedId);
-  const toBed = store.beds.find((bed) => bed.id === input.toBedId);
+  const fromBed = doc.beds.find((bed) => bed.id === admission.bedId);
+  const toBed = doc.beds.find((bed) => bed.id === input.toBedId);
   if (!toBed) return { error: "Target bed not found." };
   if (toBed.status !== "Vacant") return { error: `${toBed.label} is not vacant.` };
   if (!input.reason.trim()) return { error: "Transfer reason is required." };
@@ -160,8 +138,8 @@ export async function transferBed(input: { admissionId: string; toBedId: string;
     movedBy: input.movedBy || "Front desk",
     movedAt: admission.updatedAt
   };
-  store.transfers.unshift(transfer);
-  writeStoreToDisk(store);
+  doc.transfers.unshift(transfer);
+  await store.save(doc);
 
   await recordAuditEvent({
     actorRole: "admin",
@@ -181,8 +159,8 @@ export async function transferBed(input: { admissionId: string; toBedId: string;
   return { admission, transfer };
 }
 
-export function getOccupancyStats() {
-  const { beds, admissions } = getStore();
+export async function getOccupancyStats() {
+  const { beds, admissions } = await store.load();
   const wardGroups = new Map<string, HospitalBed[]>();
   for (const bed of beds) {
     wardGroups.set(bed.ward, [...(wardGroups.get(bed.ward) ?? []), bed]);
@@ -230,16 +208,16 @@ export function getOccupancyStats() {
   };
 }
 
-export function createIpdAdmission(input: Record<string, unknown>) {
-  const visit = getOpdVisitById(normalizeText(input.visitId));
+export async function createIpdAdmission(input: Record<string, unknown>) {
+  const visit = await getOpdVisitById(normalizeText(input.visitId));
   if (!visit) return { error: "OPD visit not found." };
 
-  const store = getStore();
-  const bed = store.beds.find((item) => item.id === normalizeText(input.bedId));
+  const doc = await store.load();
+  const bed = doc.beds.find((item) => item.id === normalizeText(input.bedId));
   if (!bed) return { error: "Bed not found." };
   if (bed.status !== "Vacant") return { error: `${bed.label} is not vacant.` };
 
-  const existing = store.admissions.find((item) => item.visitId === visit.id && item.status === "Admitted");
+  const existing = doc.admissions.find((item) => item.visitId === visit.id && item.status === "Admitted");
   if (existing) return { admission: existing };
 
   const now = new Date().toISOString();
@@ -270,21 +248,22 @@ export function createIpdAdmission(input: Record<string, unknown>) {
   };
 
   setBedStatus(bed, "Occupied");
-  store.admissions.unshift(admission);
-  writeStoreToDisk(store);
+  doc.admissions.unshift(admission);
+  await store.save(doc);
   return { admission };
 }
 
-export function updateBed(input: { id: string; status?: BedStatus; notes?: string }) {
-  const bed = getStore().beds.find((item) => item.id === input.id);
+export async function updateBed(input: { id: string; status?: BedStatus; notes?: string }) {
+  const doc = await store.load();
+  const bed = doc.beds.find((item) => item.id === input.id);
   if (!bed) return null;
   if (input.status) setBedStatus(bed, input.status);
   if (typeof input.notes === "string") bed.notes = input.notes.trim();
-  writeStoreToDisk(getStore());
+  await store.save(doc);
   return bed;
 }
 
-export function updateIpdAdmission(input: {
+export async function updateIpdAdmission(input: {
   id: string;
   status?: IpdAdmissionStatus;
   bedId?: string;
@@ -298,14 +277,14 @@ export function updateIpdAdmission(input: {
   expectedDischargeDate?: string;
   markedForDischarge?: boolean;
 }) {
-  const store = getStore();
-  const admission = store.admissions.find((item) => item.id === input.id);
+  const doc = await store.load();
+  const admission = doc.admissions.find((item) => item.id === input.id);
   if (!admission) return null;
 
   if (input.bedId && input.bedId !== admission.bedId && admission.status === "Admitted") {
-    const nextBed = store.beds.find((bed) => bed.id === input.bedId);
+    const nextBed = doc.beds.find((bed) => bed.id === input.bedId);
     if (!nextBed || nextBed.status !== "Vacant") return null;
-    const oldBed = store.beds.find((bed) => bed.id === admission.bedId);
+    const oldBed = doc.beds.find((bed) => bed.id === admission.bedId);
     if (oldBed) setBedStatus(oldBed, "Cleaning");
     setBedStatus(nextBed, "Occupied");
     admission.bedId = nextBed.id;
@@ -317,7 +296,7 @@ export function updateIpdAdmission(input: {
     admission.status = input.status;
     if (input.status === "Discharged" || input.status === "Cancelled") {
       admission.dischargedAt ||= new Date().toISOString();
-      const bed = store.beds.find((item) => item.id === admission.bedId);
+      const bed = doc.beds.find((item) => item.id === admission.bedId);
       if (bed) setBedStatus(bed, input.status === "Discharged" ? "Cleaning" : "Vacant");
     }
   }
@@ -332,6 +311,6 @@ export function updateIpdAdmission(input: {
   if (typeof input.markedForDischarge === "boolean") admission.markedForDischarge = input.markedForDischarge;
   admission.updatedAt = new Date().toISOString();
 
-  writeStoreToDisk(store);
+  await store.save(doc);
   return admission;
 }

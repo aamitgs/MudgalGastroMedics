@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 
 export default async function DoctorPortalPage() {
   const cookieStore = await cookies();
-  const isAuthenticated = canOpenDoctorWorkspace(accessContextFromCookieStore(cookieStore));
+  const isAuthenticated = canOpenDoctorWorkspace(await accessContextFromCookieStore(cookieStore));
 
   return (
     <main>
-      <section className="border-b border-line bg-white">
+      <section className="border-b border-line bg-surface">
         <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 py-5">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Doctor Workspace</p>

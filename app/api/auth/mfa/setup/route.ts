@@ -12,7 +12,7 @@ function canSetUp(status: string, totpEnabled: boolean) {
 
 /** Issues a fresh TOTP secret and provisioning URI for the authenticator app. */
 export async function GET(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   const { session, user } = resolved;
 
@@ -21,13 +21,13 @@ export async function GET(request: Request) {
   }
 
   const secret = await createTotpSecret();
-  updateAccessUser(user.id, { totpSecret: secret, totpEnabled: false });
+  await updateAccessUser(user.id, { totpSecret: secret, totpEnabled: false });
   return NextResponse.json({ ok: true, secret, uri: buildTotpUri(secret, user.username) });
 }
 
 /** Confirms the first code from the authenticator app and enables MFA. */
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   const { session, user } = resolved;
 
@@ -46,9 +46,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "That code did not match. Check the app and try again." }, { status: 401 });
   }
 
-  updateAccessUser(user.id, { totpEnabled: true });
+  await updateAccessUser(user.id, { totpEnabled: true });
   if (session.status === "mfa-setup-required") {
-    updateAccessSession(session.id, { status: "active" });
+    await updateAccessSession(session.id, { status: "active" });
   }
 
   await recordAuditEvent({

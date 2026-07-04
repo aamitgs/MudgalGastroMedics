@@ -32,6 +32,8 @@ export type NavItem = {
   label: string;
   icon: LucideIcon;
   roles: HospitalRole[];
+  /** In-page section anchor or cross-surface route this item opens. */
+  href: string;
   badge?: string;
 };
 
@@ -129,26 +131,26 @@ function rolesWithPermission(resource: AccessResource | null, action: AccessActi
 }
 
 export const navItems: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, roles: rolesWithPermission(null) },
-  { label: "Patients", icon: UsersRound, roles: rolesWithPermission("patients") },
-  { label: "Doctors", icon: Stethoscope, roles: rolesWithPermission("appointments") },
-  { label: "Departments", icon: Building2, roles: rolesWithPermission("hr-records") },
-  { label: "Appointments", icon: CalendarClock, roles: rolesWithPermission("appointments") },
-  { label: "OPD", icon: ClipboardList, roles: rolesWithPermission("appointments"), badge: "Live" },
-  { label: "IPD", icon: Bed, roles: rolesWithPermission("beds") },
-  { label: "Prescriptions", icon: FileText, roles: rolesWithPermission("prescriptions") },
-  { label: "Pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory"), badge: "4" },
-  { label: "Laboratory", icon: FlaskConical, roles: rolesWithPermission("lab-orders"), badge: "9" },
-  { label: "Billing", icon: CreditCard, roles: rolesWithPermission("billing") },
-  { label: "Insurance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
-  { label: "Accounts", icon: WalletCards, roles: rolesWithPermission("billing") },
-  { label: "HR", icon: UserRound, roles: rolesWithPermission("hr-records") },
-  { label: "Inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
-  { label: "Reports", icon: BarChart3, roles: rolesWithPermission("reports") },
-  { label: "CMS", icon: Activity, roles: rolesWithPermission("cms") },
-  { label: "Settings", icon: Settings, roles: rolesWithPermission("system-settings") },
-  { label: "Notifications", icon: Bell, roles: rolesWithPermission(null) },
-  { label: "AI Assistant", icon: Sparkles, roles: rolesWithPermission("patients") }
+  { label: "Dashboard", href: "#analytics", icon: LayoutDashboard, roles: rolesWithPermission(null) },
+  { label: "Patients", href: "#operations-table", icon: UsersRound, roles: rolesWithPermission("patients") },
+  { label: "Doctors", href: "#doctor-workspace", icon: Stethoscope, roles: rolesWithPermission("appointments") },
+  { label: "Departments", href: "/admin#module-hr", icon: Building2, roles: rolesWithPermission("hr-records") },
+  { label: "Appointments", href: "#appointment-flow", icon: CalendarClock, roles: rolesWithPermission("appointments") },
+  { label: "OPD", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments"), badge: "Live" },
+  { label: "IPD", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
+  { label: "Prescriptions", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
+  { label: "Pharmacy", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory"), badge: "4" },
+  { label: "Laboratory", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders"), badge: "9" },
+  { label: "Billing", href: "#billing", icon: CreditCard, roles: rolesWithPermission("billing") },
+  { label: "Insurance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
+  { label: "Accounts", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
+  { label: "HR", href: "/admin#module-hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
+  { label: "Inventory", href: "/admin#module-inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
+  { label: "Reports", href: "/admin#module-reports", icon: BarChart3, roles: rolesWithPermission("reports") },
+  { label: "CMS", href: "/admin#module-cms", icon: Activity, roles: rolesWithPermission("cms") },
+  { label: "Settings", href: "/admin#module-settings", icon: Settings, roles: rolesWithPermission("system-settings") },
+  { label: "Notifications", href: "#realtime-feed", icon: Bell, roles: rolesWithPermission(null) },
+  { label: "AI Assistant", href: "#patient-portal-preview", icon: Sparkles, roles: rolesWithPermission("patients") }
 ];
 
 export type HospitalOsSection =

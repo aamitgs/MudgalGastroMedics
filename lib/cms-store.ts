@@ -1,7 +1,6 @@
 import "server-only";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { galleryItems, procedures } from "@/lib/site-data";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 
@@ -24,11 +23,7 @@ type CmsInput = {
   notes?: string;
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmCmsStore?: CmsStore;
-};
 
-const storeFile = join(process.cwd(), ".data", "cms-content.json");
 
 function now() {
   return new Date().toISOString();
@@ -98,37 +93,24 @@ function createSeedItems(): CmsContentItem[] {
   ];
 }
 
-function readStoreFromDisk(): CmsStore {
-  if (!existsSync(storeFile)) return { items: createSeedItems(), revisions: [] };
 
-  try {
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<CmsStore>;
-    return {
-      items: Array.isArray(parsed.items) ? parsed.items : createSeedItems(),
-      revisions: Array.isArray(parsed.revisions) ? parsed.revisions : []
-    };
-  } catch {
-    return { items: createSeedItems(), revisions: [] };
-  }
-}
 
-function writeStoreToDisk(store: CmsStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, `${JSON.stringify(store, null, 2)}\n`);
-}
 
-function getStore() {
-  globalStore.__mgmCmsStore ??= readStoreFromDisk();
-  return globalStore.__mgmCmsStore;
-}
+const docStore = createDocumentStore<CmsStore>("cms-content", (parsed) => {
+  const doc = parsed as Partial<CmsStore> | undefined;
+  return {
+    items: Array.isArray(doc?.items) ? (doc.items as CmsStore["items"]) : createSeedItems(),
+    revisions: Array.isArray(doc?.revisions) ? (doc.revisions as CmsStore["revisions"]) : []
+  };
+});
 
-export function listCmsContent(type?: string) {
-  const items = getStore().items;
+export async function listCmsContent(type?: string) {
+  const items = (await docStore.load()).items;
   return type ? items.filter((item) => item.type === type) : items;
 }
 
-export function listCmsRevisions(itemId?: string, limit = 80) {
-  const revisions = getStore().revisions;
+export async function listCmsRevisions(itemId?: string, limit = 80) {
+  const revisions = (await docStore.load()).revisions;
   return (itemId ? revisions.filter((revision) => revision.itemId === itemId) : revisions).slice(0, limit);
 }
 
@@ -155,8 +137,8 @@ function recordRevision(store: CmsStore, item: CmsContentItem, action: CmsConten
   return revision;
 }
 
-export function upsertCmsContent(input: CmsInput) {
-  const store = getStore();
+export async function upsertCmsContent(input: CmsInput) {
+  const store = await docStore.load();
   const existing = input.id ? store.items.find((item) => item.id === input.id) : undefined;
   const updatedAt = now();
   const status = input.status ?? existing?.status ?? "Draft";
@@ -184,18 +166,19 @@ export function upsertCmsContent(input: CmsInput) {
 
   store.items = [item, ...store.items.filter((entry) => entry.id !== item.id)];
   recordRevision(store, item, existing ? "Updated" : "Created");
-  writeStoreToDisk(store);
+  await docStore.save(store);
   return item;
 }
 
-export function updateCmsStatus(id: string, status: CmsContentStatus) {
-  const item = getStore().items.find((entry) => entry.id === id);
+export async function updateCmsStatus(id: string, status: CmsContentStatus) {
+  const store = await docStore.load();
+  const item = store.items.find((entry) => entry.id === id);
   if (!item) return null;
 
   item.status = status;
   item.updatedAt = now();
   if (status === "Published") item.publishedAt = item.publishedAt ?? item.updatedAt;
-  recordRevision(getStore(), item, "Status Changed");
-  writeStoreToDisk(getStore());
+  recordRevision(store, item, "Status Changed");
+  await docStore.save(store);
   return item;
 }

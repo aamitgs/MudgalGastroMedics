@@ -60,12 +60,12 @@ export async function POST(request: Request) {
   const skipped: string[] = [];
 
   for (const member of launchTeam) {
-    if (getAccessUserByUsername(member.username)) {
+    if (await getAccessUserByUsername(member.username)) {
       skipped.push(member.username);
       continue;
     }
     const temporaryPassword = generateTempPassword();
-    const result = createAccessUser({
+    const result = await createAccessUser({
       name: member.name,
       username: member.username,
       roles: member.roles,

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    appointments: listAppointments()
+    appointments: (await listAppointments())
   });
 }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: `Missing: ${missing.join(", ")}` }, { status: 400 });
   }
 
-  const appointment = createAppointment(body);
+  const appointment = (await createAppointment(body));
 
   await recordAuditEvent({
     actorRole: "patient",
@@ -57,7 +57,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Valid id and status are required." }, { status: 400 });
   }
 
-  const appointment = updateAppointmentStatus(id, status as AppointmentStatus);
+  const appointment = (await updateAppointmentStatus(id, status as AppointmentStatus));
   if (!appointment) {
     return NextResponse.json({ ok: false, error: "Appointment not found." }, { status: 404 });
   }

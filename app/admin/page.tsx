@@ -25,7 +25,6 @@ import { AdminProcedures } from "@/components/AdminProcedures";
 import { AdminReports } from "@/components/AdminReports";
 import { AdminSettings } from "@/components/AdminSettings";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
-import { AdminThemeShell } from "@/components/AdminThemeShell";
 import { Section } from "@/components/Section";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
@@ -38,12 +37,11 @@ export const metadata: Metadata = {
 
 export default async function AdminPage() {
   const cookieStore = await cookies();
-  const isAuthenticated = canOpenAdminShell(accessContextFromCookieStore(cookieStore));
+  const isAuthenticated = canOpenAdminShell(await accessContextFromCookieStore(cookieStore));
 
   return (
-    <AdminThemeShell>
-      <main>
-        <section className="border-b border-line bg-white">
+    <main>
+        <section className="border-b border-line bg-surface">
           <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 py-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Operations</p>
@@ -88,7 +86,6 @@ export default async function AdminPage() {
             <AdminLogin />
           )}
         </Section>
-      </main>
-    </AdminThemeShell>
+    </main>
   );
 }

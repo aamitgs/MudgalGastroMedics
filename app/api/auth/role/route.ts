@@ -13,7 +13,7 @@ import { dropElevation, grantElevation, updateAccessSession } from "@/lib/access
  * clinical and system-level actions stay separable.
  */
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   const { session, user } = resolved;
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Password confirmation failed." }, { status: 401 });
     }
     const fromRole = session.activeRole;
-    grantElevation(session.id, fromRole);
+    await grantElevation(session.id, fromRole);
     await recordAuditEvent({
       actorRole: "super-admin",
       actorId: user.id,
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   }
 
   const previousRole = session.activeRole;
-  updateAccessSession(session.id, { activeRole: role, elevatedUntil: undefined, preElevationRole: undefined });
+  await updateAccessSession(session.id, { activeRole: role, elevatedUntil: undefined, preElevationRole: undefined });
   await recordAuditEvent({
     actorRole: role,
     actorId: user.id,
@@ -79,10 +79,10 @@ export async function POST(request: Request) {
 
 /** Drops elevation back to the pre-elevation role. */
 export async function DELETE(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
 
-  const session = dropElevation(resolved.session.id);
+  const session = await dropElevation(resolved.session.id);
   await recordAuditEvent({
     actorRole: session?.activeRole ?? resolved.session.activeRole,
     actorId: resolved.user.id,

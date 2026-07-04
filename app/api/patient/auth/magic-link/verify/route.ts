@@ -17,15 +17,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Sign-in token is required." }, { status: 400 });
   }
 
-  const result = verifyMagicLinkChallenge(token);
+  const result = await verifyMagicLinkChallenge(token);
   if (!result.ok) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 401 });
   }
 
-  const identity = ensurePatientIdentity(result.phone);
-  recordPatientLoginSuccess(identity.id);
+  const identity = await ensurePatientIdentity(result.phone);
+  await recordPatientLoginSuccess(identity.id);
   const meta = auditRequestMetadata(request);
-  const { token: sessionToken } = createPatientSession({
+  const { token: sessionToken } = await createPatientSession({
     identityId: identity.id,
     phone: identity.phone,
     ip: meta.ip,

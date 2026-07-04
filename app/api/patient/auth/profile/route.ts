@@ -6,11 +6,11 @@ import { getPatientSessionFromRequest } from "@/lib/patient-access/session-store
 
 /** Lets a signed-in patient attach an email + password, enabling email login and magic links. */
 export async function POST(request: Request) {
-  const session = getPatientSessionFromRequest(request);
+  const session = await getPatientSessionFromRequest(request);
   if (!session) {
     return NextResponse.json({ ok: false, error: "Sign in first." }, { status: 401 });
   }
-  const identity = getPatientIdentityById(session.identityId);
+  const identity = await getPatientIdentityById(session.identityId);
   if (!identity) {
     return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
   }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (!email.includes("@")) {
     return NextResponse.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });
   }
-  const existing = getPatientIdentityByEmail(email);
+  const existing = await getPatientIdentityByEmail(email);
   if (existing && existing.id !== identity.id) {
     return NextResponse.json({ ok: false, error: "That email is already linked to another account." }, { status: 409 });
   }
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
   }
 
-  updatePatientIdentity(identity.id, { email, passwordHash: hashPassword(password) });
+  await updatePatientIdentity(identity.id, { email, passwordHash: hashPassword(password) });
 
   await recordAuditEvent({
     actorRole: "patient",

@@ -23,12 +23,12 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    beds: listBeds(),
-    admissions: listIpdAdmissions(),
-    visits: listOpdVisits(),
-    vitals: listVitals(),
-    transfers: listTransfers(),
-    occupancy: getOccupancyStats()
+    beds: (await listBeds()),
+    admissions: (await listIpdAdmissions()),
+    visits: (await listOpdVisits()),
+    vitals: (await listVitals()),
+    transfers: (await listTransfers()),
+    occupancy: (await getOccupancyStats())
   });
 }
 
@@ -37,12 +37,12 @@ export async function POST(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));
-  const result = createIpdAdmission(body);
+  const result = (await createIpdAdmission(body));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true, admission: result.admission, beds: listBeds() });
+  return NextResponse.json({ ok: true, admission: result.admission, beds: (await listBeds()) });
 }
 
 export async function PATCH(request: Request) {
@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
 
   if (type === "bed") {
     const status = typeof body.status === "string" && bedStatuses.includes(body.status as BedStatus) ? body.status as BedStatus : undefined;
-    const bed = updateBed({ id: typeof body.id === "string" ? body.id : "", status, notes: typeof body.notes === "string" ? body.notes : undefined });
+    const bed = (await updateBed({ id: typeof body.id === "string" ? body.id : "", status, notes: typeof body.notes === "string" ? body.notes : undefined }));
     if (!bed) return NextResponse.json({ ok: false, error: "Bed not found." }, { status: 404 });
     return NextResponse.json({ ok: true, bed });
   }
@@ -74,28 +74,28 @@ export async function PATCH(request: Request) {
       movedBy: staffId
     });
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
-    return NextResponse.json({ ok: true, admission: result.admission, transfer: result.transfer, beds: listBeds() });
+    return NextResponse.json({ ok: true, admission: result.admission, transfer: result.transfer, beds: (await listBeds()) });
   }
 
   if (type === "vitals") {
-    const result = recordVitals({ ...body, recordedBy: staffId });
+    const result = (await recordVitals({ ...body, recordedBy: staffId }));
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true, reading: result.reading });
   }
 
   if (type === "escalate") {
-    const admission = setEscalation({
+    const admission = (await setEscalation({
       id: typeof body.id === "string" ? body.id : "",
       escalated: Boolean(body.escalated),
       reason: typeof body.reason === "string" ? body.reason : undefined
-    });
+    }));
     if (!admission) return NextResponse.json({ ok: false, error: "Admission not found." }, { status: 404 });
     return NextResponse.json({ ok: true, admission });
   }
 
   const status = typeof body.status === "string" && ipdAdmissionStatuses.includes(body.status as IpdAdmissionStatus) ? body.status as IpdAdmissionStatus : undefined;
   const depositAmount = body.depositAmount === undefined ? undefined : Number(body.depositAmount);
-  const admission = updateIpdAdmission({
+  const admission = (await updateIpdAdmission({
     id: typeof body.id === "string" ? body.id : "",
     status,
     bedId: typeof body.bedId === "string" ? body.bedId : undefined,
@@ -108,8 +108,8 @@ export async function PATCH(request: Request) {
     markedForDischarge: typeof body.markedForDischarge === "boolean" ? body.markedForDischarge : undefined,
     depositAmount,
     dischargeSummary: typeof body.dischargeSummary === "string" ? body.dischargeSummary : undefined
-  });
+  }));
 
   if (!admission) return NextResponse.json({ ok: false, error: "Admission not found or bed unavailable." }, { status: 404 });
-  return NextResponse.json({ ok: true, admission, beds: listBeds() });
+  return NextResponse.json({ ok: true, admission, beds: (await listBeds()) });
 }

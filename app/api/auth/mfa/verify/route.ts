@@ -6,7 +6,7 @@ import { updateAccessSession } from "@/lib/access/session-store";
 import { verifyTotpCode } from "@/lib/access/totp";
 
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   const { session, user } = resolved;
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "That code did not match. Check the app and try again." }, { status: 401 });
   }
 
-  updateAccessSession(session.id, { status: "active" });
+  await updateAccessSession(session.id, { status: "active" });
 
   await recordAuditEvent({
     actorRole: session.activeRole,

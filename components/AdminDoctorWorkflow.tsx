@@ -4,6 +4,7 @@ import { Copy, Download, FileText, RefreshCw, Stethoscope } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const doctorWorkflowExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Clinical Note", "Prescription", "Follow-up Date"];
 
@@ -110,7 +111,7 @@ export function AdminDoctorWorkflow() {
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 p-4">
-        {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading doctor workflow...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {!loading && activeVisits.length === 0 ? (
           <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
             <Stethoscope className="mx-auto text-brand" size={34} />

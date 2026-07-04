@@ -1,7 +1,6 @@
 import "server-only";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { AccessRole } from "@/lib/access/matrix";
 import { isAccessRole } from "@/lib/access/matrix";
 
@@ -30,31 +29,10 @@ type AccessUserStore = {
   users: AccessUser[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmAccessUserStore?: AccessUserStore;
-};
-
-const storeFile = join(process.cwd(), ".data", "access-users.json");
-
-function readStoreFromDisk(): AccessUserStore {
-  if (!existsSync(storeFile)) return { users: [] };
-  try {
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<AccessUserStore>;
-    return { users: Array.isArray(parsed.users) ? parsed.users : [] };
-  } catch {
-    return { users: [] };
-  }
-}
-
-function writeStoreToDisk(store: AccessUserStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, `${JSON.stringify(store, null, 2)}\n`);
-}
-
-function getStore() {
-  globalStore.__mgmAccessUserStore ??= readStoreFromDisk();
-  return globalStore.__mgmAccessUserStore;
-}
+const store = createDocumentStore<AccessUserStore>("access-users", (parsed) => {
+  const doc = parsed as Partial<AccessUserStore> | undefined;
+  return { users: Array.isArray(doc?.users) ? (doc.users as AccessUser[]) : [] };
+});
 
 function makeUserId() {
   return `USR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -64,20 +42,20 @@ export function normalizeUsername(value: string) {
   return value.trim().toLowerCase();
 }
 
-export function listAccessUsers(): AccessUser[] {
-  return getStore().users;
+export async function listAccessUsers(): Promise<AccessUser[]> {
+  return (await store.load()).users;
 }
 
-export function getAccessUserById(id: string) {
-  return getStore().users.find((user) => user.id === id) ?? null;
+export async function getAccessUserById(id: string) {
+  return (await store.load()).users.find((user) => user.id === id) ?? null;
 }
 
-export function getAccessUserByUsername(username: string) {
+export async function getAccessUserByUsername(username: string) {
   const normalized = normalizeUsername(username);
-  return getStore().users.find((user) => user.username === normalized) ?? null;
+  return (await store.load()).users.find((user) => user.username === normalized) ?? null;
 }
 
-export function createAccessUser(input: {
+export async function createAccessUser(input: {
   name: string;
   username: string;
   email?: string;
@@ -85,12 +63,12 @@ export function createAccessUser(input: {
   defaultRole: AccessRole;
   passwordHash: string;
   mustChangePassword?: boolean;
-}): AccessUser | { error: string } {
+}): Promise<AccessUser | { error: string }> {
   const username = normalizeUsername(input.username);
   if (!username || !/^[a-z0-9][a-z0-9._-]{1,40}$/.test(username)) {
     return { error: "Username must be 2-41 characters of letters, numbers, dots, hyphens or underscores." };
   }
-  if (getAccessUserByUsername(username)) {
+  if (await getAccessUserByUsername(username)) {
     return { error: `Username "${username}" is already taken.` };
   }
   const roles = input.roles.filter((role) => isAccessRole(role));
@@ -114,18 +92,18 @@ export function createAccessUser(input: {
     failedLoginCount: 0
   };
 
-  const store = getStore();
-  store.users = [user, ...store.users];
-  writeStoreToDisk(store);
+  const doc = await store.load();
+  doc.users = [user, ...doc.users];
+  await store.save(doc);
   return user;
 }
 
-export function updateAccessUser(id: string, updates: Partial<Omit<AccessUser, "id" | "createdAt" | "username">>) {
-  const store = getStore();
-  const user = store.users.find((item) => item.id === id);
+export async function updateAccessUser(id: string, updates: Partial<Omit<AccessUser, "id" | "createdAt" | "username">>) {
+  const doc = await store.load();
+  const user = doc.users.find((item) => item.id === id);
   if (!user) return null;
   Object.assign(user, updates, { updatedAt: new Date().toISOString() });
-  writeStoreToDisk(store);
+  await store.save(doc);
   return user;
 }
 
@@ -142,8 +120,8 @@ export function isUserLockedOut(user: AccessUser, now = Date.now()) {
   return Boolean(user.lockedUntil && new Date(user.lockedUntil).getTime() > now);
 }
 
-export function recordLoginFailure(id: string) {
-  const user = getAccessUserById(id);
+export async function recordLoginFailure(id: string) {
+  const user = await getAccessUserById(id);
   if (!user) return null;
   const failedLoginCount = user.failedLoginCount + 1;
   const minutes = lockoutMinutesForFailures(failedLoginCount);
@@ -153,7 +131,7 @@ export function recordLoginFailure(id: string) {
   });
 }
 
-export function recordLoginSuccess(id: string) {
+export async function recordLoginSuccess(id: string) {
   return updateAccessUser(id, {
     failedLoginCount: 0,
     lockedUntil: undefined,

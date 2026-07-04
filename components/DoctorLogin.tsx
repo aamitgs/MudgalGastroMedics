@@ -61,7 +61,7 @@ export function DoctorLogin() {
       </form>
       {status ? <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{status}</p> : null}
       <p className="mt-4 text-xs leading-relaxed text-muted">
-        Local default passcode is <span className="font-semibold text-ink">mgm-doctor</span>. Set <span className="font-semibold text-ink">DOCTOR_PASSCODE</span> before production use.
+        Ask the administrator if you need the doctor passcode.
       </p>
     </div>
   );

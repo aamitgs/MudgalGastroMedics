@@ -3,11 +3,11 @@ import { getPatientIdentityById } from "@/lib/patient-access/identity-store";
 import { getPatientSessionFromRequest } from "@/lib/patient-access/session-store";
 
 export async function GET(request: Request) {
-  const session = getPatientSessionFromRequest(request);
+  const session = await getPatientSessionFromRequest(request);
   if (!session) {
     return NextResponse.json({ ok: false, authenticated: false }, { status: 401 });
   }
-  const identity = getPatientIdentityById(session.identityId);
+  const identity = await getPatientIdentityById(session.identityId);
   return NextResponse.json({
     ok: true,
     authenticated: true,

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
 import { communicationChannels, communicationStatuses } from "@/lib/communication-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const communicationExportHeaders = ["Patient", "Phone", "Channel", "Subject", "Status", "Scheduled For", "Sent At", "Owner"];
 
@@ -180,7 +181,7 @@ export function AdminCommunication() {
         <form onSubmit={createLog} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Send size={19} /> Prepare patient message</p>
           <div className="grid gap-3">
-            <select name="patientId" value={selectedPatientId} onChange={(event) => setSelectedPatientId(event.target.value)} className={fieldClass}>
+            <select aria-label="Patient" name="patientId" value={selectedPatientId} onChange={(event) => setSelectedPatientId(event.target.value)} className={fieldClass}>
               <option value="">Select patient from UHID list</option>
               {recipients.map((recipient) => <option key={recipient.id} value={recipient.id}>{recipient.uhid} | {recipient.name} | {recipient.phone}</option>)}
             </select>
@@ -189,14 +190,14 @@ export function AdminCommunication() {
               <input name="phone" className={fieldClass} placeholder="Phone" defaultValue={selectedRecipient?.phone ?? ""} key={`${selectedRecipient?.id ?? "phone"}-phone`} required={!selectedRecipient} />
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <select name="channel" className={fieldClass} defaultValue="WhatsApp">{communicationChannels.map((channel) => <option key={channel}>{channel}</option>)}</select>
-              <select name="template" value={selectedTemplateKey} onChange={(event) => setSelectedTemplateKey(event.target.value as CommunicationTemplateKey)} className={fieldClass}>
+              <select aria-label="Channel" name="channel" className={fieldClass} defaultValue="WhatsApp">{communicationChannels.map((channel) => <option key={channel}>{channel}</option>)}</select>
+              <select aria-label="Template" name="template" value={selectedTemplateKey} onChange={(event) => setSelectedTemplateKey(event.target.value as CommunicationTemplateKey)} className={fieldClass}>
                 {templates.map((template) => <option key={template.key}>{template.key}</option>)}
               </select>
-              <select name="status" className={fieldClass} defaultValue="Draft">{communicationStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+              <select aria-label="Status" name="status" className={fieldClass} defaultValue="Draft">{communicationStatuses.map((status) => <option key={status}>{status}</option>)}</select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="scheduledFor" className={fieldClass} type="datetime-local" />
+              <input aria-label="Scheduled for" name="scheduledFor" className={fieldClass} type="datetime-local" />
               <input name="owner" className={fieldClass} placeholder="Owner / staff" />
             </div>
             <input name="subject" className={fieldClass} placeholder="Subject" defaultValue={selectedTemplate?.subject ?? ""} key={`${selectedTemplate?.key ?? "subject"}-subject`} />
@@ -228,7 +229,7 @@ export function AdminCommunication() {
 
       <div className="grid gap-3 border-t border-line p-4">
         <p className="text-sm font-bold text-ink">Recent communication logs</p>
-        {loading ? <p className="text-sm font-semibold text-muted">Loading communication...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {logs.length === 0 ? <p className="rounded border border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No communication logs yet.</p> : null}
         {logs.slice(0, 14).map((log) => (
           <article key={log.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -238,7 +239,7 @@ export function AdminCommunication() {
                 <h3 className="mt-1 text-lg font-bold text-ink">{log.patientName}</h3>
                 <p className="mt-1 text-sm text-muted">{log.subject}</p>
               </div>
-              <select value={log.status} onChange={(event) => void updateStatus(log.id, event.target.value as CommunicationStatus)} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+              <select aria-label="Status" value={log.status} onChange={(event) => void updateStatus(log.id, event.target.value as CommunicationStatus)} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                 {communicationStatuses.map((status) => <option key={status}>{status}</option>)}
               </select>
             </div>

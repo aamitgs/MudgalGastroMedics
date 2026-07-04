@@ -13,7 +13,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
-    url: "http://127.0.0.1:3100/hospital-os",
+    url: "http://127.0.0.1:3100/mudgalgastromedics-os",
     reuseExistingServer: true,
     timeout: 120_000
   },

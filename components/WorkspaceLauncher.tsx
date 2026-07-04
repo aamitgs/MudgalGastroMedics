@@ -1,0 +1,182 @@
+"use client";
+
+import Image from "next/image";
+import { BadgeIndianRupee, FlaskConical, HeartPulse, Pill, Settings, Stethoscope, UserRound, UsersRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AccessLogin } from "@/components/AccessLogin";
+import type { AccessRole } from "@/lib/access/matrix";
+import { site } from "@/lib/site-data";
+
+type WorkspaceTile = {
+  key: string;
+  label: string;
+  hint: string;
+  icon: typeof Stethoscope;
+  /** Preselected role for the login form; empty string = user's default role. */
+  role: AccessRole | "";
+  /** Where the tile lands once authenticated. */
+  destination: string;
+};
+
+const tiles: WorkspaceTile[] = [
+  { key: "doctor", label: "Doctor Portal", hint: "OPD queue & consultations", icon: Stethoscope, role: "", destination: "/doctor" },
+  { key: "reception", label: "Reception Desk", hint: "Appointments & registration", icon: UsersRound, role: "reception", destination: "/admin#module-appointments" },
+  { key: "pharmacy", label: "Pharmacy", hint: "Dispensing & stock", icon: Pill, role: "pharmacist", destination: "/admin#module-pharmacy" },
+  { key: "laboratory", label: "Laboratory", hint: "Orders & results", icon: FlaskConical, role: "lab-technician", destination: "/admin#module-lab" },
+  { key: "nursing", label: "Nursing Station", hint: "Beds, vitals & HDU", icon: HeartPulse, role: "nurse", destination: "/admin#module-ipd" },
+  { key: "billing", label: "Billing", hint: "Receipts & claims", icon: BadgeIndianRupee, role: "billing-accounts", destination: "/admin#module-billing" },
+  { key: "administration", label: "Administration", hint: "Operations & access control", icon: Settings, role: "admin", destination: "/admin" }
+];
+
+const lastWorkspaceKey = "mgmLastWorkspace";
+
+type SystemStatus = { ok: boolean; version?: string; environment?: string };
+
+export function WorkspaceLauncher() {
+  const [chosen, setChosen] = useState<WorkspaceTile | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
+  const [lastTile, setLastTile] = useState<WorkspaceTile | null>(null);
+  const [system, setSystem] = useState<SystemStatus | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkSession() {
+      const stored = window.localStorage.getItem(lastWorkspaceKey);
+      const remembered = tiles.find((tile) => tile.key === stored) ?? null;
+
+      const [me, health] = await Promise.all([
+        fetch("/api/auth/me", { cache: "no-store" }).catch(() => null),
+        fetch("/api/health", { cache: "no-store" }).catch(() => null)
+      ]);
+      if (!active) return;
+
+      if (remembered) setLastTile(remembered);
+      if (me?.ok) {
+        const data = await me.json().catch(() => null);
+        if (active && data?.ok && data.status === "active") setSignedIn(true);
+      }
+      if (health?.ok) {
+        const data = await health.json().catch(() => null);
+        if (active && data?.ok) setSystem({ ok: true, version: data.version, environment: data.environment });
+      } else if (active) {
+        setSystem({ ok: false });
+      }
+    }
+
+    void checkSession();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function openTile(tile: WorkspaceTile) {
+    window.localStorage.setItem(lastWorkspaceKey, tile.key);
+    if (signedIn) {
+      window.location.assign(tile.destination);
+      return;
+    }
+    setChosen(tile);
+  }
+
+  if (chosen) {
+    return (
+      <div className="mx-auto w-full max-w-md">
+        <button
+          type="button"
+          onClick={() => setChosen(null)}
+          className="mb-4 text-sm font-semibold text-brand transition hover:underline"
+        >
+          ← All workspaces
+        </button>
+        <AccessLogin
+          initialRole={chosen.role}
+          landingOverride={chosen.destination}
+          workspaceLabel={chosen.label}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <div className="flex flex-col items-center text-center">
+        <Image src="/mgm-logo.png" alt={site.name} width={64} height={64} className="h-16 w-16 object-contain" />
+        <h1 className="mt-4 text-3xl font-bold leading-tight text-ink">{site.name}</h1>
+        <p className="mt-1 text-sm font-semibold text-muted">Choose your workspace</p>
+      </div>
+
+      {lastTile ? (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/40 bg-soft/60 p-4">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wide text-brand">Welcome back</p>
+            <p className="mt-0.5 truncate text-sm font-bold text-ink">Last workspace: {lastTile.label}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => openTile(lastTile)}
+            className="inline-flex min-h-9 items-center rounded-lg bg-brand px-4 text-sm font-bold text-white transition hover:bg-brand-dark"
+          >
+            Continue
+          </button>
+        </div>
+      ) : null}
+
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {tiles.map((tile) => {
+          const Icon = tile.icon;
+          return (
+            <button
+              key={tile.key}
+              type="button"
+              onClick={() => openTile(tile)}
+              className="group flex flex-col items-start gap-3 rounded-xl border border-line bg-surface p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
+                <Icon size={19} />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-ink">{tile.label}</span>
+                <span className="mt-0.5 block text-xs font-medium text-muted">{tile.hint}</span>
+              </span>
+            </button>
+          );
+        })}
+
+        <a
+          href="/portal"
+          className="group flex flex-col items-start gap-3 rounded-xl border border-dashed border-line bg-soft/50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand"
+        >
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-surface text-teal-dark transition group-hover:bg-teal group-hover:text-white">
+            <UserRound size={19} />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-ink">Patient Portal</span>
+            <span className="mt-0.5 block text-xs font-medium text-muted">Book & track your care</span>
+          </span>
+        </a>
+      </div>
+
+      {signedIn ? (
+        <p className="mt-6 text-center text-xs font-semibold text-muted">
+          You are signed in — choosing a workspace opens it directly.
+        </p>
+      ) : (
+        <p className="mt-6 text-center text-xs leading-relaxed text-muted">
+          Staff access only. Your account determines what each workspace shows.
+        </p>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-semibold text-muted" aria-label="System status">
+        <span className="inline-flex items-center gap-1.5">
+          <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${system === null ? "bg-line" : system.ok ? "bg-teal" : "bg-coral"}`} />
+          {system === null ? "Checking system..." : system.ok ? "System operational" : "Status unavailable"}
+        </span>
+        {system?.version ? <span>v{system.version}</span> : null}
+        {system?.environment && system.environment !== "production" ? (
+          <span className="rounded bg-gold/15 px-1.5 py-0.5 uppercase tracking-wide text-gold">{system.environment}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}

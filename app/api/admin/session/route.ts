@@ -10,8 +10,8 @@ export async function POST(request: Request) {
   const username = typeof body.username === "string" ? body.username : "";
   const password = typeof body.password === "string" ? body.password : "";
   const requestedStaffId = typeof body.staffId === "string" ? body.staffId : "STF-ADMIN-001";
-  const credentialStaff = username && password ? authenticateStaffUser(username, password) : null;
-  const passcodeStaff = !credentialStaff && passcode && isValidAdminPasscode(passcode) ? getStaffById(requestedStaffId) ?? getStaffById("STF-ADMIN-001") : null;
+  const credentialStaff = username && password ? await authenticateStaffUser(username, password) : null;
+  const passcodeStaff = !credentialStaff && passcode && isValidAdminPasscode(passcode) ? (await getStaffById(requestedStaffId)) ?? (await getStaffById("STF-ADMIN-001")) : null;
   const staff = credentialStaff ?? passcodeStaff;
 
   if (!staff) {

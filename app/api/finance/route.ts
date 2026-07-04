@@ -12,10 +12,10 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    claims: listInsuranceClaims(),
-    entries: listAccountEntries(),
-    admissions: listIpdAdmissions(),
-    visits: listOpdVisits()
+    claims: (await listInsuranceClaims()),
+    entries: (await listAccountEntries()),
+    admissions: (await listIpdAdmissions()),
+    visits: (await listOpdVisits())
   });
 }
 
@@ -27,13 +27,13 @@ export async function POST(request: Request) {
   const mode = typeof body.mode === "string" ? body.mode : "entry";
 
   if (mode === "claim") {
-    const result = createInsuranceClaim(body);
+    const result = (await createInsuranceClaim(body));
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true, claim: result.claim });
   }
 
   const type = typeof body.type === "string" && accountEntryTypes.includes(body.type as AccountEntryType) ? body.type : "Expense";
-  const result = createAccountEntry({ ...body, type });
+  const result = (await createAccountEntry({ ...body, type }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   return NextResponse.json({ ok: true, entry: result.entry });
 }
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
   const status = typeof body.status === "string" && insuranceClaimStatuses.includes(body.status as InsuranceClaimStatus) ? body.status as InsuranceClaimStatus : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "Claim id is required." }, { status: 400 });
 
-  const claim = updateInsuranceClaim({
+  const claim = (await updateInsuranceClaim({
     id,
     status,
     requestedAmount: body.requestedAmount === undefined ? undefined : Number(body.requestedAmount),
@@ -56,7 +56,7 @@ export async function PATCH(request: Request) {
     claimNumber: typeof body.claimNumber === "string" ? body.claimNumber : undefined,
     documents: typeof body.documents === "string" ? body.documents : undefined,
     notes: typeof body.notes === "string" ? body.notes : undefined
-  });
+  }));
 
   if (!claim) return NextResponse.json({ ok: false, error: "Claim not found." }, { status: 404 });
   return NextResponse.json({ ok: true, claim });

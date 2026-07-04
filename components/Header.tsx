@@ -107,7 +107,7 @@ export function Header() {
 
   return (
     <>
-      <div className="border-b border-line bg-ink text-sm text-white">
+      <section aria-label="Hospital contact details" className="border-b border-line bg-ink text-sm text-white">
         <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-col justify-between gap-2 py-2 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <a href={`tel:${site.phone}`} className="inline-flex items-center gap-1.5 hover:text-cyan-200">
@@ -123,7 +123,7 @@ export function Header() {
             <span className="hidden items-center gap-1.5 sm:inline-flex"><MapPin size={15} /> Shaheed Nagar, Agra</span>
           </div>
         </div>
-      </div>
+      </section>
 
       <header className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
         <div className="mx-auto flex min-h-[88px] w-[min(1560px,calc(100%-32px))] items-center gap-8">

@@ -8,7 +8,7 @@ import { revokeAllSessionsForUser, updateAccessSession, type AccessSessionStatus
 import { updateAccessUser } from "@/lib/access/user-store";
 
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) {
     return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   }
@@ -40,14 +40,14 @@ export async function POST(request: Request) {
   }
 
   const wasForced = session.status === "password-change-required";
-  updateAccessUser(user.id, { passwordHash: hashPassword(newPassword), mustChangePassword: false });
-  revokeAllSessionsForUser(user.id, session.id);
+  await updateAccessUser(user.id, { passwordHash: hashPassword(newPassword), mustChangePassword: false });
+  await revokeAllSessionsForUser(user.id, session.id);
 
   let nextStatus: AccessSessionStatus = "active";
   if (wasForced) {
     if (user.totpEnabled) nextStatus = "mfa-pending";
     else if (user.roles.some((role) => mfaMandatoryRoles.includes(role))) nextStatus = "mfa-setup-required";
-    updateAccessSession(session.id, { status: nextStatus });
+    await updateAccessSession(session.id, { status: nextStatus });
   }
 
   await recordAuditEvent({

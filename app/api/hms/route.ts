@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     modules: hmsModules,
-    records: listHmsRecords(moduleId)
+    records: (await listHmsRecords(moduleId))
   });
 }
 
@@ -36,14 +36,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Module and title are required." }, { status: 400 });
   }
 
-  const record = createHmsRecord({
+  const record = (await createHmsRecord({
     moduleId,
     title,
     status,
     priority,
     owner: typeof body.owner === "string" ? body.owner : "",
     notes: typeof body.notes === "string" ? body.notes : ""
-  });
+  }));
 
   if (!record) {
     return NextResponse.json({ ok: false, error: "Invalid HMS module." }, { status: 400 });
@@ -73,13 +73,13 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Record ID is required." }, { status: 400 });
   }
 
-  const record = updateHmsRecord({
+  const record = (await updateHmsRecord({
     id,
     status,
     priority,
     owner: typeof body.owner === "string" ? body.owner : undefined,
     notes: typeof body.notes === "string" ? body.notes : undefined
-  });
+  }));
 
   if (!record) {
     return NextResponse.json({ ok: false, error: "HMS record not found." }, { status: 404 });

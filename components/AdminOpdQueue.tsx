@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import { opdVisitStatuses } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { toast } from "sonner";
 
 const opdExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
 
@@ -53,6 +55,7 @@ export function AdminOpdQueue() {
       return;
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
+    toast.success("Visit updated");
   }
 
   useEffect(() => {
@@ -125,7 +128,7 @@ export function AdminOpdQueue() {
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 p-4">
-        {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading OPD queue...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {!loading && visits.length === 0 ? (
           <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
             <ClipboardList className="mx-auto text-brand" size={34} />
@@ -165,7 +168,7 @@ export function AdminOpdQueue() {
                 ) : null}
               </div>
               <div className="grid content-start gap-2 lg:w-56">
-                <select
+                <select aria-label="Visit status"
                   value={visit.status}
                   onChange={(event) => void updateVisit(visit.id, { status: event.target.value as OpdVisitStatus })}
                   className="rounded border border-line bg-surface px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
@@ -174,7 +177,7 @@ export function AdminOpdQueue() {
                     <option key={status}>{status}</option>
                   ))}
                 </select>
-                <select
+                <select aria-label="Billing status"
                   value={visit.billingStatus}
                   onChange={(event) => void updateVisit(visit.id, { billingStatus: event.target.value as OpdVisit["billingStatus"] })}
                   className="rounded border border-line bg-surface px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"

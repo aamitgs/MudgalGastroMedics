@@ -526,3 +526,12 @@ CREATE TABLE IF NOT EXISTS patient_login_challenges (
 
 CREATE INDEX IF NOT EXISTS idx_patient_sessions_identity ON patient_sessions (identity_id, revoked_at);
 CREATE INDEX IF NOT EXISTS idx_patient_challenges_phone ON patient_login_challenges (phone, kind, consumed_at);
+
+-- Generic JSONB document backend (confirmed decision): each store persists its
+-- whole document under one key. Relational tables above remain the upgrade
+-- path; the audit_events table stays fully relational.
+CREATE TABLE IF NOT EXISTS store_documents (
+  key text PRIMARY KEY,
+  doc jsonb NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);

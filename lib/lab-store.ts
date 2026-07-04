@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 
@@ -8,31 +7,15 @@ type LabStore = {
   orders: LabOrder[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmLabStore?: LabStore;
-};
+const docStore = createDocumentStore<LabStore>("lab-orders", (parsed) => {
+  const doc = parsed as Partial<LabStore> | undefined;
+  return { orders: Array.isArray(doc?.orders) ? (doc.orders as LabStore["orders"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "lab-orders.json");
 
-function readStoreFromDisk(): LabStore {
-  try {
-    if (!existsSync(storeFile)) return { orders: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<LabStore>;
-    return { orders: Array.isArray(parsed.orders) ? parsed.orders : [] };
-  } catch {
-    return { orders: [] };
-  }
-}
 
-function writeStoreToDisk(store: LabStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmLabStore ??= readStoreFromDisk();
-  return globalStore.__mgmLabStore;
-}
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -43,13 +26,15 @@ function normalizeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function listLabOrders() {
-  return getStore().orders;
+export async function listLabOrders() {
+  const doc = await docStore.load();
+  return doc.orders;
 }
 
-export function createLabOrder(input: Record<string, unknown>) {
+export async function createLabOrder(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const visitId = normalizeText(input.visitId);
-  const visit = getOpdVisitById(visitId);
+  const visit = (await getOpdVisitById(visitId));
   if (!visit) return { error: "OPD visit not found." };
 
   const testsInput = input.tests;
@@ -82,12 +67,12 @@ export function createLabOrder(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().orders.unshift(order);
-  writeStoreToDisk(getStore());
+  doc.orders.unshift(order);
+  await docStore.save(doc);
   return { order };
 }
 
-export function updateLabOrder(input: {
+export async function updateLabOrder(input: {
   id: string;
   status?: LabOrderStatus;
   resultSummary?: string;
@@ -96,7 +81,8 @@ export function updateLabOrder(input: {
   amount?: number;
   notes?: string;
 }) {
-  const order = getStore().orders.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const order = doc.orders.find((item) => item.id === input.id);
   if (!order) return null;
 
   if (input.status) order.status = input.status;
@@ -107,6 +93,6 @@ export function updateLabOrder(input: {
   if (typeof input.notes === "string") order.notes = input.notes.trim();
   order.updatedAt = new Date().toISOString();
 
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return order;
 }

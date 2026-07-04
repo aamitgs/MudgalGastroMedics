@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffStatus } from "@/lib/hr-types";
 import { attendanceStatuses, staffPermissions, staffRoles, staffStatuses } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const staffExportHeaders = ["Name", "Phone", "Email", "Role", "Department", "Shift", "Status", "Joining Date"];
 
@@ -222,13 +223,13 @@ export function AdminHR() {
               <input name="phone" className={fieldClass} placeholder="Phone" required />
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <select name="role" className={fieldClass} defaultValue="Admin">{staffRoles.map((role) => <option key={role}>{role}</option>)}</select>
+              <select aria-label="Role" name="role" className={fieldClass} defaultValue="Admin">{staffRoles.map((role) => <option key={role}>{role}</option>)}</select>
               <input name="department" className={fieldClass} placeholder="Department" required />
-              <select name="shift" className={fieldClass} defaultValue="General">{shifts.map((shift) => <option key={shift}>{shift}</option>)}</select>
+              <select aria-label="Shift" name="shift" className={fieldClass} defaultValue="General">{shifts.map((shift) => <option key={shift}>{shift}</option>)}</select>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               <input name="email" className={fieldClass} placeholder="Email" />
-              <input name="joiningDate" className={fieldClass} type="date" />
+              <input aria-label="Joining date" name="joiningDate" className={fieldClass} type="date" />
               <input name="salary" className={fieldClass} type="number" min="0" placeholder="Monthly salary" />
             </div>
             <input name="emergencyContact" className={fieldClass} placeholder="Emergency contact" />
@@ -243,17 +244,17 @@ export function AdminHR() {
         <form onSubmit={markAttendance} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><CalendarCheck2 size={19} /> Mark attendance</p>
           <div className="grid gap-3">
-            <select name="staffId" className={fieldClass} required>
+            <select aria-label="Staff member" name="staffId" className={fieldClass} required>
               <option value="">Select staff member</option>
               {staff.map((member) => <option key={member.id} value={member.id}>{member.name} | {member.role}</option>)}
             </select>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="date" className={fieldClass} type="date" defaultValue={todayKey()} />
-              <select name="status" className={fieldClass} defaultValue="Present">{attendanceStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+              <input aria-label="Date" name="date" className={fieldClass} type="date" defaultValue={todayKey()} />
+              <select aria-label="Status" name="status" className={fieldClass} defaultValue="Present">{attendanceStatuses.map((status) => <option key={status}>{status}</option>)}</select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="checkIn" className={fieldClass} type="time" />
-              <input name="checkOut" className={fieldClass} type="time" />
+              <input aria-label="Check in" name="checkIn" className={fieldClass} type="time" />
+              <input aria-label="Check out" name="checkOut" className={fieldClass} type="time" />
             </div>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Leave reason, late arrival or handover notes" />
             <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">Save Attendance</button>
@@ -264,7 +265,7 @@ export function AdminHR() {
       <div className="grid gap-5 border-t border-line p-4 xl:grid-cols-2">
         <div className="grid gap-3">
           <p className="flex items-center gap-2 text-sm font-bold text-ink"><UsersRound size={17} /> Staff directory</p>
-          {loading ? <p className="text-sm font-semibold text-muted">Loading HR...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {staff.map((member) => (
             <article key={member.id} className="rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -273,7 +274,7 @@ export function AdminHR() {
                   <h3 className="mt-1 text-lg font-bold text-ink">{member.name}</h3>
                   <p className="mt-1 text-sm text-muted">{member.department} | Salary: {formatAmount(member.salary)}</p>
                 </div>
-                <select value={member.status} onChange={(event) => void updateStaffStatus(member.id, event.target.value as StaffStatus)} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                <select aria-label="Status" value={member.status} onChange={(event) => void updateStaffStatus(member.id, event.target.value as StaffStatus)} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                   {staffStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>
               </div>
@@ -313,7 +314,7 @@ export function AdminHR() {
                 <p className="font-bold text-ink">{record.staffName}</p>
                 <p className="text-sm text-muted">{record.date}{record.checkIn ? ` | In ${record.checkIn}` : ""}{record.checkOut ? ` | Out ${record.checkOut}` : ""}</p>
               </div>
-              <select value={record.status} onChange={(event) => void updateAttendanceStatus(record.id, event.target.value as AttendanceStatus)} className="rounded border border-line bg-surface px-3 py-2 text-sm font-bold text-ink">
+              <select aria-label="Status" value={record.status} onChange={(event) => void updateAttendanceStatus(record.id, event.target.value as AttendanceStatus)} className="rounded border border-line bg-surface px-3 py-2 text-sm font-bold text-ink">
                 {attendanceStatuses.map((status) => <option key={status}>{status}</option>)}
               </select>
             </article>

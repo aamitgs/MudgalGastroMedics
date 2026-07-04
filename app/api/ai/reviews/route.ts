@@ -11,8 +11,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    reviews: listAiReviews(),
-    sources: getAiSources()
+    reviews: (await listAiReviews()),
+    sources: await getAiSources()
   });
 }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const action = typeof body.action === "string" ? body.action : "generate";
 
   if (action === "seed") {
-    const created = seedMissingAiReviews();
+    const created = (await seedMissingAiReviews());
     await recordAuditEvent({
       actorRole: "admin",
       action: "ai.reviews.seeded",
@@ -32,14 +32,14 @@ export async function POST(request: Request) {
       entityId: "seeded-batch",
       metadata: { created, ...auditRequestMetadata(request) }
     });
-    return NextResponse.json({ ok: true, created, reviews: listAiReviews() });
+    return NextResponse.json({ ok: true, created, reviews: (await listAiReviews()) });
   }
 
   const source = body.source === "OPD" ? "OPD" : "Appointment";
   const sourceId = typeof body.sourceId === "string" ? body.sourceId : "";
   if (!sourceId) return NextResponse.json({ ok: false, error: "Source record is required." }, { status: 400 });
 
-  const result = generateAiReview(source as AiCaseSource, sourceId);
+  const result = (await generateAiReview(source as AiCaseSource, sourceId));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   await recordAuditEvent({
     actorRole: "admin",
@@ -60,12 +60,12 @@ export async function PATCH(request: Request) {
   const status = typeof body.status === "string" && aiReviewStatuses.includes(body.status as AiReviewStatus) ? body.status as AiReviewStatus : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "AI review id is required." }, { status: 400 });
 
-  const review = updateAiReview({
+  const review = (await updateAiReview({
     id,
     status,
     doctorReviewNote: typeof body.doctorReviewNote === "string" ? body.doctorReviewNote : undefined,
     reviewedBy: typeof body.reviewedBy === "string" ? body.reviewedBy : undefined
-  });
+  }));
 
   if (!review) return NextResponse.json({ ok: false, error: "AI review not found." }, { status: 404 });
   await recordAuditEvent({

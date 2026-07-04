@@ -2,6 +2,7 @@
 
 import { Activity, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AnalyticsSnapshot = {
   generatedAt: string;
@@ -147,7 +148,7 @@ export function AdminAnalytics() {
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-      {loading ? <p className="border-b border-line p-4 font-semibold text-muted">Loading analytics...</p> : null}
+      {loading ? <ModuleSkeleton /> : null}
 
       {analytics ? (
         <>

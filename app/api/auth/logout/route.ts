@@ -4,9 +4,9 @@ import { getSessionAndUser } from "@/lib/access/guard";
 import { clearSessionCookie, revokeAccessSession } from "@/lib/access/session-store";
 
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (resolved) {
-    revokeAccessSession(resolved.session.id);
+    await revokeAccessSession(resolved.session.id);
     await recordAuditEvent({
       actorRole: resolved.session.activeRole,
       actorId: resolved.user.id,

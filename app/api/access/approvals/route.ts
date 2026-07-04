@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   if (auth.context.activeRole !== "super-admin") {
     return NextResponse.json({ ok: false, error: "Only a Super Admin can view approvals." }, { status: 403 });
   }
-  return NextResponse.json({ ok: true, approvals: listApprovals() });
+  return NextResponse.json({ ok: true, approvals: await listApprovals() });
 }
 
 /**
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "id and decision (approved|rejected) are required." }, { status: 400 });
   }
 
-  const approval = getApprovalById(id);
+  const approval = await getApprovalById(id);
   if (!approval || approval.status !== "pending") {
     return NextResponse.json({ ok: false, error: "Pending approval not found." }, { status: 404 });
   }
@@ -45,15 +45,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const decided = decideApproval(id, decision, auth.context.userId, auth.context.userName);
+  const decided = await decideApproval(id, decision, auth.context.userId, auth.context.userName);
   if (!decided) return NextResponse.json({ ok: false, error: "Approval could not be updated." }, { status: 409 });
 
   if (decision === "approved") {
-    const target = getAccessUserById(approval.targetUserId);
+    const target = await getAccessUserById(approval.targetUserId);
     if (!target) return NextResponse.json({ ok: false, error: "Target user no longer exists." }, { status: 404 });
-    updateAccessUser(target.id, { roles: approval.payload.roles, defaultRole: approval.payload.defaultRole });
+    await updateAccessUser(target.id, { roles: approval.payload.roles, defaultRole: approval.payload.defaultRole });
     // Force re-login so sessions cannot keep acting under the old role set.
-    revokeAllSessionsForUser(target.id);
+    await revokeAllSessionsForUser(target.id);
   }
 
   await recordAuditEvent({

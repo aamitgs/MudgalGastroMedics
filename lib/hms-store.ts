@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { getHmsModule, hmsModules } from "@/lib/hms-modules";
 import type { HmsModuleRecord, HmsRecordStatus } from "@/lib/hms-types";
 
@@ -8,11 +7,7 @@ type HmsStore = {
   records: HmsModuleRecord[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmHmsStore?: HmsStore;
-};
 
-const storeFile = join(process.cwd(), ".data", "hms-modules.json");
 
 function createSeedRecords(): HmsModuleRecord[] {
   const now = new Date().toISOString();
@@ -29,32 +24,20 @@ function createSeedRecords(): HmsModuleRecord[] {
   }));
 }
 
-function readStoreFromDisk(): HmsStore {
-  try {
-    if (!existsSync(storeFile)) return { records: createSeedRecords() };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<HmsStore>;
-    return { records: Array.isArray(parsed.records) ? parsed.records : createSeedRecords() };
-  } catch {
-    return { records: createSeedRecords() };
-  }
-}
 
-function writeStoreToDisk(store: HmsStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmHmsStore ??= readStoreFromDisk();
-  return globalStore.__mgmHmsStore;
-}
 
-export function listHmsRecords(moduleId?: string) {
-  const records = getStore().records;
+const docStore = createDocumentStore<HmsStore>("hms-modules", (parsed) => {
+  const doc = parsed as Partial<HmsStore> | undefined;
+  return { records: Array.isArray(doc?.records) ? (doc.records as HmsModuleRecord[]) : createSeedRecords() };
+});
+
+export async function listHmsRecords(moduleId?: string) {
+  const records = (await docStore.load()).records;
   return moduleId ? records.filter((record) => record.moduleId === moduleId) : records;
 }
 
-export function createHmsRecord(input: {
+export async function createHmsRecord(input: {
   moduleId: string;
   title: string;
   status?: HmsRecordStatus;
@@ -78,20 +61,21 @@ export function createHmsRecord(input: {
     updatedAt: now
   };
 
-  const store = getStore();
-  store.records.unshift(record);
-  writeStoreToDisk(store);
+  const doc = await docStore.load();
+  doc.records.unshift(record);
+  await docStore.save(doc);
   return record;
 }
 
-export function updateHmsRecord(input: {
+export async function updateHmsRecord(input: {
   id: string;
   status?: HmsRecordStatus;
   owner?: string;
   priority?: HmsModuleRecord["priority"];
   notes?: string;
 }) {
-  const record = getStore().records.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const record = doc.records.find((item) => item.id === input.id);
   if (!record) return null;
 
   if (input.status) record.status = input.status;
@@ -100,6 +84,6 @@ export function updateHmsRecord(input: {
   if (typeof input.notes === "string") record.notes = input.notes.trim();
   record.updatedAt = new Date().toISOString();
 
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return record;
 }

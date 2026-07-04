@@ -10,7 +10,7 @@ import { createBreakGlassGrant, getActiveBreakGlassGrant } from "@/lib/access/br
  * critical audit event for after-the-fact review.
  */
 export async function POST(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
   const { session, user } = resolved;
 
@@ -27,12 +27,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const existing = getActiveBreakGlassGrant(user.id);
+  const existing = await getActiveBreakGlassGrant(user.id);
   if (existing) {
     return NextResponse.json({ ok: true, grant: { id: existing.id, expiresAt: existing.expiresAt } });
   }
 
-  const grant = createBreakGlassGrant({ userId: user.id, userName: user.name, reason });
+  const grant = await createBreakGlassGrant({ userId: user.id, userName: user.name, reason });
 
   await recordAuditEvent({
     actorRole: session.activeRole,

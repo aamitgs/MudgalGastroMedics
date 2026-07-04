@@ -7,7 +7,7 @@ type ReadonlyCookieStore = {
 };
 
 /** Resolves the access context inside a server component, from cookies(). */
-export function accessContextFromCookieStore(cookieStore: ReadonlyCookieStore): AccessContext {
+export async function accessContextFromCookieStore(cookieStore: ReadonlyCookieStore): Promise<AccessContext> {
   const cookieHeader = cookieStore
     .getAll()
     .map((cookie) => `${cookie.name}=${cookie.value}`)

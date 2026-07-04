@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { adjustInventoryQuantity, listInventoryItems } from "@/lib/inventory-store";
 import type { OpdVisit } from "@/lib/opd-types";
 import { getOpdVisitById } from "@/lib/opd-store";
@@ -10,31 +9,15 @@ type PharmacyStore = {
   dispenses: PharmacyDispenseRecord[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmPharmacyStore?: PharmacyStore;
-};
+const docStore = createDocumentStore<PharmacyStore>("pharmacy-dispenses", (parsed) => {
+  const doc = parsed as Partial<PharmacyStore> | undefined;
+  return { dispenses: Array.isArray(doc?.dispenses) ? (doc.dispenses as PharmacyStore["dispenses"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "pharmacy-dispenses.json");
 
-function readStoreFromDisk(): PharmacyStore {
-  try {
-    if (!existsSync(storeFile)) return { dispenses: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<PharmacyStore>;
-    return { dispenses: Array.isArray(parsed.dispenses) ? parsed.dispenses : [] };
-  } catch {
-    return { dispenses: [] };
-  }
-}
 
-function writeStoreToDisk(store: PharmacyStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmPharmacyStore ??= readStoreFromDisk();
-  return globalStore.__mgmPharmacyStore;
-}
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -45,17 +28,19 @@ function normalizeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function listPharmacyDispenses() {
-  return getStore().dispenses;
+export async function listPharmacyDispenses() {
+  const doc = await docStore.load();
+  return doc.dispenses;
 }
 
-export function createPharmacyDispense(input: Record<string, unknown>) {
+export async function createPharmacyDispense(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const visitId = normalizeText(input.visitId);
-  const visit = getOpdVisitById(visitId);
+  const visit = (await getOpdVisitById(visitId));
   if (!visit) return { error: "OPD visit not found." };
 
   const rawItems = Array.isArray(input.items) ? input.items : [];
-  const inventory = listInventoryItems();
+  const inventory = (await listInventoryItems());
   const items: PharmacyDispenseItem[] = [];
 
   for (const rawItem of rawItems) {
@@ -107,14 +92,15 @@ export function createPharmacyDispense(input: Record<string, unknown>) {
   };
 
   for (const item of items) {
-    adjustInventoryQuantity(item.inventoryItemId, -item.quantity);
+    (await adjustInventoryQuantity(item.inventoryItemId, -item.quantity));
   }
 
-  getStore().dispenses.unshift(record);
-  writeStoreToDisk(getStore());
+  doc.dispenses.unshift(record);
+  await docStore.save(doc);
   return { record };
 }
 
-export function listDispensesForVisit(visit: Pick<OpdVisit, "id">) {
-  return getStore().dispenses.filter((record) => record.visitId === visit.id);
+export async function listDispensesForVisit(visit: Pick<OpdVisit, "id">) {
+  const doc = await docStore.load();
+  return doc.dispenses.filter((record) => record.visitId === visit.id);
 }

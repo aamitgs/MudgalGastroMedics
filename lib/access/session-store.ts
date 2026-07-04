@@ -1,8 +1,7 @@
 import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { AccessRole } from "@/lib/access/matrix";
 
 export const accessSessionCookie = "mgm_session";
@@ -39,38 +38,18 @@ type AccessSessionStore = {
   sessions: AccessSession[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmAccessSessionStore?: AccessSessionStore;
-};
-
-const storeFile = join(process.cwd(), ".data", "access-sessions.json");
 const maxSessions = 2000;
 
-function readStoreFromDisk(): AccessSessionStore {
-  if (!existsSync(storeFile)) return { sessions: [] };
-  try {
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<AccessSessionStore>;
-    return { sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [] };
-  } catch {
-    return { sessions: [] };
-  }
-}
-
-function writeStoreToDisk(store: AccessSessionStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, `${JSON.stringify(store, null, 2)}\n`);
-}
-
-function getStore() {
-  globalStore.__mgmAccessSessionStore ??= readStoreFromDisk();
-  return globalStore.__mgmAccessSessionStore;
-}
+const store = createDocumentStore<AccessSessionStore>("access-sessions", (parsed) => {
+  const doc = parsed as Partial<AccessSessionStore> | undefined;
+  return { sessions: Array.isArray(doc?.sessions) ? (doc.sessions as AccessSession[]) : [] };
+});
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("base64url");
 }
 
-export function createAccessSession(input: {
+export async function createAccessSession(input: {
   userId: string;
   activeRole: AccessRole;
   status: AccessSessionStatus;
@@ -92,9 +71,9 @@ export function createAccessSession(input: {
     userAgent: input.userAgent
   };
 
-  const store = getStore();
-  store.sessions = [session, ...store.sessions].slice(0, maxSessions);
-  writeStoreToDisk(store);
+  const doc = await store.load();
+  doc.sessions = [session, ...doc.sessions].slice(0, maxSessions);
+  await store.save(doc);
   return { token, session };
 }
 
@@ -102,46 +81,51 @@ export function createAccessSession(input: {
  * Resolves a raw cookie token to a live session, enforcing revocation,
  * absolute expiry, and the idle timeout. Returns null for anything not live.
  */
-export function getSessionByToken(token: string | undefined | null): AccessSession | null {
+export async function getSessionByToken(token: string | undefined | null): Promise<AccessSession | null> {
   if (!token) return null;
-  const store = getStore();
+  const doc = await store.load();
   const tokenHash = hashToken(token);
-  const session = store.sessions.find((item) => item.tokenHash === tokenHash);
+  const session = doc.sessions.find((item) => item.tokenHash === tokenHash);
   if (!session || session.revokedAt) return null;
 
   const now = Date.now();
   if (new Date(session.expiresAt).getTime() <= now) return null;
   if (now - new Date(session.lastSeenAt).getTime() > idleTimeoutMs) {
     session.revokedAt = new Date(now).toISOString();
-    writeStoreToDisk(store);
+    await store.save(doc);
     return null;
   }
 
+  let dirty = false;
   if (session.elevatedUntil && new Date(session.elevatedUntil).getTime() <= now) {
     if (session.preElevationRole) session.activeRole = session.preElevationRole;
     session.elevatedUntil = undefined;
     session.preElevationRole = undefined;
-    writeStoreToDisk(store);
+    dirty = true;
   }
 
   if (now - new Date(session.lastSeenAt).getTime() >= lastSeenWriteIntervalMs) {
     session.lastSeenAt = new Date(now).toISOString();
-    writeStoreToDisk(store);
+    dirty = true;
   }
 
+  if (dirty) await store.save(doc);
   return session;
 }
 
-export function updateAccessSession(id: string, updates: Partial<Pick<AccessSession, "status" | "activeRole" | "elevatedUntil" | "preElevationRole">>) {
-  const store = getStore();
-  const session = store.sessions.find((item) => item.id === id);
+export async function updateAccessSession(
+  id: string,
+  updates: Partial<Pick<AccessSession, "status" | "activeRole" | "elevatedUntil" | "preElevationRole">>
+) {
+  const doc = await store.load();
+  const session = doc.sessions.find((item) => item.id === id);
   if (!session) return null;
   Object.assign(session, updates);
-  writeStoreToDisk(store);
+  await store.save(doc);
   return session;
 }
 
-export function grantElevation(id: string, previousRole: AccessRole) {
+export async function grantElevation(id: string, previousRole: AccessRole) {
   return updateAccessSession(id, {
     activeRole: "super-admin",
     preElevationRole: previousRole,
@@ -149,14 +133,14 @@ export function grantElevation(id: string, previousRole: AccessRole) {
   });
 }
 
-export function dropElevation(id: string) {
-  const store = getStore();
-  const session = store.sessions.find((item) => item.id === id);
+export async function dropElevation(id: string) {
+  const doc = await store.load();
+  const session = doc.sessions.find((item) => item.id === id);
   if (!session) return null;
   if (session.preElevationRole) session.activeRole = session.preElevationRole;
   session.elevatedUntil = undefined;
   session.preElevationRole = undefined;
-  writeStoreToDisk(store);
+  await store.save(doc);
   return session;
 }
 
@@ -164,32 +148,32 @@ export function isElevated(session: AccessSession, now = Date.now()) {
   return Boolean(session.elevatedUntil && new Date(session.elevatedUntil).getTime() > now);
 }
 
-export function revokeAccessSession(id: string) {
-  const store = getStore();
-  const session = store.sessions.find((item) => item.id === id);
+export async function revokeAccessSession(id: string) {
+  const doc = await store.load();
+  const session = doc.sessions.find((item) => item.id === id);
   if (!session || session.revokedAt) return null;
   session.revokedAt = new Date().toISOString();
-  writeStoreToDisk(store);
+  await store.save(doc);
   return session;
 }
 
-export function revokeAllSessionsForUser(userId: string, exceptSessionId?: string) {
-  const store = getStore();
+export async function revokeAllSessionsForUser(userId: string, exceptSessionId?: string) {
+  const doc = await store.load();
   const now = new Date().toISOString();
   let count = 0;
-  for (const session of store.sessions) {
+  for (const session of doc.sessions) {
     if (session.userId === userId && !session.revokedAt && session.id !== exceptSessionId) {
       session.revokedAt = now;
       count += 1;
     }
   }
-  if (count) writeStoreToDisk(store);
+  if (count) await store.save(doc);
   return count;
 }
 
-export function listSessionsForUser(userId: string) {
+export async function listSessionsForUser(userId: string) {
   const now = Date.now();
-  return getStore().sessions.filter(
+  return (await store.load()).sessions.filter(
     (session) => session.userId === userId && !session.revokedAt && new Date(session.expiresAt).getTime() > now
   );
 }

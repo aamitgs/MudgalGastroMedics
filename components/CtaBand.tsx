@@ -4,7 +4,7 @@ import { Clock, MapPin } from "lucide-react";
 
 export function CtaBand() {
   return (
-    <section className="bg-[linear-gradient(135deg,#082f3a,#0b3a46_48%,#075f59)] py-16 text-white">
+    <section aria-label="Book an appointment" className="bg-[linear-gradient(135deg,#082f3a,#0b3a46_48%,#075f59)] py-16 text-white">
       <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
         <div className="relative isolate overflow-hidden rounded border border-white/12 bg-white/8 p-6 shadow-[0_30px_90px_rgba(2,22,29,0.24)] backdrop-blur md:p-8 lg:p-10">
           <div aria-hidden="true" className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-cyan-100/12" />

@@ -4,6 +4,7 @@ import { BadgeIndianRupee, ClipboardList, CreditCard, Download, RefreshCw } from
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const billingExportHeaders = ["Token", "Patient", "Phone", "Service", "Billing Status", "Amount", "Payment Method", "Receipt ID"];
 
@@ -145,7 +146,7 @@ export function AdminBillingSummary() {
             <p className="text-sm font-bold text-ink">Recent paid receipts</p>
           </div>
           <div className="grid gap-3 p-4">
-            {loading ? <p className="text-sm font-semibold text-muted">Loading billing...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && billing.paidVisits.length === 0 ? <p className="text-sm font-semibold text-muted">No paid receipts yet.</p> : null}
             {billing.paidVisits.slice(0, 6).map((visit) => (
               <div key={visit.id} className="grid gap-2 rounded border border-line bg-soft/40 p-3 md:grid-cols-[1fr_auto_auto] md:items-center">

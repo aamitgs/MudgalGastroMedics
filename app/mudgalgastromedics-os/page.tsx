@@ -7,13 +7,13 @@ import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/pa
 export const metadata: Metadata = {
   title: { absolute: "Dashboard • MudgalGastromedics OS" },
   description: "Premium Hospital Operating System interface for Mudgal Gastromedics Hospital operations, clinical workflows, patient records and live command center.",
-  alternates: { canonical: "/hospital-os" },
+  alternates: { canonical: "/mudgalgastromedics-os" },
   robots: { index: false, follow: false }
 };
 
 export default async function HospitalOsPage() {
   const cookieStore = await cookies();
-  const isAuthenticated = canOpenAdminShell(accessContextFromCookieStore(cookieStore));
+  const isAuthenticated = canOpenAdminShell(await accessContextFromCookieStore(cookieStore));
 
   if (!isAuthenticated) {
     return (

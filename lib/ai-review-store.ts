@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { getAppointmentById, listAppointments } from "@/lib/appointment-store";
 import { createAppointmentPlanningNote } from "@/lib/ai-planning";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
@@ -10,48 +9,32 @@ type AiReviewStore = {
   reviews: AiCaseReview[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmAiReviewStore?: AiReviewStore;
-};
+const docStore = createDocumentStore<AiReviewStore>("ai-reviews", (parsed) => {
+  const doc = parsed as Partial<AiReviewStore> | undefined;
+  return { reviews: Array.isArray(doc?.reviews) ? (doc.reviews as AiReviewStore["reviews"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "ai-reviews.json");
 
-function readStoreFromDisk(): AiReviewStore {
-  try {
-    if (!existsSync(storeFile)) return { reviews: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<AiReviewStore>;
-    return {
-      reviews: Array.isArray(parsed.reviews) ? parsed.reviews : []
-    };
-  } catch {
-    return { reviews: [] };
-  }
-}
 
-function writeStoreToDisk(store: AiReviewStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmAiReviewStore ??= readStoreFromDisk();
-  return globalStore.__mgmAiReviewStore;
-}
+
 
 function makeId() {
   return `AIR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 }
 
-export function listAiReviews() {
-  return getStore().reviews;
+export async function listAiReviews() {
+  const doc = await docStore.load();
+  return doc.reviews;
 }
 
-export function generateAiReview(source: AiCaseSource, sourceId: string) {
+export async function generateAiReview(source: AiCaseSource, sourceId: string) {
+  const doc = await docStore.load();
   const now = new Date().toISOString();
-  const existing = getStore().reviews.find((review) => review.source === source && review.sourceId === sourceId);
+  const existing = doc.reviews.find((review) => review.source === source && review.sourceId === sourceId);
 
   if (source === "Appointment") {
-    const appointment = getAppointmentById(sourceId);
+    const appointment = (await getAppointmentById(sourceId));
     if (!appointment) return { error: "Appointment not found." };
     const note = createAppointmentPlanningNote(appointment);
     const review: AiCaseReview = {
@@ -77,11 +60,11 @@ export function generateAiReview(source: AiCaseSource, sourceId: string) {
       reviewedAt: existing?.reviewedAt,
       status: existing?.status && existing.status !== "Draft" ? existing.status : "Needs Review"
     };
-    upsertReview(review);
+    await upsertReview(review);
     return { review };
   }
 
-  const visit = getOpdVisitById(sourceId);
+  const visit = (await getOpdVisitById(sourceId));
   if (!visit) return { error: "OPD visit not found." };
   const urgency: AiCaseReview["urgency"] = visit.priority === "Urgent symptoms" || visit.symptoms.some((symptom) => /blood|black stool|jaundice|vomit|weight loss|pain/i.test(symptom))
     ? "Urgent Reception Call"
@@ -121,7 +104,7 @@ export function generateAiReview(source: AiCaseSource, sourceId: string) {
     reviewedAt: existing?.reviewedAt,
     status: existing?.status && existing.status !== "Draft" ? existing.status : "Needs Review"
   };
-  upsertReview(review);
+  await upsertReview(review);
   return { review };
 }
 
@@ -134,23 +117,25 @@ function routeForVisit(service: string, symptoms: string[]) {
   return "Gastroenterology consultation";
 }
 
-function upsertReview(review: AiCaseReview) {
-  const index = getStore().reviews.findIndex((item) => item.id === review.id);
+async function upsertReview(review: AiCaseReview) {
+  const doc = await docStore.load();
+  const index = doc.reviews.findIndex((item) => item.id === review.id);
   if (index >= 0) {
-    getStore().reviews[index] = review;
+    doc.reviews[index] = review;
   } else {
-    getStore().reviews.unshift(review);
+    doc.reviews.unshift(review);
   }
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
 }
 
-export function updateAiReview(input: {
+export async function updateAiReview(input: {
   id: string;
   status?: AiReviewStatus;
   doctorReviewNote?: string;
   reviewedBy?: string;
 }) {
-  const review = getStore().reviews.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const review = doc.reviews.find((item) => item.id === input.id);
   if (!review) return null;
   if (input.status) {
     review.status = input.status;
@@ -161,13 +146,13 @@ export function updateAiReview(input: {
   if (typeof input.doctorReviewNote === "string") review.doctorReviewNote = input.doctorReviewNote.trim();
   if (typeof input.reviewedBy === "string") review.reviewedBy = input.reviewedBy.trim();
   review.updatedAt = new Date().toISOString();
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return review;
 }
 
-export function getAiSources() {
+export async function getAiSources() {
   return {
-    appointments: listAppointments().map((appointment) => ({
+    appointments: (await listAppointments()).map((appointment) => ({
       id: appointment.id,
       patientName: appointment.name,
       uhid: appointment.uhid,
@@ -175,7 +160,7 @@ export function getAiSources() {
       status: appointment.status,
       createdAt: appointment.createdAt
     })),
-    visits: listOpdVisits().map((visit) => ({
+    visits: (await listOpdVisits()).map((visit) => ({
       id: visit.id,
       token: visit.token,
       patientName: visit.patientName,
@@ -187,11 +172,12 @@ export function getAiSources() {
   };
 }
 
-export function seedMissingAiReviews() {
+export async function seedMissingAiReviews() {
+  const doc = await docStore.load();
   const created: AiCaseReview[] = [];
-  for (const appointment of listAppointments().slice(0, 10)) {
-    if (!getStore().reviews.some((review) => review.source === "Appointment" && review.sourceId === appointment.id)) {
-      const result = generateAiReview("Appointment", appointment.id);
+  for (const appointment of (await listAppointments()).slice(0, 10)) {
+    if (!doc.reviews.some((review) => review.source === "Appointment" && review.sourceId === appointment.id)) {
+      const result = (await generateAiReview("Appointment", appointment.id));
       if ("review" in result && result.review) created.push(result.review);
     }
   }

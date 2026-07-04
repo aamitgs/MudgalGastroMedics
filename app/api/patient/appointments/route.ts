@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   // Records are scoped to the verified patient session — the phone number is
   // never taken from the request body, so one patient cannot read another's
   // records by guessing a number.
-  const session = getPatientSessionFromRequest(request);
+  const session = await getPatientSessionFromRequest(request);
   if (!session) {
     return NextResponse.json({ ok: false, error: "Sign in with your mobile number to view your records." }, { status: 401 });
   }
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   const phone = session.phone;
   const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
 
-  const appointments = listPatientAppointments(phone, requestId || undefined).map((appointment) => ({
+  const appointments = (await listPatientAppointments(phone, requestId || undefined)).map((appointment) => ({
     id: appointment.id,
     patientId: appointment.patientId,
     uhid: appointment.uhid,
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     message: appointment.message
   }));
 
-  const visits = listPatientOpdVisits(phone).map((visit) => ({
+  const visits = (await listPatientOpdVisits(phone)).map((visit) => ({
     id: visit.id,
     token: visit.token,
     appointmentId: visit.appointmentId,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     followUpDate: visit.followUpDate
   }));
 
-  const ipdAdmissions = listPatientIpdAdmissions(phone).map((admission) => ({
+  const ipdAdmissions = (await listPatientIpdAdmissions(phone)).map((admission) => ({
     id: admission.id,
     status: admission.status,
     createdAt: admission.createdAt,
@@ -75,9 +75,9 @@ export async function POST(request: Request) {
     dischargeSummary: admission.dischargeSummary
   }));
 
-  const vitals = ipdAdmissions.flatMap((admission) => listVitals(admission.id));
+  const vitals = (await Promise.all(ipdAdmissions.map((admission) => listVitals(admission.id)))).flat();
 
-  const insuranceClaims = listPatientInsuranceClaims(phone).map((claim) => ({
+  const insuranceClaims = (await listPatientInsuranceClaims(phone)).map((claim) => ({
     id: claim.id,
     createdAt: claim.createdAt,
     insurer: claim.insurer,

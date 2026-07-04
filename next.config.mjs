@@ -20,7 +20,9 @@ const nextConfig = {
   async redirects() {
     return [
       // The old "patient portal plan" page; /portal is the real portal.
-      { source: "/patient-portal", destination: "/portal", permanent: true }
+      { source: "/patient-portal", destination: "/portal", permanent: true },
+      // Product rename: the OS lives at its branded path now.
+      { source: "/hospital-os", destination: "/mudgalgastromedics-os", permanent: true }
     ];
   },
   async headers() {

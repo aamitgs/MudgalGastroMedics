@@ -29,12 +29,12 @@ function permissionsForAccessRole(role: AccessRole): StaffPermission[] {
   return permissions;
 }
 
-export function getAdminAuthContext(request: Request): AuthContext {
+export async function getAdminAuthContext(request: Request): Promise<AuthContext> {
   const cookieHeader = request.headers.get("cookie");
 
   if (hasAdminCookie(cookieHeader)) {
     const staffId = getAdminStaffIdFromCookie(cookieHeader) || "STF-ADMIN-001";
-    const staff = getStaffById(staffId) ?? getStaffById("STF-ADMIN-001");
+    const staff = (await getStaffById(staffId)) ?? (await getStaffById("STF-ADMIN-001"));
     return {
       authenticated: true,
       staff,
@@ -42,7 +42,7 @@ export function getAdminAuthContext(request: Request): AuthContext {
     };
   }
 
-  const context = getAccessContext(cookieHeader);
+  const context = await getAccessContext(cookieHeader);
   if (context.authenticated && !context.legacy) {
     return {
       authenticated: true,

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const auth = await authorize(request, "patients", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, patients: listPatients() });
+  return NextResponse.json({ ok: true, patients: (await listPatients()) });
 }
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Patient name and valid phone are required." }, { status: 400 });
   }
 
-  const patient = createPatient(body);
+  const patient = (await createPatient(body));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Unable to create patient." }, { status: 400 });
   }
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid patient status." }, { status: 400 });
   }
 
-  const patient = updatePatient(body);
+  const patient = (await updatePatient(body));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
   }

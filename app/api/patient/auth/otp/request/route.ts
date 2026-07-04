@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many code requests. Wait a few minutes and try again." }, { status: 429 });
   }
 
-  const { code } = createOtpChallenge(phone);
+  const { code } = await createOtpChallenge(phone);
   const delivery = await sendOtpSms(phone, code);
 
   await recordAuditEvent({

@@ -5,10 +5,10 @@ import { listSessionsForUser, revokeAccessSession, revokeAllSessionsForUser } fr
 
 /** "Manage my sessions": list and revoke the caller's own logins. */
 export async function GET(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
 
-  const sessions = listSessionsForUser(resolved.user.id).map((session) => ({
+  const sessions = (await listSessionsForUser(resolved.user.id)).map((session: Awaited<ReturnType<typeof listSessionsForUser>>[number]) => ({
     id: session.id,
     activeRole: session.activeRole,
     createdAt: session.createdAt,
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const resolved = getSessionAndUser(request);
+  const resolved = await getSessionAndUser(request);
   if (!resolved) return NextResponse.json({ ok: false, error: "Login required." }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
@@ -30,11 +30,11 @@ export async function DELETE(request: Request) {
 
   let revokedCount = 0;
   if (all) {
-    revokedCount = revokeAllSessionsForUser(resolved.user.id, resolved.session.id);
+    revokedCount = await revokeAllSessionsForUser(resolved.user.id, resolved.session.id);
   } else if (sessionId) {
-    const target = listSessionsForUser(resolved.user.id).find((session) => session.id === sessionId);
+    const target = (await listSessionsForUser(resolved.user.id)).find((session: Awaited<ReturnType<typeof listSessionsForUser>>[number]) => session.id === sessionId);
     if (!target) return NextResponse.json({ ok: false, error: "Session not found." }, { status: 404 });
-    revokeAccessSession(target.id);
+    await revokeAccessSession(target.id);
     revokedCount = 1;
   } else {
     return NextResponse.json({ ok: false, error: "Provide sessionId or all:true." }, { status: 400 });

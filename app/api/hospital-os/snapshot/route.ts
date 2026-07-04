@@ -16,15 +16,15 @@ function riskFor(priority?: string): PatientFlowRow["risk"] {
 }
 
 /** Live patient flow: today's OPD queue plus appointment requests not yet converted to visits. */
-function livePatientFlowRows(): PatientFlowRow[] {
+async function livePatientFlowRows(): Promise<PatientFlowRow[]> {
   const now = Date.now();
-  const visits = listOpdVisits();
+  const visits = (await listOpdVisits());
   const convertedAppointmentIds = new Set(visits.map((visit) => visit.appointmentId));
   const rows: PatientFlowRow[] = [];
 
   for (const visit of visits) {
     if (visit.status === "Cancelled") continue;
-    const patient = findPatientByPhone(visit.phone);
+    const patient = (await findPatientByPhone(visit.phone));
     const inFlight = visit.status === "Waiting" || visit.status === "In Consultation";
     const status: PatientFlowRow["status"] =
       visit.status === "Waiting"
@@ -51,7 +51,7 @@ function livePatientFlowRows(): PatientFlowRow[] {
     });
   }
 
-  for (const appointment of listAppointments()) {
+  for (const appointment of (await listAppointments())) {
     if (convertedAppointmentIds.has(appointment.id)) continue;
     if (appointment.status === "Cancelled" || appointment.status === "Completed") continue;
     rows.push({
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
     metadata: auditRequestMetadata(request)
   });
 
-  const liveRows = livePatientFlowRows();
+  const liveRows = await livePatientFlowRows();
   // Demo rows only pad non-production preview environments; a live hospital
   // dashboard must never show fabricated patients.
   const rows = liveRows.length ? liveRows : process.env.NODE_ENV === "production" ? [] : patientFlowRows;
@@ -94,8 +94,8 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     rows,
-    metrics: createHospitalOsDashboardMetrics(),
-    trend: createHospitalOsTrend(),
+    metrics: await createHospitalOsDashboardMetrics(),
+    trend: await createHospitalOsTrend(),
     generatedAt: new Date().toISOString()
   });
 }

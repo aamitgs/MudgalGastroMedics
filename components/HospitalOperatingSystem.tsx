@@ -140,7 +140,7 @@ import {
   postHospitalBilling,
   registerHospitalPatient,
   requestTeleconsultation
-} from "@/app/hospital-os/actions";
+} from "@/app/mudgalgastromedics-os/actions";
 
 type FlowErrorMap<T extends Record<string, unknown>> = Partial<Record<keyof T, string>>;
 
@@ -349,6 +349,7 @@ function HospitalOsApp() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
+  const [activeNav, setActiveNav] = useState("Dashboard");
   const [globalFilter, setGlobalFilter] = useState("");
   const [commandQuery, setCommandQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -639,8 +640,8 @@ function HospitalOsApp() {
   });
 
   function onSidebarKeyDown(event: React.KeyboardEvent<HTMLElement>) {
-    const buttons = Array.from(navRef.current?.querySelectorAll<HTMLButtonElement>("[data-nav-item]") ?? []);
-    const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    const buttons = Array.from(navRef.current?.querySelectorAll<HTMLElement>("[data-nav-item]") ?? []);
+    const currentIndex = buttons.indexOf(document.activeElement as HTMLElement);
     if (event.key === "ArrowDown") {
       event.preventDefault();
       buttons[(currentIndex + 1) % buttons.length]?.focus();
@@ -650,7 +651,7 @@ function HospitalOsApp() {
       buttons[(currentIndex - 1 + buttons.length) % buttons.length]?.focus();
     }
     if (event.key === "Enter") {
-      (document.activeElement as HTMLButtonElement | null)?.click();
+      (document.activeElement as HTMLElement | null)?.click();
     }
   }
 
@@ -815,18 +816,23 @@ function HospitalOsApp() {
             ) : null}
 
             <nav ref={navRef} onKeyDown={onSidebarKeyDown} className="grid gap-1" aria-label="Hospital OS sections">
-              {visibleNav.map(({ label, icon: Icon, badge }, index) => (
-                <button
-                  type="button"
+              {visibleNav.map(({ label, icon: Icon, badge, href }) => (
+                <a
+                  href={href}
                   key={label}
                   data-nav-item
-                  className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-[var(--hos-muted)] ${index === 0 ? "bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]" : "text-[var(--hos-muted-text)]"}`}
+                  onClick={() => {
+                    setActiveNav(label);
+                    setMobileNav(false);
+                  }}
+                  className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-[var(--hos-muted)] ${activeNav === label ? "bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]" : "text-[var(--hos-muted-text)]"}`}
                   title={sidebarCollapsed ? label : undefined}
+                  aria-current={activeNav === label ? "page" : undefined}
                 >
                   <Icon size={18} className="shrink-0" />
                   {!sidebarCollapsed ? <span className="min-w-0 flex-1 truncate">{label}</span> : null}
                   {!sidebarCollapsed && badge ? <Badge className="bg-white/15 text-white hover:bg-white/15">{badge}</Badge> : null}
-                </button>
+                </a>
               ))}
             </nav>
 
@@ -852,7 +858,7 @@ function HospitalOsApp() {
           <div className="mx-auto grid w-full max-w-[1560px] gap-5 px-4 py-5 lg:px-6">
             <motion.section
               id="analytics"
-              className="grid gap-5 xl:grid-cols-[1fr_420px]"
+              className="scroll-mt-20 grid gap-5 xl:grid-cols-[1fr_420px]"
               initial={reducedMotion ? false : { opacity: 0, y: 10 }}
               animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
@@ -870,7 +876,7 @@ function HospitalOsApp() {
             {access.patientPortalPreview ? <PatientPortalPanel onAuditEvent={recordSessionAudit} /> : null}
 
             {access.appointmentFlow ? (
-              <section id="appointment-flow" className="grid gap-5 xl:grid-cols-3">
+              <section id="appointment-flow" className="scroll-mt-20 grid gap-5 xl:grid-cols-3">
                 {access.patientRegistration ? <PatientRegistrationForm onAuditEvent={recordSessionAudit} /> : null}
                 {access.appointmentBooking ? <AppointmentBookingForm onAuditEvent={recordSessionAudit} /> : null}
                 {access.billing ? <BillingForm onAuditEvent={recordSessionAudit} /> : null}
@@ -1101,7 +1107,7 @@ function DashboardOverview({
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+      <Card id="realtime-feed" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -1130,7 +1136,7 @@ function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
 
   if (!activePatient) {
     return (
-      <Card id="patient-workspace" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+      <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
         <CardContent className="p-6 text-sm text-[var(--hos-muted-text)]">
           No patients in today&rsquo;s flow yet. Registrations and OPD visits appear here automatically.
         </CardContent>
@@ -1139,7 +1145,7 @@ function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
   }
 
   return (
-    <Card id="patient-workspace" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader className="border-b border-[var(--hos-border)]">
         <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Patient workspace</p>
         <CardTitle className="text-2xl font-semibold">{activePatient.patient} <span className="text-base font-medium text-[var(--hos-muted-text)]">{activePatient.uhid}</span></CardTitle>
@@ -1251,7 +1257,7 @@ function DoctorWorkspace({
   }
 
   return (
-    <Card id="doctor-workspace" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="doctor-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -1478,7 +1484,7 @@ function PatientPortalPanel({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditT
   }
 
   return (
-    <section className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
+    <section id="patient-portal-preview" className="scroll-mt-20 grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
       <Card className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
         <CardHeader>
           <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Patient portal</p>
@@ -1619,7 +1625,7 @@ function PatientRegistrationForm({ onAuditEvent }: { onAuditEvent: (item: Omit<A
   }
 
   return (
-    <Card id="patient-registration" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="patient-registration" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader>
         <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Vercel-style form</p>
         <CardTitle className="text-xl">Patient registration</CardTitle>
@@ -1752,7 +1758,7 @@ function BillingForm({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditTrailIte
   }
 
   return (
-    <Card id="billing" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="billing" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader>
         <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Stripe-style billing</p>
         <CardTitle className="text-xl">Billing workflow</CardTitle>
@@ -1853,7 +1859,7 @@ function OperationsTable({
   }
 
   return (
-    <Card id="operations-table" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="operations-table" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader className="border-b border-[var(--hos-border)]">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
@@ -2034,7 +2040,7 @@ function AssignDoctorDialog({
 
 function AuditTrailPanel({ items }: { items: AuditTrailItem[] }) {
   return (
-    <Card id="session-audit-trail" className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
+    <Card id="session-audit-trail" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
       <CardHeader>
         <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">DPDP-aware access record</p>
         <CardTitle className="text-xl">Session audit trail</CardTitle>

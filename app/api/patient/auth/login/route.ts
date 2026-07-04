@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
 
-  const identity = getPatientIdentityByEmail(email);
+  const identity = await getPatientIdentityByEmail(email);
   if (!identity?.passwordHash || isPatientLockedOut(identity)) {
     await recordAuditEvent({
       actorRole: "patient",
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   if (!verifyPassword(password, identity.passwordHash)) {
-    recordPatientLoginFailure(identity.id);
+    await recordPatientLoginFailure(identity.id);
     await recordAuditEvent({
       actorRole: "patient",
       actorId: identity.id,
@@ -52,9 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
 
-  recordPatientLoginSuccess(identity.id);
+  await recordPatientLoginSuccess(identity.id);
   const meta = auditRequestMetadata(request);
-  const { token } = createPatientSession({ identityId: identity.id, phone: identity.phone, ip: meta.ip, userAgent: meta.userAgent });
+  const { token } = await createPatientSession({ identityId: identity.id, phone: identity.phone, ip: meta.ip, userAgent: meta.userAgent });
 
   await recordAuditEvent({
     actorRole: "patient",

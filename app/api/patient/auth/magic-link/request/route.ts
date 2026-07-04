@@ -20,9 +20,9 @@ export async function POST(request: Request) {
 
   // Anti-enumeration: the response is identical whether or not the email is
   // registered; a link is only actually generated for known identities.
-  const identity = getPatientIdentityByEmail(email);
+  const identity = await getPatientIdentityByEmail(email);
   if (identity) {
-    const { token } = createMagicLinkChallenge(identity.phone);
+    const { token } = await createMagicLinkChallenge(identity.phone);
     const link = `${site.url}/portal?loginToken=${token}`;
     await sendMagicLinkEmail(email, link);
     await recordAuditEvent({

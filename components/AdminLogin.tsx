@@ -86,7 +86,7 @@ export function AdminLogin() {
       </form>
       {status ? <p className="mt-4 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-3 text-sm font-semibold text-red-700 dark:text-red-300">{status}</p> : null}
       <p className="mt-4 text-xs leading-relaxed text-muted">
-        Local defaults: username <span className="font-semibold text-ink">admin</span>, password <span className="font-semibold text-ink">mgm-admin</span>. Set <span className="font-semibold text-ink">STAFF_USERS_JSON</span> or <span className="font-semibold text-ink">ADMIN_PASSWORD</span> before production use.
+        Use your staff credentials, or ask a Super Admin if you need access.
       </p>
     </div>
   );

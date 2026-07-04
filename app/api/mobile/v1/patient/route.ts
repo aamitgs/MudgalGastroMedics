@@ -3,8 +3,8 @@ import { hasMobileToken, mobileOk, mobileUnauthorized } from "@/lib/mobile-api";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { findPatientByPhone } from "@/lib/patient-store";
 
-function publicAppointment(phone: string, requestId?: string) {
-  return listPatientAppointments(phone, requestId).map((appointment) => ({
+async function publicAppointment(phone: string, requestId?: string) {
+  return (await listPatientAppointments(phone, requestId)).map((appointment) => ({
     id: appointment.id,
     patientId: appointment.patientId,
     uhid: appointment.uhid,
@@ -22,8 +22,8 @@ function publicAppointment(phone: string, requestId?: string) {
   }));
 }
 
-function publicVisit(phone: string) {
-  return listPatientOpdVisits(phone).map((visit) => ({
+async function publicVisit(phone: string) {
+  return (await listPatientOpdVisits(phone)).map((visit) => ({
     id: visit.id,
     token: visit.token,
     appointmentId: visit.appointmentId,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, version: "v1", error: "Enter a valid phone number." }, { status: 400 });
   }
 
-  const patient = findPatientByPhone(phone);
+  const patient = (await findPatientByPhone(phone));
 
   return mobileOk({
     patient: patient ? {
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       status: patient.status,
       lastVisitAt: patient.lastVisitAt
     } : null,
-    appointments: publicAppointment(phone, requestId || undefined),
-    visits: publicVisit(phone)
+    appointments: await publicAppointment(phone, requestId || undefined),
+    visits: await publicVisit(phone)
   });
 }

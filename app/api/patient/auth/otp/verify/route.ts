@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Wait a few minutes and try again." }, { status: 429 });
   }
 
-  const result = verifyOtpChallenge(phone, code);
+  const result = await verifyOtpChallenge(phone, code);
   if (!result.ok) {
     await recordAuditEvent({
       actorRole: "patient",
@@ -31,10 +31,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 401 });
   }
 
-  const identity = ensurePatientIdentity(result.phone);
-  recordPatientLoginSuccess(identity.id);
+  const identity = await ensurePatientIdentity(result.phone);
+  await recordPatientLoginSuccess(identity.id);
   const meta = auditRequestMetadata(request);
-  const { token } = createPatientSession({ identityId: identity.id, phone: identity.phone, ip: meta.ip, userAgent: meta.userAgent });
+  const { token } = await createPatientSession({ identityId: identity.id, phone: identity.phone, ip: meta.ip, userAgent: meta.userAgent });
 
   await recordAuditEvent({
     actorRole: "patient",

@@ -54,7 +54,7 @@ test("core protected APIs are present", () => {
 });
 
 test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
-  assert.equal(exists("app/hospital-os/actions.ts"), true);
+  assert.equal(exists("app/mudgalgastromedics-os/actions.ts"), true);
   assert.equal(exists("app/api/hospital-os/snapshot/route.ts"), true);
   assert.equal(exists("app/api/hospital-os/realtime/route.ts"), true);
   assert.match(read("app/api/hospital-os/snapshot/route.ts"), /hospital_os\.snapshot\.viewed/);
@@ -66,14 +66,14 @@ test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
   assert.match(read("components/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
   assert.match(read("components/HospitalOperatingSystem.tsx"), /Session audit trail/);
   assert.match(read("components/HospitalOperatingSystem.tsx"), /AI symptom checker/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.patient\.registered/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.appointment\.booked/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.billing\.posted/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.patient_flow\.bulk_updated/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.patient_flow\.doctor_assigned/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.clinical_notes\.autosaved/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.ai_prescription\.confirmed/);
-  assert.match(read("app/hospital-os/actions.ts"), /hospital_os\.teleconsultation\.requested/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient\.registered/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.appointment\.booked/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.billing\.posted/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient_flow\.bulk_updated/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient_flow\.doctor_assigned/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.clinical_notes\.autosaved/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.ai_prescription\.confirmed/);
+  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.teleconsultation\.requested/);
 });
 
 test("mobile API exposes versioned token-gated endpoints", () => {

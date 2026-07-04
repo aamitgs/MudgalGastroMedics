@@ -12,8 +12,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    staff: listStaff(),
-    attendance: listAttendance()
+    staff: await listStaff(),
+    attendance: await listAttendance()
   });
 }
 
@@ -26,14 +26,14 @@ export async function POST(request: Request) {
 
   if (mode === "attendance") {
     const status = typeof body.status === "string" && attendanceStatuses.includes(body.status as AttendanceStatus) ? body.status : "Present";
-    const result = createAttendance({ ...body, status });
+    const result = await createAttendance({ ...body, status });
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true, attendance: result.attendance });
   }
 
   const role = typeof body.role === "string" && staffRoles.includes(body.role as StaffRole) ? body.role : "Admin";
   const shift = typeof body.shift === "string" && shifts.includes(body.shift as StaffMember["shift"]) ? body.shift : "General";
-  const result = createStaff({ ...body, role, shift });
+  const result = await createStaff({ ...body, role, shift });
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   return NextResponse.json({ ok: true, staffMember: result.staff });
 }
@@ -49,7 +49,7 @@ export async function PATCH(request: Request) {
 
   if (mode === "attendance") {
     const status = typeof body.status === "string" && attendanceStatuses.includes(body.status as AttendanceStatus) ? body.status as AttendanceStatus : undefined;
-    const attendance = updateAttendance({
+    const attendance = await updateAttendance({
       id,
       status,
       checkIn: typeof body.checkIn === "string" ? body.checkIn : undefined,
@@ -66,7 +66,7 @@ export async function PATCH(request: Request) {
   const permissions = Array.isArray(body.permissions)
     ? body.permissions.filter((item: unknown): item is StaffPermission => staffPermissions.includes(String(item) as StaffPermission))
     : undefined;
-  const staffMember = updateStaff({
+  const staffMember = await updateStaff({
     id,
     status,
     role,

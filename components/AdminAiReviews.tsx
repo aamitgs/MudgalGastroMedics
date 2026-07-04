@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
 import { aiReviewStatuses } from "@/lib/ai-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const aiReviewExportHeaders = ["Patient", "Phone", "Service", "Source", "Urgency", "Status", "Reviewed By", "Created"];
 
@@ -178,11 +179,11 @@ export function AdminAiReviews() {
         <form onSubmit={generateReview} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><BrainCircuit size={19} /> Generate review</p>
           <div className="grid gap-3">
-            <select value={source} onChange={(event) => { setSource(event.target.value as AiCaseSource); setSourceId(""); }} className={fieldClass}>
+            <select aria-label="Source type" value={source} onChange={(event) => { setSource(event.target.value as AiCaseSource); setSourceId(""); }} className={fieldClass}>
               <option value="Appointment">Appointment</option>
               <option value="OPD">OPD</option>
             </select>
-            <select value={sourceId} onChange={(event) => setSourceId(event.target.value)} className={fieldClass} required>
+            <select aria-label="Source record" value={sourceId} onChange={(event) => setSourceId(event.target.value)} className={fieldClass} required>
               <option value="">Select source record</option>
               {sourceOptions.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -198,7 +199,7 @@ export function AdminAiReviews() {
         </form>
 
         <div className="grid gap-4">
-          {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading AI reviews...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {!loading && reviews.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-8 text-center font-semibold text-muted">No AI reviews generated yet.</p> : null}
           {reviews.map((review) => (
             <article key={review.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -208,7 +209,7 @@ export function AdminAiReviews() {
                   <h3 className="mt-1 text-xl font-bold text-ink">{review.patientName}</h3>
                   <p className="mt-1 text-sm text-muted">{review.service} | {review.urgency}</p>
                 </div>
-                <select value={review.status} onChange={(event) => void updateReview(review.id, { status: event.target.value as AiReviewStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                <select aria-label="Review status" value={review.status} onChange={(event) => void updateReview(review.id, { status: event.target.value as AiReviewStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                   {aiReviewStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>
               </div>

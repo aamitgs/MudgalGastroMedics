@@ -10,9 +10,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    dispenses: listPharmacyDispenses(),
-    visits: listOpdVisits(),
-    inventory: listInventoryItems()
+    dispenses: (await listPharmacyDispenses()),
+    visits: (await listOpdVisits()),
+    inventory: (await listInventoryItems())
   });
 }
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));
-  const result = createPharmacyDispense(body);
+  const result = (await createPharmacyDispense(body));
 
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
@@ -30,6 +30,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     dispense: result.record,
-    inventory: listInventoryItems()
+    inventory: (await listInventoryItems())
   });
 }

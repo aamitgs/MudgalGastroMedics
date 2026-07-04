@@ -3,6 +3,7 @@
 import { CheckCircle2, KeyRound, RefreshCw, ShieldCheck, ShieldOff, UserRoundCog, UserRoundPlus, UsersRound, XCircle } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { roleMeta, staffLoginRoles, type AccessRole } from "@/lib/access/matrix";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ManagedUser = {
   id: string;
@@ -234,7 +235,7 @@ export function AdminUserManagement() {
       ) : null}
 
       <div className="grid gap-3 p-4">
-        {loading ? <p className="text-sm font-semibold text-muted">Loading users...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {!loading && users.length === 0 ? (
           <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">
             No named users yet. Use “Seed Launch Team” to create the launch accounts with one-time temporary passwords.
@@ -311,7 +312,7 @@ export function AdminUserManagement() {
                   ))}
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
-                  <select value={defaultDraft} onChange={(event) => setDefaultDraft(event.target.value as AccessRole)} className={fieldClass}>
+                  <select aria-label="Default role" value={defaultDraft} onChange={(event) => setDefaultDraft(event.target.value as AccessRole)} className={fieldClass}>
                     {roleDraft.map((role) => (
                       <option key={role} value={role}>Default: {roleMeta[role].label}</option>
                     ))}

@@ -3,7 +3,7 @@ import { getPublicProcedures } from "@/lib/cms-public";
 
 export async function GET(request: Request) {
   if (!hasMobileToken(request)) return mobileUnauthorized();
-  const procedures = getPublicProcedures();
+  const procedures = await getPublicProcedures();
 
   return mobileOk({
     procedures: procedures.map((procedure) => ({

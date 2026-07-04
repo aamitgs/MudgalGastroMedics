@@ -34,7 +34,7 @@ function publicUser(user: AccessUser) {
 export async function GET(request: Request) {
   const auth = await authorize(request, "user-management", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
-  return NextResponse.json({ ok: true, users: listAccessUsers().map(publicUser) });
+  return NextResponse.json({ ok: true, users: (await listAccessUsers()).map(publicUser) });
 }
 
 export async function POST(request: Request) {
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   }
 
   const temporaryPassword = generateTempPassword();
-  const result = createAccessUser({
+  const result = await createAccessUser({
     name,
     username,
     email,
@@ -99,7 +99,7 @@ export async function PATCH(request: Request) {
   const body = await request.json().catch(() => ({}));
   const id = typeof body.id === "string" ? body.id : "";
   const operation = typeof body.operation === "string" ? body.operation : "";
-  const user = getAccessUserById(id);
+  const user = await getAccessUserById(id);
   if (!user) return NextResponse.json({ ok: false, error: "User not found." }, { status: 404 });
 
   const audit = (action: string, metadata: Record<string, unknown> = {}) =>
@@ -118,29 +118,29 @@ export async function PATCH(request: Request) {
     if (user.id === auth.context.userId) {
       return NextResponse.json({ ok: false, error: "You cannot suspend your own account." }, { status: 400 });
     }
-    updateAccessUser(user.id, { status: "suspended" });
-    const revoked = revokeAllSessionsForUser(user.id);
+    await updateAccessUser(user.id, { status: "suspended" });
+    const revoked = await revokeAllSessionsForUser(user.id);
     await audit("access.user.suspended", { sessionsRevoked: revoked });
-    return NextResponse.json({ ok: true, user: publicUser(getAccessUserById(user.id)!) });
+    return NextResponse.json({ ok: true, user: publicUser((await getAccessUserById(user.id))!) });
   }
 
   if (operation === "reactivate") {
-    updateAccessUser(user.id, { status: "active", failedLoginCount: 0, lockedUntil: undefined });
+    await updateAccessUser(user.id, { status: "active", failedLoginCount: 0, lockedUntil: undefined });
     await audit("access.user.reactivated");
-    return NextResponse.json({ ok: true, user: publicUser(getAccessUserById(user.id)!) });
+    return NextResponse.json({ ok: true, user: publicUser((await getAccessUserById(user.id))!) });
   }
 
   if (operation === "reset-password") {
     const temporaryPassword = generateTempPassword();
-    updateAccessUser(user.id, { passwordHash: hashPassword(temporaryPassword), mustChangePassword: true });
-    revokeAllSessionsForUser(user.id);
+    await updateAccessUser(user.id, { passwordHash: hashPassword(temporaryPassword), mustChangePassword: true });
+    await revokeAllSessionsForUser(user.id);
     await audit("access.user.password_reset");
     return NextResponse.json({ ok: true, temporaryPassword });
   }
 
   if (operation === "reset-mfa") {
-    updateAccessUser(user.id, { totpSecret: undefined, totpEnabled: false });
-    revokeAllSessionsForUser(user.id);
+    await updateAccessUser(user.id, { totpSecret: undefined, totpEnabled: false });
+    await revokeAllSessionsForUser(user.id);
     await audit("access.user.mfa_reset");
     return NextResponse.json({ ok: true });
   }
@@ -154,7 +154,7 @@ export async function PATCH(request: Request) {
       : roles[0];
     if (!roles.length) return NextResponse.json({ ok: false, error: "At least one role is required." }, { status: 400 });
 
-    const approval = createRoleChangeApproval({
+    const approval = await createRoleChangeApproval({
       targetUserId: user.id,
       targetUserName: user.name,
       roles,

@@ -3,6 +3,7 @@
 import { AlertTriangle, CheckCircle2, RefreshCw, Rocket, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductionCheck, ProductionCheckStatus } from "@/lib/production-readiness";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ProductionReadiness = {
   generatedAt: string;
@@ -98,7 +99,7 @@ export function AdminProductionReadiness() {
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-      {loading ? <p className="border-b border-line p-4 font-semibold text-muted">Loading production readiness...</p> : null}
+      {loading ? <ModuleSkeleton /> : null}
 
       {readiness ? (
         <>

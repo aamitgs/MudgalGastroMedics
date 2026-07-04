@@ -3,6 +3,7 @@
 import { Activity, CheckCircle2, ClipboardList, Layers3, Plus, RefreshCw } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { HmsBuildStatus, HmsModule, HmsModuleRecord, HmsRecordStatus } from "@/lib/hms-types";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type HmsResponse = {
   ok: boolean;
@@ -139,7 +140,7 @@ export function AdminEnterpriseModules() {
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 border-b border-line p-4 md:grid-cols-5">
-        {loading ? <p className="font-semibold text-muted">Loading platform modules...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {stats.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line bg-soft/60 p-4">
             <div className="flex items-center justify-between gap-4">
@@ -196,10 +197,10 @@ export function AdminEnterpriseModules() {
               <p className="flex items-center gap-2 text-lg font-bold text-ink"><Plus size={18} /> Add module task / record</p>
               <input name="title" className={fieldClass} placeholder={`New ${selected.name} task`} required />
               <div className="grid gap-3 md:grid-cols-3">
-                <select name="status" className={fieldClass} defaultValue="Pending">
+                <select aria-label="Status" name="status" className={fieldClass} defaultValue="Pending">
                   {recordStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>
-                <select name="priority" className={fieldClass} defaultValue="Normal">
+                <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Normal">
                   {priorities.map((priority) => <option key={priority}>{priority}</option>)}
                 </select>
                 <input name="owner" className={fieldClass} placeholder="Owner / team" defaultValue={selected.group} />
@@ -220,7 +221,7 @@ export function AdminEnterpriseModules() {
                       <h4 className="mt-1 text-lg font-bold text-ink">{record.title}</h4>
                       <p className="mt-1 text-sm text-muted">Owner: {record.owner} | Updated {new Date(record.updatedAt).toLocaleDateString("en-IN")}</p>
                     </div>
-                    <select
+                    <select aria-label="Status"
                       value={record.status}
                       onChange={(event) => void updateRecord(record.id, event.target.value as HmsRecordStatus)}
                       className="min-h-10 rounded border border-line bg-soft px-3 text-sm font-bold text-ink"

@@ -7,6 +7,7 @@ import { accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
 import type { IpdAdmission } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const claimExportHeaders = ["Patient", "Phone", "Insurer", "Policy Number", "Claim Number", "Requested", "Approved", "Settled", "Status"];
 
@@ -189,17 +190,17 @@ export function AdminFinance() {
         <form onSubmit={createClaim} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><FileCheck2 size={19} /> Create insurance claim</p>
           <div className="grid gap-3">
-            <select value={sourceType} onChange={(event) => setSourceType(event.target.value as "ipd" | "opd")} className={fieldClass}>
+            <select aria-label="Source type" value={sourceType} onChange={(event) => setSourceType(event.target.value as "ipd" | "opd")} className={fieldClass}>
               <option value="ipd">IPD Admission</option>
               <option value="opd">OPD Visit</option>
             </select>
             {sourceType === "ipd" ? (
-              <select name="admissionId" className={fieldClass} required>
+              <select aria-label="Admission" name="admissionId" className={fieldClass} required>
                 <option value="">Select admission</option>
                 {admissions.map((admission) => <option key={admission.id} value={admission.id}>{admission.id} | {admission.patientName}{admission.uhid ? ` | ${admission.uhid}` : ""}</option>)}
               </select>
             ) : (
-              <select name="visitId" className={fieldClass} required>
+              <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
                 <option value="">Select OPD visit</option>
                 {visits.map((visit) => <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""}</option>)}
               </select>
@@ -227,15 +228,15 @@ export function AdminFinance() {
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><BadgeIndianRupee size={19} /> Add account entry</p>
           <div className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="date" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-              <select name="type" className={fieldClass} defaultValue="Expense">{accountEntryTypes.map((type) => <option key={type}>{type}</option>)}</select>
+              <input aria-label="Date" name="date" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+              <select aria-label="Type" name="type" className={fieldClass} defaultValue="Expense">{accountEntryTypes.map((type) => <option key={type}>{type}</option>)}</select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <input name="category" className={fieldClass} placeholder="Category" required />
               <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" required />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <select name="method" className={fieldClass} defaultValue="Cash">{["Cash", "UPI", "Card", "Bank", "Insurance", "Other"].map((method) => <option key={method}>{method}</option>)}</select>
+              <select aria-label="Payment method" name="method" className={fieldClass} defaultValue="Cash">{["Cash", "UPI", "Card", "Bank", "Insurance", "Other"].map((method) => <option key={method}>{method}</option>)}</select>
               <input name="reference" className={fieldClass} placeholder="Reference / voucher" />
             </div>
             <input name="party" className={fieldClass} placeholder="Party / vendor / patient" />
@@ -248,7 +249,7 @@ export function AdminFinance() {
       <div className="grid gap-5 border-t border-line p-4 xl:grid-cols-2">
         <div className="grid gap-3">
           <p className="text-sm font-bold text-ink">Insurance claims</p>
-          {loading ? <p className="text-sm font-semibold text-muted">Loading finance...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {claims.map((claim) => (
             <article key={claim.id} className="rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -257,7 +258,7 @@ export function AdminFinance() {
                   <h3 className="mt-1 text-lg font-bold text-ink">{claim.patientName}</h3>
                   <p className="mt-1 text-sm text-muted">{claim.insurer}{claim.tpa ? ` | ${claim.tpa}` : ""}</p>
                 </div>
-                <select value={claim.status} onChange={(event) => void updateClaim(claim.id, { status: event.target.value as InsuranceClaimStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
+                <select aria-label="Claim status" value={claim.status} onChange={(event) => void updateClaim(claim.id, { status: event.target.value as InsuranceClaimStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
                   {insuranceClaimStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>
               </div>

@@ -1,7 +1,6 @@
 import "server-only";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { AccessRole } from "@/lib/access/matrix";
 
 /**
@@ -30,33 +29,12 @@ type ApprovalsStore = {
   approvals: AccessApproval[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmApprovalsStore?: ApprovalsStore;
-};
+const store = createDocumentStore<ApprovalsStore>("access-approvals", (parsed) => {
+  const doc = parsed as Partial<ApprovalsStore> | undefined;
+  return { approvals: Array.isArray(doc?.approvals) ? (doc.approvals as AccessApproval[]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "access-approvals.json");
-
-function readStoreFromDisk(): ApprovalsStore {
-  if (!existsSync(storeFile)) return { approvals: [] };
-  try {
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<ApprovalsStore>;
-    return { approvals: Array.isArray(parsed.approvals) ? parsed.approvals : [] };
-  } catch {
-    return { approvals: [] };
-  }
-}
-
-function writeStoreToDisk(store: ApprovalsStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, `${JSON.stringify(store, null, 2)}\n`);
-}
-
-function getStore() {
-  globalStore.__mgmApprovalsStore ??= readStoreFromDisk();
-  return globalStore.__mgmApprovalsStore;
-}
-
-export function createRoleChangeApproval(input: {
+export async function createRoleChangeApproval(input: {
   targetUserId: string;
   targetUserName: string;
   roles: AccessRole[];
@@ -75,29 +53,29 @@ export function createRoleChangeApproval(input: {
     requestedAt: new Date().toISOString(),
     status: "pending"
   };
-  const store = getStore();
-  store.approvals = [approval, ...store.approvals].slice(0, 500);
-  writeStoreToDisk(store);
+  const doc = await store.load();
+  doc.approvals = [approval, ...doc.approvals].slice(0, 500);
+  await store.save(doc);
   return approval;
 }
 
-export function getApprovalById(id: string) {
-  return getStore().approvals.find((approval) => approval.id === id) ?? null;
+export async function getApprovalById(id: string) {
+  return (await store.load()).approvals.find((approval) => approval.id === id) ?? null;
 }
 
-export function listApprovals(status?: AccessApproval["status"]) {
-  const approvals = getStore().approvals;
+export async function listApprovals(status?: AccessApproval["status"]) {
+  const approvals = (await store.load()).approvals;
   return status ? approvals.filter((approval) => approval.status === status) : approvals;
 }
 
-export function decideApproval(id: string, decision: "approved" | "rejected", decidedBy: string, decidedByName: string) {
-  const store = getStore();
-  const approval = store.approvals.find((item) => item.id === id);
+export async function decideApproval(id: string, decision: "approved" | "rejected", decidedBy: string, decidedByName: string) {
+  const doc = await store.load();
+  const approval = doc.approvals.find((item) => item.id === id);
   if (!approval || approval.status !== "pending") return null;
   approval.status = decision;
   approval.decidedBy = decidedBy;
   approval.decidedByName = decidedByName;
   approval.decidedAt = new Date().toISOString();
-  writeStoreToDisk(store);
+  await store.save(doc);
   return approval;
 }

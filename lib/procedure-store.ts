@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { getPublicProcedures } from "@/lib/cms-public";
 import { getOpdVisitById } from "@/lib/opd-store";
 import { defaultProcedureChecklist, procedureScheduleStatuses } from "@/lib/procedure-types";
@@ -10,47 +9,33 @@ type ProcedureStore = {
   schedules: ProcedureSchedule[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmProcedureStore?: ProcedureStore;
-};
+const docStore = createDocumentStore<ProcedureStore>("procedure-schedules", (parsed) => {
+  const doc = parsed as Partial<ProcedureStore> | undefined;
+  return { schedules: Array.isArray(doc?.schedules) ? (doc.schedules as ProcedureStore["schedules"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "procedure-schedules.json");
 
-function readStoreFromDisk(): ProcedureStore {
-  try {
-    if (!existsSync(storeFile)) return { schedules: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<ProcedureStore>;
-    return { schedules: Array.isArray(parsed.schedules) ? parsed.schedules : [] };
-  } catch {
-    return { schedules: [] };
-  }
-}
 
-function writeStoreToDisk(store: ProcedureStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmProcedureStore ??= readStoreFromDisk();
-  return globalStore.__mgmProcedureStore;
-}
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function listProcedureSchedules() {
-  return getStore().schedules;
+export async function listProcedureSchedules() {
+  const doc = await docStore.load();
+  return doc.schedules;
 }
 
-export function createProcedureSchedule(input: Record<string, unknown>) {
+export async function createProcedureSchedule(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const visitId = normalizeText(input.visitId);
-  const visit = getOpdVisitById(visitId);
+  const visit = (await getOpdVisitById(visitId));
   if (!visit) return { error: "OPD visit not found." };
 
   const procedureSlug = normalizeText(input.procedureSlug);
-  const procedure = getPublicProcedures().find((item) => item.slug === procedureSlug);
+  const procedure = (await getPublicProcedures()).find((item) => item.slug === procedureSlug);
   if (!procedure) return { error: "Valid procedure is required." };
 
   const scheduledDate = normalizeText(input.scheduledDate);
@@ -83,12 +68,12 @@ export function createProcedureSchedule(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().schedules.unshift(schedule);
-  writeStoreToDisk(getStore());
+  doc.schedules.unshift(schedule);
+  await docStore.save(doc);
   return { schedule };
 }
 
-export function updateProcedureSchedule(input: {
+export async function updateProcedureSchedule(input: {
   id: string;
   status?: ProcedureScheduleStatus;
   checklist?: Partial<ProcedureChecklist>;
@@ -101,7 +86,8 @@ export function updateProcedureSchedule(input: {
   doctor?: string;
   anesthesiaPlan?: string;
 }) {
-  const schedule = getStore().schedules.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const schedule = doc.schedules.find((item) => item.id === input.id);
   if (!schedule) return null;
 
   if (input.status && procedureScheduleStatuses.includes(input.status)) schedule.status = input.status;
@@ -116,7 +102,7 @@ export function updateProcedureSchedule(input: {
   if (typeof input.anesthesiaPlan === "string") schedule.anesthesiaPlan = input.anesthesiaPlan.trim();
   schedule.updatedAt = new Date().toISOString();
 
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return schedule;
 }
 

@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("patient registration, appointment booking, and billing flows pass with axe checks", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/clean operating telemetry/i)).toBeVisible();
 
   await page.getByLabel("First name").fill("Rahul");
@@ -40,7 +40,7 @@ test("patient registration, appointment booking, and billing flows pass with axe
 });
 
 test("command palette searches direct records with keyboard shortcut", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/clean operating telemetry/i)).toBeVisible();
   await page.evaluate(() => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
@@ -53,7 +53,7 @@ test("command palette searches direct records with keyboard shortcut", async ({ 
 });
 
 test("keyboard shortcuts modal documents global shortcuts", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/clean operating telemetry/i)).toBeVisible();
   await page.evaluate(() => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "?", shiftKey: true, bubbles: true }));
@@ -64,7 +64,7 @@ test("keyboard shortcuts modal documents global shortcuts", async ({ page }) => 
 });
 
 test("doctor workspace autosaves clinical notes", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/single-screen consultation/i)).toBeVisible();
   await page.getByLabel("Select Nisha Verma consultation").click();
   await expect(page.getByText("Clinical notes for Nisha Verma")).toBeVisible();
@@ -77,7 +77,7 @@ test("doctor workspace autosaves clinical notes", async ({ page }) => {
 });
 
 test("doctor workspace queue supports keyboard navigation", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/single-screen consultation/i)).toBeVisible();
   const firstQueueItem = page.getByLabel("Select Aarav Sharma consultation");
   await firstQueueItem.focus();
@@ -88,7 +88,7 @@ test("doctor workspace queue supports keyboard navigation", async ({ page }) => 
 });
 
 test("doctor workspace confirms AI prescription suggestion", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText("AI prescription assistance", { exact: true })).toBeVisible();
   await expect(page.getByText(/Suggestion only/i)).toBeVisible();
   await page.getByRole("button", { name: "Confirm Suggestion" }).click();
@@ -100,7 +100,7 @@ test("doctor workspace confirms AI prescription suggestion", async ({ page }) =>
 });
 
 test("patient portal symptom checker stays informational", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText("Informational guidance")).toBeVisible();
   await expect(page.getByText("Not a diagnosis")).toBeVisible();
   await page.getByRole("button", { name: "Review Symptoms" }).click();
@@ -125,7 +125,7 @@ test("patient portal symptom checker stays informational", async ({ page }) => {
 });
 
 test("patient flow table exports CSV", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: /export csv/i }).click();
@@ -139,7 +139,7 @@ test("patient flow table exports CSV", async ({ page }) => {
 });
 
 test("patient flow table exports Excel-compatible file", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: /export excel/i }).click();
@@ -153,7 +153,7 @@ test("patient flow table exports Excel-compatible file", async ({ page }) => {
 });
 
 test("patient flow table filters by status column", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await page.getByLabel("Filter patient flow status").selectOption("Vitals Pending");
   await expect(page.getByRole("row", { name: /Nisha Verma/i })).toBeVisible();
@@ -171,7 +171,7 @@ test("patient flow table filters by status column", async ({ page }) => {
 });
 
 test("patient flow table changes rows per page", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await expect(page.getByText(/showing 4 of 6/i)).toBeVisible();
   await expect(page.getByRole("row", { name: /Kavya Mehta/i })).toHaveCount(0);
@@ -181,7 +181,7 @@ test("patient flow table changes rows per page", async ({ page }) => {
 });
 
 test("patient flow table supports keyboard row navigation", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   const firstRow = page.getByLabel("Open Aarav Sharma row");
   await firstRow.focus();
@@ -192,7 +192,7 @@ test("patient flow table supports keyboard row navigation", async ({ page }) => 
 });
 
 test("patient flow row action opens patient workspace", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await page.getByRole("button", { name: "Open actions for Imran Khan" }).click();
   await page.getByRole("menuitem", { name: "Open patient workspace" }).click();
@@ -200,7 +200,7 @@ test("patient flow row action opens patient workspace", async ({ page }) => {
 });
 
 test("patient flow row action assigns doctor", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await page.getByRole("button", { name: "Open actions for Imran Khan" }).click();
   await page.getByRole("menuitem", { name: "Assign doctor" }).click();
@@ -213,7 +213,7 @@ test("patient flow row action assigns doctor", async ({ page }) => {
 });
 
 test("patient flow row action exports a single row", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await page.getByRole("button", { name: "Open actions for Imran Khan" }).click();
   const downloadPromise = page.waitForEvent("download");
@@ -228,7 +228,7 @@ test("patient flow row action exports a single row", async ({ page }) => {
 });
 
 test("patient flow table applies bulk action to selected rows", async ({ page }) => {
-  await page.goto("/hospital-os");
+  await page.goto("/mudgalgastromedics-os");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await page.getByLabel("Select Nisha Verma", { exact: true }).click();
   await expect(page.getByRole("button", { name: /bulk action \(1\)/i })).toBeEnabled();

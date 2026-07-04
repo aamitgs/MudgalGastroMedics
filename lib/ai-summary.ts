@@ -15,11 +15,11 @@ function hasApiKey() {
   return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
 }
 
-function buildTimelineText(phone: string) {
-  const appointments = listPatientAppointments(phone);
-  const visits = listPatientOpdVisits(phone);
-  const admissions = listPatientIpdAdmissions(phone);
-  const vitals = admissions.flatMap((admission) => listVitals(admission.id));
+async function buildTimelineText(phone: string) {
+  const appointments = (await listPatientAppointments(phone));
+  const visits = (await listPatientOpdVisits(phone));
+  const admissions = (await listPatientIpdAdmissions(phone));
+  const vitals = (await Promise.all(admissions.map((admission) => listVitals(admission.id)))).flat();
 
   const lines: string[] = [];
 
@@ -55,7 +55,7 @@ export async function generatePatientSummary(phone: string): Promise<PatientSumm
     return { ok: false, error: "AI summary is not configured. Set ANTHROPIC_API_KEY to enable this feature." };
   }
 
-  const { lines, hasAnyRecord, patientName } = buildTimelineText(phone);
+  const { lines, hasAnyRecord, patientName } = await buildTimelineText(phone);
   if (!hasAnyRecord) {
     return { ok: false, error: "No appointments, visits or admissions on record for this patient yet." };
   }

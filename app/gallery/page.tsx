@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/gallery" }
 };
 
-export default function GalleryPage() {
-  const galleryItems = getPublicGalleryItems();
+export default async function GalleryPage() {
+  const galleryItems = await getPublicGalleryItems();
   const equipmentGallery = equipment.map((item) => ({
     category: "Equipment",
     title: item.name,

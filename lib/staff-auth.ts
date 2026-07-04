@@ -69,11 +69,11 @@ function parseStaffCredentials(): StaffCredential[] {
   ];
 }
 
-export function authenticateStaffUser(username: string, password: string): StaffMember | null {
+export async function authenticateStaffUser(username: string, password: string): Promise<StaffMember | null> {
   const normalizedUsername = username.trim().toLowerCase();
   const credential = parseStaffCredentials().find((entry) => entry.username.trim().toLowerCase() === normalizedUsername);
   if (!credential || !safeCompare(password, credential.password)) return null;
-  const staff = getStaffById(credential.staffId);
+  const staff = await getStaffById(credential.staffId);
   if (!staff || staff.status !== "Active") return null;
   return staff;
 }

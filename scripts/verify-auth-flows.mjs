@@ -1,0 +1,121 @@
+/**
+ * Live verification of the auth stack against a running server.
+ * Self-contained: creates a throwaway staff user + patient session, exercises
+ * the critical flows, and reports pass/fail. Reusable in JSON and database
+ * modes:  BASE=http://127.0.0.1:3100 node scripts/verify-auth-flows.mjs
+ */
+const BASE = process.env.BASE || "http://127.0.0.1:3100";
+
+let pass = 0;
+let fail = 0;
+function check(label, condition, detail = "") {
+  if (condition) {
+    pass += 1;
+    console.log(`  PASS ${label}`);
+  } else {
+    fail += 1;
+    console.log(`  FAIL ${label} ${detail}`);
+  }
+}
+
+function jar() {
+  const cookies = {};
+  return {
+    header() {
+      return Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join("; ");
+    },
+    absorb(res) {
+      for (const raw of res.headers.getSetCookie?.() ?? []) {
+        const [pair] = raw.split(";");
+        const idx = pair.indexOf("=");
+        cookies[pair.slice(0, idx).trim()] = pair.slice(idx + 1);
+      }
+    }
+  };
+}
+
+async function api(j, method, path, body) {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json", cookie: j.header() },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  j.absorb(res);
+  return { status: res.status, data: await res.json().catch(() => ({})) };
+}
+
+const suffix = Math.random().toString(36).slice(2, 7);
+const username = `verify.${suffix}`;
+
+console.log(`\nVerifying auth flows against ${BASE}`);
+
+console.log("-- staff: create, forced reset, least privilege --");
+const admin = jar();
+const adminLogin = await api(admin, "POST", "/api/admin/session", { username: "admin", password: "mgm-admin" });
+check("legacy admin login", adminLogin.data.ok === true, JSON.stringify(adminLogin.data).slice(0, 120));
+
+const created = await api(admin, "POST", "/api/access/users", {
+  name: `Verify ${suffix}`,
+  username,
+  roles: ["reception"],
+  defaultRole: "reception"
+});
+check("user created with temp password", created.data.ok === true && Boolean(created.data.temporaryPassword), JSON.stringify(created.data).slice(0, 140));
+const tempPassword = created.data.temporaryPassword;
+
+const staff = jar();
+const login1 = await api(staff, "POST", "/api/auth/login", { username, password: tempPassword });
+check("first login forces password change", login1.data.status === "password-change-required", JSON.stringify(login1.data).slice(0, 120));
+
+// Deliberately unrelated to the username so the no-name-in-password rule passes.
+const newPassword = `Kx#${Math.random().toString(36).slice(2, 8)}Qw9!mZt4`;
+const changed = await api(staff, "POST", "/api/auth/password", { currentPassword: tempPassword, newPassword });
+check("forced password change ok", changed.data.ok === true, JSON.stringify(changed.data).slice(0, 120));
+
+const patients = await api(staff, "GET", "/api/patients");
+check("reception can view patients", patients.status === 200, String(patients.status));
+const hr = await api(staff, "GET", "/api/hr");
+check("reception denied HR (403)", hr.status === 403, String(hr.status));
+const audit = await api(staff, "GET", "/api/audit");
+check("reception denied audit logs (403)", audit.status === 403, String(audit.status));
+
+const me = await api(staff, "GET", "/api/auth/me");
+check("me reflects active reception role", me.data.activeRole === "reception", JSON.stringify(me.data).slice(0, 120));
+
+const wrongRole = await api(jar(), "POST", "/api/auth/login", { username, password: newPassword, role: "admin" });
+check("role-not-held rejected (403)", wrongRole.status === 403, String(wrongRole.status));
+
+console.log("-- staff: sessions + suspension revokes access --");
+const sessions = await api(staff, "GET", "/api/auth/sessions");
+check("session list works", sessions.data.ok === true && sessions.data.sessions.length >= 1);
+
+const userId = created.data.user.id;
+const suspended = await api(admin, "PATCH", "/api/access/users", { id: userId, operation: "suspend" });
+check("suspend ok", suspended.data.ok === true, JSON.stringify(suspended.data).slice(0, 120));
+const afterSuspend = await api(staff, "GET", "/api/patients");
+check("suspended session blocked (401)", afterSuspend.status === 401, String(afterSuspend.status));
+
+console.log("-- audit trail --");
+const auditEvents = await api(admin, "GET", "/api/audit");
+const actions = new Set((auditEvents.data.events ?? []).map((event) => event.action));
+for (const expected of ["access.user.created", "access.login", "access.password.changed", "auth.denied", "access.user.suspended"]) {
+  check(`audit has ${expected}`, actions.has(expected));
+}
+
+console.log("-- patient portal: OTP + scoping --");
+const phone = `98${Math.floor(10000000 + Math.random() * 89999999)}`;
+const patient = jar();
+const noSession = await api(patient, "POST", "/api/patient/appointments", {});
+check("patient records need session (401)", noSession.status === 401, String(noSession.status));
+const otpReq = await api(patient, "POST", "/api/patient/auth/otp/request", { phone });
+check("otp requested (dev code available)", otpReq.data.ok === true && Boolean(otpReq.data.devCode), JSON.stringify(otpReq.data).slice(0, 120));
+const otpVerify = await api(patient, "POST", "/api/patient/auth/otp/verify", { phone, code: otpReq.data.devCode });
+check("otp verified -> session", otpVerify.data.ok === true, JSON.stringify(otpVerify.data).slice(0, 120));
+const records = await api(patient, "POST", "/api/patient/appointments", {});
+check("patient records load with session", records.status === 200, String(records.status));
+await api(patient, "POST", "/api/patient/auth/logout");
+const afterLogout = await api(patient, "POST", "/api/patient/appointments", {});
+check("patient session revoked on logout (401)", afterLogout.status === 401, String(afterLogout.status));
+
+console.log(`\n==== ${pass} passed, ${fail} failed ====`);
+process.exit(fail ? 1 : 0);

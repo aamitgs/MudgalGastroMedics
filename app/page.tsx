@@ -10,9 +10,9 @@ import { Stats } from "@/components/Stats";
 import { getPublicGalleryItems, getPublicProcedures } from "@/lib/cms-public";
 import { doctor, equipment, patientFacilities, site, whyChoose } from "@/lib/site-data";
 
-export default function Home() {
-  const procedures = getPublicProcedures();
-  const galleryItems = getPublicGalleryItems();
+export default async function Home() {
+  const procedures = await getPublicProcedures();
+  const galleryItems = await getPublicGalleryItems();
   const treatmentGroups = [
     {
       title: "Diagnostic Endoscopy",

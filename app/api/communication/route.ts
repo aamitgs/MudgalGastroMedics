@@ -10,8 +10,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    logs: listCommunicationLogs(),
-    recipients: getCommunicationRecipients(),
+    logs: (await listCommunicationLogs()),
+    recipients: await getCommunicationRecipients(),
     templates: communicationTemplates
   });
 }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const channel = typeof body.channel === "string" && communicationChannels.includes(body.channel as CommunicationChannel) ? body.channel : "WhatsApp";
   const status = typeof body.status === "string" && communicationStatuses.includes(body.status as CommunicationStatus) ? body.status : "Draft";
-  const result = createCommunicationLog({ ...body, channel, status });
+  const result = (await createCommunicationLog({ ...body, channel, status }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   return NextResponse.json({ ok: true, log: result.log });
 }
@@ -38,7 +38,7 @@ export async function PATCH(request: Request) {
 
   const status = typeof body.status === "string" && communicationStatuses.includes(body.status as CommunicationStatus) ? body.status as CommunicationStatus : undefined;
   const channel = typeof body.channel === "string" && communicationChannels.includes(body.channel as CommunicationChannel) ? body.channel as CommunicationChannel : undefined;
-  const log = updateCommunicationLog({
+  const log = (await updateCommunicationLog({
     id,
     status,
     channel,
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
     scheduledFor: typeof body.scheduledFor === "string" ? body.scheduledFor : undefined,
     owner: typeof body.owner === "string" ? body.owner : undefined,
     notes: typeof body.notes === "string" ? body.notes : undefined
-  });
+  }));
 
   if (!log) return NextResponse.json({ ok: false, error: "Communication log not found." }, { status: 404 });
   return NextResponse.json({ ok: true, log });

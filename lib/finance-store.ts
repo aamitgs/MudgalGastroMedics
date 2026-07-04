@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import { listIpdAdmissions } from "@/lib/ipd-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
@@ -10,34 +9,15 @@ type FinanceStore = {
   entries: AccountEntry[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmFinanceStore?: FinanceStore;
-};
+const docStore = createDocumentStore<FinanceStore>("finance", (parsed) => {
+  const doc = parsed as Partial<FinanceStore> | undefined;
+  return { claims: Array.isArray(doc?.claims) ? (doc.claims as FinanceStore["claims"]) : [], entries: Array.isArray(doc?.entries) ? (doc.entries as FinanceStore["entries"]) : [] };
+});
 
-const storeFile = join(process.cwd(), ".data", "finance.json");
 
-function readStoreFromDisk(): FinanceStore {
-  try {
-    if (!existsSync(storeFile)) return { claims: [], entries: [] };
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<FinanceStore>;
-    return {
-      claims: Array.isArray(parsed.claims) ? parsed.claims : [],
-      entries: Array.isArray(parsed.entries) ? parsed.entries : []
-    };
-  } catch {
-    return { claims: [], entries: [] };
-  }
-}
 
-function writeStoreToDisk(store: FinanceStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmFinanceStore ??= readStoreFromDisk();
-  return globalStore.__mgmFinanceStore;
-}
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -48,29 +28,33 @@ function normalizeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function listInsuranceClaims() {
-  return getStore().claims;
+export async function listInsuranceClaims() {
+  const doc = await docStore.load();
+  return doc.claims;
 }
 
-export function listPatientInsuranceClaims(phone: string) {
+export async function listPatientInsuranceClaims(phone: string) {
+  const doc = await docStore.load();
   const normalizedPhone = phone.replace(/\D/g, "");
   if (normalizedPhone.length < 6) return [];
 
-  return getStore().claims.filter((claim) => {
+  return doc.claims.filter((claim) => {
     const claimPhone = claim.phone.replace(/\D/g, "");
     return claimPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(claimPhone);
   });
 }
 
-export function listAccountEntries() {
-  return getStore().entries;
+export async function listAccountEntries() {
+  const doc = await docStore.load();
+  return doc.entries;
 }
 
-export function createInsuranceClaim(input: Record<string, unknown>) {
+export async function createInsuranceClaim(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const admissionId = normalizeText(input.admissionId);
   const visitId = normalizeText(input.visitId);
-  const admission = admissionId ? listIpdAdmissions().find((item) => item.id === admissionId) : null;
-  const visit = visitId ? getOpdVisitById(visitId) : null;
+  const admission = admissionId ? (await listIpdAdmissions()).find((item) => item.id === admissionId) : null;
+  const visit = visitId ? (await getOpdVisitById(visitId)) : null;
   const source = admission || visit;
   if (!source) return { error: "Select an IPD admission or OPD visit." };
 
@@ -100,12 +84,12 @@ export function createInsuranceClaim(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().claims.unshift(claim);
-  writeStoreToDisk(getStore());
+  doc.claims.unshift(claim);
+  await docStore.save(doc);
   return { claim };
 }
 
-export function updateInsuranceClaim(input: {
+export async function updateInsuranceClaim(input: {
   id: string;
   status?: InsuranceClaimStatus;
   requestedAmount?: number;
@@ -115,7 +99,8 @@ export function updateInsuranceClaim(input: {
   documents?: string;
   notes?: string;
 }) {
-  const claim = getStore().claims.find((item) => item.id === input.id);
+  const doc = await docStore.load();
+  const claim = doc.claims.find((item) => item.id === input.id);
   if (!claim) return null;
   if (input.status) claim.status = input.status;
   if (typeof input.requestedAmount === "number" && Number.isFinite(input.requestedAmount)) claim.requestedAmount = input.requestedAmount;
@@ -125,11 +110,12 @@ export function updateInsuranceClaim(input: {
   if (typeof input.documents === "string") claim.documents = input.documents.trim();
   if (typeof input.notes === "string") claim.notes = input.notes.trim();
   claim.updatedAt = new Date().toISOString();
-  writeStoreToDisk(getStore());
+  await docStore.save(doc);
   return claim;
 }
 
-export function createAccountEntry(input: Record<string, unknown>) {
+export async function createAccountEntry(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const amount = normalizeNumber(input.amount);
   const category = normalizeText(input.category);
   if (!category || amount <= 0) return { error: "Category and valid amount are required." };
@@ -149,7 +135,7 @@ export function createAccountEntry(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().entries.unshift(entry);
-  writeStoreToDisk(getStore());
+  doc.entries.unshift(entry);
+  await docStore.save(doc);
   return { entry };
 }

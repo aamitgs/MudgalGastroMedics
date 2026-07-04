@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const auth = await authorize(request, "system-settings", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, tasks: listAutomationTasks() });
+  return NextResponse.json({ ok: true, tasks: (await listAutomationTasks()) });
 }
 
 export async function POST(request: Request) {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const action = typeof body.action === "string" ? body.action : "create";
 
   if (action === "generate") {
-    const generated = generateAutomationTasks();
+    const generated = (await generateAutomationTasks());
     await recordAuditEvent({
       actorRole: "admin",
       action: "automation.tasks.generated",
@@ -28,12 +28,12 @@ export async function POST(request: Request) {
       entityId: "generated-batch",
       metadata: { generated: generated.length, ...auditRequestMetadata(request) }
     });
-    return NextResponse.json({ ok: true, generated, tasks: listAutomationTasks() });
+    return NextResponse.json({ ok: true, generated, tasks: (await listAutomationTasks()) });
   }
 
   const type = typeof body.type === "string" && automationTaskTypes.includes(body.type as AutomationTaskType) ? body.type : "Appointment Follow-up";
   const priority = typeof body.priority === "string" && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? body.priority : "Normal";
-  const result = createAutomationTask({ ...body, type, priority });
+  const result = (await createAutomationTask({ ...body, type, priority }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   await recordAuditEvent({
     actorRole: "admin",
@@ -55,14 +55,14 @@ export async function PATCH(request: Request) {
   const priority = typeof body.priority === "string" && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? body.priority as AutomationTaskPriority : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "Automation task id is required." }, { status: 400 });
 
-  const task = updateAutomationTask({
+  const task = (await updateAutomationTask({
     id,
     status,
     priority,
     dueAt: typeof body.dueAt === "string" ? body.dueAt : undefined,
     owner: typeof body.owner === "string" ? body.owner : undefined,
     notes: typeof body.notes === "string" ? body.notes : undefined
-  });
+  }));
 
   if (!task) return NextResponse.json({ ok: false, error: "Automation task not found." }, { status: 404 });
   await recordAuditEvent({

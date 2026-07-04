@@ -12,13 +12,13 @@ type ProcedurePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublicProcedures().map((procedure) => ({ slug: procedure.slug }));
+export async function generateStaticParams() {
+  return (await getPublicProcedures()).map((procedure) => ({ slug: procedure.slug }));
 }
 
 export async function generateMetadata({ params }: ProcedurePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const procedure = getPublicProcedure(slug);
+  const procedure = await getPublicProcedure(slug);
 
   if (!procedure) return {};
 
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: ProcedurePageProps): Promise<
 
 export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const { slug } = await params;
-  const procedure = getPublicProcedure(slug);
+  const procedure = await getPublicProcedure(slug);
   if (!procedure) notFound();
   const isBleeding = procedure.slug === "gastrointestinal-bleeding-management";
 

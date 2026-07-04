@@ -12,9 +12,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    schedules: listProcedureSchedules(),
-    visits: listOpdVisits(),
-    procedures: getPublicProcedures()
+    schedules: (await listProcedureSchedules()),
+    visits: (await listOpdVisits()),
+    procedures: await getPublicProcedures()
   });
 }
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));
-  const result = createProcedureSchedule(body);
+  const result = (await createProcedureSchedule(body));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid procedure status." }, { status: 400 });
   }
 
-  const schedule = updateProcedureSchedule({
+  const schedule = (await updateProcedureSchedule({
     id,
     status: status as ProcedureScheduleStatus | undefined,
     checklist: body.checklist && typeof body.checklist === "object" ? body.checklist : undefined,
@@ -59,7 +59,7 @@ export async function PATCH(request: Request) {
     room: typeof body.room === "string" ? body.room : undefined,
     doctor: typeof body.doctor === "string" ? body.doctor : undefined,
     anesthesiaPlan: typeof body.anesthesiaPlan === "string" ? body.anesthesiaPlan : undefined
-  });
+  }));
 
   if (!schedule) {
     return NextResponse.json({ ok: false, error: "Procedure schedule not found." }, { status: 404 });

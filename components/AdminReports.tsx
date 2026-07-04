@@ -2,6 +2,7 @@
 
 import { BarChart3, CalendarDays, ClipboardList, PackageX, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AdminReport = {
   generatedAt: string;
@@ -200,7 +201,7 @@ export function AdminReports() {
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid grid-cols-2 gap-2 border-b border-line p-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
-        {loading ? <p className="font-semibold text-muted">Loading reports...</p> : null}
+        {loading ? <ModuleSkeleton /> : null}
         {kpis.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line bg-soft/60 px-3 py-2.5">
             <div className="flex items-center justify-between gap-2">

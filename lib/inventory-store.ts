@@ -1,17 +1,12 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { InventoryCategory, InventoryItem } from "@/lib/inventory-types";
 
 type InventoryStore = {
   items: InventoryItem[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmInventoryStore?: InventoryStore;
-};
 
-const storeFile = join(process.cwd(), ".data", "inventory.json");
 
 const starterItems: InventoryItem[] = [
   {
@@ -56,25 +51,14 @@ const starterItems: InventoryItem[] = [
   }
 ];
 
-function readItemsFromDisk(): InventoryItem[] {
-  try {
-    if (!existsSync(storeFile)) return starterItems;
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<InventoryStore>;
-    return Array.isArray(parsed.items) ? parsed.items : starterItems;
-  } catch {
-    return starterItems;
-  }
-}
+const docStore = createDocumentStore<InventoryStore>("inventory", (parsed) => {
+  const doc = parsed as Partial<InventoryStore> | undefined;
+  return { items: Array.isArray(doc?.items) ? (doc.items as InventoryItem[]) : starterItems };
+});
 
-function writeItemsToDisk(items: InventoryItem[]) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify({ items }, null, 2));
-}
 
-function getStore() {
-  globalStore.__mgmInventoryStore ??= { items: readItemsFromDisk() };
-  return globalStore.__mgmInventoryStore;
-}
+
+
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -85,13 +69,14 @@ function normalizeNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-export function listInventoryItems() {
-  return getStore().items;
+export async function listInventoryItems() {
+  return (await docStore.load()).items;
 }
 
-export function upsertInventoryItem(input: Record<string, unknown>) {
+export async function upsertInventoryItem(input: Record<string, unknown>) {
+  const doc = await docStore.load();
   const id = normalizeText(input.id) || `INV-${Date.now().toString(36).toUpperCase()}`;
-  const existing = getStore().items.find((item) => item.id === id);
+  const existing = doc.items.find((item) => item.id === id);
   const now = new Date().toISOString();
 
   const item: InventoryItem = {
@@ -108,18 +93,19 @@ export function upsertInventoryItem(input: Record<string, unknown>) {
   if (existing) {
     Object.assign(existing, item);
   } else {
-    getStore().items.unshift(item);
+    doc.items.unshift(item);
   }
 
-  writeItemsToDisk(getStore().items);
+  await docStore.save(doc);
   return item;
 }
 
-export function adjustInventoryQuantity(id: string, delta: number) {
-  const item = getStore().items.find((entry) => entry.id === id);
+export async function adjustInventoryQuantity(id: string, delta: number) {
+  const doc = await docStore.load();
+  const item = doc.items.find((entry) => entry.id === id);
   if (!item) return null;
   item.quantity = Math.max(0, item.quantity + delta);
   item.lastUpdatedAt = new Date().toISOString();
-  writeItemsToDisk(getStore().items);
+  await docStore.save(doc);
   return item;
 }

@@ -3,9 +3,9 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { clearPatientSessionCookie, getPatientSessionFromRequest, revokePatientSession } from "@/lib/patient-access/session-store";
 
 export async function POST(request: Request) {
-  const session = getPatientSessionFromRequest(request);
+  const session = await getPatientSessionFromRequest(request);
   if (session) {
-    revokePatientSession(session.id);
+    await revokePatientSession(session.id);
     await recordAuditEvent({
       actorRole: "patient",
       actorId: session.identityId,

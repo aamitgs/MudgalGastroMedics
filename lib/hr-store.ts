@@ -1,6 +1,5 @@
 import "server-only";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createDocumentStore } from "@/lib/document-store";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffRole, StaffStatus } from "@/lib/hr-types";
 import { staffPermissions } from "@/lib/hr-types";
 
@@ -9,11 +8,7 @@ type HrStore = {
   attendance: AttendanceRecord[];
 };
 
-const globalStore = globalThis as typeof globalThis & {
-  __mgmHrStore?: HrStore;
-};
 
-const storeFile = join(process.cwd(), ".data", "hr.json");
 
 function nowIso() {
   return new Date().toISOString();
@@ -111,28 +106,14 @@ function seedStore(): HrStore {
   };
 }
 
-function readStoreFromDisk(): HrStore {
-  try {
-    if (!existsSync(storeFile)) return seedStore();
-    const parsed = JSON.parse(readFileSync(storeFile, "utf8")) as Partial<HrStore>;
-    return {
-      staff: Array.isArray(parsed.staff) ? parsed.staff.map(withPermissions) : seedStore().staff,
-      attendance: Array.isArray(parsed.attendance) ? parsed.attendance : []
-    };
-  } catch {
-    return seedStore();
-  }
-}
-
-function writeStoreToDisk(store: HrStore) {
-  mkdirSync(dirname(storeFile), { recursive: true });
-  writeFileSync(storeFile, JSON.stringify(store, null, 2));
-}
-
-function getStore() {
-  globalStore.__mgmHrStore ??= readStoreFromDisk();
-  return globalStore.__mgmHrStore;
-}
+const store = createDocumentStore<HrStore>("hr", (parsed) => {
+  const doc = parsed as Partial<HrStore> | undefined;
+  if (!doc) return seedStore();
+  return {
+    staff: Array.isArray(doc.staff) ? doc.staff.map(withPermissions) : seedStore().staff,
+    attendance: Array.isArray(doc.attendance) ? doc.attendance : []
+  };
+});
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -170,20 +151,21 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 }
 
-export function listStaff() {
-  return getStore().staff.map(withPermissions);
+export async function listStaff() {
+  return (await store.load()).staff.map(withPermissions);
 }
 
-export function getStaffById(id: string) {
-  const member = getStore().staff.find((item) => item.id === id);
+export async function getStaffById(id: string) {
+  const member = (await store.load()).staff.find((item) => item.id === id);
   return member ? withPermissions(member) : null;
 }
 
-export function listAttendance() {
-  return getStore().attendance;
+export async function listAttendance() {
+  return (await store.load()).attendance;
 }
 
-export function createStaff(input: Record<string, unknown>) {
+export async function createStaff(input: Record<string, unknown>) {
+  const doc = await store.load();
   const name = normalizeText(input.name);
   const phone = normalizeText(input.phone);
   const department = normalizeText(input.department);
@@ -209,12 +191,12 @@ export function createStaff(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().staff.unshift(member);
-  writeStoreToDisk(getStore());
+  doc.staff.unshift(member);
+  await store.save(doc);
   return { staff: member };
 }
 
-export function updateStaff(input: {
+export async function updateStaff(input: {
   id: string;
   status?: StaffStatus;
   role?: StaffRole;
@@ -227,7 +209,8 @@ export function updateStaff(input: {
   emergencyContact?: string;
   notes?: string;
 }) {
-  const member = getStore().staff.find((item) => item.id === input.id);
+  const doc = await store.load();
+  const member = doc.staff.find((item) => item.id === input.id);
   if (!member) return null;
 
   if (input.status) member.status = input.status;
@@ -244,18 +227,19 @@ export function updateStaff(input: {
   if (typeof input.emergencyContact === "string") member.emergencyContact = input.emergencyContact.trim();
   if (typeof input.notes === "string") member.notes = input.notes.trim();
   member.updatedAt = nowIso();
-  writeStoreToDisk(getStore());
+  await store.save(doc);
   return member;
 }
 
-export function createAttendance(input: Record<string, unknown>) {
+export async function createAttendance(input: Record<string, unknown>) {
+  const doc = await store.load();
   const staffId = normalizeText(input.staffId);
-  const staffMember = getStore().staff.find((item) => item.id === staffId);
+  const staffMember = doc.staff.find((item) => item.id === staffId);
   if (!staffMember) return { error: "Select a valid staff member." };
 
   const date = normalizeText(input.date) || nowIso().slice(0, 10);
   const status = (normalizeText(input.status) as AttendanceStatus) || "Present";
-  const existing = getStore().attendance.find((record) => record.staffId === staffId && record.date === date);
+  const existing = doc.attendance.find((record) => record.staffId === staffId && record.date === date);
   const now = nowIso();
 
   if (existing) {
@@ -265,7 +249,7 @@ export function createAttendance(input: Record<string, unknown>) {
     existing.checkOut = normalizeText(input.checkOut);
     existing.notes = normalizeText(input.notes);
     existing.updatedAt = now;
-    writeStoreToDisk(getStore());
+    await store.save(doc);
     return { attendance: existing };
   }
 
@@ -282,25 +266,26 @@ export function createAttendance(input: Record<string, unknown>) {
     notes: normalizeText(input.notes)
   };
 
-  getStore().attendance.unshift(attendance);
-  writeStoreToDisk(getStore());
+  doc.attendance.unshift(attendance);
+  await store.save(doc);
   return { attendance };
 }
 
-export function updateAttendance(input: {
+export async function updateAttendance(input: {
   id: string;
   status?: AttendanceStatus;
   checkIn?: string;
   checkOut?: string;
   notes?: string;
 }) {
-  const attendance = getStore().attendance.find((item) => item.id === input.id);
+  const doc = await store.load();
+  const attendance = doc.attendance.find((item) => item.id === input.id);
   if (!attendance) return null;
   if (input.status) attendance.status = input.status;
   if (typeof input.checkIn === "string") attendance.checkIn = input.checkIn.trim();
   if (typeof input.checkOut === "string") attendance.checkOut = input.checkOut.trim();
   if (typeof input.notes === "string") attendance.notes = input.notes.trim();
   attendance.updatedAt = nowIso();
-  writeStoreToDisk(getStore());
+  await store.save(doc);
   return attendance;
 }

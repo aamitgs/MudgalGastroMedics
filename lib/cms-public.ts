@@ -19,12 +19,12 @@ function cleanPathSlug(value: string, prefix: string) {
   return value.replace(prefix, "").replace(/^#/, "").replace(/^\//, "").trim();
 }
 
-function publishedContent() {
-  return listCmsContent().filter((item) => item.status === "Published");
+async function publishedContent() {
+  return (await listCmsContent()).filter((item) => item.status === "Published");
 }
 
-export function getPublicProcedures(): PublicProcedure[] {
-  const publishedProcedures = publishedContent().filter((item) => item.type === "Procedure");
+export async function getPublicProcedures(): Promise<PublicProcedure[]> {
+  const publishedProcedures = (await publishedContent()).filter((item) => item.type === "Procedure");
   const overrides = new Map(publishedProcedures.map((item) => [cleanPathSlug(item.slug, "/procedures/"), item]));
 
   const merged = procedures.map((procedure) => {
@@ -58,12 +58,12 @@ export function getPublicProcedures(): PublicProcedure[] {
   return [...merged, ...cmsOnly];
 }
 
-export function getPublicProcedure(slug: string) {
-  return getPublicProcedures().find((procedure) => procedure.slug === slug) ?? null;
+export async function getPublicProcedure(slug: string) {
+  return (await getPublicProcedures()).find((procedure) => procedure.slug === slug) ?? null;
 }
 
-export function getPublicGalleryItems(): PublicGalleryItem[] {
-  const publishedGallery = publishedContent().filter((item) => item.type === "Gallery");
+export async function getPublicGalleryItems(): Promise<PublicGalleryItem[]> {
+  const publishedGallery = (await publishedContent()).filter((item) => item.type === "Gallery");
   const overrides = new Map(publishedGallery.map((item) => [cleanPathSlug(item.slug, "/gallery"), item]));
 
   const merged = galleryItems.map((item) => {

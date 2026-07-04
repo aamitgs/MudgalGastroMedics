@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { site } from "@/lib/site-data";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { toast } from "sonner";
 
 type AiSummaryResponse = {
   ok: boolean;
@@ -134,6 +136,7 @@ export function DoctorPortalWorkspace() {
       return;
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
+    toast.success("Saved", { id: "doctor-autosave", duration: 1600 });
   }
 
   useEffect(() => {
@@ -251,7 +254,7 @@ export function DoctorPortalWorkspace() {
             </div>
             {error ? <p className="border-b border-line bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
             <div className="grid max-h-[780px] gap-3 overflow-auto p-4">
-              {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading doctor portal...</p> : null}
+              {loading ? <ModuleSkeleton /> : null}
               {!loading && filteredVisits.length === 0 ? (
                 <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
                   <Stethoscope className="mx-auto text-brand" size={34} />
@@ -346,7 +349,7 @@ function DoctorConsultationCard({
           <div className="grid gap-2 sm:grid-cols-3 md:min-w-[440px]">
             <button type="button" onClick={() => void updateVisit(visit.id, { status: "In Consultation" })} className="rounded border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 py-2 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]">Start</button>
             <button type="button" onClick={() => void updateVisit(visit.id, { status: "Completed" })} className="rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 py-2 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">Complete</button>
-            <select
+            <select aria-label="Visit status"
               value={visit.status}
               onChange={(event) => void updateVisit(visit.id, { status: event.target.value as OpdVisitStatus })}
               className="rounded border border-line bg-white px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"

@@ -17,26 +17,26 @@ function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "document";
 }
 
-function findPatientForVisit(patientId: string | undefined, phone: string) {
+async function findPatientForVisit(patientId: string | undefined, phone: string) {
   if (patientId) {
-    const byId = getPatientById(patientId);
+    const byId = (await getPatientById(patientId));
     if (byId) return byId;
   }
-  return findPatientByPhone(phone) ?? undefined;
+  return (await findPatientByPhone(phone)) ?? undefined;
 }
 
 export async function renderPrescriptionPdf(visitId: string): Promise<PdfRenderResult> {
-  const visit = getOpdVisitById(visitId);
+  const visit = (await getOpdVisitById(visitId));
   if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
 
   registerPdfFonts();
-  const patient = findPatientForVisit(visit.patientId, visit.phone);
+  const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(PrescriptionDocument({ visit, patient }));
   return { ok: true, buffer, filename: `prescription-${slugify(visit.patientName)}-${visit.token}.pdf` };
 }
 
 export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult> {
-  const visit = getOpdVisitById(visitId);
+  const visit = (await getOpdVisitById(visitId));
   if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
 
   registerPdfFonts();
@@ -46,10 +46,10 @@ export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult
 }
 
 export async function renderDischargeSummaryPdf(admissionId: string): Promise<PdfRenderResult> {
-  const admission = listIpdAdmissions().find((item) => item.id === admissionId);
+  const admission = (await listIpdAdmissions()).find((item) => item.id === admissionId);
   if (!admission) return { ok: false, error: "Admission not found.", status: 404 };
 
-  const vitals = listVitals(admission.id);
+  const vitals = (await listVitals(admission.id));
   const html = buildDischargeSummaryHtml(admission, vitals);
   const buffer = await renderHtmlToPdf(html, {
     headerTemplate: buildDischargeSummaryHeaderTemplate(admission),

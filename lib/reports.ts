@@ -22,24 +22,24 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function createAdminReport() {
+export async function createAdminReport() {
   const today = todayKey();
-  const accountEntries = listAccountEntries();
-  const aiReviews = listAiReviews();
-  const appointments = listAppointments();
-  const automationTasks = listAutomationTasks();
-  const communicationLogs = listCommunicationLogs();
-  const claims = listInsuranceClaims();
-  const staff = listStaff();
-  const attendance = listAttendance();
-  const opdVisits = listOpdVisits();
-  const inventory = listInventoryItems();
-  const beds = listBeds();
-  const ipdAdmissions = listIpdAdmissions();
-  const labOrders = listLabOrders();
-  const patients = listPatients();
-  const dispenses = listPharmacyDispenses();
-  const procedureSchedules = listProcedureSchedules();
+  const accountEntries = (await listAccountEntries());
+  const aiReviews = (await listAiReviews());
+  const appointments = (await listAppointments());
+  const automationTasks = (await listAutomationTasks());
+  const communicationLogs = (await listCommunicationLogs());
+  const claims = (await listInsuranceClaims());
+  const staff = await listStaff();
+  const attendance = await listAttendance();
+  const opdVisits = (await listOpdVisits());
+  const inventory = (await listInventoryItems());
+  const beds = (await listBeds());
+  const ipdAdmissions = (await listIpdAdmissions());
+  const labOrders = (await listLabOrders());
+  const patients = (await listPatients());
+  const dispenses = (await listPharmacyDispenses());
+  const procedureSchedules = (await listProcedureSchedules());
   const todaysDispenses = dispenses.filter((record) => record.createdAt.slice(0, 10) === today);
   const todaysLabOrders = labOrders.filter((order) => order.createdAt.slice(0, 10) === today);
   const todaysProcedures = procedureSchedules.filter((schedule) => schedule.scheduledDate === today);

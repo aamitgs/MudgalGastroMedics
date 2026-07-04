@@ -47,22 +47,22 @@ function topCounts(items: string[], fallback = "Uncategorized") {
     .slice(0, 8);
 }
 
-export function createAnalyticsSnapshot() {
+export async function createAnalyticsSnapshot() {
   const days = daysBack(14);
-  const appointments = listAppointments();
-  const aiReviews = listAiReviews();
-  const communicationLogs = listCommunicationLogs();
-  const accountEntries = listAccountEntries();
-  const attendance = listAttendance();
-  const staff = listStaff();
-  const inventory = listInventoryItems();
-  const beds = listBeds();
-  const admissions = listIpdAdmissions();
-  const labOrders = listLabOrders();
-  const opdVisits = listOpdVisits();
-  const patients = listPatients();
-  const dispenses = listPharmacyDispenses();
-  const procedures = listProcedureSchedules();
+  const appointments = (await listAppointments());
+  const aiReviews = (await listAiReviews());
+  const communicationLogs = (await listCommunicationLogs());
+  const accountEntries = (await listAccountEntries());
+  const attendance = await listAttendance();
+  const staff = await listStaff();
+  const inventory = (await listInventoryItems());
+  const beds = (await listBeds());
+  const admissions = (await listIpdAdmissions());
+  const labOrders = (await listLabOrders());
+  const opdVisits = (await listOpdVisits());
+  const patients = (await listPatients());
+  const dispenses = (await listPharmacyDispenses());
+  const procedures = (await listProcedureSchedules());
   const paidVisits = opdVisits.filter((visit) => visit.billingStatus === "Paid");
   const activeAdmissions = admissions.filter((admission) => admission.status === "Admitted");
 
@@ -148,9 +148,9 @@ export function createAnalyticsSnapshot() {
 }
 
 /** Real KPI tiles for the Hospital OS command center, replacing static demo figures. */
-export function createHospitalOsDashboardMetrics(): DashboardMetric[] {
-  const snapshot = createAnalyticsSnapshot();
-  const occupancy = getOccupancyStats();
+export async function createHospitalOsDashboardMetrics(): Promise<DashboardMetric[]> {
+  const snapshot = await createAnalyticsSnapshot();
+  const occupancy = (await getOccupancyStats());
   const today = snapshot.trend[snapshot.trend.length - 1];
   const yesterday = snapshot.trend[snapshot.trend.length - 2];
 
@@ -192,8 +192,8 @@ export function createHospitalOsDashboardMetrics(): DashboardMetric[] {
 }
 
 /** Real 7-day OPD/revenue trend for the Hospital OS command center charts. */
-export function createHospitalOsTrend() {
-  const snapshot = createAnalyticsSnapshot();
+export async function createHospitalOsTrend() {
+  const snapshot = await createAnalyticsSnapshot();
   return snapshot.trend.slice(-7).map((day) => ({
     time: new Date(day.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
     opd: day.opd,

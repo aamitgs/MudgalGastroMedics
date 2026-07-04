@@ -6,6 +6,7 @@ import type { InventoryItem } from "@/lib/inventory-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PharmacyDispenseRecord } from "@/lib/pharmacy-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const dispenseExportHeaders = ["Token", "Patient", "Phone", "Status", "Items", "Total", "Payment Status", "Created"];
 
@@ -197,7 +198,7 @@ export function AdminPharmacy() {
           <div className="grid gap-3">
             <label>
               <span className="mb-2 block text-sm font-bold text-ink">OPD Visit</span>
-              <select value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
+              <select aria-label="Selected visit id" value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
                 <option value="">Select OPD visit</option>
                 {visits.map((visit) => (
                   <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
@@ -216,7 +217,7 @@ export function AdminPharmacy() {
                 const stockItem = inventory.find((entry) => entry.id === item.inventoryItemId);
                 return (
                   <div key={index} className="grid gap-2 rounded border border-line bg-surface p-3 md:grid-cols-[1fr_90px_110px_auto] md:items-center">
-                    <select value={item.inventoryItemId} onChange={(event) => updateDraftItem(index, { inventoryItemId: event.target.value })} className={fieldClass} required>
+                    <select aria-label="Inventory item id" value={item.inventoryItemId} onChange={(event) => updateDraftItem(index, { inventoryItemId: event.target.value })} className={fieldClass} required>
                       <option value="">Select item</option>
                       {medicineItems.map((entry) => (
                         <option key={entry.id} value={entry.id}>{entry.name} | {entry.quantity} {entry.unit}</option>
@@ -238,11 +239,11 @@ export function AdminPharmacy() {
 
             <div className="grid gap-3 md:grid-cols-3">
               <input value={discount} onChange={(event) => setDiscount(event.target.value)} className={fieldClass} type="number" min="0" placeholder="Discount" />
-              <select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value as "Unpaid" | "Paid")} className={fieldClass}>
+              <select aria-label="Payment status" value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value as "Unpaid" | "Paid")} className={fieldClass}>
                 <option>Unpaid</option>
                 <option>Paid</option>
               </select>
-              <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className={fieldClass}>
+              <select aria-label="Payment method" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)} className={fieldClass}>
                 {["Cash", "UPI", "Card", "Insurance", "Other"].map((method) => <option key={method}>{method}</option>)}
               </select>
             </div>
@@ -263,7 +264,7 @@ export function AdminPharmacy() {
             <p className="text-sm font-bold text-ink">Recent pharmacy dispenses</p>
           </div>
           <div className="grid max-h-[760px] gap-3 overflow-auto p-4">
-            {loading ? <p className="text-sm font-semibold text-muted">Loading pharmacy...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && dispenses.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No pharmacy dispenses yet.</p> : null}
             {dispenses.map((record) => (
               <article key={record.id} className="rounded border border-line bg-soft/40 p-4">

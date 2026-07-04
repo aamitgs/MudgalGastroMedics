@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const auth = await authorize(request, "appointments", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, visits: listOpdVisits() });
+  return NextResponse.json({ ok: true, visits: (await listOpdVisits()) });
 }
 
 export async function POST(request: Request) {
@@ -21,13 +21,13 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const appointmentId = typeof body.appointmentId === "string" ? body.appointmentId : "";
-  const appointment = getAppointmentById(appointmentId);
+  const appointment = (await getAppointmentById(appointmentId));
 
   if (!appointment) {
     return NextResponse.json({ ok: false, error: "Appointment not found." }, { status: 404 });
   }
 
-  const visit = createOpdVisit(appointment);
+  const visit = (await createOpdVisit(appointment));
   return NextResponse.json({ ok: true, visit });
 }
 
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid payment method." }, { status: 400 });
   }
 
-  const visit = updateOpdVisit({
+  const visit = (await updateOpdVisit({
     id,
     status: status as OpdVisitStatus | undefined,
     billingStatus: billingStatus as OpdVisit["billingStatus"] | undefined,
@@ -83,7 +83,7 @@ export async function PATCH(request: Request) {
     prescription,
     advice,
     followUpDate
-  });
+  }));
 
   if (!visit) {
     return NextResponse.json({ ok: false, error: "Visit not found." }, { status: 404 });

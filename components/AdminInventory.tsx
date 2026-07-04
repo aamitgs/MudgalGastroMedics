@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryCategories } from "@/lib/inventory-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Last Updated"];
 
@@ -156,7 +157,7 @@ export function AdminInventory() {
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Plus size={19} /> Add / update stock item</p>
           <div className="grid gap-3">
             <input name="name" className={fieldClass} placeholder="Item name" required />
-            <select name="category" className={fieldClass} defaultValue="Consumable">
+            <select aria-label="Category" name="category" className={fieldClass} defaultValue="Consumable">
               {inventoryCategories.map((category) => (
                 <option key={category}>{category}</option>
               ))}
@@ -174,7 +175,7 @@ export function AdminInventory() {
         </form>
 
         <div className="grid gap-3">
-          {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading inventory...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {!loading && items.length === 0 ? (
             <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
               <PackageCheck className="mx-auto text-brand" size={34} />

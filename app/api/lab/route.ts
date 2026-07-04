@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const auth = await authorize(request, "lab-orders", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, orders: listLabOrders(), visits: listOpdVisits() });
+  return NextResponse.json({ ok: true, orders: (await listLabOrders()), visits: (await listOpdVisits()) });
 }
 
 export async function POST(request: Request) {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));
-  const result = createLabOrder(body);
+  const result = (await createLabOrder(body));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
@@ -43,7 +43,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid lab order status." }, { status: 400 });
   }
 
-  const order = updateLabOrder({
+  const order = (await updateLabOrder({
     id,
     status: status as LabOrderStatus | undefined,
     resultSummary: typeof body.resultSummary === "string" ? body.resultSummary : undefined,
@@ -51,7 +51,7 @@ export async function PATCH(request: Request) {
     paymentStatus,
     amount,
     notes: typeof body.notes === "string" ? body.notes : undefined
-  });
+  }));
 
   if (!order) {
     return NextResponse.json({ ok: false, error: "Lab order not found." }, { status: 404 });

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const auth = await authorize(request, "pharmacy-inventory", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, items: listInventoryItems() });
+  return NextResponse.json({ ok: true, items: (await listInventoryItems()) });
 }
 
 export async function POST(request: Request) {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid inventory category." }, { status: 400 });
   }
 
-  const item = upsertInventoryItem(body);
+  const item = (await upsertInventoryItem(body));
   return NextResponse.json({ ok: true, item });
 }
 
@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Valid item id and delta are required." }, { status: 400 });
   }
 
-  const item = adjustInventoryQuantity(id, delta);
+  const item = (await adjustInventoryQuantity(id, delta));
   if (!item) {
     return NextResponse.json({ ok: false, error: "Inventory item not found." }, { status: 404 });
   }

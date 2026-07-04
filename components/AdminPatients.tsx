@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { toast } from "sonner";
 
 const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Gender", "Blood Group", "City", "Status", "Last Visit"];
 
@@ -67,6 +69,7 @@ export function AdminPatients() {
       return;
     }
     setPatients((items) => [data.patient as PatientRecord, ...items.filter((item) => item.id !== data.patient?.id)]);
+    toast.success("Patient saved");
     form.reset();
   }
 
@@ -82,6 +85,7 @@ export function AdminPatients() {
       return;
     }
     setPatients((items) => items.map((item) => (item.id === id ? data.patient as PatientRecord : item)));
+    toast.success("Patient updated");
   }
 
   useEffect(() => {
@@ -178,13 +182,13 @@ export function AdminPatients() {
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <input name="age" className={fieldClass} placeholder="Age" inputMode="numeric" />
-              <select name="gender" className={fieldClass} defaultValue="">
+              <select aria-label="Gender" name="gender" className={fieldClass} defaultValue="">
                 <option value="">Gender</option>
                 <option>Female</option>
                 <option>Male</option>
                 <option>Other</option>
               </select>
-              <select name="bloodGroup" className={fieldClass} defaultValue="">
+              <select aria-label="Blood group" name="bloodGroup" className={fieldClass} defaultValue="">
                 <option value="">Blood group</option>
                 {bloodGroups.filter(Boolean).map((group) => <option key={group}>{group}</option>)}
               </select>
@@ -213,7 +217,7 @@ export function AdminPatients() {
           </label>
 
           <div className="mt-4 grid max-h-[720px] gap-3 overflow-auto pr-1">
-            {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading patients...</p> : null}
+            {loading ? <ModuleSkeleton /> : null}
             {!loading && filteredPatients.length === 0 ? (
               <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
                 <FileHeart className="mx-auto text-brand" size={34} />
@@ -246,7 +250,7 @@ export function AdminPatients() {
                   <div className="grid gap-2">
                     <a href={`tel:${patient.phone}`} className="rounded border border-line bg-surface px-4 py-2 text-center font-bold text-ink transition hover:border-brand hover:text-brand">Call</a>
                     <a href={`https://wa.me/${patient.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="rounded border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 px-4 py-2 text-center font-bold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-100 dark:bg-emerald-950">WhatsApp</a>
-                    <select
+                    <select aria-label="Status"
                       value={patient.status}
                       onChange={(event) => void updateStatus(patient.id, event.target.value as PatientStatus)}
                       className="rounded border border-line bg-surface px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"

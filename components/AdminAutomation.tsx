@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus } from "@/lib/automation-types";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const automationExportHeaders = ["Title", "Type", "Priority", "Status", "Patient", "Due At", "Created"];
 
@@ -174,11 +175,11 @@ export function AdminAutomation() {
           <div className="grid gap-3">
             <input name="title" className={fieldClass} placeholder="Task title" required />
             <div className="grid gap-3 md:grid-cols-2">
-              <select name="type" className={fieldClass} defaultValue="Appointment Follow-up">{automationTaskTypes.map((type) => <option key={type}>{type}</option>)}</select>
-              <select name="priority" className={fieldClass} defaultValue="Normal">{automationTaskPriorities.map((priority) => <option key={priority}>{priority}</option>)}</select>
+              <select aria-label="Type" name="type" className={fieldClass} defaultValue="Appointment Follow-up">{automationTaskTypes.map((type) => <option key={type}>{type}</option>)}</select>
+              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Normal">{automationTaskPriorities.map((priority) => <option key={priority}>{priority}</option>)}</select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="dueAt" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+              <input aria-label="Due at" name="dueAt" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
               <input name="owner" className={fieldClass} placeholder="Owner" />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -194,12 +195,12 @@ export function AdminAutomation() {
         <div className="grid gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-soft/60 p-3">
             <p className="flex items-center gap-2 font-bold text-ink"><CalendarClock size={18} /> Queue</p>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AutomationTaskStatus | "All")} className="min-h-10 rounded border border-line bg-surface px-3 text-sm font-bold text-ink">
+            <select aria-label="Filter tasks by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AutomationTaskStatus | "All")} className="min-h-10 rounded border border-line bg-surface px-3 text-sm font-bold text-ink">
               <option value="All">All Status</option>
               {automationTaskStatuses.map((status) => <option key={status}>{status}</option>)}
             </select>
           </div>
-          {loading ? <p className="rounded border border-line bg-soft/60 p-4 font-semibold text-muted">Loading automation tasks...</p> : null}
+          {loading ? <ModuleSkeleton /> : null}
           {!loading && filteredTasks.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-8 text-center font-semibold text-muted">No automation tasks in this view.</p> : null}
           {filteredTasks.map((task) => (
             <article key={task.id} className="rounded border border-line bg-surface p-4 shadow-sm">
@@ -214,13 +215,13 @@ export function AdminAutomation() {
               <div className="mt-4 grid gap-3 md:grid-cols-4">
                 <label>
                   <span className="mb-1 block text-xs font-bold uppercase tracking-[0.1em] text-muted">Status</span>
-                  <select value={task.status} onChange={(event) => void updateTask(task.id, { status: event.target.value as AutomationTaskStatus })} className={fieldClass}>
+                  <select aria-label="Task status" value={task.status} onChange={(event) => void updateTask(task.id, { status: event.target.value as AutomationTaskStatus })} className={fieldClass}>
                     {automationTaskStatuses.map((status) => <option key={status}>{status}</option>)}
                   </select>
                 </label>
                 <label>
                   <span className="mb-1 block text-xs font-bold uppercase tracking-[0.1em] text-muted">Priority</span>
-                  <select value={task.priority} onChange={(event) => void updateTask(task.id, { priority: event.target.value as AutomationTaskPriority })} className={fieldClass}>
+                  <select aria-label="Task priority" value={task.priority} onChange={(event) => void updateTask(task.id, { priority: event.target.value as AutomationTaskPriority })} className={fieldClass}>
                     {automationTaskPriorities.map((priority) => <option key={priority}>{priority}</option>)}
                   </select>
                 </label>

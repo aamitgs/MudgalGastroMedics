@@ -98,3 +98,18 @@ Patients never touch the staff login. `lib/patient-access/*` +
 - **Deliberately excluded** — social login (rejected by spec); UHID+DOB
   lookup, QR-code access and family delegated access are v2 backlog
   (confirmed decision).
+
+## Storage backend (Postgres migration complete)
+
+All 24 JSON stores now run through `lib/document-store.ts`:
+- **Local dev** (no `DATA_SOURCE`): JSON files under `.data/` as before — fast, offline.
+- **Production** (`DATA_SOURCE=database` + `DATABASE_URL`): each store persists as one
+  JSONB document in the `store_documents` table; the audit log keeps its dedicated
+  relational `audit_events` table. Apply `database/schema.sql` once (`npm run db:apply`),
+  verify with `npm run db:check`.
+- Whole-document last-write-wins, matching the JSON files' prior semantics — adequate for
+  single-branch volumes; the per-store relational tables in `database/schema.sql` remain
+  the future upgrade path.
+- Verified live against Neon Postgres: full auth suite (22 checks) plus a clinical
+  write round-trip (appointment → patient → OPD visit) persist and read back correctly.
+  Re-run anytime with `BASE=<url> node scripts/verify-auth-flows.mjs`.
