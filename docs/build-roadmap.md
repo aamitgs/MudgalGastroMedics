@@ -23,6 +23,33 @@ scale layers** the blueprint describes are largely unbuilt. This roadmap builds 
 
 ---
 
+## TRACK 0 — Clinical Safety  *(highest priority)*
+*Added after the Part 8 constitution, whose decision hierarchy ranks **Patient Safety
+first, Visual Design last**. These are partial or missing today and outrank the
+enterprise-UX tracks below. Every alert must be **explainable** (say why it fired) and
+**non-blocking-by-default** for non-critical cases — warn, don't obstruct the clinician.*
+
+| # | Item | Current state | Build | Pri | Effort | Depends on |
+|---|---|---|---|---|---|---|
+| 0.1 | **Active allergy alert at prescribe time** | Allergies **displayed** in doctor workspace/PDF, but passive | Surface a confirm-to-proceed alert when a prescription is entered for a patient with recorded allergies; log the override with reason | **Critical** | S | — |
+| 0.2 | **Critical lab-result flagging** | Lab has a `priority` field only | Threshold rules flag out-of-range results as Critical → doctor notification + red badge in queue and patient timeline | **Critical** | M | 2.4 (notifications) |
+| 0.3 | **Duplicate-patient prompt at registration** | Implicit phone-dedup in `patient-store` | Make it explicit: on register, show "possible existing match" with name/UHID/DOB and let staff merge or confirm-new — prevents duplicate records | **High** | M | — |
+| 0.4 | **Duplicate-medication detection** | None | Flag when a newly prescribed drug repeats an active medication for that patient | High | M | — |
+| 0.5 | **Drug–drug interaction alerts** | None | Start with a curated high-risk interaction list (explainable, sourced), alert at prescribe time; expand data source later. Never auto-block — warn + require acknowledgement | High | L | drug reference data |
+| 0.6 | **Patient identity verification** | None | Lightweight confirm-identity step (name + phone/DOB) before clinical write actions on a record; audited | Med | M | — |
+| 0.7 | **Consent capture & verification** | `consent` exists as a field/concept only | Real captured+audited consent step for procedures and admission (digital acknowledgement); block the workflow until consent recorded | Med | M | — |
+
+**Track 0 outcome:** the platform actively prevents the highest-risk clinical mistakes —
+allergy/interaction/duplicate-medication at prescribe time, critical results never missed,
+no duplicate patient identities, consent always on file. This is the constitution's #1
+priority and precedes cosmetic/enterprise-feel work.
+
+> **Note on HDU vitals escalation** — already built (`computeHduEscalation`): flags
+> overdue/out-of-threshold HDU vitals for staff attention. It is a staff-attention flag,
+> never a diagnosis, and stays that way.
+
+---
+
 ## TRACK 1 — Finish the Foundation
 *Cheap, high-visibility, zero backend risk. Closes the most Part 1/2/6 gaps fastest.*
 
@@ -95,14 +122,19 @@ context one click away; a real notification inbox and live global search.
 
 ## Recommended execution order
 
-1. **Track 1 in full** (about a week) — biggest visible lift for least risk; makes the
-   platform *feel* like one enterprise product before any heavy build.
-2. **Track 2: 2.1 (Patient Drawer) + 2.2 (role-filtered modules) + 2.4 (notifications)** —
-   the three items that most change the day-to-day experience.
-3. **Track 3: 3.1 (DataTable)** — the single largest lever for real-hospital data volume;
-   start it in parallel with late Track 2 since it's independent.
-4. **Track 4** — pull items in as growth (multi-branch), scale (offline/observability),
-   or clinical scope (radiology, AI assistant) demand them.
+*Reordered to honor the Part 8 decision hierarchy (Patient Safety → … → Visual Design last).*
+
+1. **Track 0: 0.1 (allergy alert) + 0.3 (duplicate-patient prompt) + 0.4 (duplicate meds)** —
+   highest-value safety wins, mostly S/M effort; do these first regardless of visual polish.
+2. **Track 1 in full** (about a week) — biggest visible lift for least risk; makes the
+   platform *feel* like one enterprise product. Runs alongside the rest of Track 0.
+3. **Track 2: 2.4 (notifications) → 0.2 (critical-lab flagging, which depends on it) →
+   2.1 (Patient Drawer) + 2.2 (role-filtered modules)** — safety + the items that most
+   change day-to-day work.
+4. **Track 3: 3.1 (DataTable)** — the single largest lever for real-hospital data volume;
+   independent, can run in parallel with late Track 2.
+5. **Track 0: 0.5–0.7 (interactions, identity, consent) + Track 4** — pull in as data
+   sources, clinical scope, and growth (multi-branch, observability) demand.
 
 ## Cross-cutting discipline (apply to every item)
 - Reuse-first: search the design system before creating a component.
