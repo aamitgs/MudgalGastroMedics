@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, LogOut, Moon, Stethoscope, Sun, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { Toaster } from "sonner";
+import { StaffFooter } from "@/components/StaffFooter";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
 
 const staffLinks = [
@@ -91,6 +92,7 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
         </div>
       </header>
       {children}
+      <StaffFooter />
       <Toaster richColors closeButton position="top-right" theme={dark ? "dark" : "light"} />
     </div>
   );
