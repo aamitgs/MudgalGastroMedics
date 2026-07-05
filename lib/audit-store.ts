@@ -2,7 +2,14 @@ import "server-only";
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { AuditActorRole, AuditEvent, AuditSeverity } from "@/lib/audit-types";
+import type {
+  AuditActorRole,
+  AuditChangeSet,
+  AuditDeviceContext,
+  AuditEvent,
+  AuditSeverity
+} from "@/lib/audit-types";
+import { computeAuditChanges } from "@/lib/audit-diff";
 import { query, shouldUseDatabaseStores } from "@/lib/database";
 
 type AuditStore = {
@@ -17,6 +24,14 @@ type AuditInput = {
   entityId: string;
   severity?: AuditSeverity;
   metadata?: Record<string, unknown>;
+  /** Pre-mutation snapshot; diffed against `after` into a change-set. */
+  before?: Record<string, unknown> | null;
+  /** Post-mutation snapshot; diffed against `before` into a change-set. */
+  after?: Record<string, unknown> | null;
+  /** Explicit change-set (overrides before/after diffing when provided). */
+  changes?: AuditChangeSet;
+  /** Originating device/network context (see auditRequestMetadata). */
+  device?: AuditDeviceContext;
 };
 
 const globalStore = globalThis as typeof globalThis & {
@@ -67,6 +82,10 @@ function makeAuditId() {
   return `AUD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function rowToAuditEvent(row: AuditEventRow): AuditEvent {
   const metadata = row.metadata ?? {};
   const severity = typeof metadata.severity === "string" && ["info", "warning", "critical"].includes(metadata.severity)
@@ -82,15 +101,31 @@ function rowToAuditEvent(row: AuditEventRow): AuditEvent {
     entityType: row.entity_type,
     entityId: row.entity_id,
     severity,
-    metadata
+    metadata,
+    // Change-set and device context are persisted inside metadata (no schema
+    // change); surface them as typed fields for the reviewer UI.
+    changes: isRecord(metadata.changes) ? (metadata.changes as AuditChangeSet) : undefined,
+    device: isRecord(metadata.device) ? (metadata.device as AuditDeviceContext) : undefined
   };
 }
 
+// Return type is intentionally inferred (not annotated as AuditDeviceContext):
+// ip/userAgent always resolve via fallbacks, so callers that need them as plain
+// strings (e.g. session creation) keep that guarantee. Still assignable to the
+// optional-field AuditDeviceContext when passed as `device`.
 export function auditRequestMetadata(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  let path: string | undefined;
+  try {
+    path = new URL(request.url).pathname;
+  } catch {
+    path = undefined;
+  }
   return {
     ip: forwardedFor || request.headers.get("x-real-ip") || "local",
-    userAgent: request.headers.get("user-agent") || "unknown"
+    userAgent: request.headers.get("user-agent") || "unknown",
+    method: request.method,
+    path
   };
 }
 
@@ -135,6 +170,17 @@ export async function listAuditEvents(limit = 250) {
 }
 
 export async function recordAuditEvent(input: AuditInput) {
+  const changes = input.changes
+    ?? (input.before || input.after ? computeAuditChanges(input.before, input.after) : undefined);
+
+  // Change-set and device context live inside metadata so the relational
+  // audit_events table needs no new columns (backward-compatible).
+  const metadata: Record<string, unknown> = {
+    ...(input.metadata ?? {}),
+    ...(changes ? { changes } : {}),
+    ...(input.device ? { device: input.device } : {})
+  };
+
   const event: AuditEvent = {
     id: makeAuditId(),
     createdAt: new Date().toISOString(),
@@ -144,7 +190,9 @@ export async function recordAuditEvent(input: AuditInput) {
     entityType: input.entityType,
     entityId: input.entityId,
     severity: input.severity ?? "info",
-    metadata: input.metadata ?? {}
+    metadata,
+    changes,
+    device: input.device
   };
 
   if (shouldUseDatabaseStores()) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, ClipboardCheck, Download, RefreshCw, ShieldCheck } from "lucide-react";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { useEffect, useMemo, useState } from "react";
 import type { AuditEvent, AuditSeverity } from "@/lib/audit-types";
@@ -32,13 +33,24 @@ function formatTime(value: string) {
   }).format(new Date(value));
 }
 
+function formatAuditValue(value: unknown): string {
+  if (value === undefined || value === null || value === "") return "—";
+  if (Array.isArray(value)) return value.length ? value.join(", ") : "—";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+// Structured change-set and device context render on their own; keep the
+// residual metadata summary free of them (and of internal keys).
+const summaryHiddenKeys = ["userAgent", "changes", "device", "severity"];
+
 function metadataSummary(metadata: Record<string, unknown>) {
-  const entries = Object.entries(metadata).filter(([key]) => !["userAgent"].includes(key));
-  if (!entries.length) return "No extra metadata";
+  const entries = Object.entries(metadata).filter(([key]) => !summaryHiddenKeys.includes(key));
+  if (!entries.length) return null;
 
   return entries
     .slice(0, 4)
-    .map(([key, value]) => `${key}: ${String(value)}`)
+    .map(([key, value]) => `${key}: ${formatAuditValue(value)}`)
     .join(" | ");
 }
 
@@ -105,21 +117,15 @@ export function AdminAuditLog() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
             onClick={() => downloadCsv(auditExportHeaders, events.map(auditExportRow), "audit-log.csv")}
             disabled={events.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadEvents()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-          >
+          </ActionButton>
+          <ActionButton onClick={() => void loadEvents()}>
             <RefreshCw size={17} /> Refresh Log
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -159,7 +165,38 @@ export function AdminAuditLog() {
               <p><span className="font-bold text-ink">Entity:</span> {event.entityId}</p>
               <p><span className="font-bold text-ink">Time:</span> {formatTime(event.createdAt)}</p>
             </div>
-            <p className="mt-3 rounded border border-line bg-surface p-3 text-xs font-semibold text-muted">{metadataSummary(event.metadata)}</p>
+
+            {event.changes && Object.keys(event.changes).length ? (
+              <div className="mt-3 overflow-hidden rounded border border-line bg-surface">
+                <p className="border-b border-line px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-muted">Field changes</p>
+                <ul className="divide-y divide-line">
+                  {Object.entries(event.changes).map(([field, change]) => (
+                    <li key={field} className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs">
+                      <span className="font-bold text-ink">{field}</span>
+                      <span className="rounded bg-red-50 px-1.5 py-0.5 font-semibold text-red-700 line-through decoration-red-400 dark:bg-red-950 dark:text-red-300">{formatAuditValue(change.before)}</span>
+                      <span className="text-muted" aria-hidden="true">→</span>
+                      <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{formatAuditValue(change.after)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {metadataSummary(event.metadata) ? (
+              <p className="mt-3 rounded border border-line bg-surface p-3 text-xs font-semibold text-muted">{metadataSummary(event.metadata)}</p>
+            ) : null}
+
+            {event.device ? (
+              <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-semibold text-muted">
+                <span><span className="text-ink">IP</span> {event.device.ip || "—"}</span>
+                {event.device.method || event.device.path ? (
+                  <span><span className="text-ink">Route</span> {event.device.method} {event.device.path}</span>
+                ) : null}
+                {event.device.userAgent ? (
+                  <span className="max-w-full truncate" title={event.device.userAgent}><span className="text-ink">Agent</span> {event.device.userAgent}</span>
+                ) : null}
+              </p>
+            ) : null}
           </article>
         ))}
       </div>

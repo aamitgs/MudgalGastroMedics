@@ -81,7 +81,8 @@ export async function POST(request: Request) {
     action: "access.user.created",
     entityType: "access_user",
     entityId: result.id,
-    metadata: { name, username: result.username, roles, ...auditRequestMetadata(request) }
+    metadata: { name, username: result.username, roles },
+    device: auditRequestMetadata(request)
   });
 
   // The temporary password is returned exactly once for secure handoff and is
@@ -102,7 +103,11 @@ export async function PATCH(request: Request) {
   const user = await getAccessUserById(id);
   if (!user) return NextResponse.json({ ok: false, error: "User not found." }, { status: 404 });
 
-  const audit = (action: string, metadata: Record<string, unknown> = {}) =>
+  const audit = (
+    action: string,
+    metadata: Record<string, unknown> = {},
+    change?: { before?: Record<string, unknown>; after?: Record<string, unknown> }
+  ) =>
     recordAuditEvent({
       actorRole: auth.context.activeRole,
       actorId: auth.context.userId,
@@ -110,7 +115,10 @@ export async function PATCH(request: Request) {
       entityType: "access_user",
       entityId: user.id,
       severity: "warning",
-      metadata: { targetUser: user.username, ...metadata, ...auditRequestMetadata(request) }
+      metadata: { targetUser: user.username, ...metadata },
+      before: change?.before,
+      after: change?.after,
+      device: auditRequestMetadata(request)
     });
 
   if (operation === "suspend") {
@@ -120,13 +128,21 @@ export async function PATCH(request: Request) {
     }
     await updateAccessUser(user.id, { status: "suspended" });
     const revoked = await revokeAllSessionsForUser(user.id);
-    await audit("access.user.suspended", { sessionsRevoked: revoked });
+    await audit(
+      "access.user.suspended",
+      { sessionsRevoked: revoked },
+      { before: { status: user.status }, after: { status: "suspended" } }
+    );
     return NextResponse.json({ ok: true, user: publicUser((await getAccessUserById(user.id))!) });
   }
 
   if (operation === "reactivate") {
     await updateAccessUser(user.id, { status: "active", failedLoginCount: 0, lockedUntil: undefined });
-    await audit("access.user.reactivated");
+    await audit(
+      "access.user.reactivated",
+      {},
+      { before: { status: user.status }, after: { status: "active" } }
+    );
     return NextResponse.json({ ok: true, user: publicUser((await getAccessUserById(user.id))!) });
   }
 
@@ -162,7 +178,14 @@ export async function PATCH(request: Request) {
       requestedBy: auth.context.userId,
       requestedByName: auth.context.userName
     });
-    await audit("access.role_change.requested", { approvalId: approval.id, roles });
+    await audit(
+      "access.role_change.requested",
+      { approvalId: approval.id },
+      {
+        before: { roles: user.roles, defaultRole: user.defaultRole },
+        after: { roles, defaultRole }
+      }
+    );
     return NextResponse.json({ ok: true, approval });
   }
 
