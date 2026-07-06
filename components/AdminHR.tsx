@@ -1,10 +1,12 @@
 "use client";
 
-import { CalendarCheck2, Download, Phone, RefreshCw, UserRoundPlus, UsersRound } from "lucide-react";
+import { CalendarCheck2, Download, Phone, RefreshCw, UserRoundCheck, UserRoundPlus, UsersRound } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffStatus } from "@/lib/hr-types";
 import { attendanceStatuses, staffPermissions, staffRoles, staffStatuses } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const staffExportHeaders = ["Name", "Phone", "Email", "Role", "Department", "Shift", "Status", "Joining Date"];
@@ -189,17 +191,16 @@ export function AdminHR() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Maintain staff roles, shifts, emergency contacts and daily attendance.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(staffExportHeaders, staff.map(staffExportRow), "staff-directory.csv")}
             disabled={staff.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadHr()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadHr()}>
             <RefreshCw size={17} /> Refresh HR
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -237,7 +238,7 @@ export function AdminHR() {
               Permissions are assigned from the selected role. Admin can adjust permissions after saving the staff member.
             </p>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Role notes, documents or duty instructions" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">Save Staff</button>
+            <ActionButton type="submit" variant="primary">Save Staff</ActionButton>
           </div>
         </form>
 
@@ -257,7 +258,7 @@ export function AdminHR() {
               <input aria-label="Check out" name="checkOut" className={fieldClass} type="time" />
             </div>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Leave reason, late arrival or handover notes" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">Save Attendance</button>
+            <ActionButton type="submit" variant="success">Save Attendance</ActionButton>
           </div>
         </form>
       </div>
@@ -293,6 +294,7 @@ export function AdminHR() {
                         key={permission}
                         type="button"
                         onClick={() => void togglePermission(member, permission)}
+                        aria-pressed={active}
                         className={`rounded-full border px-3 py-1 text-xs font-bold transition ${active ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300" : "border-line bg-surface text-muted hover:border-brand hover:text-brand"}`}
                       >
                         {permission}
@@ -307,7 +309,13 @@ export function AdminHR() {
 
         <div className="grid gap-3">
           <p className="text-sm font-bold text-ink">Recent attendance</p>
-          {attendance.length === 0 ? <p className="rounded border border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No attendance marked yet.</p> : null}
+          {attendance.length === 0 ? (
+            <ModuleEmptyState
+              icon={UserRoundCheck}
+              title="No attendance marked yet"
+              description="Mark today's attendance with the form — presence feeds the staff dashboard and daily analytics."
+            />
+          ) : null}
           {attendance.slice(0, 12).map((record) => (
             <article key={record.id} className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-soft/40 p-4">
               <div>

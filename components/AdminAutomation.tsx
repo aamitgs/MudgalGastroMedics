@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus } from "@/lib/automation-types";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const automationExportHeaders = ["Title", "Type", "Priority", "Status", "Patient", "Due At", "Created"];
@@ -141,20 +143,19 @@ export function AdminAutomation() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Generate operational tasks from appointments, OPD follow-ups, procedures, payments, lab reports, stock alerts and AI reviews.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => void generateTasks()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]">
+          <ActionButton variant="primary" onClick={() => void generateTasks()}>
             <WandSparkles size={17} /> Generate Tasks
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(automationExportHeaders, tasks.map(automationExportRow), "automation-tasks.csv")}
             disabled={tasks.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadAutomation()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadAutomation()}>
             <RefreshCw size={17} /> Refresh
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -188,7 +189,7 @@ export function AdminAutomation() {
             </div>
             <textarea name="description" className={`${fieldClass} min-h-24 py-3`} placeholder="Task description" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">Save Task</button>
+            <ActionButton type="submit" variant="success">Save Task</ActionButton>
           </div>
         </form>
 
@@ -201,7 +202,15 @@ export function AdminAutomation() {
             </select>
           </div>
           {loading ? <ModuleSkeleton /> : null}
-          {!loading && filteredTasks.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-8 text-center font-semibold text-muted">No automation tasks in this view.</p> : null}
+          {!loading && filteredTasks.length === 0 ? (
+            <ModuleEmptyState
+              icon={WandSparkles}
+              title="No automation tasks in this view"
+              description="Tasks are generated from live hospital activity — overdue follow-ups, unpaid dispenses and pending reports become actionable items here."
+              action="Generate Tasks"
+              onAction={() => void generateTasks()}
+            />
+          ) : null}
           {filteredTasks.map((task) => (
             <article key={task.id} className="rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">

@@ -7,6 +7,7 @@ import type { InventoryItem } from "@/lib/inventory-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PharmacyDispenseRecord } from "@/lib/pharmacy-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const dispenseExportHeaders = ["Token", "Patient", "Phone", "Status", "Items", "Total", "Payment Status", "Created"];
@@ -164,21 +165,19 @@ export function AdminPharmacy() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(dispenseExportHeaders, dispenses.map(dispenseExportRow), "pharmacy-dispenses.csv")}
             disabled={dispenses.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
             onClick={() => void loadPharmacy()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
           >
             <RefreshCw size={17} /> Refresh Pharmacy
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -226,17 +225,17 @@ export function AdminPharmacy() {
                     </select>
                     <input value={item.quantity} onChange={(event) => updateDraftItem(index, { quantity: event.target.value })} className={fieldClass} type="number" min="1" placeholder="Qty" required />
                     <input value={item.unitPrice} onChange={(event) => updateDraftItem(index, { unitPrice: event.target.value })} className={fieldClass} type="number" min="0" placeholder="Price" />
-                    <button type="button" onClick={() => setDraftItems((items) => items.filter((_, itemIndex) => itemIndex !== index))} className="grid h-11 w-11 place-items-center rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300" aria-label="Remove item">
+                    <ActionButton variant="ghost" onClick={() => setDraftItems((items) => items.filter((_, itemIndex) => itemIndex !== index))} className="h-11 w-11 min-h-11 border border-red-200 bg-red-50 px-0 text-red-700 hover:bg-red-100 hover:text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300" aria-label="Remove item">
                       <Trash2 size={16} />
-                    </button>
+                    </ActionButton>
                     {stockItem ? <p className="md:col-span-4 text-xs font-semibold text-muted">Available: {stockItem.quantity} {stockItem.unit} | Reorder at {stockItem.reorderLevel}</p> : null}
                   </div>
                 );
               })}
             </div>
-            <button type="button" onClick={() => setDraftItems((items) => [...items, { inventoryItemId: "", quantity: "1", unitPrice: "0" }])} className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+            <ActionButton variant="secondary" onClick={() => setDraftItems((items) => [...items, { inventoryItemId: "", quantity: "1", unitPrice: "0" }])} className="min-h-10">
               <Plus size={16} /> Add Item
-            </button>
+            </ActionButton>
 
             <div className="grid gap-3 md:grid-cols-3">
               <input value={discount} onChange={(event) => setDiscount(event.target.value)} className={fieldClass} type="number" min="0" placeholder="Discount" />
@@ -254,9 +253,9 @@ export function AdminPharmacy() {
               <div className="mt-2 flex justify-between text-sm text-muted"><span>Discount</span><span className="font-bold text-ink">{formatAmount(Number(discount) || 0)}</span></div>
               <div className="mt-3 flex justify-between border-t border-line pt-3 text-lg font-bold text-ink"><span>Total</span><span>{formatAmount(total)}</span></div>
             </div>
-            <button type="submit" disabled={!selectedVisitId} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)] disabled:cursor-not-allowed disabled:opacity-60">
+            <ActionButton type="submit" variant="primary" disabled={!selectedVisitId}>
               <BadgeIndianRupee size={17} /> Issue Dispense
-            </button>
+            </ActionButton>
           </div>
         </form>
 

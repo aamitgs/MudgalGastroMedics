@@ -7,6 +7,7 @@ import { accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
 import type { IpdAdmission } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const claimExportHeaders = ["Patient", "Phone", "Insurer", "Policy Number", "Claim Number", "Requested", "Approved", "Settled", "Status"];
@@ -161,17 +162,16 @@ export function AdminFinance() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Track TPA/insurance claims and maintain a simple hospital ledger for income, deposits, expenses and refunds.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(claimExportHeaders, claims.map(claimExportRow), "insurance-claims.csv")}
             disabled={claims.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadFinance()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadFinance()}>
             <RefreshCw size={17} /> Refresh Finance
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -220,7 +220,7 @@ export function AdminFinance() {
             </div>
             <input name="documents" className={fieldClass} placeholder="Documents / file references" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Claim notes" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">Save Claim</button>
+            <ActionButton type="submit" variant="primary">Save Claim</ActionButton>
           </div>
         </form>
 
@@ -241,7 +241,7 @@ export function AdminFinance() {
             </div>
             <input name="party" className={fieldClass} placeholder="Party / vendor / patient" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Ledger notes" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">Save Entry</button>
+            <ActionButton type="submit" variant="success">Save Entry</ActionButton>
           </div>
         </form>
       </div>
