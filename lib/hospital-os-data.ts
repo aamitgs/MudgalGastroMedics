@@ -57,6 +57,8 @@ export type PatientFlowRow = {
   waitMinutes: number;
   risk: "Low" | "Moderate" | "High";
   lastActivity: string;
+  /** Registered contact number — the cross-store patient identity key. Absent on demo rows. */
+  phone?: string;
 };
 
 export type CommandRecord = {
@@ -73,8 +75,11 @@ export type ClinicalEvent = {
   time: string;
   title: string;
   detail: string;
-  type: "registration" | "vitals" | "consult" | "lab" | "billing";
+  type: "registration" | "vitals" | "consult" | "lab" | "billing" | "appointment" | "admission" | "discharge" | "pharmacy";
 };
+
+/** Live per-module counts for sidebar badges, computed server-side in the snapshot. */
+export type NavBadgeCounts = Partial<Record<"OPD" | "Laboratory" | "Pharmacy", number>>;
 
 export type DashboardMetric = {
   label: string;
@@ -143,11 +148,11 @@ export const navItems: NavItem[] = [
   { label: "Doctors", group: "Clinical", href: "#doctor-workspace", icon: Stethoscope, roles: rolesWithPermission("appointments") },
   { label: "Departments", group: "Administration", href: "/admin#module-hr", icon: Building2, roles: rolesWithPermission("hr-records") },
   { label: "Appointments", group: "Clinical", href: "#appointment-flow", icon: CalendarClock, roles: rolesWithPermission("appointments") },
-  { label: "OPD", group: "Clinical", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments"), badge: "Live" },
+  { label: "OPD", group: "Clinical", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
   { label: "IPD", group: "Clinical", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
   { label: "Prescriptions", group: "Clinical", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
-  { label: "Pharmacy", group: "Operations", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory"), badge: "4" },
-  { label: "Laboratory", group: "Diagnostics", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders"), badge: "9" },
+  { label: "Pharmacy", group: "Operations", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
+  { label: "Laboratory", group: "Diagnostics", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
   { label: "Billing", group: "Finance", href: "#billing", icon: CreditCard, roles: rolesWithPermission("billing") },
   { label: "Insurance", group: "Finance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
   { label: "Accounts", group: "Finance", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
@@ -248,14 +253,6 @@ export const commandRecords: CommandRecord[] = [
   { id: "cmd-10", entity: "Bed", title: "HDU-04", subtitle: "Occupied - discharge expected 6 PM", href: "#analytics", keywords: ["bed", "hdu"], priority: 68 },
   { id: "cmd-11", entity: "Room", title: "Procedure Room 2", subtitle: "ERCP list running 12 minutes late", href: "#appointment-flow", keywords: ["room", "procedure"], priority: 58 },
   { id: "cmd-12", entity: "Procedure", title: "Colonoscopy package", subtitle: "Billing template and consent ready", href: "#billing", keywords: ["procedure", "colonoscopy"], priority: 54 }
-];
-
-export const clinicalTimeline: ClinicalEvent[] = [
-  { time: "09:12", title: "OPD registration", detail: "UHID verified, previous ERCP notes attached.", type: "registration" },
-  { time: "09:28", title: "Vitals captured", detail: "BP 126/82, pulse 82, SpO2 98%, pain score 3/10.", type: "vitals" },
-  { time: "09:44", title: "Consultation started", detail: "Follow-up for abdominal pain and reflux symptoms.", type: "consult" },
-  { time: "10:10", title: "Lab order", detail: "CBC, LFT, amylase, lipase requested with priority normal.", type: "lab" },
-  { time: "10:22", title: "Billing note", detail: "Insurance preauth documents requested from front desk.", type: "billing" }
 ];
 
 export const dashboardMetrics: DashboardMetric[] = [

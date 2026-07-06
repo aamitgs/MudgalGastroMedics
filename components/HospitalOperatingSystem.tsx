@@ -109,7 +109,6 @@ import {
   canAccessCommandEntity,
   accessRoleToHospitalRole,
   canAccessSection,
-  clinicalTimeline,
   commandRecords,
   dashboardMetrics,
   hospitalRoles,
@@ -120,7 +119,7 @@ import {
   roleFallbackMessage,
   v1AiScope
 } from "@/lib/hospital-os-data";
-import type { CommandRecord, DashboardMetric, HospitalRealtimeEvent, HospitalRole, PatientFlowRow } from "@/lib/hospital-os-data";
+import type { CommandRecord, DashboardMetric, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import {
@@ -130,6 +129,7 @@ import {
 } from "@/lib/validation/hospital-os";
 import type { AppointmentInput, BillingInput, PatientRegistrationInput } from "@/lib/validation/hospital-os";
 import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { PatientTimelinePanel } from "@/components/hospital-os/PatientTimelinePanel";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -206,6 +206,7 @@ type HospitalSnapshotResponse = {
   rows?: PatientFlowRow[];
   metrics?: DashboardMetric[];
   trend?: HospitalTrendPoint[];
+  navBadges?: NavBadgeCounts;
   error?: string;
 };
 
@@ -213,6 +214,7 @@ type HospitalSnapshot = {
   rows: PatientFlowRow[];
   metrics: DashboardMetric[];
   trend: HospitalTrendPoint[];
+  navBadges: NavBadgeCounts;
 };
 
 function realtimeEventMessage(event: HospitalRealtimeEvent) {
@@ -278,7 +280,7 @@ async function fetchHospitalSnapshot(): Promise<HospitalSnapshot> {
     throw new Error(data.error || "Unable to load Hospital OS snapshot.");
   }
 
-  return { rows: data.rows, metrics: data.metrics ?? dashboardMetrics, trend: data.trend ?? analyticsSeries };
+  return { rows: data.rows, metrics: data.metrics ?? dashboardMetrics, trend: data.trend ?? analyticsSeries, navBadges: data.navBadges ?? {} };
 }
 
 type OsSession = {
@@ -383,7 +385,7 @@ function HospitalOsApp() {
   } = useHospitalOsStore();
 
   const {
-    data: snapshot = { rows: [], metrics: dashboardMetrics, trend: analyticsSeries },
+    data: snapshot = { rows: [], metrics: dashboardMetrics, trend: analyticsSeries, navBadges: {} },
     isLoading,
     isError
   } = useQuery({
@@ -496,7 +498,16 @@ function HospitalOsApp() {
     setSelectedRows(rowSelection);
   }, [rowSelection, setSelectedRows]);
 
-  const visibleNav = useMemo(() => navItems.filter((item) => item.roles.includes(role)), [role]);
+  const visibleNav = useMemo(
+    () =>
+      navItems
+        .filter((item) => item.roles.includes(role))
+        .map((item) => {
+          const liveCount = snapshot.navBadges[item.label as keyof NavBadgeCounts];
+          return liveCount === undefined ? item : { ...item, badge: String(liveCount) };
+        }),
+    [role, snapshot.navBadges]
+  );
 
   const access = useMemo(() => {
     const clinicalWorkspace = canAccessSection(role, "clinicalWorkspace");
@@ -1187,17 +1198,7 @@ function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
             </div>
           </TabsContent>
           <TabsContent value="timeline" className="mt-0">
-            <div className="grid gap-3">
-              {clinicalTimeline.map((event) => (
-                <article key={`${event.time}-${event.title}`} className="grid grid-cols-[64px_1fr] gap-4 rounded-lg border border-[var(--hos-border)] p-4">
-                  <p className="text-sm font-semibold text-[var(--hos-primary)]">{event.time}</p>
-                  <div>
-                    <h3 className="font-semibold">{event.title}</h3>
-                    <p className="mt-1 text-sm leading-6 text-[var(--hos-muted-text)]">{event.detail}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <PatientTimelinePanel phone={activePatient.phone} patientName={activePatient.patient} />
           </TabsContent>
           {["vitals", "prescriptions", "reports", "billing", "insurance", "appointments", "notes", "ai"].map((tab) => (
             <TabsContent key={tab} value={tab} className="mt-0">

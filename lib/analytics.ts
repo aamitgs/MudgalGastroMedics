@@ -4,7 +4,7 @@ import { listAiReviews } from "@/lib/ai-review-store";
 import { listCommunicationLogs } from "@/lib/communication-store";
 import { listAccountEntries } from "@/lib/finance-store";
 import { listAttendance, listStaff } from "@/lib/hr-store";
-import type { DashboardMetric } from "@/lib/hospital-os-data";
+import type { DashboardMetric, NavBadgeCounts } from "@/lib/hospital-os-data";
 import { listInventoryItems } from "@/lib/inventory-store";
 import { getOccupancyStats, listBeds, listIpdAdmissions } from "@/lib/ipd-store";
 import { listLabOrders } from "@/lib/lab-store";
@@ -126,6 +126,11 @@ export async function createAnalyticsSnapshot() {
     serviceMix: topCounts([...appointments.map((appointment) => appointment.service), ...opdVisits.map((visit) => visit.service)]),
     symptomMix: topCounts(appointments.flatMap((appointment) => appointment.symptoms).concat(opdVisits.flatMap((visit) => visit.symptoms)), "Not specified"),
     paymentMix: topCounts(paidVisits.map((visit) => visit.paymentMethod || "Cash")),
+    queues: {
+      opdInFlight: opdVisits.filter((visit) => visit.status === "Waiting" || visit.status === "In Consultation").length,
+      labPending: labOrders.filter((order) => !["Result Ready", "Delivered", "Cancelled"].includes(order.status)).length,
+      pharmacyUnpaid: dispenses.filter((record) => record.paymentStatus === "Unpaid").length
+    },
     workload: [
       { label: "Reception Requests", value: appointments.filter((appointment) => appointment.status === "New").length },
       { label: "Waiting OPD", value: opdVisits.filter((visit) => visit.status === "Waiting").length },
@@ -147,9 +152,11 @@ export async function createAnalyticsSnapshot() {
   };
 }
 
+export type AnalyticsSnapshot = Awaited<ReturnType<typeof createAnalyticsSnapshot>>;
+
 /** Real KPI tiles for the Hospital OS command center, replacing static demo figures. */
-export async function createHospitalOsDashboardMetrics(): Promise<DashboardMetric[]> {
-  const snapshot = await createAnalyticsSnapshot();
+export async function createHospitalOsDashboardMetrics(precomputed?: AnalyticsSnapshot): Promise<DashboardMetric[]> {
+  const snapshot = precomputed ?? (await createAnalyticsSnapshot());
   const occupancy = (await getOccupancyStats());
   const today = snapshot.trend[snapshot.trend.length - 1];
   const yesterday = snapshot.trend[snapshot.trend.length - 2];
@@ -192,11 +199,20 @@ export async function createHospitalOsDashboardMetrics(): Promise<DashboardMetri
 }
 
 /** Real 7-day OPD/revenue trend for the Hospital OS command center charts. */
-export async function createHospitalOsTrend() {
-  const snapshot = await createAnalyticsSnapshot();
+export async function createHospitalOsTrend(precomputed?: AnalyticsSnapshot) {
+  const snapshot = precomputed ?? (await createAnalyticsSnapshot());
   return snapshot.trend.slice(-7).map((day) => ({
     time: new Date(day.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
     opd: day.opd,
     revenue: Math.round((day.revenue / 100000) * 100) / 100
   }));
+}
+
+/** Live sidebar badge counts (Track 1.9): real queue depths instead of hardcoded figures. */
+export function createHospitalOsNavBadges(snapshot: AnalyticsSnapshot): NavBadgeCounts {
+  const badges: NavBadgeCounts = {};
+  if (snapshot.queues.opdInFlight > 0) badges.OPD = snapshot.queues.opdInFlight;
+  if (snapshot.queues.labPending > 0) badges.Laboratory = snapshot.queues.labPending;
+  if (snapshot.queues.pharmacyUnpaid > 0) badges.Pharmacy = snapshot.queues.pharmacyUnpaid;
+  return badges;
 }

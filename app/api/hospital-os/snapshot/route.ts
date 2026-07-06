@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { createHospitalOsDashboardMetrics, createHospitalOsTrend } from "@/lib/analytics";
+import { createAnalyticsSnapshot, createHospitalOsDashboardMetrics, createHospitalOsNavBadges, createHospitalOsTrend } from "@/lib/analytics";
 import { listAppointments } from "@/lib/appointment-store";
 import { patientFlowRows, type PatientFlowRow } from "@/lib/hospital-os-data";
 import { listOpdVisits } from "@/lib/opd-store";
@@ -47,7 +47,8 @@ async function livePatientFlowRows(): Promise<PatientFlowRow[]> {
       insurance: visit.paymentMethod === "Insurance" ? "Insurance" : "Self pay",
       waitMinutes: inFlight ? Math.max(0, Math.min(600, Math.round((now - new Date(visit.createdAt).getTime()) / 60000))) : 0,
       risk: riskFor(visit.priority),
-      lastActivity: `OPD ${visit.status} · Token ${visit.token}`
+      lastActivity: `OPD ${visit.status} · Token ${visit.token}`,
+      phone: visit.phone
     });
   }
 
@@ -66,7 +67,8 @@ async function livePatientFlowRows(): Promise<PatientFlowRow[]> {
       insurance: "Self pay",
       waitMinutes: 0,
       risk: riskFor(appointment.priority),
-      lastActivity: `Appointment ${appointment.status.toLowerCase()} · ${appointment.timeSlot || "Flexible"}`
+      lastActivity: `Appointment ${appointment.status.toLowerCase()} · ${appointment.timeSlot || "Flexible"}`,
+      phone: appointment.phone
     });
   }
 
@@ -91,11 +93,15 @@ export async function GET(request: Request) {
   // dashboard must never show fabricated patients.
   const rows = liveRows.length ? liveRows : process.env.NODE_ENV === "production" ? [] : patientFlowRows;
 
+  // One aggregation pass feeds metrics, trend and badges (was 2× full store scans).
+  const analytics = await createAnalyticsSnapshot();
+
   return NextResponse.json({
     ok: true,
     rows,
-    metrics: await createHospitalOsDashboardMetrics(),
-    trend: await createHospitalOsTrend(),
+    metrics: await createHospitalOsDashboardMetrics(analytics),
+    trend: await createHospitalOsTrend(analytics),
+    navBadges: createHospitalOsNavBadges(analytics),
     generatedAt: new Date().toISOString()
   });
 }
