@@ -17,9 +17,25 @@ type ModuleEmptyStateProps = {
   description: string;
   action?: string;
   onAction?: () => void;
+  /** Optional second, lower-emphasis path (P6 contract: primary + secondary). */
+  secondaryAction?: string;
+  onSecondaryAction?: () => void;
+  /** Optional "learn how this module works" link (P6 contract: help link). */
+  helpHref?: string;
+  helpLabel?: string;
 };
 
-export function ModuleEmptyState({ icon: Icon, title, description, action, onAction }: ModuleEmptyStateProps) {
+export function ModuleEmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+  onAction,
+  secondaryAction,
+  onSecondaryAction,
+  helpHref,
+  helpLabel = "Learn how this works"
+}: ModuleEmptyStateProps) {
   return (
     <div className="grid min-h-56 place-items-center rounded border border-dashed border-line bg-soft/60 p-8 text-center">
       <div>
@@ -28,12 +44,26 @@ export function ModuleEmptyState({ icon: Icon, title, description, action, onAct
         </span>
         <h3 className="mt-4 text-base font-bold text-ink">{title}</h3>
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">{description}</p>
-        {action ? (
-          <div className="mt-5 flex justify-center">
-            <ActionButton variant="primary" onClick={onAction}>
-              {action}
-            </ActionButton>
+        {action || secondaryAction ? (
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            {action ? (
+              <ActionButton variant="primary" onClick={onAction}>
+                {action}
+              </ActionButton>
+            ) : null}
+            {secondaryAction ? (
+              <ActionButton variant="secondary" onClick={onSecondaryAction}>
+                {secondaryAction}
+              </ActionButton>
+            ) : null}
           </div>
+        ) : null}
+        {helpHref ? (
+          <p className="mt-3">
+            <a href={helpHref} className="text-sm font-semibold text-brand underline-offset-4 hover:underline">
+              {helpLabel}
+            </a>
+          </p>
         ) : null}
       </div>
     </div>

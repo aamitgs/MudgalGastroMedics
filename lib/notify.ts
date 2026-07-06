@@ -51,5 +51,25 @@ export const notify = {
    */
   saved(message = "Saved", options?: NotifyOptions) {
     return toast.success(message, { duration: 1600, ...options });
+  },
+  /**
+   * In-flight operation feedback. Returns the toast id — resolve it with
+   * `notify.success(msg, { id })` / `notify.error(msg, { id })` when done,
+   * so the spinner is replaced instead of stacking a second toast.
+   */
+  loading(message: string, options?: NotifyOptions) {
+    return toast.loading(message, options);
+  },
+  /**
+   * Success with an inline Undo action (P6 toast contract). The undo callback
+   * must fully reverse the write; the window lasts as long as the toast (8s,
+   * error-tier duration, since a missed undo is unrecoverable).
+   */
+  undo(message: string, onUndo: () => void, options?: NotifyOptions) {
+    return toast.success(message, {
+      duration: DURATION.error,
+      action: { label: "Undo", onClick: onUndo },
+      ...options
+    });
   }
 };
