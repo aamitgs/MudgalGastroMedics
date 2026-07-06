@@ -7,6 +7,7 @@ import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const labExportHeaders = ["Token", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created"];
@@ -157,17 +158,16 @@ export function AdminLab() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Order tests against OPD visits, track sample status, and record result summaries or report references.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(labExportHeaders, filteredOrders.map(labExportRow), "lab-orders.csv")}
             disabled={filteredOrders.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadLab()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadLab()}>
             <RefreshCw size={17} /> Refresh Lab
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -196,7 +196,7 @@ export function AdminLab() {
               <p className="mb-2 text-sm font-bold text-ink">Common tests</p>
               <div className="flex flex-wrap gap-2">
                 {commonLabTests.map((test) => (
-                  <button key={test} type="button" onClick={() => toggleTest(test)} className={`rounded-full border px-3 py-1 text-xs font-bold transition ${selectedTests.includes(test) ? "border-brand bg-cyan-50 dark:bg-cyan-950 text-brand" : "border-line bg-surface text-muted"}`}>
+                  <button key={test} type="button" onClick={() => toggleTest(test)} aria-pressed={selectedTests.includes(test)} className={`rounded-full border px-3 py-1 text-xs font-bold transition ${selectedTests.includes(test) ? "border-brand bg-cyan-50 dark:bg-cyan-950 text-brand" : "border-line bg-surface text-muted"}`}>
                     {test}
                   </button>
                 ))}
@@ -210,9 +210,9 @@ export function AdminLab() {
             </div>
             <select aria-label="Payment status" name="paymentStatus" className={fieldClass} defaultValue="Unpaid"><option>Unpaid</option><option>Paid</option></select>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Lab notes, fasting status, sample remarks" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+            <ActionButton type="submit" variant="primary">
               <TestTube2 size={17} /> Save Lab Order
-            </button>
+            </ActionButton>
           </div>
         </form>
 

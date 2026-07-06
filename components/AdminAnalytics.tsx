@@ -2,6 +2,7 @@
 
 import { Activity, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AnalyticsSnapshot = {
@@ -142,9 +143,9 @@ export function AdminAnalytics() {
           <h2 className="mt-1 text-xl font-bold text-ink">Operational intelligence</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Track conversion, workload, revenue mix, care volume, operational risk and 14-day activity trends.</p>
         </div>
-        <button type="button" onClick={() => void loadAnalytics()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+        <ActionButton variant="secondary" onClick={() => void loadAnalytics()}>
           <RefreshCw size={17} /> Refresh Analytics
-        </button>
+        </ActionButton>
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}

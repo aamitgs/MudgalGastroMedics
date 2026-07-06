@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
 import { aiReviewStatuses } from "@/lib/ai-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const aiReviewExportHeaders = ["Patient", "Phone", "Service", "Source", "Urgency", "Status", "Reviewed By", "Created"];
@@ -148,20 +149,19 @@ export function AdminAiReviews() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Generate structured routing notes, safety flags and preparation checklists for reception and doctor review.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => void seedReviews()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]">
+          <ActionButton variant="primary" onClick={() => void seedReviews()}>
             <Sparkles size={17} /> Seed Recent
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(aiReviewExportHeaders, reviews.map(aiReviewExportRow), "ai-reviews.csv")}
             disabled={reviews.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadAiReviews()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadAiReviews()}>
             <RefreshCw size={17} /> Refresh AI
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ export function AdminAiReviews() {
                 </option>
               ))}
             </select>
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">Generate AI Review</button>
+            <ActionButton type="submit" variant="success">Generate AI Review</ActionButton>
           </div>
           <p className="mt-4 rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 p-3 text-xs font-semibold leading-relaxed text-amber-800 dark:text-amber-300">
             AI planning support does not diagnose or prescribe. Every note must be reviewed by reception or doctor before action.

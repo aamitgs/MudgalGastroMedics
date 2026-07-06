@@ -7,6 +7,7 @@ import type { CmsContentItem, CmsContentRevision, CmsContentStatus } from "@/lib
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const cmsExportHeaders = ["Title", "Type", "Status", "Slug", "Owner", "Published At", "Updated"];
@@ -150,21 +151,19 @@ export function AdminCmsWorkspace() {
           ) : null}
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(cmsExportHeaders, items.map(cmsExportRow), "cms-content.csv")}
             disabled={items.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
             onClick={() => void loadItems()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
           >
             <RefreshCw size={17} /> Refresh CMS
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -205,9 +204,9 @@ export function AdminCmsWorkspace() {
                 <input name="owner" className={fieldClass} placeholder="Owner" defaultValue="Admin" />
                 <input name="notes" className={fieldClass} placeholder="Approval notes" />
               </div>
-              <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+              <ActionButton type="submit" variant="primary">
                 Save CMS Item
-              </button>
+              </ActionButton>
             </div>
           </form>
 
@@ -278,13 +277,9 @@ export function AdminCmsWorkspace() {
                 <p><span className="font-bold text-ink">Media:</span> {item.mediaUrl || "-"}</p>
                 <p><span className="font-bold text-ink">Notes:</span> {item.notes || "-"}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => void previewContent(item)}
-                className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded border border-line bg-soft px-3 text-sm font-bold text-ink transition hover:border-brand hover:text-brand"
-              >
+              <ActionButton variant="secondary" onClick={() => void previewContent(item)} className="mt-3 min-h-10 px-3 text-sm">
                 <Eye size={15} /> Preview + History
-              </button>
+              </ActionButton>
             </article>
           ))}
         </div>

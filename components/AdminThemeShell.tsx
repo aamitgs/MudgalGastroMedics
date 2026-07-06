@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { Moon, Sun } from "lucide-react";
 import { useEffect } from "react";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
@@ -22,15 +23,15 @@ export function AdminThemeShell({ children }: { children: React.ReactNode }) {
   return (
     <div className={dark ? "dark" : undefined}>
       {children}
-      <button
-        type="button"
+      <ActionButton
+        variant="secondary"
         onClick={toggleDark}
         aria-label="Toggle dark mode"
-        className="fixed bottom-6 right-6 z-50 inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-bold text-ink shadow-[0_18px_42px_rgba(8,64,84,0.24)] transition hover:border-brand hover:text-brand"
+        className="fixed bottom-6 right-6 z-50 rounded-full bg-surface px-4 text-sm shadow-[0_18px_42px_rgba(8,64,84,0.24)]"
       >
         {dark ? <Sun size={16} /> : <Moon size={16} />}
         {dark ? "Light mode" : "Dark mode"}
-      </button>
+      </ActionButton>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Copy, Download, FileText, RefreshCw, Stethoscope } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const doctorWorkflowExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Clinical Note", "Prescription", "Follow-up Date"];
@@ -90,21 +91,19 @@ export function AdminDoctorWorkflow() {
           <h2 className="mt-1 text-xl font-bold text-ink">Clinical notes and follow-up</h2>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(doctorWorkflowExportHeaders, visits.map(doctorWorkflowExportRow), "doctor-workflow.csv")}
             disabled={visits.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
             onClick={() => void loadVisits()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
           >
             <RefreshCw size={17} /> Refresh Visits
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -158,9 +157,9 @@ function DoctorVisitCard({ visit, updateVisit }: { visit: OpdVisit; updateVisit:
             </div>
           ) : null}
         </div>
-        <button type="button" onClick={() => void copySummary()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-line bg-surface px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+        <ActionButton variant="secondary" onClick={() => void copySummary()} className="min-h-10 bg-surface">
           <Copy size={16} /> Copy Summary
-        </button>
+        </ActionButton>
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">

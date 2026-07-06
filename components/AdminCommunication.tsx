@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
 import { communicationChannels, communicationStatuses } from "@/lib/communication-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const communicationExportHeaders = ["Patient", "Phone", "Channel", "Subject", "Status", "Scheduled For", "Sent At", "Owner"];
@@ -153,17 +154,16 @@ export function AdminCommunication() {
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Prepare WhatsApp/SMS/call scripts, open patient handoffs and track delivery status for reception.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(communicationExportHeaders, logs.map(communicationExportRow), "communication-log.csv")}
             disabled={logs.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadCommunication()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadCommunication()}>
             <RefreshCw size={17} /> Refresh Communication
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -205,7 +205,7 @@ export function AdminCommunication() {
             <textarea name="message" value={customMessage || selectedTemplate?.message || ""} onChange={(event) => setCustomMessage(event.target.value)} className={`${fieldClass} min-h-28 py-3`} placeholder="Message text" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes for reception" />
             <div className="flex flex-wrap gap-3">
-              <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">Save Log</button>
+              <ActionButton type="submit" variant="primary">Save Log</ActionButton>
               {selectedRecipient ? (
                 <a href={whatsAppUrl(selectedRecipient.phone, messagePreview)} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)]">
                   <MessageCircle size={17} /> Open WhatsApp
@@ -219,7 +219,7 @@ export function AdminCommunication() {
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><UsersRound size={19} /> Templates</p>
           <div className="grid gap-3">
             {templates.map((template) => (
-              <button key={template.key} type="button" onClick={() => setSelectedTemplateKey(template.key)} className={`rounded border p-4 text-left transition ${selectedTemplateKey === template.key ? "border-brand bg-cyan-50 dark:bg-cyan-950" : "border-line bg-surface hover:border-brand/60"}`}>
+              <button key={template.key} type="button" onClick={() => setSelectedTemplateKey(template.key)} aria-pressed={selectedTemplateKey === template.key} className={`rounded border p-4 text-left transition ${selectedTemplateKey === template.key ? "border-brand bg-cyan-50 dark:bg-cyan-950" : "border-line bg-surface hover:border-brand/60"}`}>
                 <p className="font-bold text-ink">{template.key}</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted">{template.message}</p>
               </button>

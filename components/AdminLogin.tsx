@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { LockKeyhole } from "lucide-react";
 import { FormEvent, useState } from "react";
 
@@ -76,13 +77,9 @@ export function AdminLogin() {
             />
           </label>
         </details>
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <ActionButton type="submit" variant="primary" loading={loading} className="min-h-10 rounded-lg px-5">
           {loading ? "Checking..." : "Open Dashboard"}
-        </button>
+        </ActionButton>
       </form>
       {status ? <p className="mt-4 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-3 text-sm font-semibold text-red-700 dark:text-red-300">{status}</p> : null}
       <p className="mt-4 text-xs leading-relaxed text-muted">

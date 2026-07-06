@@ -7,6 +7,7 @@ import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedW
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
 import { ipdAdmissionStatuses } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
 
@@ -199,9 +200,9 @@ export function AdminIpdBeds() {
           <h2 className="mt-1 text-xl font-bold text-ink">Admissions and live bed board</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Admit from OPD, assign beds, transfer rooms, track nursing notes and discharge summaries.</p>
         </div>
-        <button type="button" onClick={() => void loadIpd()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+        <ActionButton variant="secondary" onClick={() => void loadIpd()}>
           <RefreshCw size={17} /> Refresh IPD
-        </button>
+        </ActionButton>
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
@@ -252,9 +253,9 @@ export function AdminIpdBeds() {
             </label>
             <input name="diagnosis" className={fieldClass} placeholder="Provisional diagnosis" required />
             <textarea name="carePlan" className={`${fieldClass} min-h-24 py-3`} placeholder="Care plan / monitoring instructions" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+            <ActionButton type="submit" variant="primary">
               Create Admission
-            </button>
+            </ActionButton>
           </div>
         </form>
 

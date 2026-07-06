@@ -3,6 +3,7 @@
 import { Activity, CheckCircle2, ClipboardList, Layers3, Plus, RefreshCw } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { HmsBuildStatus, HmsModule, HmsModuleRecord, HmsRecordStatus } from "@/lib/hms-types";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type HmsResponse = {
@@ -128,13 +129,12 @@ export function AdminEnterpriseModules() {
             Every requested module now has a tracked product surface. Live MVP modules are usable today; foundation and planned modules are ready for deeper workflows.
           </p>
         </div>
-        <button
-          type="button"
+        <ActionButton
+          variant="secondary"
           onClick={() => void loadModules()}
-          className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
         >
           <RefreshCw size={17} /> Refresh Modules
-        </button>
+        </ActionButton>
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
@@ -159,6 +159,7 @@ export function AdminEnterpriseModules() {
               key={module.id}
               type="button"
               onClick={() => setSelectedModule(module.id)}
+              aria-pressed={selectedModule === module.id}
               className={`rounded border p-4 text-left transition hover:-translate-y-0.5 hover:border-brand ${selectedModule === module.id ? "border-brand bg-cyan-50 dark:bg-cyan-950 shadow-sm" : "border-line bg-surface"}`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -206,9 +207,9 @@ export function AdminEnterpriseModules() {
                 <input name="owner" className={fieldClass} placeholder="Owner / team" defaultValue={selected.group} />
               </div>
               <textarea name="notes" className={`${fieldClass} min-h-24 py-3`} placeholder="Implementation notes, workflow details, or requirements" />
-              <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+              <ActionButton type="submit" variant="primary">
                 Save Module Record
-              </button>
+              </ActionButton>
             </form>
 
             <div className="grid gap-3 p-4">

@@ -3,6 +3,7 @@
 import { AlertTriangle, CheckCircle2, RefreshCw, Rocket, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductionCheck, ProductionCheckStatus } from "@/lib/production-readiness";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ProductionReadiness = {
@@ -93,9 +94,9 @@ export function AdminProductionReadiness() {
           <h2 className="mt-1 text-xl font-bold text-ink">Deployment readiness</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Environment, security, data, operations and compliance checks before going live with patient data.</p>
         </div>
-        <button type="button" onClick={() => void loadReadiness()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+        <ActionButton variant="secondary" onClick={() => void loadReadiness()}>
           <RefreshCw size={17} /> Refresh Readiness
-        </button>
+        </ActionButton>
       </div>
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}

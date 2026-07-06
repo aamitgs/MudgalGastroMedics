@@ -7,6 +7,7 @@ import type { OpdVisit } from "@/lib/opd-types";
 import type { ProcedureChecklist, ProcedureSchedule, ProcedureScheduleStatus } from "@/lib/procedure-types";
 import { procedureRooms, procedureScheduleStatuses } from "@/lib/procedure-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const procedureExportHeaders = ["Patient", "Phone", "Procedure", "Scheduled Date", "Scheduled Time", "Room", "Doctor", "Priority", "Status"];
@@ -171,17 +172,16 @@ export function AdminProcedures() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(procedureExportHeaders, filteredSchedules.map(procedureExportRow), "procedures.csv")}
             disabled={filteredSchedules.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button type="button" onClick={() => void loadProcedures()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadProcedures()}>
             <RefreshCw size={17} /> Refresh Procedures
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -223,9 +223,9 @@ export function AdminProcedures() {
             <input name="doctor" className={fieldClass} placeholder="Doctor" defaultValue="Dr. Deepak Kumar Sharma" />
             <input name="anesthesiaPlan" className={fieldClass} placeholder="Sedation / anesthesia plan" />
             <textarea name="notes" className={`${fieldClass} min-h-24 py-3`} placeholder="Preparation notes, consent remarks, special risks" />
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+            <ActionButton type="submit" variant="primary">
               <ClipboardCheck size={17} /> Save Procedure Schedule
-            </button>
+            </ActionButton>
           </div>
         </form>
 
