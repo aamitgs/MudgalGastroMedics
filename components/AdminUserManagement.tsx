@@ -3,6 +3,7 @@
 import { CheckCircle2, KeyRound, RefreshCw, ShieldCheck, ShieldOff, UserRoundCog, UserRoundPlus, UsersRound, XCircle } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { roleMeta, staffLoginRoles, type AccessRole } from "@/lib/access/matrix";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ManagedUser = {
@@ -32,7 +33,7 @@ type Approval = {
 type Credential = { name: string; username: string; roles: AccessRole[]; temporaryPassword: string };
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
-const actionButton = "inline-flex min-h-9 items-center justify-center gap-1.5 rounded border border-line bg-surface px-3 text-xs font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50";
+const rowAction = "gap-1.5 bg-surface px-3 text-xs";
 
 const assignableRoles = staffLoginRoles.filter((role) => role !== "super-admin");
 
@@ -180,12 +181,12 @@ export function AdminUserManagement() {
           <h2 className="mt-1 text-xl font-bold text-ink">Users, roles & approvals</h2>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => void seedLaunchTeam()} disabled={!isSuperAdmin} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50">
+          <ActionButton variant="secondary" onClick={() => void seedLaunchTeam()} disabled={!isSuperAdmin}>
             <UsersRound size={17} /> Seed Launch Team
-          </button>
-          <button type="button" onClick={() => void load()} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void load()}>
             <RefreshCw size={17} /> Refresh
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -221,12 +222,12 @@ export function AdminUserManagement() {
                   <span className="text-muted"> (requested by {approval.requestedByName})</span>
                 </p>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => void decideApproval(approval.id, "approved")} disabled={!isSuperAdmin} className={actionButton}>
+                  <ActionButton variant="secondary" className={rowAction} onClick={() => void decideApproval(approval.id, "approved")} disabled={!isSuperAdmin}>
                     <CheckCircle2 size={14} /> Approve
-                  </button>
-                  <button type="button" onClick={() => void decideApproval(approval.id, "rejected")} disabled={!isSuperAdmin} className={actionButton}>
+                  </ActionButton>
+                  <ActionButton variant="secondary" className={rowAction} onClick={() => void decideApproval(approval.id, "rejected")} disabled={!isSuperAdmin}>
                     <XCircle size={14} /> Reject
-                  </button>
+                  </ActionButton>
                 </div>
               </div>
             ))}
@@ -259,8 +260,9 @@ export function AdminUserManagement() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
+                <ActionButton
+                  variant="secondary"
+                  className={rowAction}
                   onClick={async () => {
                     const data = await operate(user.id, "reset-password");
                     if (data?.temporaryPassword) {
@@ -269,34 +271,33 @@ export function AdminUserManagement() {
                     }
                   }}
                   disabled={!isSuperAdmin}
-                  className={actionButton}
                 >
                   <KeyRound size={14} /> Reset password
-                </button>
-                <button type="button" onClick={() => void operate(user.id, "reset-mfa")} disabled={!isSuperAdmin || !user.totpEnabled} className={actionButton}>
+                </ActionButton>
+                <ActionButton variant="secondary" className={rowAction} onClick={() => void operate(user.id, "reset-mfa")} disabled={!isSuperAdmin || !user.totpEnabled}>
                   <ShieldOff size={14} /> Reset MFA
-                </button>
+                </ActionButton>
                 {user.status === "active" ? (
-                  <button type="button" onClick={() => void operate(user.id, "suspend")} disabled={!isSuperAdmin || user.id === myUserId} className={actionButton}>
+                  <ActionButton variant="secondary" className={rowAction} onClick={() => void operate(user.id, "suspend")} disabled={!isSuperAdmin || user.id === myUserId}>
                     <ShieldOff size={14} /> Suspend
-                  </button>
+                  </ActionButton>
                 ) : (
-                  <button type="button" onClick={() => void operate(user.id, "reactivate")} disabled={!isSuperAdmin} className={actionButton}>
+                  <ActionButton variant="secondary" className={rowAction} onClick={() => void operate(user.id, "reactivate")} disabled={!isSuperAdmin}>
                     <ShieldCheck size={14} /> Reactivate
-                  </button>
+                  </ActionButton>
                 )}
-                <button
-                  type="button"
+                <ActionButton
+                  variant="secondary"
+                  className={rowAction}
                   onClick={() => {
                     setEditingRolesFor(editingRolesFor === user.id ? "" : user.id);
                     setRoleDraft(user.roles);
                     setDefaultDraft(user.defaultRole);
                   }}
                   disabled={!isSuperAdmin}
-                  className={actionButton}
                 >
                   <UserRoundCog size={14} /> Change roles
-                </button>
+                </ActionButton>
               </div>
             </div>
 
@@ -317,8 +318,8 @@ export function AdminUserManagement() {
                       <option key={role} value={role}>Default: {roleMeta[role].label}</option>
                     ))}
                   </select>
-                  <button
-                    type="button"
+                  <ActionButton
+                    variant="primary"
                     onClick={async () => {
                       const data = await operate(user.id, "request-role-change", { roles: roleDraft, defaultRole: defaultDraft });
                       if (data) {
@@ -327,10 +328,9 @@ export function AdminUserManagement() {
                       }
                     }}
                     disabled={!roleDraft.length}
-                    className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]"
                   >
                     Request change
-                  </button>
+                  </ActionButton>
                 </div>
               </div>
             ) : null}
@@ -355,9 +355,9 @@ export function AdminUserManagement() {
         <p className="text-xs leading-relaxed text-muted">
           Super Admin cannot be granted here — create the account first, then request the role change so a second Super Admin approves it.
         </p>
-        <button type="submit" disabled={!isSuperAdmin || !newRoles.length} className="inline-flex min-h-9 items-center justify-center gap-2 justify-self-start rounded border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)] disabled:cursor-not-allowed disabled:opacity-50">
+        <ActionButton type="submit" variant="primary" disabled={!isSuperAdmin || !newRoles.length} className="justify-self-start px-5">
           <UserRoundPlus size={16} /> Create user
-        </button>
+        </ActionButton>
       </form>
     </div>
   );

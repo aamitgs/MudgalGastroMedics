@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
 
@@ -162,21 +164,16 @@ export function AdminPatients() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(patientExportHeaders, filteredPatients.map(patientExportRow), "patients.csv")}
             disabled={filteredPatients.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadPatients()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-          >
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadPatients()}>
             <RefreshCw size={17} /> Refresh Patients
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -237,9 +234,9 @@ export function AdminPatients() {
                 </div>
               </div>
             ) : null}
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+            <ActionButton type="submit" variant="primary">
               Save Patient + Generate UHID
-            </button>
+            </ActionButton>
           </div>
         </form>
 
@@ -257,10 +254,11 @@ export function AdminPatients() {
           <div className="mt-4 grid max-h-[720px] gap-3 overflow-auto pr-1">
             {loading ? <ModuleSkeleton /> : null}
             {!loading && filteredPatients.length === 0 ? (
-              <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
-                <FileHeart className="mx-auto text-brand" size={34} />
-                <p className="mt-4 text-xl font-bold text-ink">No patient records found.</p>
-              </div>
+              <ModuleEmptyState
+                icon={FileHeart}
+                title="No patient records found"
+                description="Register a patient with the form, or accept a website appointment request — a UHID is created or matched by phone automatically."
+              />
             ) : null}
             {filteredPatients.map((patient) => (
               <article key={patient.id} className="rounded border border-line bg-surface p-4 shadow-sm">

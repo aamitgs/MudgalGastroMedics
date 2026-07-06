@@ -6,6 +6,8 @@ import { createAppointmentPlanningNote } from "@/lib/ai-planning";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
 
@@ -90,7 +92,7 @@ export function AdminAppointments() {
       setError(data.error || "Unable to create OPD token.");
       return;
     }
-    setError("OPD token created. Refresh the OPD Queue section below.");
+    notify.success("OPD token created", { description: "Refresh the OPD Queue section below." });
   }
 
   useEffect(() => {
@@ -170,28 +172,19 @@ export function AdminAppointments() {
                 className="min-h-9 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 sm:w-72"
               />
             </label>
-            <button
-              type="button"
+            <ActionButton
+              variant="secondary"
               onClick={() => downloadCsv(appointmentExportHeaders, filteredAppointments.map(appointmentExportRow), "appointments.csv")}
               disabled={filteredAppointments.length === 0}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download size={17} /> Export CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => void loadAppointments()}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-            >
+            </ActionButton>
+            <ActionButton variant="secondary" onClick={() => void loadAppointments()}>
               <RefreshCw size={17} /> Refresh
-            </button>
-            <button
-              type="button"
-              onClick={() => void logout()}
-              className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-surface px-4 font-bold text-muted transition hover:border-red-200 dark:border-red-900 hover:bg-red-50 dark:bg-red-950 hover:text-red-700 dark:text-red-300"
-            >
+            </ActionButton>
+            <ActionButton variant="ghost" onClick={() => void logout()} className="border border-line bg-surface hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950 dark:hover:text-red-300">
               Logout
-            </button>
+            </ActionButton>
           </div>
         </div>
 
@@ -200,10 +193,15 @@ export function AdminAppointments() {
         <div className="grid gap-4 p-4">
           {loading ? <ModuleSkeleton /> : null}
           {!loading && filteredAppointments.length === 0 ? (
-            <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
-              <p className="text-xl font-bold text-ink">No appointment requests yet.</p>
-              <p className="mt-2 text-muted">Submit the website appointment form, then refresh this dashboard.</p>
-            </div>
+            <ModuleEmptyState
+              icon={CalendarDays}
+              title={query ? "No requests match your search" : "No appointment requests yet"}
+              description={query ? "Try a different patient name, phone number or service." : "Requests from the website booking form land here in real time — refresh to pick up the latest."}
+              action="Refresh"
+              onAction={() => void loadAppointments()}
+              secondaryAction={query ? "Clear search" : undefined}
+              onSecondaryAction={query ? () => setQuery("") : undefined}
+            />
           ) : null}
           {filteredAppointments.map((appointment) => (
             <article key={appointment.id} className="rounded border border-line/80 bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4 shadow-sm">
@@ -248,20 +246,17 @@ export function AdminAppointments() {
                 <div className="grid content-start gap-2 sm:grid-cols-2 lg:w-48 lg:grid-cols-1">
                   <a href={`tel:${appointment.phone}`} className="rounded border border-line bg-surface px-4 py-2 text-center font-bold text-ink transition hover:border-brand hover:text-brand">Call</a>
                   <a href={`https://wa.me/${appointment.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="rounded border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 px-4 py-2 text-center font-bold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-100 dark:bg-emerald-950">WhatsApp</a>
-                  <button
-                    type="button"
+                  <ActionButton
+                    variant="secondary"
                     onClick={() => setOpenPlanId((value) => (value === appointment.id ? "" : appointment.id))}
-                    className="inline-flex items-center justify-center gap-2 rounded border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-4 py-2 text-center font-bold text-brand transition hover:bg-cyan-100 dark:bg-cyan-950"
+                    aria-expanded={openPlanId === appointment.id}
+                    className="border-cyan-200 bg-cyan-50 text-brand hover:bg-cyan-100 dark:border-cyan-900 dark:bg-cyan-950"
                   >
                     <BrainCircuit size={16} /> AI Plan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void createOpdToken(appointment.id)}
-                    className="rounded border border-teal/20 bg-teal px-4 py-2 text-center font-bold text-white transition hover:bg-teal-dark"
-                  >
+                  </ActionButton>
+                  <ActionButton variant="success" onClick={() => void createOpdToken(appointment.id)}>
                     Create OPD Token
-                  </button>
+                  </ActionButton>
                   <select aria-label="Appointment status"
                     value={appointment.status}
                     onChange={(event) => void updateStatus(appointment.id, event.target.value as AppointmentStatus)}
@@ -328,9 +323,9 @@ function PlanningNote({ appointment }: { appointment: AppointmentRecord }) {
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm font-bold text-ink">Reception script</p>
-            <button type="button" onClick={() => void copyScript()} className="inline-flex items-center gap-1 rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink hover:border-brand hover:text-brand">
+            <ActionButton variant="secondary" size="sm" onClick={() => void copyScript()} className="min-h-7 gap-1 px-2 text-xs">
               <Copy size={13} /> Copy
-            </button>
+            </ActionButton>
           </div>
           <p className="rounded border border-line bg-surface p-3 text-sm leading-relaxed text-muted">{note.receptionScript}</p>
           <p className="mt-3 rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 p-3 text-xs font-semibold leading-relaxed text-amber-800 dark:text-amber-300">{note.safetyNote}</p>

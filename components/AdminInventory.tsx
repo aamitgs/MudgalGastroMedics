@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryCategories, inventoryExpirySoonDays, inventoryExpiryStatus } from "@/lib/inventory-types";
 import { downloadCsv } from "@/lib/table-export";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Batch", "Lot", "Expiry", "Last Updated"];
@@ -128,21 +130,16 @@ export function AdminInventory() {
           <h2 className="mt-1 text-xl font-bold text-ink">Stock control</h2>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <ActionButton
+            variant="secondary"
             onClick={() => downloadCsv(inventoryExportHeaders, items.map(inventoryExportRow), "inventory.csv")}
             disabled={items.length === 0}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download size={17} /> Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadItems()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
-          >
+          </ActionButton>
+          <ActionButton variant="secondary" onClick={() => void loadItems()}>
             <RefreshCw size={17} /> Refresh Stock
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -178,19 +175,20 @@ export function AdminInventory() {
               <input name="lotNumber" className={fieldClass} placeholder="Lot no." />
               <input name="expiryDate" type="date" aria-label="Expiry date" className={fieldClass} />
             </div>
-            <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
+            <ActionButton type="submit" variant="primary">
               Save Stock Item
-            </button>
+            </ActionButton>
           </div>
         </form>
 
         <div className="grid gap-3">
           {loading ? <ModuleSkeleton /> : null}
           {!loading && items.length === 0 ? (
-            <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
-              <PackageCheck className="mx-auto text-brand" size={34} />
-              <p className="mt-4 text-xl font-bold text-ink">No stock items yet.</p>
-            </div>
+            <ModuleEmptyState
+              icon={PackageCheck}
+              title="No stock items yet"
+              description="Add your first medicine, consumable or procedure kit with the form — quantities, reorder levels and expiry tracking start immediately."
+            />
           ) : null}
           {items.map((item) => {
             const isLow = item.quantity <= item.reorderLevel;
@@ -214,9 +212,9 @@ export function AdminInventory() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => void adjustQuantity(item.id, -1)} className="grid h-10 w-10 place-items-center rounded border border-line bg-soft font-bold text-ink">-</button>
+                    <ActionButton variant="secondary" onClick={() => void adjustQuantity(item.id, -1)} aria-label={`Decrease ${item.name} quantity`} className="h-10 w-10 min-h-10 px-0">-</ActionButton>
                     <span className="min-w-28 rounded border border-line bg-surface px-4 py-2 text-center font-bold text-ink">{item.quantity} {item.unit}</span>
-                    <button type="button" onClick={() => void adjustQuantity(item.id, 1)} className="grid h-10 w-10 place-items-center rounded border border-line bg-soft font-bold text-ink">+</button>
+                    <ActionButton variant="secondary" onClick={() => void adjustQuantity(item.id, 1)} aria-label={`Increase ${item.name} quantity`} className="h-10 w-10 min-h-10 px-0">+</ActionButton>
                   </div>
                 </div>
               </article>
