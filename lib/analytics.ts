@@ -6,6 +6,7 @@ import { listAccountEntries } from "@/lib/finance-store";
 import { listAttendance, listStaff } from "@/lib/hr-store";
 import type { DashboardMetric, NavBadgeCounts } from "@/lib/hospital-os-data";
 import { listInventoryItems } from "@/lib/inventory-store";
+import { inventoryExpiryStatus } from "@/lib/inventory-types";
 import { getOccupancyStats, listBeds, listIpdAdmissions } from "@/lib/ipd-store";
 import { listLabOrders } from "@/lib/lab-store";
 import { listOpdVisits } from "@/lib/opd-store";
@@ -144,6 +145,7 @@ export async function createAnalyticsSnapshot() {
     risks: {
       urgentAppointments: appointments.filter((appointment) => appointment.priority === "Urgent symptoms").length,
       lowStockItems: inventory.filter((item) => item.quantity <= item.reorderLevel).length,
+      expiringItems: inventory.filter((item) => inventoryExpiryStatus(item) !== null).length,
       flaggedPatients: patients.filter((patient) => patient.status === "Flagged").length,
       escalatedAiReviews: aiReviews.filter((review) => review.status === "Escalated").length,
       unpaidLab: labOrders.filter((order) => order.paymentStatus === "Unpaid").length,

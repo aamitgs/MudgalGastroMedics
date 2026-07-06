@@ -1,13 +1,13 @@
 "use client";
 
-import { AlertTriangle, Download, PackageCheck, Plus, RefreshCw } from "lucide-react";
+import { AlertTriangle, CalendarClock, CalendarX, Download, PackageCheck, Plus, RefreshCw } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/lib/inventory-types";
-import { inventoryCategories } from "@/lib/inventory-types";
+import { inventoryCategories, inventoryExpirySoonDays, inventoryExpiryStatus } from "@/lib/inventory-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
-const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Last Updated"];
+const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Batch", "Lot", "Expiry", "Last Updated"];
 
 function inventoryExportRow(item: InventoryItem) {
   return [
@@ -17,6 +17,9 @@ function inventoryExportRow(item: InventoryItem) {
     String(item.reorderLevel),
     item.unit,
     item.vendor ?? "",
+    item.batchNumber ?? "",
+    item.lotNumber ?? "",
+    item.expiryDate ?? "",
     item.lastUpdatedAt
   ];
 }
@@ -107,9 +110,11 @@ export function AdminInventory() {
 
   const stats = useMemo(() => {
     const lowStock = items.filter((item) => item.quantity <= item.reorderLevel);
+    const expiryAlerts = items.filter((item) => inventoryExpiryStatus(item) !== null);
     return [
       { label: "Total Items", value: items.length },
       { label: "Low Stock", value: lowStock.length },
+      { label: `Expiry ≤${inventoryExpirySoonDays}d`, value: expiryAlerts.length },
       { label: "Medicines", value: items.filter((item) => item.category === "Medicine").length },
       { label: "Procedure Kits", value: items.filter((item) => item.category === "Procedure Kit").length }
     ];
@@ -143,7 +148,7 @@ export function AdminInventory() {
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-xl font-bold text-ink">{stat.value}</p>
@@ -168,6 +173,11 @@ export function AdminInventory() {
               <input name="unit" className={fieldClass} placeholder="Unit" defaultValue="pcs" />
             </div>
             <input name="vendor" className={fieldClass} placeholder="Vendor / supplier" />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <input name="batchNumber" className={fieldClass} placeholder="Batch no." />
+              <input name="lotNumber" className={fieldClass} placeholder="Lot no." />
+              <input name="expiryDate" type="date" aria-label="Expiry date" className={fieldClass} />
+            </div>
             <button type="submit" className="inline-flex min-h-9 items-center justify-center rounded border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)]">
               Save Stock Item
             </button>
@@ -184,6 +194,7 @@ export function AdminInventory() {
           ) : null}
           {items.map((item) => {
             const isLow = item.quantity <= item.reorderLevel;
+            const expiry = inventoryExpiryStatus(item);
             return (
               <article key={item.id} className="rounded border border-line bg-surface p-4 shadow-sm">
                 <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
@@ -192,8 +203,15 @@ export function AdminInventory() {
                       <h3 className="text-xl font-bold text-ink">{item.name}</h3>
                       <span className="rounded-full border border-line bg-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-muted">{item.category}</span>
                       {isLow ? <span className="inline-flex items-center gap-1 rounded-full border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-700 dark:text-red-300"><AlertTriangle size={13} /> Low</span> : null}
+                      {expiry === "expired" ? <span className="inline-flex items-center gap-1 rounded-full border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-700 dark:text-red-300"><CalendarX size={13} /> Expired {item.expiryDate}</span> : null}
+                      {expiry === "expiring-soon" ? <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-700 dark:text-amber-300"><CalendarClock size={13} /> Expires {item.expiryDate}</span> : null}
                     </div>
-                    <p className="mt-2 text-sm text-muted">Vendor: {item.vendor || "-"} | Reorder at {item.reorderLevel} {item.unit}</p>
+                    <p className="mt-2 text-sm text-muted">
+                      Vendor: {item.vendor || "-"} | Reorder at {item.reorderLevel} {item.unit}
+                      {item.batchNumber ? ` | Batch ${item.batchNumber}` : ""}
+                      {item.lotNumber ? ` | Lot ${item.lotNumber}` : ""}
+                      {item.expiryDate && !expiry ? ` | Expires ${item.expiryDate}` : ""}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button type="button" onClick={() => void adjustQuantity(item.id, -1)} className="grid h-10 w-10 place-items-center rounded border border-line bg-soft font-bold text-ink">-</button>

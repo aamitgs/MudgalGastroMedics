@@ -69,6 +69,13 @@ function normalizeNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+/** Accepts YYYY-MM-DD only; anything else is treated as "no expiry recorded". */
+function normalizeIsoDate(value: unknown) {
+  const text = normalizeText(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return "";
+  return Number.isNaN(new Date(`${text}T00:00:00`).getTime()) ? "" : text;
+}
+
 export async function listInventoryItems() {
   return (await docStore.load()).items;
 }
@@ -87,6 +94,9 @@ export async function upsertInventoryItem(input: Record<string, unknown>) {
     reorderLevel: normalizeNumber(input.reorderLevel, existing?.reorderLevel ?? 0),
     unit: normalizeText(input.unit) || existing?.unit || "pcs",
     vendor: normalizeText(input.vendor) || existing?.vendor || "",
+    batchNumber: normalizeText(input.batchNumber) || existing?.batchNumber || undefined,
+    lotNumber: normalizeText(input.lotNumber) || existing?.lotNumber || undefined,
+    expiryDate: normalizeIsoDate(input.expiryDate) || existing?.expiryDate || undefined,
     lastUpdatedAt: now
   };
 
