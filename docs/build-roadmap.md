@@ -38,6 +38,7 @@ enterprise-UX tracks below. Every alert must be **explainable** (say why it fire
 | 0.5 | **Drug–drug interaction alerts** | None | Start with a curated high-risk interaction list (explainable, sourced), alert at prescribe time; expand data source later. Never auto-block — warn + require acknowledgement | High | L | drug reference data |
 | 0.6 | **Patient identity verification** | None | Lightweight confirm-identity step (name + phone/DOB) before clinical write actions on a record; audited | Med | M | — |
 | 0.7 | **Consent capture & verification** | `consent` exists as a field/concept only | Real captured+audited consent step for procedures and admission (digital acknowledgement); block the workflow until consent recorded | Med | M | — |
+| 0.8 | **Inventory batch/lot/expiry foundation** *(audit addendum)* | `InventoryItem` has only quantity/reorderLevel/vendor — no batch, lot, or expiry fields | Add optional `batchNumber`/`lotNumber`/`expiryDate` to the inventory model + entry UI; surfaces expiring/expired stock so pharmacy expiry monitoring (P4) becomes buildable. Additive, backward-compatible | **High** | S | — |
 
 **Track 0 outcome:** the platform actively prevents the highest-risk clinical mistakes —
 allergy/interaction/duplicate-medication at prescribe time, critical results never missed,
@@ -67,6 +68,22 @@ priority and precedes cosmetic/enterprise-feel work.
 **Track 1 outcome:** staff surfaces look and behave like one enterprise product;
 navigation is grouped; one Button everywhere; every table/list has a real empty state.
 
+### Track 1 addenda — July 2026 full-prompt audit
+*Verified against the codebase on 2026-07-06. Items 1.3/1.4/1.5 shipped their
+primitives but not full adoption; the audit also surfaced small spec gaps and two
+cheap Part 1/3 violations. All additive, zero backend risk.*
+
+| # | Item | Current state | Build | Pri | Effort | Depends on |
+|---|---|---|---|---|---|---|
+| 1.9 | **De-mock the OS dashboard** | `dashboardMetrics`, `clinicalTimeline`, sidebar badges are hardcoded demo values | Wire metric tiles, the patient timeline tab, and nav badges to real store queries (P3 requires live widgets; P8 forbids hardcoded values on staff surfaces) | **High** | S–M | — |
+| 1.10 | **Primitive completions** | Button lacks Warning variant; `notify` lacks loading/undo; empty states lack secondary action + help link | Add Warning variant, `notify.loading`/`notify.undo`, and optional `secondaryAction`/`helpHref` props — before the remaining ~15 modules adopt them (P6 contracts) | High | S | — |
+| 1.11 | **Retire HMS/ERP positioning language** | `/hms-erp` + `/platform` public pages still say "HMS / Hospital ERP" (P1 forbidden vocabulary) | Reword to "Enterprise Healthcare Platform" language; keep the `/hms-erp` URL as a redirect for SEO continuity | Med | S | — |
+| 1.12 | **Zod convergence on REST routes** | Server actions validate via `lib/validation`; the 58 REST routes use hand-rolled `typeof` checks | Migrate route bodies onto shared Zod schemas module-by-module (P5 "validate everything", one validation culture) | Med | M | — |
+
+**Adoption completion (amend 1.3/1.4/1.5):** 77 raw `<button>`s remain (5 files use
+ActionButton); ~11/26 modules use the shared empty states; `notify` used in 9 files.
+Finish rollout module-by-module alongside other Track 1/2 work.
+
 ---
 
 ## TRACK 2 — Structural UX
@@ -92,7 +109,7 @@ context one click away; a real notification inbox and live global search.
 
 | # | Item | Current state | Build | Pri | Effort | Depends on |
 |---|---|---|---|---|---|---|
-| 3.1 | **Shared enterprise DataTable** | 1 real table (OS); 26 card-stacks; no virtualization/server paging | One TanStack-based `DataTable` (sticky header/col, resize, column visibility, saved views/filters, multi-sort, bulk actions, export, print, keyboard, skeleton, empty/error) + **server pagination/filtering/sorting** and virtualization >200 rows. Adopt module-by-module starting Patients → Appointments (P2/P4/P5/P6) | **High** | XL | Postgres (done) |
+| 3.1 | **Shared enterprise DataTable** | 1 real table (OS); 26 card-stacks; no virtualization/server paging | One TanStack-based `DataTable` (sticky header/col, resize, column visibility, saved views/filters, multi-sort, bulk actions, export, print, keyboard, skeleton, empty/error) + **server pagination/filtering/sorting** and virtualization >200 rows. Adopt module-by-module starting Patients → Appointments (P2/P4/P5/P6). **Prerequisite decision:** unify the two token vocabularies (site vs `--hos-*`) first so the flagship table isn't built twice | **High** | XL | Postgres (done); token unification (4.9) |
 | 3.2 | **Advanced forms** | Basic; doctor autosave only | Shared RHF+Zod wrapper: smart defaults, autocomplete, recently-used values, searchable dropdowns, grouped sections, inline validation, autosave, undo, success feedback (P4/P6) | Med | L | — |
 | 3.3 | **Print center** | 3 PDFs (Rx/invoice/discharge) | Unified print surface: + medical certificate, patient card, barcode labels, wristbands; consistent branded templates (P4) | Med | M | — |
 | 3.4 | **Export center** | CSV/Excel in 17 spots, ad hoc | Central export (PDF/Excel/CSV/print/email; scheduled/encrypted later) reused by every table (P4) | Med | M | 3.1 |
@@ -117,6 +134,9 @@ context one click away; a real notification inbox and live global search.
 | 4.6 | **Radiology / Pathology modules** | Don't exist | Build as modules mirroring Lab workflow (order→schedule→acquire→review→approve→report→notify) (P3/P4) | Low | XL | 3.1 |
 | 4.7 | **Shift handover · task assignment · internal messaging** | Auto-task generation only | User-assigned tasks (priority/due/reassign), shift handover (pending/critical/escalations/ack), secure internal notes/mentions (P3/P4) | Low | L | 2.4 |
 | 4.8 | **Full i18n + next-themes** | Hindi toggle (partial), custom theme store | Proper i18n framework (multi-lang/currency/timezone/RTL); optionally reconcile theme onto next-themes (P5/P6) | Low | L | — |
+| 4.9 | **Token-system unification** *(audit addendum)* | Two token vocabularies: site tokens under StaffChrome vs `--hos-*` in the OS shell; duplicate primitives per surface (`EmptyState`/`ModuleEmptyState`, two Buttons) | One token vocabulary + one primitive per pattern; decide **before** 3.1 builds the DataTable | Med | M | — |
+| 4.10 | **Decompose `HospitalOperatingSystem.tsx`** *(audit addendum)* | 2,188-line monolith (shell + dashboard + workspaces + palette + tables); next-largest file is 614 lines | Behavior-preserving extraction into `components/hospital-os/` feature modules; do incrementally whenever the file is touched (P7 "no god components") | Med | M–L | pairs well with 1.7 |
+| 4.11 | **Smart widgets + announcements decision** *(audit addendum)* | In the Master Prompt (P3) but absent here: movable/resizable dashboard widgets; hospital announcements surface | Product decision: build or consciously defer. Widgets: after 2.3 role dashboards. Announcements: could ride on the CMS + notification inbox (2.4) | Low | — | 2.3, 2.4 |
 
 ---
 
