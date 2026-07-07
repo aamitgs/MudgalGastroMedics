@@ -125,32 +125,32 @@ body.lang-hi .inline-lang [data-hi] {
   display: inline;
 }
 
+/**
+ * Track 4.9 token unification: the Hospital OS shell previously had its own
+ * unbranded blue/gray palette, diverging from the cyan/teal/gold/coral brand
+ * used everywhere else (website, StaffChrome, Admin modules). These now alias
+ * the --site-* tokens role-for-role, so the OS shell renders in the same
+ * brand. Dark mode needs no color redefinition of its own: the OS shell root
+ * carries BOTH "hospital-os-theme" and "dark" classes together (see
+ * shellClass in HospitalOperatingSystem.tsx), so `.dark`'s --site-* dark
+ * values already apply on the same element by the time these aliases resolve.
+ */
 .hospital-os-theme {
   color-scheme: light;
-  --hos-primary: #2563eb;
-  --hos-success: #16a34a;
-  --hos-warning: #f59e0b;
-  --hos-danger: #dc2626;
-  --hos-bg: #fafafa;
-  --hos-surface: #ffffff;
-  --hos-muted: #f3f4f6;
-  --hos-border: #e5e7eb;
-  --hos-text: #111827;
-  --hos-muted-text: #6b7280;
+  --hos-primary: var(--site-brand);
+  --hos-success: var(--site-teal);
+  --hos-warning: var(--site-gold);
+  --hos-danger: var(--site-coral);
+  --hos-bg: var(--site-mist);
+  --hos-surface: var(--site-surface);
+  --hos-muted: var(--site-soft);
+  --hos-border: var(--site-line);
+  --hos-text: var(--site-ink);
+  --hos-muted-text: var(--site-muted);
 }
 
 .hospital-os-theme.dark {
   color-scheme: dark;
-  --hos-primary: #60a5fa;
-  --hos-success: #4ade80;
-  --hos-warning: #fbbf24;
-  --hos-danger: #f87171;
-  --hos-bg: #080b12;
-  --hos-surface: #0d111b;
-  --hos-muted: #141a26;
-  --hos-border: rgba(255, 255, 255, 0.1);
-  --hos-text: #f9fafb;
-  --hos-muted-text: rgba(249, 250, 251, 0.62);
 }
 
 .hero-bg {
