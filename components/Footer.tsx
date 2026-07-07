@@ -70,7 +70,7 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">Contact Us</h3>
             <div className="grid gap-3">
-              <ContactLine icon={<Phone size={16} />} label="Landline" value={site.phone} href={`tel:${site.phone}`} />
+              <ContactLine icon={<Phone size={16} />} label="Call" value={site.mobile} href={`tel:${site.mobile.replace(/\s/g, "")}`} />
               <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile}`} />
               <ContactLine icon={<MessageCircle size={16} />} label="WhatsApp" value={site.mobile} href={`https://wa.me/${site.whatsapp}`} />
             </div>

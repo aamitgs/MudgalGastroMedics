@@ -3,17 +3,41 @@ import { authorize } from "@/lib/access/guard";
 import { communicationChannels, communicationStatuses, communicationTemplates } from "@/lib/communication-types";
 import type { CommunicationChannel, CommunicationStatus } from "@/lib/communication-types";
 import { createCommunicationLog, getCommunicationRecipients, listCommunicationLogs, updateCommunicationLog } from "@/lib/communication-store";
+import { queryCommunicationLogs, type CommunicationLogSortField, type SortDirection } from "@/lib/communication-log-query";
+
+const sortFields: CommunicationLogSortField[] = ["patientName", "channel", "status", "subject", "createdAt"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "liaison-notes", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({
-    ok: true,
-    logs: (await listCommunicationLogs()),
-    recipients: await getCommunicationRecipients(),
-    templates: communicationTemplates
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allLogs = await listCommunicationLogs();
+  const recipients = await getCommunicationRecipients();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, logs: allLogs, recipients, templates: communicationTemplates });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+  const channel = params.get("channel");
+
+  const result = queryCommunicationLogs(allLogs, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as CommunicationLogSortField) ? (sortBy as CommunicationLogSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && communicationStatuses.includes(status as CommunicationStatus) ? (status as CommunicationStatus) : undefined,
+    channel: channel && communicationChannels.includes(channel as CommunicationChannel) ? (channel as CommunicationChannel) : undefined
   });
+
+  return NextResponse.json({ ok: true, ...result, recipients, templates: communicationTemplates });
 }
 
 export async function POST(request: Request) {

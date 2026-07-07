@@ -243,7 +243,7 @@ export function PatientHealthDashboard({
           {uhid ? <p className="mt-1 text-sm text-[var(--hos-muted-text)]">UHID: {uhid}</p> : null}
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href={`tel:${site.phone}`} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] px-4 text-sm font-semibold text-[var(--hos-text)] transition hover:border-[var(--hos-primary)]">
+          <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] px-4 text-sm font-semibold text-[var(--hos-text)] transition hover:border-[var(--hos-primary)]">
             <Phone size={16} /> Call
           </a>
           <a
@@ -434,7 +434,7 @@ export function PatientHealthDashboard({
               title="Nothing on record yet"
               description={`No appointments, visits or admissions found for ${phone}. Once reception processes your request, it will show up here.`}
               action="Call Reception"
-              onAction={() => window.open(`tel:${site.phone}`)}
+              onAction={() => window.open(`tel:${site.mobile.replace(/\s/g, "")}`)}
             />
           ) : null}
         </div>

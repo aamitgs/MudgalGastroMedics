@@ -10,7 +10,7 @@ export async function GET(request: Request) {
       shortName: site.shortName,
       tagline: site.tagline,
       address: fullAddress,
-      phone: site.phone,
+      phone: site.mobile,
       mobile: site.mobile,
       whatsapp: site.whatsapp,
       email: site.email,

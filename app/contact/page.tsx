@@ -8,7 +8,7 @@ import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Book an appointment at Mudgal Gastromedics Hospital, 16 HIG Shaheed Nagar, Agra. Call 0562-3501228 or WhatsApp +91 9828912257.",
+  description: "Book an appointment at Mudgal Gastromedics Hospital, 16 HIG Shaheed Nagar, Agra. Call or WhatsApp +91 9828912257.",
   alternates: { canonical: "/contact" }
 };
 
@@ -16,8 +16,8 @@ export default function ContactPage() {
   const quickActions = [
     {
       title: "Call Reception",
-      value: site.phone,
-      href: `tel:${site.phone}`,
+      value: site.mobile,
+      href: `tel:${site.mobile.replace(/\s/g, "")}`,
       icon: Phone,
       tone: "bg-brand text-white"
     },

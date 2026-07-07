@@ -17,7 +17,7 @@ export function CtaBand() {
               </div>
               <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] md:text-6xl">Book your appointment today.</h2>
               <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/76">
-                Call {site.phone} or WhatsApp {site.mobile}. Address: {fullAddress}
+                Call or WhatsApp {site.mobile}. Address: {fullAddress}
               </p>
               <div className="mt-5 flex max-w-xl gap-3 rounded border border-white/14 bg-white/8 p-4 text-white/78">
                 <Clock className="mt-1 shrink-0 text-cyan-100" size={19} />
@@ -30,7 +30,7 @@ export function CtaBand() {
               <div className="mt-5 grid max-w-3xl gap-3 md:grid-cols-3">
                 <ButtonLink href="/contact#appointment" className="min-h-13 px-6">Book Appointment</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-6">WhatsApp</ButtonLink>
-                <ButtonLink href={`tel:${site.phone}`} variant="ghost" className="min-h-13 border-white/20 bg-white text-ink">Call Reception</ButtonLink>
+                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 border-white/20 bg-white text-ink">Call Reception</ButtonLink>
               </div>
             </div>
             <div className="grid gap-4">

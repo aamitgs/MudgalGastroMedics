@@ -419,7 +419,7 @@ export function PatientPortalAccess() {
 
         {status ? <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{status}</p> : null}
         <div className="mt-5 grid gap-2">
-          <a href={`tel:${site.phone}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
             <Phone size={17} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
           </a>
           <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white">

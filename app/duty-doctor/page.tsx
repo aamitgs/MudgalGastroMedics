@@ -31,7 +31,7 @@ export default function DutyDoctorPage() {
               Duty Medical Officer supporting general medicine, gastroenterology care coordination and inpatient clinical needs.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={`tel:${site.phone}`} className="gap-2"><Phone size={18} /> Call Reception</ButtonLink>
+              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="gap-2"><Phone size={18} /> Call Reception</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>
               <ButtonLink href="/contact#appointment" variant="ghost" className="border-white/25 bg-white/95 text-ink">Book Appointment</ButtonLink>
             </div>
@@ -141,7 +141,7 @@ export default function DutyDoctorPage() {
             <p className="mt-2 max-w-2xl text-muted">Duty timing and immediate care needs should be confirmed with reception, especially for urgent symptoms or after-hours visits.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href={`tel:${site.phone}`}>Call Reception</ButtonLink>
+            <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
             <ButtonLink href="/contact#appointment" variant="ghost">Book Appointment</ButtonLink>
           </div>

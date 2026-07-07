@@ -83,7 +83,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/contact#appointment" className="gap-2"><CalendarCheck size={18} /> Book Appointment</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>
-              <ButtonLink href={`tel:${site.phone}`} variant="ghost" className="gap-2 border-white/25 bg-white/95 text-ink"><Phone size={18} /> Call {site.phone}</ButtonLink>
+              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="gap-2 border-white/25 bg-white/95 text-ink"><Phone size={18} /> Call {site.mobile}</ButtonLink>
             </div>
           </div>
           <div className="rounded border border-white/20 bg-white/12 p-5 shadow-[0_24px_70px_rgba(2,22,29,0.22)] backdrop-blur-md">
