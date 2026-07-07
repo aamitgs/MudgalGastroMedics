@@ -6,6 +6,7 @@ import { site } from "@/lib/site-data";
 const companyLinks = [
   { href: "/#doctor", label: "About MGM" },
   { href: "/#doctor", label: "Doctor Profile" },
+  { href: "/blog", label: "Blog" },
   { href: "/gallery", label: "Facilities" },
   { href: "/contact", label: "Contact" },
   { href: "/contact#appointment", label: "Book Appointment" }

@@ -64,6 +64,7 @@ const navItems = [
     ]
   },
   { href: "/life-at-mgm", label: "Life@MGM" },
+  { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact Us" }
 ] satisfies Array<{
   href: string;
@@ -79,6 +80,7 @@ const navHindi: Record<string, string> = {
   "Special Procedures": "विशेष प्रक्रियाएँ",
   "GI Diseases": "जीआई रोग",
   "Symptoms": "लक्षण",
+  "Blog": "ब्लॉग",
   "Contact Us": "संपर्क करें",
   "Abdominal Pain": "पेट दर्द",
   "Acidity / Reflux": "एसिडिटी / रिफ्लक्स",

@@ -140,6 +140,9 @@ export default async function Home() {
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-12 px-6">
                 WhatsApp
               </ButtonLink>
+              <ButtonLink href="/blog/stomach-intestine-liver-consultation-check-up-camp" variant="ghost" className="min-h-12 px-6">
+                Read Blog Post
+              </ButtonLink>
             </div>
           </div>
           <div className="overflow-hidden rounded border border-line/80 bg-white p-2 shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
