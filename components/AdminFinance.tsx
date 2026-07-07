@@ -1,14 +1,21 @@
 "use client";
 
-import { BadgeIndianRupee, Download, FileCheck2, RefreshCw } from "lucide-react";
+import { BadgeIndianRupee, Download, FileCheck2 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import type { AccountEntry, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
 import { accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
+import type { AccountEntrySortField } from "@/lib/account-entry-query";
+import { queryAccountEntries } from "@/lib/account-entry-query";
+import type { InsuranceClaimSortField } from "@/lib/insurance-claim-query";
+import { queryInsuranceClaims } from "@/lib/insurance-claim-query";
 import type { IpdAdmission } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
-import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DataTable } from "@/components/design-system/DataTable";
+import { notify } from "@/lib/notify";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const claimExportHeaders = ["Patient", "Phone", "Insurer", "Policy Number", "Claim Number", "Requested", "Approved", "Settled", "Status"];
 
@@ -26,6 +33,12 @@ function claimExportRow(claim: InsuranceClaim) {
   ];
 }
 
+const entryExportHeaders = ["Date", "Type", "Category", "Amount", "Method", "Party", "Notes"];
+
+function entryExportRow(entry: AccountEntry) {
+  return [entry.date, entry.type, entry.category, String(entry.amount), entry.method, entry.party ?? "", entry.notes ?? ""];
+}
+
 type FinanceResponse = {
   ok: boolean;
   claims?: InsuranceClaim[];
@@ -38,12 +51,22 @@ type FinanceResponse = {
 };
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+const rowsPerPage = 25;
 
 function formatAmount(value: number) {
   return `Rs. ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
+const entryTypeTone: Record<AccountEntryType, string> = {
+  Income: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+  Deposit: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+  Expense: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
+  Refund: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
+  Adjustment: "border-line bg-soft text-muted"
+};
+
 export function AdminFinance() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
   const [entries, setEntries] = useState<AccountEntry[]>([]);
   const [admissions, setAdmissions] = useState<IpdAdmission[]>([]);
@@ -51,6 +74,21 @@ export function AdminFinance() {
   const [sourceType, setSourceType] = useState<"ipd" | "opd">("ipd");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [claimPage, setClaimPage] = useState(0);
+  const [claimFilter, setClaimFilter] = useState("");
+  const [claimStatusFilter, setClaimStatusFilter] = useState<InsuranceClaimStatus | "">("");
+  const [claimSorting, setClaimSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
+
+  const [entryPage, setEntryPage] = useState(0);
+  const [entryFilter, setEntryFilter] = useState("");
+  const [entryTypeFilter, setEntryTypeFilter] = useState<AccountEntryType | "">("");
+  const [entrySorting, setEntrySorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
+
+  const claimSortField = (claimSorting[0]?.id as InsuranceClaimSortField | undefined) ?? "createdAt";
+  const claimSortDir = claimSorting[0]?.desc ? "desc" : "asc";
+  const entrySortField = (entrySorting[0]?.id as AccountEntrySortField | undefined) ?? "createdAt";
+  const entrySortDir = entrySorting[0]?.desc ? "desc" : "asc";
 
   async function loadFinance() {
     setLoading(true);
@@ -113,12 +151,12 @@ export function AdminFinance() {
     });
     const data = (await response.json().catch(() => ({}))) as FinanceResponse;
     if (!response.ok || !data.ok || !data.claim) {
-      setError(data.error || "Unable to create insurance claim.");
+      notify.error(data.error || "Unable to create insurance claim.");
       return;
     }
     setClaims((items) => [data.claim as InsuranceClaim, ...items]);
+    notify.success("Insurance claim saved");
     event.currentTarget.reset();
-    setError("");
   }
 
   async function createEntry(event: FormEvent<HTMLFormElement>) {
@@ -131,12 +169,12 @@ export function AdminFinance() {
     });
     const data = (await response.json().catch(() => ({}))) as FinanceResponse;
     if (!response.ok || !data.ok || !data.entry) {
-      setError(data.error || "Unable to create account entry.");
+      notify.error(data.error || "Unable to create account entry.");
       return;
     }
     setEntries((items) => [data.entry as AccountEntry, ...items]);
+    notify.success("Account entry saved");
     event.currentTarget.reset();
-    setError("");
   }
 
   async function updateClaim(id: string, updates: Partial<Pick<InsuranceClaim, "status" | "requestedAmount" | "approvedAmount" | "settledAmount" | "claimNumber" | "documents" | "notes">>) {
@@ -147,11 +185,149 @@ export function AdminFinance() {
     });
     const data = (await response.json().catch(() => ({}))) as FinanceResponse;
     if (!response.ok || !data.ok || !data.claim) {
-      setError(data.error || "Unable to update claim.");
+      notify.error(data.error || "Unable to update claim.");
       return;
     }
-    setClaims((items) => items.map((item) => (item.id === id ? data.claim as InsuranceClaim : item)));
+    const updated = data.claim as InsuranceClaim;
+    setClaims((items) => items.map((item) => (item.id === id ? updated : item)));
   }
+
+  function updateClaimFilter(value: string) {
+    setClaimFilter(value);
+    setClaimPage(0);
+  }
+
+  function updateClaimStatusFilter(value: InsuranceClaimStatus | "") {
+    setClaimStatusFilter(value);
+    setClaimPage(0);
+  }
+
+  function updateEntryFilter(value: string) {
+    setEntryFilter(value);
+    setEntryPage(0);
+  }
+
+  function updateEntryTypeFilter(value: AccountEntryType | "") {
+    setEntryTypeFilter(value);
+    setEntryPage(0);
+  }
+
+  // Both tables paginate client-side against the already-loaded arrays: the
+  // "Create insurance claim" form's admission/visit dropdowns need the
+  // complete lists regardless, and claim/ledger volume is small enough that
+  // a server round-trip would add latency without reducing anything
+  // actually transferred — same reasoning as IPD and HR.
+  const { claims: claimPageRows, pageCount: claimPageCount } = useMemo(
+    () =>
+      queryInsuranceClaims(claims, {
+        page: claimPage,
+        pageSize: rowsPerPage,
+        sortBy: claimSortField,
+        sortDir: claimSortDir,
+        query: claimFilter,
+        status: claimStatusFilter || undefined
+      }),
+    [claims, claimPage, claimSortField, claimSortDir, claimFilter, claimStatusFilter]
+  );
+
+  const { entries: entryPageRows, pageCount: entryPageCount } = useMemo(
+    () =>
+      queryAccountEntries(entries, {
+        page: entryPage,
+        pageSize: rowsPerPage,
+        sortBy: entrySortField,
+        sortDir: entrySortDir,
+        query: entryFilter,
+        type: entryTypeFilter || undefined
+      }),
+    [entries, entryPage, entrySortField, entrySortDir, entryFilter, entryTypeFilter]
+  );
+
+  const claimColumns = useMemo<ColumnDef<InsuranceClaim, unknown>[]>(
+    () => [
+      {
+        accessorKey: "patientName",
+        header: "Patient",
+        size: 170,
+        cell: ({ row }) => (
+          <div>
+            <button
+              type="button"
+              onClick={() => openDrawer(row.original.phone, row.original.patientName)}
+              title="Open patient summary"
+              className="rounded text-left font-bold text-ink underline-offset-4 hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              {row.original.patientName}
+            </button>
+            {row.original.uhid ? <span className="ml-2 rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-black uppercase text-brand dark:border-cyan-900 dark:bg-cyan-950">{row.original.uhid}</span> : null}
+          </div>
+        )
+      },
+      {
+        accessorKey: "insurer",
+        header: "Insurer / TPA",
+        size: 170,
+        cell: ({ row }) => (
+          <span>
+            {row.original.insurer}
+            {row.original.tpa ? <span className="text-muted"> · {row.original.tpa}</span> : null}
+          </span>
+        )
+      },
+      { id: "requested", header: "Requested", size: 110, enableSorting: false, cell: ({ row }) => formatAmount(row.original.requestedAmount) },
+      { id: "approved", header: "Approved", size: 110, enableSorting: false, cell: ({ row }) => formatAmount(row.original.approvedAmount) },
+      { accessorKey: "settledAmount", header: "Settled", size: 110, cell: ({ row }) => formatAmount(row.original.settledAmount) },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 140,
+        cell: ({ row }) => (
+          <select
+            aria-label="Claim status"
+            value={row.original.status}
+            onChange={(event) => void updateClaim(row.original.id, { status: event.target.value as InsuranceClaimStatus })}
+            className="rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink"
+          >
+            {insuranceClaimStatuses.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+        )
+      }
+    ],
+    [openDrawer]
+  );
+
+  const entryColumns = useMemo<ColumnDef<AccountEntry, unknown>[]>(
+    () => [
+      { accessorKey: "date", header: "Date", size: 110 },
+      {
+        accessorKey: "type",
+        header: "Type",
+        size: 110,
+        cell: ({ row }) => <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${entryTypeTone[row.original.type]}`}>{row.original.type}</span>
+      },
+      { accessorKey: "category", header: "Category", size: 160, cell: ({ row }) => <span className="font-bold text-ink">{row.original.category}</span> },
+      { accessorKey: "amount", header: "Amount", size: 110, cell: ({ row }) => <span className="font-bold text-teal-dark">{formatAmount(row.original.amount)}</span> },
+      { id: "method", header: "Method", size: 100, enableSorting: false, cell: ({ row }) => row.original.method },
+      { id: "party", header: "Party", size: 150, enableSorting: false, cell: ({ row }) => row.original.party || "—" },
+      {
+        id: "notes",
+        header: "Notes",
+        size: 180,
+        enableSorting: false,
+        cell: ({ row }) =>
+          row.original.notes ? (
+            <span className="line-clamp-1 text-muted" title={row.original.notes}>
+              {row.original.notes}
+            </span>
+          ) : (
+            <span className="text-muted">—</span>
+          )
+      }
+    ],
+    []
+  );
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
@@ -161,21 +337,7 @@ export function AdminFinance() {
           <h2 className="mt-1 text-xl font-bold text-ink">Claims, deposits and cashbook</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Track TPA/insurance claims and maintain a simple hospital ledger for income, deposits, expenses and refunds.</p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <ActionButton
-            variant="secondary"
-            onClick={() => downloadCsv(claimExportHeaders, claims.map(claimExportRow), "insurance-claims.csv")}
-            disabled={claims.length === 0}
-          >
-            <Download size={17} /> Export CSV
-          </ActionButton>
-          <ActionButton variant="secondary" onClick={() => void loadFinance()}>
-            <RefreshCw size={17} /> Refresh Finance
-          </ActionButton>
-        </div>
       </div>
-
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
@@ -188,7 +350,9 @@ export function AdminFinance() {
 
       <div className="grid gap-5 p-4 xl:grid-cols-2">
         <form onSubmit={createClaim} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><FileCheck2 size={19} /> Create insurance claim</p>
+          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+            <FileCheck2 size={19} /> Create insurance claim
+          </p>
           <div className="grid gap-3">
             <select aria-label="Source type" value={sourceType} onChange={(event) => setSourceType(event.target.value as "ipd" | "opd")} className={fieldClass}>
               <option value="ipd">IPD Admission</option>
@@ -197,12 +361,22 @@ export function AdminFinance() {
             {sourceType === "ipd" ? (
               <select aria-label="Admission" name="admissionId" className={fieldClass} required>
                 <option value="">Select admission</option>
-                {admissions.map((admission) => <option key={admission.id} value={admission.id}>{admission.id} | {admission.patientName}{admission.uhid ? ` | ${admission.uhid}` : ""}</option>)}
+                {admissions.map((admission) => (
+                  <option key={admission.id} value={admission.id}>
+                    {admission.id} | {admission.patientName}
+                    {admission.uhid ? ` | ${admission.uhid}` : ""}
+                  </option>
+                ))}
               </select>
             ) : (
               <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
                 <option value="">Select OPD visit</option>
-                {visits.map((visit) => <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""}</option>)}
+                {visits.map((visit) => (
+                  <option key={visit.id} value={visit.id}>
+                    {visit.token} | {visit.patientName}
+                    {visit.uhid ? ` | ${visit.uhid}` : ""}
+                  </option>
+                ))}
               </select>
             )}
             <div className="grid gap-3 md:grid-cols-2">
@@ -220,69 +394,167 @@ export function AdminFinance() {
             </div>
             <input name="documents" className={fieldClass} placeholder="Documents / file references" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Claim notes" />
-            <ActionButton type="submit" variant="primary">Save Claim</ActionButton>
+            <ActionButton type="submit" variant="primary">
+              Save Claim
+            </ActionButton>
           </div>
         </form>
 
         <form onSubmit={createEntry} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><BadgeIndianRupee size={19} /> Add account entry</p>
+          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+            <BadgeIndianRupee size={19} /> Add account entry
+          </p>
           <div className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
               <input aria-label="Date" name="date" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-              <select aria-label="Type" name="type" className={fieldClass} defaultValue="Expense">{accountEntryTypes.map((type) => <option key={type}>{type}</option>)}</select>
+              <select aria-label="Type" name="type" className={fieldClass} defaultValue="Expense">
+                {accountEntryTypes.map((type) => (
+                  <option key={type}>{type}</option>
+                ))}
+              </select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <input name="category" className={fieldClass} placeholder="Category" required />
               <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" required />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <select aria-label="Payment method" name="method" className={fieldClass} defaultValue="Cash">{["Cash", "UPI", "Card", "Bank", "Insurance", "Other"].map((method) => <option key={method}>{method}</option>)}</select>
+              <select aria-label="Payment method" name="method" className={fieldClass} defaultValue="Cash">
+                {["Cash", "UPI", "Card", "Bank", "Insurance", "Other"].map((method) => (
+                  <option key={method}>{method}</option>
+                ))}
+              </select>
               <input name="reference" className={fieldClass} placeholder="Reference / voucher" />
             </div>
             <input name="party" className={fieldClass} placeholder="Party / vendor / patient" />
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Ledger notes" />
-            <ActionButton type="submit" variant="success">Save Entry</ActionButton>
+            <ActionButton type="submit" variant="success">
+              Save Entry
+            </ActionButton>
           </div>
         </form>
       </div>
 
-      <div className="grid gap-5 border-t border-line p-4 xl:grid-cols-2">
-        <div className="grid gap-3">
-          <p className="text-sm font-bold text-ink">Insurance claims</p>
-          {loading ? <ModuleSkeleton /> : null}
-          {claims.map((claim) => (
-            <article key={claim.id} className="rounded border border-line bg-surface p-4 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{claim.id}{claim.uhid ? ` | ${claim.uhid}` : ""}</p>
-                  <h3 className="mt-1 text-lg font-bold text-ink">{claim.patientName}</h3>
-                  <p className="mt-1 text-sm text-muted">{claim.insurer}{claim.tpa ? ` | ${claim.tpa}` : ""}</p>
-                </div>
-                <select aria-label="Claim status" value={claim.status} onChange={(event) => void updateClaim(claim.id, { status: event.target.value as InsuranceClaimStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
-                  {insuranceClaimStatuses.map((status) => <option key={status}>{status}</option>)}
-                </select>
-              </div>
-              <div className="mt-3 grid gap-2 text-sm md:grid-cols-3">
-                <p className="rounded border border-line bg-soft/60 p-2"><span className="font-bold text-ink">Requested:</span> {formatAmount(claim.requestedAmount)}</p>
-                <p className="rounded border border-line bg-soft/60 p-2"><span className="font-bold text-ink">Approved:</span> {formatAmount(claim.approvedAmount)}</p>
-                <p className="rounded border border-line bg-soft/60 p-2"><span className="font-bold text-ink">Settled:</span> {formatAmount(claim.settledAmount)}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+      <div className="grid gap-3 border-t border-line p-4">
+        <p className="text-sm font-bold text-ink">Insurance claims</p>
+        <DataTable
+          columns={claimColumns}
+          data={claimPageRows}
+          getRowId={(claim) => claim.id}
+          pageIndex={claimPage}
+          pageCount={claimPageCount}
+          onPageChange={setClaimPage}
+          sorting={claimSorting}
+          onSortingChange={setClaimSorting}
+          globalFilter={claimFilter}
+          onGlobalFilterChange={updateClaimFilter}
+          searchPlaceholder="Search patient, insurer, policy, claim number"
+          loading={loading}
+          error={error || undefined}
+          onRetry={() => void loadFinance()}
+          emptyState={{
+            icon: FileCheck2,
+            title: claimFilter || claimStatusFilter ? "No claims match your filters" : "No insurance claims yet",
+            description: claimFilter || claimStatusFilter ? "Try a different search term, or clear the status filter." : "Create a claim with the form above.",
+            action: claimFilter || claimStatusFilter ? "Clear filters" : undefined,
+            onAction:
+              claimFilter || claimStatusFilter
+                ? () => {
+                    setClaimFilter("");
+                    setClaimStatusFilter("");
+                  }
+                : undefined
+          }}
+          export={{ headers: claimExportHeaders, row: claimExportRow, filename: "insurance-claims.csv" }}
+          stickyFirstColumn
+          toolbarExtra={
+            <select
+              aria-label="Filter by claim status"
+              value={claimStatusFilter}
+              onChange={(event) => updateClaimStatusFilter(event.target.value as InsuranceClaimStatus | "")}
+              className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+            >
+              <option value="">All statuses</option>
+              {insuranceClaimStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          }
+          bulkActions={(selected, clear) => (
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                downloadCsv(claimExportHeaders, selected.map(claimExportRow), "selected-insurance-claims.csv");
+                clear();
+              }}
+            >
+              <Download size={14} /> Export selected
+            </ActionButton>
+          )}
+        />
+      </div>
 
-        <div className="grid gap-3">
-          <p className="text-sm font-bold text-ink">Recent account entries</p>
-          {entries.map((entry) => (
-            <article key={entry.id} className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-soft/40 p-4">
-              <div>
-                <p className="font-bold text-ink">{entry.category}</p>
-                <p className="text-sm text-muted">{entry.date} | {entry.type} | {entry.method}{entry.party ? ` | ${entry.party}` : ""}</p>
-              </div>
-              <p className="font-bold text-teal-dark">{formatAmount(entry.amount)}</p>
-            </article>
-          ))}
-        </div>
+      <div className="grid gap-3 border-t border-line p-4">
+        <p className="text-sm font-bold text-ink">Recent account entries</p>
+        <DataTable
+          columns={entryColumns}
+          data={entryPageRows}
+          getRowId={(entry) => entry.id}
+          pageIndex={entryPage}
+          pageCount={entryPageCount}
+          onPageChange={setEntryPage}
+          sorting={entrySorting}
+          onSortingChange={setEntrySorting}
+          globalFilter={entryFilter}
+          onGlobalFilterChange={updateEntryFilter}
+          searchPlaceholder="Search category, party, reference, notes"
+          loading={loading}
+          error={error || undefined}
+          onRetry={() => void loadFinance()}
+          emptyState={{
+            icon: BadgeIndianRupee,
+            title: entryFilter || entryTypeFilter ? "No entries match your filters" : "No account entries yet",
+            description: entryFilter || entryTypeFilter ? "Try a different search term, or clear the type filter." : "Add income, deposits, expenses or refunds with the form above.",
+            action: entryFilter || entryTypeFilter ? "Clear filters" : undefined,
+            onAction:
+              entryFilter || entryTypeFilter
+                ? () => {
+                    setEntryFilter("");
+                    setEntryTypeFilter("");
+                  }
+                : undefined
+          }}
+          export={{ headers: entryExportHeaders, row: entryExportRow, filename: "account-entries.csv" }}
+          toolbarExtra={
+            <select
+              aria-label="Filter by entry type"
+              value={entryTypeFilter}
+              onChange={(event) => updateEntryTypeFilter(event.target.value as AccountEntryType | "")}
+              className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+            >
+              <option value="">All types</option>
+              {accountEntryTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          }
+          bulkActions={(selected, clear) => (
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                downloadCsv(entryExportHeaders, selected.map(entryExportRow), "selected-account-entries.csv");
+                clear();
+              }}
+            >
+              <Download size={14} /> Export selected
+            </ActionButton>
+          )}
+        />
       </div>
     </div>
   );
