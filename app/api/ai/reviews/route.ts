@@ -2,18 +2,44 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { generateAiReview, getAiSources, listAiReviews, seedMissingAiReviews, updateAiReview } from "@/lib/ai-review-store";
+import { queryAiReviews, type AiReviewSortField, type SortDirection } from "@/lib/ai-review-query";
 import { aiReviewStatuses } from "@/lib/ai-types";
 import type { AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
+
+const sortFields: AiReviewSortField[] = ["patientName", "source", "urgency", "status", "createdAt"];
+const sources: AiCaseSource[] = ["Appointment", "OPD"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "cms", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({
-    ok: true,
-    reviews: (await listAiReviews()),
-    sources: await getAiSources()
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allReviews = await listAiReviews();
+  const sourceOptions = await getAiSources();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, reviews: allReviews, sources: sourceOptions });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+  const source = params.get("source");
+
+  const result = queryAiReviews(allReviews, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as AiReviewSortField) ? (sortBy as AiReviewSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && aiReviewStatuses.includes(status as AiReviewStatus) ? (status as AiReviewStatus) : undefined,
+    source: source && sources.includes(source as AiCaseSource) ? (source as AiCaseSource) : undefined
   });
+
+  return NextResponse.json({ ok: true, ...result, sources: sourceOptions });
 }
 
 export async function POST(request: Request) {

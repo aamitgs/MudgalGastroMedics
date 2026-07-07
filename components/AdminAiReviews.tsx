@@ -1,13 +1,16 @@
 "use client";
 
-import { BrainCircuit, ClipboardCheck, Download, RefreshCw, Sparkles } from "lucide-react";
-import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { BrainCircuit, ClipboardCheck, Download, Edit3, Sparkles } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
 import { aiReviewStatuses } from "@/lib/ai-types";
+import type { AiReviewSortField } from "@/lib/ai-review-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
-import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DataTable } from "@/components/design-system/DataTable";
+import { notify } from "@/lib/notify";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const aiReviewExportHeaders = ["Patient", "Phone", "Service", "Source", "Urgency", "Status", "Reviewed By", "Created"];
 
@@ -36,64 +39,86 @@ type AiReviewResponse = {
   review?: AiCaseReview;
   sources?: AiSources;
   created?: AiCaseReview[];
+  pageCount?: number;
   error?: string;
 };
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+const pageSize = 25;
+
+const urgencyTone: Record<AiCaseReview["urgency"], string> = {
+  Routine: "border-line bg-soft text-muted",
+  "Priority Review": "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
+  "Urgent Reception Call": "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+};
 
 export function AdminAiReviews() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [reviews, setReviews] = useState<AiCaseReview[]>([]);
   const [sources, setSources] = useState<AiSources>({ appointments: [], visits: [] });
   const [source, setSource] = useState<AiCaseSource>("Appointment");
   const [sourceId, setSourceId] = useState("");
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<AiReviewStatus | "">("");
+  const [sourceFilter, setSourceFilter] = useState<AiCaseSource | "">("");
+  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingReview, setEditingReview] = useState<AiCaseReview | null>(null);
+
+  const sortField = (sorting[0]?.id as AiReviewSortField | undefined) ?? "createdAt";
+  const sortDir = sorting[0]?.desc ? "desc" : "asc";
 
   async function loadAiReviews() {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/ai/reviews", { cache: "no-store" });
-    const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
-    if (!response.ok || !data.ok) {
+    const params = new URLSearchParams({ page: String(pageIndex), pageSize: String(pageSize), sortBy: sortField, sortDir });
+    if (globalFilter.trim()) params.set("q", globalFilter.trim());
+    if (statusFilter) params.set("status", statusFilter);
+    if (sourceFilter) params.set("source", sourceFilter);
+
+    const response = await fetch(`/api/ai/reviews?${params.toString()}`, { cache: "no-store" }).catch(() => null);
+    const data = ((await response?.json().catch(() => ({}))) ?? {}) as AiReviewResponse;
+    if (!response?.ok || !data.ok) {
       setError(data.error || "Unable to load AI reviews.");
       setLoading(false);
       return;
     }
     setReviews(data.reviews ?? []);
     setSources(data.sources ?? { appointments: [], visits: [] });
+    setPageCount(data.pageCount ?? 1);
     setLoading(false);
+    setEditingReview((current) => {
+      if (!current) return current;
+      return data.reviews?.find((review) => review.id === current.id) ?? current;
+    });
   }
 
   useEffect(() => {
-    let active = true;
-    async function loadInitialAiReviews() {
-      const response = await fetch("/api/ai/reviews", { cache: "no-store" });
-      const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
-      if (!active) return;
-      if (!response.ok || !data.ok) {
-        setError(data.error || "Unable to load AI reviews.");
-        setLoading(false);
-        return;
-      }
-      setReviews(data.reviews ?? []);
-      setSources(data.sources ?? { appointments: [], visits: [] });
-      setLoading(false);
-    }
-    void loadInitialAiReviews();
-    return () => {
-      active = false;
-    };
-  }, []);
+    const timer = window.setTimeout(() => void loadAiReviews(), globalFilter ? 250 : 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageIndex, sortField, sortDir, globalFilter, statusFilter, sourceFilter]);
+
+  function updateGlobalFilter(value: string) {
+    setGlobalFilter(value);
+    setPageIndex(0);
+  }
+
+  function updateStatusFilter(value: AiReviewStatus | "") {
+    setStatusFilter(value);
+    setPageIndex(0);
+  }
+
+  function updateSourceFilter(value: AiCaseSource | "") {
+    setSourceFilter(value);
+    setPageIndex(0);
+  }
 
   const sourceOptions = source === "Appointment" ? sources.appointments : sources.visits;
-  const stats = useMemo(() => {
-    return [
-      { label: "AI Reviews", value: reviews.length },
-      { label: "Needs Review", value: reviews.filter((review) => review.status === "Needs Review").length },
-      { label: "Escalated", value: reviews.filter((review) => review.status === "Escalated").length },
-      { label: "Reviewed", value: reviews.filter((review) => review.status === "Reviewed").length }
-    ];
-  }, [reviews]);
 
   async function generateReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -104,11 +129,11 @@ export function AdminAiReviews() {
     });
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok || !data.review) {
-      setError(data.error || "Unable to generate AI review.");
+      notify.error(data.error || "Unable to generate AI review.");
       return;
     }
-    setReviews((items) => [data.review as AiCaseReview, ...items.filter((item) => item.id !== data.review?.id)]);
-    setError("");
+    setSourceId("");
+    void loadAiReviews();
   }
 
   async function seedReviews() {
@@ -119,11 +144,10 @@ export function AdminAiReviews() {
     });
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok) {
-      setError(data.error || "Unable to seed AI reviews.");
+      notify.error(data.error || "Unable to seed AI reviews.");
       return;
     }
-    setReviews(data.reviews ?? []);
-    setError("");
+    void loadAiReviews();
   }
 
   async function updateReview(id: string, updates: Partial<Pick<AiCaseReview, "status" | "doctorReviewNote" | "reviewedBy">>) {
@@ -134,11 +158,74 @@ export function AdminAiReviews() {
     });
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok || !data.review) {
-      setError(data.error || "Unable to update AI review.");
+      notify.error(data.error || "Unable to update AI review.");
       return;
     }
-    setReviews((items) => items.map((item) => (item.id === id ? data.review as AiCaseReview : item)));
+    const updated = data.review as AiCaseReview;
+    setReviews((items) => items.map((item) => (item.id === id ? updated : item)));
+    setEditingReview((current) => (current?.id === id ? updated : current));
   }
+
+  const columns = useMemo<ColumnDef<AiCaseReview, unknown>[]>(
+    () => [
+      {
+        accessorKey: "patientName",
+        header: "Patient",
+        size: 170,
+        cell: ({ row }) => (
+          <div>
+            <button
+              type="button"
+              onClick={() => openDrawer(row.original.phone, row.original.patientName)}
+              title="Open patient summary"
+              className="rounded text-left font-bold text-ink underline-offset-4 hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              {row.original.patientName}
+            </button>
+            {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
+          </div>
+        )
+      },
+      { accessorKey: "source", header: "Source", size: 110, cell: ({ row }) => <span>{row.original.source} | {row.original.route}</span> },
+      { accessorKey: "service", header: "Service", size: 170 },
+      {
+        accessorKey: "urgency",
+        header: "Urgency",
+        size: 170,
+        cell: ({ row }) => <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${urgencyTone[row.original.urgency]}`}>{row.original.urgency}</span>
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        cell: ({ row }) => (
+          <select
+            aria-label="Review status"
+            value={row.original.status}
+            onChange={(event) => void updateReview(row.original.id, { status: event.target.value as AiReviewStatus })}
+            className="rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink"
+          >
+            {aiReviewStatuses.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+        )
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 100,
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => (
+          <ActionButton variant="secondary" size="sm" onClick={() => setEditingReview((current) => (current?.id === row.original.id ? null : row.original))} aria-expanded={editingReview?.id === row.original.id}>
+            <Edit3 size={13} /> Review
+          </ActionButton>
+        )
+      }
+    ],
+    [openDrawer, editingReview]
+  );
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
@@ -148,39 +235,26 @@ export function AdminAiReviews() {
           <h2 className="mt-1 text-xl font-bold text-ink">Planning summaries for human review</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Generate structured routing notes, safety flags and preparation checklists for reception and doctor review.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <ActionButton variant="primary" onClick={() => void seedReviews()}>
-            <Sparkles size={17} /> Seed Recent
-          </ActionButton>
-          <ActionButton
-            variant="secondary"
-            onClick={() => downloadCsv(aiReviewExportHeaders, reviews.map(aiReviewExportRow), "ai-reviews.csv")}
-            disabled={reviews.length === 0}
-          >
-            <Download size={17} /> Export CSV
-          </ActionButton>
-          <ActionButton variant="secondary" onClick={() => void loadAiReviews()}>
-            <RefreshCw size={17} /> Refresh AI
-          </ActionButton>
-        </div>
+        <ActionButton variant="primary" onClick={() => void seedReviews()}>
+          <Sparkles size={17} /> Seed Recent
+        </ActionButton>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
-            <p className="text-2xl font-bold text-ink">{stat.value}</p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.7fr_1.3fr]">
+      <div className="grid gap-5 p-4 xl:grid-cols-[0.5fr_1.5fr]">
         <form onSubmit={generateReview} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><BrainCircuit size={19} /> Generate review</p>
+          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+            <BrainCircuit size={19} /> Generate review
+          </p>
           <div className="grid gap-3">
-            <select aria-label="Source type" value={source} onChange={(event) => { setSource(event.target.value as AiCaseSource); setSourceId(""); }} className={fieldClass}>
+            <select
+              aria-label="Source type"
+              value={source}
+              onChange={(event) => {
+                setSource(event.target.value as AiCaseSource);
+                setSourceId("");
+              }}
+              className={fieldClass}
+            >
               <option value="Appointment">Appointment</option>
               <option value="OPD">OPD</option>
             </select>
@@ -188,74 +262,160 @@ export function AdminAiReviews() {
               <option value="">Select source record</option>
               {sourceOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {option.token ? `${option.token} | ` : ""}{option.patientName}{option.uhid ? ` | ${option.uhid}` : ""} | {option.service}
+                  {option.token ? `${option.token} | ` : ""}
+                  {option.patientName}
+                  {option.uhid ? ` | ${option.uhid}` : ""} | {option.service}
                 </option>
               ))}
             </select>
-            <ActionButton type="submit" variant="success">Generate AI Review</ActionButton>
+            <ActionButton type="submit" variant="success">
+              Generate AI Review
+            </ActionButton>
           </div>
-          <p className="mt-4 rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 p-3 text-xs font-semibold leading-relaxed text-amber-800 dark:text-amber-300">
+          <p className="mt-4 rounded border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-relaxed text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
             AI planning support does not diagnose or prescribe. Every note must be reviewed by reception or doctor before action.
           </p>
         </form>
 
-        <div className="grid gap-4">
-          {loading ? <ModuleSkeleton /> : null}
-          {!loading && reviews.length === 0 ? (
-            <ModuleEmptyState
-              icon={Sparkles}
-              title="No AI reviews yet"
-              description="AI clinical case reviews appear here as visits are processed. Nothing needs your attention right now."
-            />
-          ) : null}
-          {reviews.map((review) => (
-            <article key={review.id} className="rounded border border-line bg-surface p-4 shadow-sm">
+        <div>
+          <DataTable
+            columns={columns}
+            data={reviews}
+            getRowId={(review) => review.id}
+            pageIndex={pageIndex}
+            pageCount={pageCount}
+            onPageChange={setPageIndex}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            globalFilter={globalFilter}
+            onGlobalFilterChange={updateGlobalFilter}
+            searchPlaceholder="Search patient, phone, service, summary"
+            loading={loading}
+            error={error || undefined}
+            onRetry={() => void loadAiReviews()}
+            emptyState={{
+              icon: Sparkles,
+              title: globalFilter || statusFilter || sourceFilter ? "No reviews match your filters" : "No AI reviews yet",
+              description:
+                globalFilter || statusFilter || sourceFilter
+                  ? "Try a different search term, or clear the status/source filters."
+                  : "AI clinical case reviews appear here as visits are processed, or generate one with the form.",
+              action: globalFilter || statusFilter || sourceFilter ? "Clear filters" : undefined,
+              onAction:
+                globalFilter || statusFilter || sourceFilter
+                  ? () => {
+                      setGlobalFilter("");
+                      setStatusFilter("");
+                      setSourceFilter("");
+                    }
+                  : undefined
+            }}
+            export={{ headers: aiReviewExportHeaders, row: aiReviewExportRow, filename: "ai-reviews.csv" }}
+            stickyFirstColumn
+            toolbarExtra={
+              <>
+                <select
+                  aria-label="Filter by status"
+                  value={statusFilter}
+                  onChange={(event) => updateStatusFilter(event.target.value as AiReviewStatus | "")}
+                  className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+                >
+                  <option value="">All statuses</option>
+                  {aiReviewStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label="Filter by source"
+                  value={sourceFilter}
+                  onChange={(event) => updateSourceFilter(event.target.value as AiCaseSource | "")}
+                  className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+                >
+                  <option value="">All sources</option>
+                  <option value="Appointment">Appointment</option>
+                  <option value="OPD">OPD</option>
+                </select>
+              </>
+            }
+            bulkActions={(selected, clear) => (
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  downloadCsv(aiReviewExportHeaders, selected.map(aiReviewExportRow), "selected-ai-reviews.csv");
+                  clear();
+                }}
+              >
+                <Download size={14} /> Export selected
+              </ActionButton>
+            )}
+          />
+
+          {editingReview ? (
+            <div className="mt-4 rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{review.source} | {review.route}{review.uhid ? ` | ${review.uhid}` : ""}</p>
-                  <h3 className="mt-1 text-xl font-bold text-ink">{review.patientName}</h3>
-                  <p className="mt-1 text-sm text-muted">{review.service} | {review.urgency}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">
+                    {editingReview.source} | {editingReview.route}
+                    {editingReview.uhid ? ` | ${editingReview.uhid}` : ""}
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-ink">{editingReview.patientName}</h3>
+                  <p className="mt-1 text-sm text-muted">
+                    {editingReview.service} | {editingReview.urgency}
+                  </p>
                 </div>
-                <select aria-label="Review status" value={review.status} onChange={(event) => void updateReview(review.id, { status: event.target.value as AiReviewStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
-                  {aiReviewStatuses.map((status) => <option key={status}>{status}</option>)}
-                </select>
+                <ActionButton variant="ghost" size="sm" onClick={() => setEditingReview(null)}>
+                  Close
+                </ActionButton>
               </div>
-              <p className="mt-4 rounded border border-line bg-soft/50 p-3 text-sm leading-relaxed text-muted">{review.summary}</p>
+              <p className="mt-4 rounded border border-line bg-soft/50 p-3 text-sm leading-relaxed text-muted">{editingReview.summary}</p>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <div>
-                  <p className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><ClipboardCheck size={16} /> Flags</p>
+                  <p className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
+                    <ClipboardCheck size={16} /> Flags
+                  </p>
                   <div className="grid gap-2">
-                    {review.flags.map((flag) => <span key={flag} className="rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 px-3 py-2 text-sm font-semibold text-amber-800 dark:text-amber-300">{flag}</span>)}
+                    {editingReview.flags.map((flag) => (
+                      <span key={flag} className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                        {flag}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <div>
                   <p className="mb-2 text-sm font-bold text-ink">Preparation</p>
                   <div className="grid gap-2">
-                    {review.preparation.map((item) => <span key={item} className="rounded border border-line bg-soft/60 px-3 py-2 text-sm text-muted">{item}</span>)}
+                    {editingReview.preparation.map((item) => (
+                      <span key={item} className="rounded border border-line bg-soft/60 px-3 py-2 text-sm text-muted">
+                        {item}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
-              <div className="mt-4 rounded border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 p-3">
+              <div className="mt-4 rounded border border-cyan-200 bg-cyan-50 p-3 dark:border-cyan-900 dark:bg-cyan-950">
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Reception Script</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink">{review.receptionScript}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink">{editingReview.receptionScript}</p>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-[1fr_220px]">
                 <textarea
-                  defaultValue={review.doctorReviewNote}
-                  onBlur={(event) => void updateReview(review.id, { doctorReviewNote: event.target.value })}
+                  defaultValue={editingReview.doctorReviewNote}
+                  onBlur={(event) => void updateReview(editingReview.id, { doctorReviewNote: event.target.value })}
                   className={`${fieldClass} min-h-20 py-3`}
                   placeholder="Doctor/reception review note"
                 />
                 <input
-                  defaultValue={review.reviewedBy}
-                  onBlur={(event) => void updateReview(review.id, { reviewedBy: event.target.value })}
+                  defaultValue={editingReview.reviewedBy}
+                  onBlur={(event) => void updateReview(editingReview.id, { reviewedBy: event.target.value })}
                   className={fieldClass}
                   placeholder="Reviewed by"
                 />
               </div>
-              <p className="mt-3 text-xs font-semibold text-muted">{review.safetyNote}</p>
-            </article>
-          ))}
+              <p className="mt-3 text-xs font-semibold text-muted">{editingReview.safetyNote}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
