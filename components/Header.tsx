@@ -128,17 +128,17 @@ export function Header() {
       </section>
 
       <header className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
-        <div className="mx-auto flex min-h-[88px] w-[min(1560px,calc(100%-32px))] items-center gap-8">
+        <div className="mx-auto flex min-h-[88px] w-[min(1560px,calc(100%-40px))] items-center gap-4 2xl:gap-6">
           <Link href="/" className="shrink-0 rounded bg-white p-1" aria-label="Mudgal Gastromedics Hospital home">
-            <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "150px", height: "auto" }} />
+            <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "128px", height: "auto" }} />
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-5 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-7">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-4 2xl:gap-5">
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1.5 whitespace-nowrap py-8 text-[15px] font-semibold transition hover:text-[#19c7f3] xl:text-base ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
+                  className={`flex items-center gap-1 whitespace-nowrap py-8 text-[14px] font-semibold transition hover:text-[#19c7f3] 2xl:text-[15px] ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
                 >
                   <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
@@ -156,9 +156,9 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <LanguageToggle />
-            <ButtonLink href="/portal#book" className="hidden whitespace-nowrap border-coral bg-coral px-7 text-lg hover:bg-brand-dark md:inline-flex">
+            <ButtonLink href="/portal#book" className="hidden min-w-[176px] whitespace-nowrap border-coral bg-coral px-5 text-base hover:bg-brand-dark md:inline-flex">
               <span data-en>Book Appointment</span>
               <span data-hi lang="hi">बुक करें</span>
             </ButtonLink>
