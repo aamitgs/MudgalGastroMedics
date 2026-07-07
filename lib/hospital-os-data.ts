@@ -255,28 +255,6 @@ export const commandRecords: CommandRecord[] = [
   { id: "cmd-12", entity: "Procedure", title: "Colonoscopy package", subtitle: "Billing template and consent ready", href: "#billing", keywords: ["procedure", "colonoscopy"], priority: 54 }
 ];
 
-export const dashboardMetrics: DashboardMetric[] = [
-  { label: "OPD Flow", value: "42", delta: "+12% vs yesterday", tone: "success", dataKey: "opd" },
-  { label: "Bed Occupancy", value: "76%", delta: "4 HDU beds free", tone: "primary", dataKey: "beds" },
-  { label: "Revenue Today", value: "Rs 4.8L", delta: "+8.4% vs 7-day avg", tone: "success", dataKey: "revenue" },
-  { label: "Critical Alerts", value: "3", delta: "2 labs, 1 stock", tone: "danger", dataKey: "alerts" }
-];
-
-export const analyticsSeries = [
-  { time: "08:00", opd: 8, revenue: 0.8, beds: 68, alerts: 0 },
-  { time: "10:00", opd: 22, revenue: 1.7, beds: 72, alerts: 1 },
-  { time: "12:00", opd: 35, revenue: 2.9, beds: 76, alerts: 2 },
-  { time: "14:00", opd: 42, revenue: 4.8, beds: 76, alerts: 3 },
-  { time: "16:00", opd: 50, revenue: 5.5, beds: 74, alerts: 2 }
-];
-
-export const liveEvents = [
-  "Queue moved: MGM-24018 to Consultation",
-  "Critical LFT report assigned to doctor",
-  "Pharmacy stock alert: Rifaximin below threshold",
-  "HDU-04 discharge request submitted"
-];
-
 /** Audit actions that are internal telemetry, not activity worth surfacing in the live feed. */
 const realtimeExcludedActions = new Set([
   "hospital_os.realtime.polled",

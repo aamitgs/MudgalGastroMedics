@@ -104,14 +104,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { MetricCard } from "@/components/design-system/MetricCard";
 import {
-  analyticsSeries,
   canAccessCommandEntity,
   accessRoleToHospitalRole,
   canAccessSection,
   commandRecords,
-  dashboardMetrics,
   hospitalRoles,
-  liveEvents,
   navGroupOrder,
   navItems,
   patientFlowRows,
@@ -201,6 +198,8 @@ const commandFuse = new Fuse(commandRecords, {
 
 type HospitalTrendPoint = { time: string; opd: number; revenue: number };
 
+type RealtimeMessage = { id: string; text: string };
+
 type HospitalSnapshotResponse = {
   ok: boolean;
   rows?: PatientFlowRow[];
@@ -280,7 +279,10 @@ async function fetchHospitalSnapshot(): Promise<HospitalSnapshot> {
     throw new Error(data.error || "Unable to load Hospital OS snapshot.");
   }
 
-  return { rows: data.rows, metrics: data.metrics ?? dashboardMetrics, trend: data.trend ?? analyticsSeries, navBadges: data.navBadges ?? {} };
+  // metrics/trend are always computed live by the API from real store data
+  // (never omitted); these fall back to empty, not fabricated numbers, so a
+  // malformed response degrades to "no data" rather than misleading figures.
+  return { rows: data.rows, metrics: data.metrics ?? [], trend: data.trend ?? [], navBadges: data.navBadges ?? {} };
 }
 
 type OsSession = {
@@ -368,7 +370,12 @@ function HospitalOsApp() {
   const [isBulkPending, startBulkTransition] = useTransition();
   const [auditTrail, setAuditTrail] = useState<AuditTrailItem[]>([]);
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "polling" | "closed">("connecting");
-  const [realtimeMessages, setRealtimeMessages] = useState(liveEvents);
+  // Starts empty, not fabricated sample events — the realtime feed (below)
+  // shows a neutral waiting state until the WebSocket/polling connection
+  // delivers real activity. Each entry carries a generated id (not just the
+  // message text) since the same message can legitimately recur — using text
+  // as the React key caused "duplicate key" warnings when it did.
+  const [realtimeMessages, setRealtimeMessages] = useState<RealtimeMessage[]>([]);
   const navRef = useRef<HTMLElement | null>(null);
 
   const {
@@ -385,7 +392,7 @@ function HospitalOsApp() {
   } = useHospitalOsStore();
 
   const {
-    data: snapshot = { rows: [], metrics: dashboardMetrics, trend: analyticsSeries, navBadges: {} },
+    data: snapshot = { rows: [], metrics: [], trend: [], navBadges: {} },
     isLoading,
     isError
   } = useQuery({
@@ -485,8 +492,9 @@ function HospitalOsApp() {
       pollingMs: 6000,
       onStatus: setRealtimeStatus,
       onEvent: (event) => {
-        const message = realtimeEventMessage(event);
-        setRealtimeMessages((items) => [message, ...items].slice(0, 5));
+        const text = realtimeEventMessage(event);
+        const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${event.type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        setRealtimeMessages((items) => [{ id, text }, ...items].slice(0, 5));
       }
     });
 
@@ -886,7 +894,7 @@ function HospitalOsApp() {
               animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <DashboardOverview realtimeMessages={realtimeMessages} metrics={liveDashboardMetrics} series={liveTrend} />
+              <DashboardOverview realtimeMessages={realtimeMessages} metrics={liveDashboardMetrics} series={liveTrend} isLoading={isLoading} />
             </motion.section>
 
             {access.clinicalWorkspace ? (
@@ -1061,11 +1069,13 @@ function ShortcutsDialog({ open, setOpen }: { open: boolean; setOpen: (open: boo
 function DashboardOverview({
   realtimeMessages,
   metrics,
-  series
+  series,
+  isLoading
 }: {
-  realtimeMessages: string[];
+  realtimeMessages: RealtimeMessage[];
   metrics: DashboardMetric[];
   series: HospitalTrendPoint[];
+  isLoading: boolean;
 }) {
   return (
     <>
@@ -1088,41 +1098,52 @@ function DashboardOverview({
           </div>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => {
-              const Icon = metricIcons[metric.label];
-              return <MetricCard key={metric.label} {...metric} icon={Icon} />;
-            })}
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="status" aria-busy={isLoading} aria-label={isLoading ? "Loading metrics" : undefined}>
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-[94px] rounded-lg border border-[var(--hos-border)]" aria-hidden="true" />)
+              : metrics.map((metric) => {
+                  const Icon = metricIcons[metric.label];
+                  return <MetricCard key={metric.label} {...metric} icon={Icon} />;
+                })}
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={series}>
-                  <defs>
-                    <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563EB" stopOpacity={0.24} />
-                      <stop offset="95%" stopColor="#2563EB" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--hos-border)" vertical={false} />
-                  <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                  <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="revenue" stroke="#2563EB" fill="url(#revenueFill)" strokeWidth={2} name="Revenue in lakh" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={series}>
-                  <CartesianGrid stroke="var(--hos-border)" vertical={false} />
-                  <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                  <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                  <Tooltip />
-                  <Bar dataKey="opd" fill="#16A34A" radius={[6, 6, 0, 0]} name="OPD patients" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-[260px] rounded-lg border border-[var(--hos-border)]" role="status" aria-label="Loading revenue trend" />
+                <Skeleton className="h-[260px] rounded-lg border border-[var(--hos-border)]" role="status" aria-label="Loading OPD trend" />
+              </>
+            ) : (
+              <>
+                <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={series}>
+                      <defs>
+                        <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#2563EB" stopOpacity={0.24} />
+                          <stop offset="95%" stopColor="#2563EB" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke="var(--hos-border)" vertical={false} />
+                      <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
+                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="revenue" stroke="#2563EB" fill="url(#revenueFill)" strokeWidth={2} name="Revenue in lakh" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={series}>
+                      <CartesianGrid stroke="var(--hos-border)" vertical={false} />
+                      <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
+                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
+                      <Tooltip />
+                      <Bar dataKey="opd" fill="#16A34A" radius={[6, 6, 0, 0]} name="OPD patients" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -1138,12 +1159,18 @@ function DashboardOverview({
           </div>
         </CardHeader>
         <CardContent className="grid gap-3">
-          {realtimeMessages.map((item) => (
-            <div key={item} className="flex items-start gap-3 rounded-lg border border-[var(--hos-border)] p-3">
-              <Check size={17} className="mt-0.5 text-[var(--hos-success)]" />
-              <p className="text-sm leading-5 text-[var(--hos-text)]">{item}</p>
-            </div>
-          ))}
+          {realtimeMessages.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-[var(--hos-border)] p-3 text-sm text-[var(--hos-muted-text)]">
+              {isLoading ? "Connecting to live activity…" : "No recent activity yet. New actions across the hospital appear here as they happen."}
+            </p>
+          ) : (
+            realtimeMessages.map((item) => (
+              <div key={item.id} className="flex items-start gap-3 rounded-lg border border-[var(--hos-border)] p-3">
+                <Check size={17} className="mt-0.5 text-[var(--hos-success)]" />
+                <p className="text-sm leading-5 text-[var(--hos-text)]">{item.text}</p>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
     </>
