@@ -1,38 +1,18 @@
-const moduleLinks = [
-  { id: "module-reports", label: "Reports" },
-  { id: "module-access", label: "Access" },
-  { id: "module-readiness", label: "Readiness" },
-  { id: "module-audit", label: "Audit" },
-  { id: "module-analytics", label: "Analytics" },
-  { id: "module-cms", label: "CMS" },
-  { id: "module-modules", label: "Modules" },
-  { id: "module-automation", label: "Automation" },
-  { id: "module-ai-reviews", label: "AI Reviews" },
-  { id: "module-patients", label: "Patients" },
-  { id: "module-appointments", label: "Appointments" },
-  { id: "module-opd", label: "OPD" },
-  { id: "module-procedures", label: "Procedures" },
-  { id: "module-ipd", label: "IPD & Beds" },
-  { id: "module-doctor-workflow", label: "Doctor Workflow" },
-  { id: "module-lab", label: "Lab" },
-  { id: "module-pharmacy", label: "Pharmacy" },
-  { id: "module-billing", label: "Billing" },
-  { id: "module-finance", label: "Finance" },
-  { id: "module-hr", label: "HR" },
-  { id: "module-inventory", label: "Inventory" },
-  { id: "module-communication", label: "Comms" },
-  { id: "module-settings", label: "Settings" }
-];
+type ModuleLink = { id: string; label: string };
 
-/** Sticky jump-nav for the operations dashboard so 23 modules stay one keystroke away. */
-export function AdminModuleNav() {
+/**
+ * Sticky jump-nav for the operations dashboard. Links come from the server
+ * page pre-filtered by the same permission registry that decides which module
+ * sections render (Track 2.2) — the nav can never point at a hidden module.
+ */
+export function AdminModuleNav({ modules }: { modules: ModuleLink[] }) {
   return (
     <nav
       aria-label="Operations modules"
       className="sticky top-14 z-30 border-b border-line bg-surface/95 backdrop-blur"
     >
       <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] items-center gap-1 overflow-x-auto py-2 [scrollbar-width:thin]">
-        {moduleLinks.map((link) => (
+        {modules.map((link) => (
           <a
             key={link.id}
             href={`#${link.id}`}

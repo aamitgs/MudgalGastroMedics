@@ -26,6 +26,7 @@ import { AdminReports } from "@/components/AdminReports";
 import { AdminSettings } from "@/components/AdminSettings";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { Section } from "@/components/Section";
+import { visibleAdminModules } from "@/lib/access/admin-modules";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {
@@ -35,9 +36,41 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }
 };
 
+/** Section renderers keyed by registry id (lib/access/admin-modules.ts). */
+const moduleComponents: Record<string, React.ReactNode> = {
+  "module-reports": <AdminReports />,
+  "module-access": <AdminUserManagement />,
+  "module-readiness": <AdminProductionReadiness />,
+  "module-audit": <AdminAuditLog />,
+  "module-analytics": <AdminAnalytics />,
+  "module-cms": <AdminCmsWorkspace />,
+  "module-modules": <AdminEnterpriseModules />,
+  "module-automation": <AdminAutomation />,
+  "module-ai-reviews": <AdminAiReviews />,
+  "module-patients": <AdminPatients />,
+  "module-appointments": <AdminAppointments />,
+  "module-opd": <AdminOpdQueue />,
+  "module-procedures": <AdminProcedures />,
+  "module-ipd": <AdminIpdBeds />,
+  "module-doctor-workflow": <AdminDoctorWorkflow />,
+  "module-lab": <AdminLab />,
+  "module-pharmacy": <AdminPharmacy />,
+  "module-billing": <AdminBillingSummary />,
+  "module-finance": <AdminFinance />,
+  "module-hr": <AdminHR />,
+  "module-inventory": <AdminInventory />,
+  "module-communication": <AdminCommunication />,
+  "module-settings": <AdminSettings />
+};
+
 export default async function AdminPage() {
   const cookieStore = await cookies();
-  const isAuthenticated = canOpenAdminShell(await accessContextFromCookieStore(cookieStore));
+  const context = await accessContextFromCookieStore(cookieStore);
+  const isAuthenticated = canOpenAdminShell(context);
+  // Role-filtered modules (Track 2.2): render only what the active role may
+  // view. The server enforces the same matrix on every API call — this
+  // removes 403 dead-ends, it is not the security boundary.
+  const modules = isAuthenticated ? visibleAdminModules(context.activeRole) : [];
 
   return (
     <main>
@@ -53,34 +86,16 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        {isAuthenticated ? <AdminModuleNav /> : null}
+        {isAuthenticated ? <AdminModuleNav modules={modules.map(({ id, label }) => ({ id, label }))} /> : null}
 
         <Section muted className="pb-10 pt-8 md:pb-12 md:pt-10">
           {isAuthenticated ? (
             <div className="grid gap-4">
-              <section id="module-reports" className="scroll-mt-28"><AdminReports /></section>
-              <section id="module-access" className="scroll-mt-28"><AdminUserManagement /></section>
-              <section id="module-readiness" className="scroll-mt-28"><AdminProductionReadiness /></section>
-              <section id="module-audit" className="scroll-mt-28"><AdminAuditLog /></section>
-              <section id="module-analytics" className="scroll-mt-28"><AdminAnalytics /></section>
-              <section id="module-cms" className="scroll-mt-28"><AdminCmsWorkspace /></section>
-              <section id="module-modules" className="scroll-mt-28"><AdminEnterpriseModules /></section>
-              <section id="module-automation" className="scroll-mt-28"><AdminAutomation /></section>
-              <section id="module-ai-reviews" className="scroll-mt-28"><AdminAiReviews /></section>
-              <section id="module-patients" className="scroll-mt-28"><AdminPatients /></section>
-              <section id="module-appointments" className="scroll-mt-28"><AdminAppointments /></section>
-              <section id="module-opd" className="scroll-mt-28"><AdminOpdQueue /></section>
-              <section id="module-procedures" className="scroll-mt-28"><AdminProcedures /></section>
-              <section id="module-ipd" className="scroll-mt-28"><AdminIpdBeds /></section>
-              <section id="module-doctor-workflow" className="scroll-mt-28"><AdminDoctorWorkflow /></section>
-              <section id="module-lab" className="scroll-mt-28"><AdminLab /></section>
-              <section id="module-pharmacy" className="scroll-mt-28"><AdminPharmacy /></section>
-              <section id="module-billing" className="scroll-mt-28"><AdminBillingSummary /></section>
-              <section id="module-finance" className="scroll-mt-28"><AdminFinance /></section>
-              <section id="module-hr" className="scroll-mt-28"><AdminHR /></section>
-              <section id="module-inventory" className="scroll-mt-28"><AdminInventory /></section>
-              <section id="module-communication" className="scroll-mt-28"><AdminCommunication /></section>
-              <section id="module-settings" className="scroll-mt-28"><AdminSettings /></section>
+              {modules.map((module) => (
+                <section key={module.id} id={module.id} className="scroll-mt-28">
+                  {moduleComponents[module.id]}
+                </section>
+              ))}
             </div>
           ) : (
             <AdminLogin />
