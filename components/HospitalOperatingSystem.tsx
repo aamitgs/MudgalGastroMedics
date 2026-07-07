@@ -6,7 +6,6 @@ import {
   Activity,
   AlertTriangle,
   Bed,
-  Bell,
   Building2,
   CalendarClock,
   Check,
@@ -129,6 +128,7 @@ import {
 } from "@/lib/validation/hospital-os";
 import type { AppointmentInput, BillingInput, PatientRegistrationInput } from "@/lib/validation/hospital-os";
 import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 import { PatientTimelinePanel } from "@/components/hospital-os/PatientTimelinePanel";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import type { LucideIcon } from "lucide-react";
@@ -1012,10 +1012,7 @@ function TopNav({
         <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" onClick={onOpenShortcuts} aria-label="Keyboard shortcuts">
           <Command size={18} />
         </Button>
-        <Button type="button" variant="outline" size="icon" className="relative border-[var(--hos-border)]" aria-label="Notifications">
-          <Bell size={18} />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--hos-danger)]" />
-        </Button>
+        <NotificationCenter />
         <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" onClick={onToggleTheme} aria-label="Toggle theme">
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </Button>

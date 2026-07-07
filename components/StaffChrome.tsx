@@ -7,6 +7,7 @@ import { LayoutDashboard, LogOut, Moon, Stethoscope, Sun, UsersRound } from "luc
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { StaffFooter } from "@/components/StaffFooter";
+import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
 
 const staffLinks = [
@@ -73,11 +74,14 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
                 <Icon size={15} /> <span className="hidden md:inline">{label}</span>
               </Link>
             ))}
+            <span className="ml-1">
+              <NotificationCenter />
+            </span>
             <button
               type="button"
               onClick={toggleDark}
               aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-              className="ml-1 inline-flex min-h-9 items-center justify-center rounded border border-line px-2.5 text-muted transition hover:border-brand hover:text-brand"
+              className="inline-flex min-h-9 items-center justify-center rounded border border-line px-2.5 text-muted transition hover:border-brand hover:text-brand"
             >
               {dark ? <Sun size={15} /> : <Moon size={15} />}
             </button>
