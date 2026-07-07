@@ -1,15 +1,17 @@
 "use client";
 
-import { AlertTriangle, Download, FlaskConical, RefreshCw, Search, TestTube2 } from "lucide-react";
-import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { AlertTriangle, Download, Edit3, FlaskConical, TestTube2 } from "lucide-react";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { DataTable } from "@/components/design-system/DataTable";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
+import type { LabSortField } from "@/lib/lab-query";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
-import { ActionButton } from "@/components/design-system/ActionButton";
-import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 const labExportHeaders = ["Token", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created"];
 
@@ -17,11 +19,13 @@ function labExportRow(order: LabOrder) {
   return [order.token, order.patientName, order.phone, order.tests.join("; "), order.priority, order.status, order.paymentStatus, order.createdAt];
 }
 
-type LabResponse = {
+type LabListResponse = {
   ok: boolean;
   orders?: LabOrder[];
   order?: LabOrder;
   visits?: OpdVisit[];
+  pageCount?: number;
+  stats?: { total: number; processing: number; resultReady: number; criticalUnacked: number; paidAmount: number };
   error?: string;
 };
 
@@ -31,6 +35,8 @@ function formatAmount(value: number | undefined) {
   return `Rs. ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
+const pageSize = 25;
+
 export function AdminLab() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [orders, setOrders] = useState<LabOrder[]>([]);
@@ -38,16 +44,32 @@ export function AdminLab() {
   const [selectedVisitId, setSelectedVisitId] = useState("");
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [customTests, setCustomTests] = useState("");
-  const [query, setQuery] = useState("");
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
+  const [stats, setStats] = useState({ total: 0, processing: 0, resultReady: 0, criticalUnacked: 0, paidAmount: 0 });
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<LabOrderStatus | "">("");
+  const [criticalOnly, setCriticalOnly] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingOrder, setEditingOrder] = useState<LabOrder | null>(null);
+
+  const sortField = (sorting[0]?.id as LabSortField | undefined) ?? "createdAt";
+  const sortDir = sorting[0]?.desc ? "desc" : "asc";
 
   async function loadLab() {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/lab", { cache: "no-store" });
-    const data = (await response.json().catch(() => ({}))) as LabResponse;
-    if (!response.ok || !data.ok) {
+    const params = new URLSearchParams({ page: String(pageIndex), pageSize: String(pageSize), sortBy: sortField, sortDir });
+    if (globalFilter.trim()) params.set("q", globalFilter.trim());
+    if (statusFilter) params.set("status", statusFilter);
+    if (criticalOnly) params.set("criticalOnly", "true");
+
+    const response = await fetch(`/api/lab?${params.toString()}`, { cache: "no-store" }).catch(() => null);
+    const data = ((await response?.json().catch(() => ({}))) ?? {}) as LabListResponse;
+    if (!response?.ok || !data.ok) {
       setError(data.error || "Unable to load lab.");
       setLoading(false);
       return;
@@ -55,55 +77,35 @@ export function AdminLab() {
     setOrders(data.orders ?? []);
     setVisits(data.visits ?? []);
     setSelectedVisitId((current) => current || data.visits?.[0]?.id || "");
+    setPageCount(data.pageCount ?? 1);
+    if (data.stats) setStats(data.stats);
     setLoading(false);
+    setEditingOrder((current) => {
+      if (!current) return current;
+      return data.orders?.find((order) => order.id === current.id) ?? current;
+    });
   }
 
   useEffect(() => {
-    let active = true;
+    const timer = window.setTimeout(() => void loadLab(), globalFilter ? 250 : 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageIndex, sortField, sortDir, globalFilter, statusFilter, criticalOnly]);
 
-    async function loadInitialLab() {
-      const response = await fetch("/api/lab", { cache: "no-store" });
-      const data = (await response.json().catch(() => ({}))) as LabResponse;
-      if (!active) return;
-      if (!response.ok || !data.ok) {
-        setError(data.error || "Unable to load lab.");
-        setLoading(false);
-        return;
-      }
-      setOrders(data.orders ?? []);
-      setVisits(data.visits ?? []);
-      setSelectedVisitId(data.visits?.[0]?.id || "");
-      setLoading(false);
-    }
+  function updateGlobalFilter(value: string) {
+    setGlobalFilter(value);
+    setPageIndex(0);
+  }
 
-    void loadInitialLab();
+  function updateStatusFilter(value: LabOrderStatus | "") {
+    setStatusFilter(value);
+    setPageIndex(0);
+  }
 
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const filteredOrders = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return orders;
-    return orders.filter((order) =>
-      [order.id, order.token, order.uhid, order.patientName, order.phone, order.tests.join(" "), order.status]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery)
-    );
-  }, [orders, query]);
-
-  const stats = useMemo(() => {
-    return [
-      { label: "Lab Orders", value: orders.length },
-      { label: "Processing", value: orders.filter((order) => order.status === "Processing" || order.status === "Sample Collected").length },
-      { label: "Result Ready", value: orders.filter((order) => order.status === "Result Ready").length },
-      { label: "Critical Unacked", value: orders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length },
-      { label: "Paid Lab", value: formatAmount(orders.filter((order) => order.paymentStatus === "Paid").reduce((sum, order) => sum + Number(order.amount || 0), 0)) }
-    ];
-  }, [orders]);
+  function toggleCriticalOnly(value: boolean) {
+    setCriticalOnly(value);
+    setPageIndex(0);
+  }
 
   function toggleTest(test: string) {
     setSelectedTests((items) => (items.includes(test) ? items.filter((item) => item !== test) : [...items, test]));
@@ -126,16 +128,17 @@ export function AdminLab() {
         notes: formData.get("notes")
       })
     });
-    const data = (await response.json().catch(() => ({}))) as LabResponse;
+    const data = (await response.json().catch(() => ({}))) as LabListResponse;
     if (!response.ok || !data.ok || !data.order) {
-      setError(data.error || "Unable to create lab order.");
+      // Mutation failures are transient/non-blocking (toast), never the
+      // table's load-error state — a failed create must not blank the list.
+      notify.error(data.error || "Unable to create lab order.");
       return;
     }
-    setOrders((items) => [data.order as LabOrder, ...items]);
     setSelectedTests([]);
     setCustomTests("");
     event.currentTarget.reset();
-    setError("");
+    void loadLab();
   }
 
   async function updateOrder(id: string, updates: Partial<Pick<LabOrder, "status" | "resultSummary" | "reportReference" | "paymentStatus" | "amount" | "notes">> & { criticalManual?: boolean; acknowledgeCritical?: boolean }) {
@@ -144,13 +147,145 @@ export function AdminLab() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, ...updates })
     });
-    const data = (await response.json().catch(() => ({}))) as LabResponse;
+    const data = (await response.json().catch(() => ({}))) as LabListResponse;
     if (!response.ok || !data.ok || !data.order) {
-      setError(data.error || "Unable to update lab order.");
+      notify.error(data.error || "Unable to update lab order.");
       return;
     }
-    setOrders((items) => items.map((item) => (item.id === id ? data.order as LabOrder : item)));
+    const updated = data.order as LabOrder;
+    setOrders((items) => items.map((item) => (item.id === id ? updated : item)));
+    setEditingOrder((current) => (current?.id === id ? updated : current));
   }
+
+  const statTiles = useMemo(
+    () => [
+      { label: "Lab Orders", value: stats.total },
+      { label: "Processing", value: stats.processing },
+      { label: "Result Ready", value: stats.resultReady },
+      { label: "Critical Unacked", value: stats.criticalUnacked },
+      { label: "Paid Lab", value: formatAmount(stats.paidAmount) }
+    ],
+    [stats]
+  );
+
+  const columns = useMemo<ColumnDef<LabOrder, unknown>[]>(
+    () => [
+      {
+        accessorKey: "token",
+        header: "Token",
+        size: 130,
+        cell: ({ row }) => (
+          <div>
+            <span className="font-mono text-xs font-bold text-ink">{row.original.token}</span>
+            {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
+          </div>
+        )
+      },
+      {
+        accessorKey: "patientName",
+        header: "Patient",
+        size: 170,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={() => openDrawer(row.original.phone, row.original.patientName)}
+            title="Open patient summary"
+            className="rounded text-left font-bold text-ink underline-offset-4 hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+          >
+            {row.original.patientName}
+          </button>
+        )
+      },
+      {
+        id: "tests",
+        header: "Tests",
+        size: 180,
+        enableSorting: false,
+        cell: ({ row }) => <span className="line-clamp-1 text-muted" title={row.original.tests.join(", ")}>{row.original.tests.join(", ")}</span>
+      },
+      {
+        accessorKey: "priority",
+        header: "Priority",
+        size: 90,
+        cell: ({ row }) =>
+          row.original.priority === "Urgent" ? (
+            <span className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">Urgent</span>
+          ) : (
+            <span className="text-muted">Routine</span>
+          )
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        cell: ({ row }) => (
+          <select
+            aria-label="Order status"
+            value={row.original.status}
+            onChange={(event) => void updateOrder(row.original.id, { status: event.target.value as LabOrderStatus })}
+            className="rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink"
+          >
+            {labOrderStatuses.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+        )
+      },
+      {
+        id: "critical",
+        header: "Critical",
+        size: 150,
+        enableSorting: false,
+        cell: ({ row }) =>
+          !row.original.criticalFlag ? (
+            <span className="text-muted">—</span>
+          ) : row.original.criticalAcknowledgedAt ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+              <AlertTriangle size={11} /> Acknowledged
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+              <AlertTriangle size={11} /> Critical
+            </span>
+          )
+      },
+      {
+        accessorKey: "paymentStatus",
+        header: "Payment",
+        size: 110,
+        cell: ({ row }) => (
+          <select
+            aria-label="Payment status"
+            value={row.original.paymentStatus}
+            onChange={(event) => void updateOrder(row.original.id, { paymentStatus: event.target.value as LabOrder["paymentStatus"] })}
+            className="rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink"
+          >
+            <option>Unpaid</option>
+            <option>Paid</option>
+          </select>
+        )
+      },
+      {
+        accessorKey: "amount",
+        header: "Amount",
+        size: 100,
+        cell: ({ row }) => formatAmount(row.original.amount)
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 90,
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => (
+          <ActionButton variant="secondary" size="sm" onClick={() => setEditingOrder((current) => (current?.id === row.original.id ? null : row.original))} aria-expanded={editingOrder?.id === row.original.id}>
+            <Edit3 size={13} /> Result
+          </ActionButton>
+        )
+      }
+    ],
+    [openDrawer, editingOrder]
+  );
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
@@ -160,24 +295,10 @@ export function AdminLab() {
           <h2 className="mt-1 text-xl font-bold text-ink">Lab orders and results</h2>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted">Order tests against OPD visits, track sample status, and record result summaries or report references.</p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <ActionButton
-            variant="secondary"
-            onClick={() => downloadCsv(labExportHeaders, filteredOrders.map(labExportRow), "lab-orders.csv")}
-            disabled={filteredOrders.length === 0}
-          >
-            <Download size={17} /> Export CSV
-          </ActionButton>
-          <ActionButton variant="secondary" onClick={() => void loadLab()}>
-            <RefreshCw size={17} /> Refresh Lab
-          </ActionButton>
-        </div>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-
       <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
-        {stats.map((stat) => (
+        {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{stat.label}</p>
@@ -187,19 +308,30 @@ export function AdminLab() {
 
       <div className="grid gap-5 p-4 xl:grid-cols-[0.85fr_1.15fr]">
         <form onSubmit={createOrder} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><FlaskConical size={19} /> Create lab order</p>
+          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+            <FlaskConical size={19} /> Create lab order
+          </p>
           <div className="grid gap-3">
             <select aria-label="Selected visit id" value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
-                <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
+                <option key={visit.id} value={visit.id}>
+                  {visit.token} | {visit.patientName}
+                  {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
+                </option>
               ))}
             </select>
             <div className="rounded border border-line bg-surface p-3">
               <p className="mb-2 text-sm font-bold text-ink">Common tests</p>
               <div className="flex flex-wrap gap-2">
                 {commonLabTests.map((test) => (
-                  <button key={test} type="button" onClick={() => toggleTest(test)} aria-pressed={selectedTests.includes(test)} className={`rounded-full border px-3 py-1 text-xs font-bold transition ${selectedTests.includes(test) ? "border-brand bg-cyan-50 dark:bg-cyan-950 text-brand" : "border-line bg-surface text-muted"}`}>
+                  <button
+                    key={test}
+                    type="button"
+                    onClick={() => toggleTest(test)}
+                    aria-pressed={selectedTests.includes(test)}
+                    className={`rounded-full border px-3 py-1 text-xs font-bold transition ${selectedTests.includes(test) ? "border-brand bg-cyan-50 text-brand dark:bg-cyan-950" : "border-line bg-surface text-muted"}`}
+                  >
                     {test}
                   </button>
                 ))}
@@ -207,11 +339,17 @@ export function AdminLab() {
             </div>
             <input value={customTests} onChange={(event) => setCustomTests(event.target.value)} className={fieldClass} placeholder="Other tests, comma separated" />
             <div className="grid gap-3 md:grid-cols-3">
-              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
+              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine">
+                <option>Routine</option>
+                <option>Urgent</option>
+              </select>
               <input name="sampleType" className={fieldClass} placeholder="Sample type" />
               <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" />
             </div>
-            <select aria-label="Payment status" name="paymentStatus" className={fieldClass} defaultValue="Unpaid"><option>Unpaid</option><option>Paid</option></select>
+            <select aria-label="Payment status" name="paymentStatus" className={fieldClass} defaultValue="Unpaid">
+              <option>Unpaid</option>
+              <option>Paid</option>
+            </select>
             <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Lab notes, fasting status, sample remarks" />
             <ActionButton type="submit" variant="primary">
               <TestTube2 size={17} /> Save Lab Order
@@ -220,86 +358,132 @@ export function AdminLab() {
         </form>
 
         <div>
-          <label className="relative block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search lab orders" className="min-h-10 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-          </label>
-          <div className="mt-4 grid max-h-[760px] gap-3 overflow-auto pr-1">
-            {loading ? <ModuleSkeleton /> : null}
-            {!loading && filteredOrders.length === 0 ? (
-              <ModuleEmptyState
-                icon={FlaskConical}
-                title="No lab orders here"
-                description="Lab tests raised for patients appear in this queue. Order a test above, or adjust your search if you expected results."
+          <DataTable
+            columns={columns}
+            data={orders}
+            getRowId={(order) => order.id}
+            pageIndex={pageIndex}
+            pageCount={pageCount}
+            onPageChange={setPageIndex}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            globalFilter={globalFilter}
+            onGlobalFilterChange={updateGlobalFilter}
+            searchPlaceholder="Search lab orders"
+            loading={loading}
+            error={error || undefined}
+            onRetry={() => void loadLab()}
+            emptyState={{
+              icon: FlaskConical,
+              title: globalFilter || statusFilter || criticalOnly ? "No lab orders match your filters" : "No lab orders here",
+              description:
+                globalFilter || statusFilter || criticalOnly
+                  ? "Try a different search term, or clear the status/critical filters."
+                  : "Lab tests raised for patients appear in this queue. Order a test with the form to the left.",
+              action: globalFilter || statusFilter || criticalOnly ? "Clear filters" : undefined,
+              onAction:
+                globalFilter || statusFilter || criticalOnly
+                  ? () => {
+                      setGlobalFilter("");
+                      setStatusFilter("");
+                      setCriticalOnly(false);
+                    }
+                  : undefined
+            }}
+            export={{ headers: labExportHeaders, row: labExportRow, filename: "lab-orders.csv" }}
+            stickyFirstColumn
+            toolbarExtra={
+              <>
+                <select
+                  aria-label="Filter by status"
+                  value={statusFilter}
+                  onChange={(event) => updateStatusFilter(event.target.value as LabOrderStatus | "")}
+                  className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+                >
+                  <option value="">All statuses</option>
+                  {labOrderStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+                <label className="inline-flex min-h-9 items-center gap-2 rounded border border-line bg-surface px-3 text-sm font-semibold text-ink">
+                  <input type="checkbox" checked={criticalOnly} onChange={(event) => toggleCriticalOnly(event.target.checked)} className="h-4 w-4 accent-red-600" />
+                  Critical only
+                </label>
+              </>
+            }
+            bulkActions={(selected, clear) => (
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  downloadCsv(labExportHeaders, selected.map(labExportRow), "selected-lab-orders.csv");
+                  clear();
+                }}
+              >
+                <Download size={14} /> Export selected
+              </ActionButton>
+            )}
+          />
+
+          {editingOrder ? (
+            <div className="mt-4 rounded border border-line bg-surface p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
+                    {editingOrder.token}
+                    {editingOrder.uhid ? ` · ${editingOrder.uhid}` : ""}
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold text-ink">{editingOrder.patientName}</h3>
+                </div>
+                <ActionButton variant="ghost" size="sm" onClick={() => setEditingOrder(null)}>
+                  Close
+                </ActionButton>
+              </div>
+              <input
+                defaultValue={editingOrder.reportReference}
+                onBlur={(event) => void updateOrder(editingOrder.id, { reportReference: event.target.value })}
+                className={`${fieldClass} mt-3`}
+                placeholder="Report file/reference"
               />
-            ) : null}
-            {filteredOrders.map((order) => (
-              <article key={order.id} className="rounded border border-line bg-surface p-4 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{order.id} | {order.token}{order.uhid ? ` | ${order.uhid}` : ""}</p>
-                    <h3 className="mt-1 text-lg font-bold text-ink">
-                      <button
-                        type="button"
-                        onClick={() => openDrawer(order.phone, order.patientName)}
-                        title="Open patient summary"
-                        className="rounded text-left underline-offset-4 transition hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
-                      >
-                        {order.patientName}
-                      </button>
-                    </h3>
-                    {order.criticalFlag ? (
-                      order.criticalAcknowledgedAt ? (
-                        <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
-                          <AlertTriangle size={13} /> Critical — acknowledged by {order.criticalAcknowledgedBy}
-                        </span>
-                      ) : (
-                        <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-                          <AlertTriangle size={13} /> Critical result
-                        </span>
-                      )
-                    ) : null}
-                    <p className="mt-1 text-sm text-muted">{order.tests.join(", ")}</p>
-                  </div>
-                  <select aria-label="Order status" value={order.status} onChange={(event) => void updateOrder(order.id, { status: event.target.value as LabOrderStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
-                    {labOrderStatuses.map((status) => <option key={status}>{status}</option>)}
-                  </select>
-                </div>
-                <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  <input defaultValue={order.reportReference} onBlur={(event) => void updateOrder(order.id, { reportReference: event.target.value })} className={fieldClass} placeholder="Report file/reference" />
-                  <select defaultValue={order.paymentStatus} onChange={(event) => void updateOrder(order.id, { paymentStatus: event.target.value as LabOrder["paymentStatus"] })} className={fieldClass}><option>Unpaid</option><option>Paid</option></select>
-                </div>
-                <textarea defaultValue={order.resultSummary} onBlur={(event) => void updateOrder(order.id, { resultSummary: event.target.value })} className={`${fieldClass} mt-3 min-h-20 py-3`} placeholder="Result summary / abnormal findings" />
-                {order.criticalFlag && order.criticalReasons?.length ? (
-                  <ul className="mt-2 grid gap-1 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-                    {order.criticalReasons.map((reason) => (
-                      <li key={reason}>{reason}</li>
-                    ))}
-                  </ul>
+              <textarea
+                defaultValue={editingOrder.resultSummary}
+                onBlur={(event) => void updateOrder(editingOrder.id, { resultSummary: event.target.value })}
+                className={`${fieldClass} mt-3 min-h-20 py-3`}
+                placeholder="Result summary / abnormal findings"
+              />
+              {editingOrder.criticalFlag && editingOrder.criticalReasons?.length ? (
+                <ul className="mt-2 grid gap-1 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+                  {editingOrder.criticalReasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <label className="inline-flex items-center gap-2 text-sm font-semibold text-muted">
+                  <input
+                    type="checkbox"
+                    checked={editingOrder.criticalSource === "manual"}
+                    onChange={(event) => void updateOrder(editingOrder.id, { criticalManual: event.target.checked })}
+                    className="h-4 w-4 rounded border-line accent-red-600"
+                  />
+                  Mark critical (lab judgment)
+                </label>
+                {editingOrder.criticalFlag && !editingOrder.criticalAcknowledgedAt ? (
+                  <ActionButton variant="danger" size="sm" onClick={() => void updateOrder(editingOrder.id, { acknowledgeCritical: true })}>
+                    Acknowledge critical result
+                  </ActionButton>
                 ) : null}
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-muted">
-                    <input
-                      type="checkbox"
-                      checked={order.criticalSource === "manual"}
-                      onChange={(event) => void updateOrder(order.id, { criticalManual: event.target.checked })}
-                      className="h-4 w-4 rounded border-line accent-red-600"
-                    />
-                    Mark critical (lab judgment)
-                  </label>
-                  {order.criticalFlag && !order.criticalAcknowledgedAt ? (
-                    <ActionButton variant="danger" size="sm" onClick={() => void updateOrder(order.id, { acknowledgeCritical: true })}>
-                      Acknowledge critical result
-                    </ActionButton>
-                  ) : null}
-                </div>
-                <div className="mt-3 flex flex-wrap justify-between gap-2 rounded border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-3 py-2 text-sm font-bold text-cyan-900 dark:text-cyan-300">
-                  <span>{order.priority} | {order.sampleType || "Sample not noted"}</span>
-                  <span>{formatAmount(order.amount)}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+                {editingOrder.criticalAcknowledgedAt ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                    <AlertTriangle size={13} /> Acknowledged by {editingOrder.criticalAcknowledgedBy} at{" "}
+                    {new Date(editingOrder.criticalAcknowledgedAt).toLocaleString("en-IN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

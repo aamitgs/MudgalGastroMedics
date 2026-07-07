@@ -139,7 +139,9 @@ export function AdminPatients() {
     });
     const data = (await response.json().catch(() => ({}))) as PatientResponse;
     if (!response.ok || !data.ok || !data.patient) {
-      setError(data.error || "Unable to save patient.");
+      // Mutation failures are transient/non-blocking (toast), never the
+      // table's load-error state — a failed create must not blank the list.
+      notify.error(data.error || "Unable to save patient.");
       return;
     }
     notify.success(duplicateMatch ? "Existing patient updated" : "Patient saved");
@@ -157,7 +159,7 @@ export function AdminPatients() {
     });
     const data = (await response.json().catch(() => ({}))) as PatientResponse;
     if (!response.ok || !data.ok || !data.patient) {
-      setError(data.error || "Unable to update patient.");
+      notify.error(data.error || "Unable to update patient.");
       return;
     }
     setPatients((items) => items.map((item) => (item.id === id ? (data.patient as PatientRecord) : item)));
@@ -286,8 +288,6 @@ export function AdminPatients() {
             </p>
           </div>
         </div>
-
-        {error ? <p className="border-b border-line bg-red-50 p-4 text-sm font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
 
         <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
           {statTiles.map((stat) => (

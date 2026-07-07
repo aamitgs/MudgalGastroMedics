@@ -1,16 +1,52 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { queryLabOrders, type LabSortField, type SortDirection } from "@/lib/lab-query";
 import { createLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
 import { labOrderStatuses } from "@/lib/lab-types";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { listOpdVisits } from "@/lib/opd-store";
 
+const sortFields: LabSortField[] = ["patientName", "token", "status", "priority", "createdAt"];
+
 export async function GET(request: Request) {
   const auth = await authorize(request, "lab-orders", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, orders: (await listLabOrders()), visits: (await listOpdVisits()) });
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allOrders = await listLabOrders();
+  const visits = await listOpdVisits();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, orders: allOrders, visits });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+
+  const result = queryLabOrders(allOrders, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as LabSortField) ? (sortBy as LabSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && labOrderStatuses.includes(status as LabOrderStatus) ? (status as LabOrderStatus) : undefined,
+    criticalOnly: params.get("criticalOnly") === "true"
+  });
+
+  const stats = {
+    total: allOrders.length,
+    processing: allOrders.filter((order) => order.status === "Processing" || order.status === "Sample Collected").length,
+    resultReady: allOrders.filter((order) => order.status === "Result Ready").length,
+    criticalUnacked: allOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length,
+    paidAmount: allOrders.filter((order) => order.paymentStatus === "Paid").reduce((sum, order) => sum + Number(order.amount || 0), 0)
+  };
+
+  return NextResponse.json({ ok: true, ...result, visits, stats });
 }
 
 export async function POST(request: Request) {

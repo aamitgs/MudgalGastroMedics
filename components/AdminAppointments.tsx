@@ -109,7 +109,9 @@ export function AdminAppointments() {
     });
     const data = (await response.json().catch(() => ({}))) as MutationResponse;
     if (!response.ok || !data.ok || !data.appointment) {
-      setError(data.error || "Unable to update appointment.");
+      // Mutation failures are transient/non-blocking (toast), never the
+      // table's load-error state — a failed update must not blank the list.
+      notify.error(data.error || "Unable to update appointment.");
       return;
     }
     setAppointments((items) => items.map((item) => (item.id === id ? (data.appointment as AppointmentRecord) : item)));
@@ -124,7 +126,7 @@ export function AdminAppointments() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setError(data.error || "Unable to create OPD token.");
+      notify.error(data.error || "Unable to create OPD token.");
       return;
     }
     notify.success("OPD token created", { description: "Refresh the OPD Queue section below." });
@@ -263,8 +265,6 @@ export function AdminAppointments() {
             <h2 className="mt-1 text-xl font-bold text-ink">Appointment Requests</h2>
           </div>
         </div>
-
-        {error ? <p className="border-b border-line bg-red-50 p-4 text-sm font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
 
         <div className="p-4">
           <DataTable
