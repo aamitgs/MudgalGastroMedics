@@ -3,13 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Moon, Stethoscope, Sun, UsersRound } from "lucide-react";
+import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { StaffFooter } from "@/components/StaffFooter";
+import { GlobalCommandPalette } from "@/components/hospital-os/GlobalCommandPalette";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
+import { useCommandPaletteStore } from "@/stores/command-history-store";
 
 const staffLinks = [
   { href: "/mudgalgastromedics-os", label: "Hospital OS", icon: LayoutDashboard },
@@ -29,6 +31,7 @@ const themeStorageKey = "mgm-admin-theme";
 export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const { dark, setDark, toggleDark } = useAdminThemeStore();
+  const openPalette = useCommandPaletteStore((state) => state.setOpen);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(themeStorageKey);
@@ -80,6 +83,18 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
             </span>
             <button
               type="button"
+              onClick={() => openPalette(true)}
+              aria-label="Open command palette"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-brand hover:text-brand"
+            >
+              <Search size={15} />
+              <span className="hidden items-center gap-1.5 md:inline-flex">
+                Search
+                <kbd className="rounded border border-line bg-soft px-1.5 py-0.5 font-mono text-[10px] font-semibold text-ink">⌘K</kbd>
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={toggleDark}
               aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
               className="inline-flex min-h-9 items-center justify-center rounded border border-line px-2.5 text-muted transition hover:border-brand hover:text-brand"
@@ -98,6 +113,7 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
       </header>
       {children}
       <PatientDrawer />
+      <GlobalCommandPalette />
       <StaffFooter />
       <Toaster richColors closeButton position="top-right" theme={dark ? "dark" : "light"} />
     </div>
