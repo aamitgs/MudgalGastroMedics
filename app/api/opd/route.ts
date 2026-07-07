@@ -1,18 +1,51 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { getAppointmentById } from "@/lib/appointment-store";
+import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
 import { createOpdVisit, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
 import { opdVisitStatuses } from "@/lib/opd-types";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
 const billingStatuses: OpdVisit["billingStatus"][] = ["Not Started", "Estimate Shared", "Paid"];
 const paymentMethods: NonNullable<OpdVisit["paymentMethod"]>[] = ["Cash", "UPI", "Card", "Insurance", "Other"];
+const sortFields: OpdSortField[] = ["patientName", "token", "status", "service", "createdAt"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "appointments", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, visits: (await listOpdVisits()) });
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allVisits = await listOpdVisits();
+
+  // Backward compatible: existing callers (Doctor Workflow, Billing, Doctor
+  // Portal, Appointments) that pass no pagination params keep getting the
+  // full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, visits: allVisits });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+
+  const result = queryOpdVisits(allVisits, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as OpdSortField) ? (sortBy as OpdSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && opdVisitStatuses.includes(status as OpdVisitStatus) ? (status as OpdVisitStatus) : undefined
+  });
+
+  const stats = {
+    waiting: allVisits.filter((visit) => visit.status === "Waiting").length,
+    inConsultation: allVisits.filter((visit) => visit.status === "In Consultation").length,
+    completed: allVisits.filter((visit) => visit.status === "Completed").length,
+    paid: allVisits.filter((visit) => visit.billingStatus === "Paid").length
+  };
+
+  return NextResponse.json({ ok: true, ...result, stats });
 }
 
 export async function POST(request: Request) {
