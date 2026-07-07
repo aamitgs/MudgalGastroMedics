@@ -3,6 +3,7 @@ import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { InventoryItem } from "@/lib/inventory-types";
 import type { IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import type { LabOrder } from "@/lib/lab-types";
 import { evaluateNotificationRules, opdWaitAlertMinutes, type NotificationRuleInputs } from "@/lib/notification-rules";
 import type { OpdVisit } from "@/lib/opd-types";
 
@@ -13,7 +14,7 @@ function minutesAgo(minutes: number) {
 }
 
 function inputs(overrides: Partial<NotificationRuleInputs> = {}): NotificationRuleInputs {
-  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], ...overrides };
+  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], labOrders: [], ...overrides };
 }
 
 function item(overrides: Partial<InventoryItem> = {}): InventoryItem {
@@ -110,6 +111,24 @@ function visit(overrides: Partial<OpdVisit> = {}): OpdVisit {
   };
 }
 
+function labOrder(overrides: Partial<LabOrder> = {}): LabOrder {
+  return {
+    id: "LAB-1",
+    createdAt: minutesAgo(120),
+    updatedAt: minutesAgo(10),
+    visitId: "V-1",
+    token: "T-14",
+    patientName: "Sunil Jain",
+    phone: "9876511111",
+    service: "LFT panel",
+    tests: ["LFT"],
+    priority: "Urgent",
+    status: "Result Ready",
+    paymentStatus: "Paid",
+    ...overrides
+  };
+}
+
 describe("evaluateNotificationRules", () => {
   it("returns nothing when operations are healthy", () => {
     expect(evaluateNotificationRules(inputs({ inventory: [item()], opdVisits: [visit({ createdAt: minutesAgo(5) })] }), now)).toEqual([]);
@@ -185,6 +204,24 @@ describe("evaluateNotificationRules", () => {
       now
     );
     expect(result.map((n) => n.source)).toEqual(["ai-review:R1", "opd-wait:W1"]);
+  });
+
+  it("flags unacknowledged critical lab results and drops acknowledged ones", () => {
+    const result = evaluateNotificationRules(
+      inputs({
+        labOrders: [
+          labOrder({ id: "L1", criticalFlag: true, criticalReasons: ["Potassium 6.9 mmol/L is above the critical high of 6.2 mmol/L."] }),
+          labOrder({ id: "L2", criticalFlag: true, criticalAcknowledgedAt: minutesAgo(5), criticalAcknowledgedBy: "Dr. Mudgal" }),
+          labOrder({ id: "L3" })
+        ]
+      }),
+      now
+    );
+    expect(result.map((n) => n.source)).toEqual(["lab-critical:L1"]);
+    expect(result[0].category).toBe("Laboratory");
+    expect(result[0].priority).toBe("Critical");
+    expect(result[0].detail).toContain("Potassium 6.9");
+    expect(result[0].detail).toContain("acknowledgement");
   });
 
   it("always explains why a notification fired", () => {

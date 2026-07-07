@@ -3,6 +3,7 @@ import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryExpiryStatus } from "@/lib/inventory-types";
 import type { IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import type { LabOrder } from "@/lib/lab-types";
 import { computeHduEscalation, hduVitalsOverdueMinutes } from "@/lib/ipd-types";
 import type { NotificationCategory, NotificationPriority } from "@/lib/notification-types";
 import type { OpdVisit } from "@/lib/opd-types";
@@ -20,7 +21,7 @@ export type NotificationInput = {
 export const opdWaitAlertMinutes = 60;
 
 /** Rule prefixes owned by the sync; open notifications with these sources auto-resolve when the condition clears. */
-export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:"];
+export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:"];
 
 export type NotificationRuleInputs = {
   inventory: InventoryItem[];
@@ -29,6 +30,7 @@ export type NotificationRuleInputs = {
   vitals: VitalsReading[];
   aiReviews: AiCaseReview[];
   opdVisits: OpdVisit[];
+  labOrders: LabOrder[];
 };
 
 /**
@@ -99,6 +101,18 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         href: "/admin#module-ipd"
       });
     }
+  }
+
+  for (const order of inputs.labOrders) {
+    if (!order.criticalFlag || order.criticalAcknowledgedAt || order.status === "Cancelled") continue;
+    active.push({
+      source: `lab-critical:${order.id}`,
+      category: "Laboratory",
+      priority: "Critical",
+      title: `Critical lab result: ${order.patientName}`,
+      detail: `${order.tests.join(", ") || order.service} — ${(order.criticalReasons ?? ["flagged critical"]).join(" ")} Requires doctor acknowledgement.`,
+      href: "/admin#module-lab"
+    });
   }
 
   for (const review of inputs.aiReviews) {

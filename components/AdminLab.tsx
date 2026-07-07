@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FlaskConical, RefreshCw, Search, TestTube2 } from "lucide-react";
+import { AlertTriangle, Download, FlaskConical, RefreshCw, Search, TestTube2 } from "lucide-react";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
@@ -98,6 +98,7 @@ export function AdminLab() {
       { label: "Lab Orders", value: orders.length },
       { label: "Processing", value: orders.filter((order) => order.status === "Processing" || order.status === "Sample Collected").length },
       { label: "Result Ready", value: orders.filter((order) => order.status === "Result Ready").length },
+      { label: "Critical Unacked", value: orders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length },
       { label: "Paid Lab", value: formatAmount(orders.filter((order) => order.paymentStatus === "Paid").reduce((sum, order) => sum + Number(order.amount || 0), 0)) }
     ];
   }, [orders]);
@@ -135,7 +136,7 @@ export function AdminLab() {
     setError("");
   }
 
-  async function updateOrder(id: string, updates: Partial<Pick<LabOrder, "status" | "resultSummary" | "reportReference" | "paymentStatus" | "amount" | "notes">>) {
+  async function updateOrder(id: string, updates: Partial<Pick<LabOrder, "status" | "resultSummary" | "reportReference" | "paymentStatus" | "amount" | "notes">> & { criticalManual?: boolean; acknowledgeCritical?: boolean }) {
     const response = await fetch("/api/lab", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -173,7 +174,7 @@ export function AdminLab() {
 
       {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -236,6 +237,17 @@ export function AdminLab() {
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{order.id} | {order.token}{order.uhid ? ` | ${order.uhid}` : ""}</p>
                     <h3 className="mt-1 text-lg font-bold text-ink">{order.patientName}</h3>
+                    {order.criticalFlag ? (
+                      order.criticalAcknowledgedAt ? (
+                        <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                          <AlertTriangle size={13} /> Critical — acknowledged by {order.criticalAcknowledgedBy}
+                        </span>
+                      ) : (
+                        <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+                          <AlertTriangle size={13} /> Critical result
+                        </span>
+                      )
+                    ) : null}
                     <p className="mt-1 text-sm text-muted">{order.tests.join(", ")}</p>
                   </div>
                   <select aria-label="Order status" value={order.status} onChange={(event) => void updateOrder(order.id, { status: event.target.value as LabOrderStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
@@ -247,6 +259,29 @@ export function AdminLab() {
                   <select defaultValue={order.paymentStatus} onChange={(event) => void updateOrder(order.id, { paymentStatus: event.target.value as LabOrder["paymentStatus"] })} className={fieldClass}><option>Unpaid</option><option>Paid</option></select>
                 </div>
                 <textarea defaultValue={order.resultSummary} onBlur={(event) => void updateOrder(order.id, { resultSummary: event.target.value })} className={`${fieldClass} mt-3 min-h-20 py-3`} placeholder="Result summary / abnormal findings" />
+                {order.criticalFlag && order.criticalReasons?.length ? (
+                  <ul className="mt-2 grid gap-1 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+                    {order.criticalReasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-muted">
+                    <input
+                      type="checkbox"
+                      checked={order.criticalSource === "manual"}
+                      onChange={(event) => void updateOrder(order.id, { criticalManual: event.target.checked })}
+                      className="h-4 w-4 rounded border-line accent-red-600"
+                    />
+                    Mark critical (lab judgment)
+                  </label>
+                  {order.criticalFlag && !order.criticalAcknowledgedAt ? (
+                    <ActionButton variant="danger" size="sm" onClick={() => void updateOrder(order.id, { acknowledgeCritical: true })}>
+                      Acknowledge critical result
+                    </ActionButton>
+                  ) : null}
+                </div>
                 <div className="mt-3 flex flex-wrap justify-between gap-2 rounded border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-3 py-2 text-sm font-bold text-cyan-900 dark:text-cyan-300">
                   <span>{order.priority} | {order.sampleType || "Sample not noted"}</span>
                   <span>{formatAmount(order.amount)}</span>

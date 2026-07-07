@@ -4,6 +4,7 @@ import { listAppointments } from "@/lib/appointment-store";
 import { createDocumentStore } from "@/lib/document-store";
 import { listInventoryItems } from "@/lib/inventory-store";
 import { listIpdAdmissions, listVitals } from "@/lib/ipd-store";
+import { listLabOrders } from "@/lib/lab-store";
 import { evaluateNotificationRules, notificationRulePrefixes, type NotificationInput } from "@/lib/notification-rules";
 import type { StaffNotification } from "@/lib/notification-types";
 import { listOpdVisits } from "@/lib/opd-store";
@@ -109,16 +110,17 @@ function trim(doc: NotificationDoc) {
  * every inbox read.
  */
 export async function syncNotificationsFromOperations(now = new Date()) {
-  const [inventory, appointments, admissions, vitals, aiReviews, opdVisits] = await Promise.all([
+  const [inventory, appointments, admissions, vitals, aiReviews, opdVisits, labOrders] = await Promise.all([
     listInventoryItems(),
     listAppointments(),
     listIpdAdmissions(),
     listVitals(),
     listAiReviews(),
-    listOpdVisits()
+    listOpdVisits(),
+    listLabOrders()
   ]);
 
-  const active = evaluateNotificationRules({ inventory, appointments, admissions, vitals, aiReviews, opdVisits }, now);
+  const active = evaluateNotificationRules({ inventory, appointments, admissions, vitals, aiReviews, opdVisits, labOrders }, now);
 
   const doc = await docStore.load();
   const nowIso = now.toISOString();

@@ -20,6 +20,14 @@ export type LabOrder = {
   amount?: number;
   paymentStatus: "Unpaid" | "Paid";
   notes?: string;
+  /** Critical (panic) result flag — Track 0.2. Set by threshold rules or laboratory judgment. */
+  criticalFlag?: boolean;
+  /** Explainability: why this result is critical (threshold sentences or the manual note). */
+  criticalReasons?: string[];
+  criticalSource?: "threshold" | "manual";
+  /** Doctor sign-off that the critical result was seen; clears the alert, stays on record. */
+  criticalAcknowledgedBy?: string;
+  criticalAcknowledgedAt?: string;
 };
 
 export const labOrderStatuses: LabOrderStatus[] = ["Ordered", "Sample Collected", "Processing", "Result Ready", "Delivered", "Cancelled"];

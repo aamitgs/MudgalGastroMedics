@@ -110,11 +110,14 @@ export async function buildPatientTimeline(phone: string): Promise<ClinicalEvent
 
   for (const order of labOrders) {
     if (normalizePhone(order.phone) !== key) continue;
+    const critical = order.criticalFlag
+      ? ` · CRITICAL RESULT${order.criticalAcknowledgedBy ? ` (acknowledged by ${order.criticalAcknowledgedBy})` : " (awaiting acknowledgement)"}${order.criticalReasons?.length ? ` — ${order.criticalReasons.join(" ")}` : ""}`
+      : "";
     events.push(entry(
       order.createdAt,
       "lab",
-      `Lab order · ${order.status}`,
-      `${order.tests.join(", ") || order.service} · ${order.priority}${order.resultSummary ? ` · ${order.resultSummary}` : ""}`
+      order.criticalFlag ? `Lab order · ${order.status} · CRITICAL` : `Lab order · ${order.status}`,
+      `${order.tests.join(", ") || order.service} · ${order.priority}${order.resultSummary ? ` · ${order.resultSummary}` : ""}${critical}`
     ));
   }
 

@@ -1,4 +1,5 @@
 import "server-only";
+import { evaluateLabCritical } from "@/lib/clinical/lab-critical";
 import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
@@ -80,17 +81,57 @@ export async function updateLabOrder(input: {
   paymentStatus?: LabOrder["paymentStatus"];
   amount?: number;
   notes?: string;
+  /** Laboratory judgment: force-mark (or unmark) the result as critical. */
+  criticalManual?: boolean;
+  /** Doctor sign-off on a critical result; recorded, and clears the active alert. */
+  acknowledgeCriticalBy?: string;
 }) {
   const doc = await docStore.load();
   const order = doc.orders.find((item) => item.id === input.id);
   if (!order) return null;
 
   if (input.status) order.status = input.status;
-  if (typeof input.resultSummary === "string") order.resultSummary = input.resultSummary.trim();
   if (typeof input.reportReference === "string") order.reportReference = input.reportReference.trim();
   if (input.paymentStatus) order.paymentStatus = input.paymentStatus;
   if (typeof input.amount === "number" && Number.isFinite(input.amount)) order.amount = input.amount;
   if (typeof input.notes === "string") order.notes = input.notes.trim();
+
+  if (typeof input.resultSummary === "string") {
+    order.resultSummary = input.resultSummary.trim();
+    // Threshold pass runs on every result edit, but never overrides a manual flag.
+    if (order.criticalSource !== "manual") {
+      const evaluation = evaluateLabCritical(order.resultSummary);
+      order.criticalFlag = evaluation.critical || undefined;
+      order.criticalReasons = evaluation.critical ? evaluation.reasons : undefined;
+      order.criticalSource = evaluation.critical ? "threshold" : undefined;
+      if (!evaluation.critical) {
+        order.criticalAcknowledgedBy = undefined;
+        order.criticalAcknowledgedAt = undefined;
+      }
+    }
+  }
+
+  if (typeof input.criticalManual === "boolean") {
+    if (input.criticalManual) {
+      order.criticalFlag = true;
+      order.criticalSource = "manual";
+      order.criticalReasons = ["Marked critical by laboratory staff."];
+    } else {
+      // Unmarking re-runs the threshold pass so a genuine panic value cannot be cleared by hand.
+      const evaluation = evaluateLabCritical(order.resultSummary ?? "");
+      order.criticalFlag = evaluation.critical || undefined;
+      order.criticalReasons = evaluation.critical ? evaluation.reasons : undefined;
+      order.criticalSource = evaluation.critical ? "threshold" : undefined;
+      order.criticalAcknowledgedBy = undefined;
+      order.criticalAcknowledgedAt = undefined;
+    }
+  }
+
+  if (input.acknowledgeCriticalBy && order.criticalFlag) {
+    order.criticalAcknowledgedBy = input.acknowledgeCriticalBy;
+    order.criticalAcknowledgedAt = new Date().toISOString();
+  }
+
   order.updatedAt = new Date().toISOString();
 
   await docStore.save(doc);

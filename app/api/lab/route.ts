@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { createLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
 import { labOrderStatuses } from "@/lib/lab-types";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
@@ -43,6 +44,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid lab order status." }, { status: 400 });
   }
 
+  const acknowledgeCritical = body.acknowledgeCritical === true;
+
   const order = (await updateLabOrder({
     id,
     status: status as LabOrderStatus | undefined,
@@ -50,11 +53,25 @@ export async function PATCH(request: Request) {
     reportReference: typeof body.reportReference === "string" ? body.reportReference : undefined,
     paymentStatus,
     amount,
-    notes: typeof body.notes === "string" ? body.notes : undefined
+    notes: typeof body.notes === "string" ? body.notes : undefined,
+    criticalManual: typeof body.criticalManual === "boolean" ? body.criticalManual : undefined,
+    acknowledgeCriticalBy: acknowledgeCritical ? auth.context.userName || auth.context.activeRole : undefined
   }));
 
   if (!order) {
     return NextResponse.json({ ok: false, error: "Lab order not found." }, { status: 404 });
+  }
+
+  // Critical-result state changes are clinically significant: audit them explicitly.
+  if (acknowledgeCritical || typeof body.criticalManual === "boolean") {
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: acknowledgeCritical ? "lab.critical.acknowledged" : body.criticalManual ? "lab.critical.marked" : "lab.critical.unmarked",
+      entityType: "lab-order",
+      entityId: order.id,
+      metadata: { reasons: order.criticalReasons, source: order.criticalSource, ...auditRequestMetadata(request) }
+    });
   }
 
   return NextResponse.json({ ok: true, order });
