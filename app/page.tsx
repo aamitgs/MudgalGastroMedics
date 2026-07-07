@@ -119,6 +119,44 @@ export default async function Home() {
       </section>
 
       <Section className="relative z-10 pt-12 md:pt-14">
+        <MotionReveal>
+          <div className="mb-7 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-gold" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Consultation Camp</span>
+              </div>
+              <h2 className="max-w-4xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+                Stomach, Intestine & Liver Consultation and Check-Up Camp
+              </h2>
+              <p className="mt-4 max-w-3xl text-2xl font-bold leading-tight text-brand md:text-4xl" lang="hi">
+                पेट, आंत और लिवर परामर्श एवं जांच शिविर
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="min-h-12 px-6">
+                Call Now
+              </ButtonLink>
+              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-12 px-6">
+                WhatsApp
+              </ButtonLink>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded border border-line/80 bg-white p-2 shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
+            <Image
+              src="/images/hospital/campbanner.jpeg"
+              alt="Mudgal Gastromedics stomach, intestine and liver consultation and check-up camp banner"
+              width={1600}
+              height={810}
+              sizes="(min-width: 1180px) 1180px, calc(100vw - 32px)"
+              className="h-auto w-full rounded object-cover"
+              priority
+            />
+          </div>
+        </MotionReveal>
+      </Section>
+
+      <Section className="relative z-10 pt-12 md:pt-14">
         <Stats />
       </Section>
 
