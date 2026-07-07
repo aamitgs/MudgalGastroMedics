@@ -4,15 +4,45 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { createAppointment, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentStatus } from "@/lib/appointment-types";
+import { queryAppointments, type AppointmentSortField, type SortDirection } from "@/lib/appointment-query";
+
+const sortFields: AppointmentSortField[] = ["name", "service", "status", "date", "createdAt"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "appointments", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({
-    ok: true,
-    appointments: (await listAppointments())
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allAppointments = await listAppointments();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, appointments: allAppointments });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+
+  const result = queryAppointments(allAppointments, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as AppointmentSortField) ? (sortBy as AppointmentSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && appointmentStatuses.includes(status as AppointmentStatus) ? (status as AppointmentStatus) : undefined
   });
+
+  const stats = {
+    total: allAppointments.length,
+    new: allAppointments.filter((appointment) => appointment.status === "New").length,
+    confirmed: allAppointments.filter((appointment) => appointment.status === "Confirmed").length,
+    urgent: allAppointments.filter((appointment) => appointment.priority === "Urgent symptoms").length
+  };
+
+  return NextResponse.json({ ok: true, ...result, stats });
 }
 
 export async function POST(request: Request) {
