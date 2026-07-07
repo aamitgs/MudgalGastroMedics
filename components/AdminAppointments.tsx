@@ -10,6 +10,7 @@ import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const appointmentExportHeaders = ["Name", "Phone", "Service", "Date", "Time Slot", "Priority", "Status", "Created"];
 
@@ -41,6 +42,7 @@ const statusStyles: Record<AppointmentStatus, string> = {
 };
 
 export function AdminAppointments() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -208,7 +210,16 @@ export function AdminAppointments() {
               <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-2xl font-bold text-ink">{appointment.name}</h3>
+                    <h3 className="text-2xl font-bold text-ink">
+                      <button
+                        type="button"
+                        onClick={() => openDrawer(appointment.phone, appointment.name)}
+                        title="Open patient summary"
+                        className="rounded text-left underline-offset-4 transition hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+                      >
+                        {appointment.name}
+                      </button>
+                    </h3>
                     {appointment.uhid ? (
                       <span className="rounded-full border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-brand">
                         {appointment.uhid}

@@ -7,6 +7,7 @@ import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
@@ -31,6 +32,7 @@ function formatAmount(value: number | undefined) {
 }
 
 export function AdminLab() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [orders, setOrders] = useState<LabOrder[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
   const [selectedVisitId, setSelectedVisitId] = useState("");
@@ -236,7 +238,16 @@ export function AdminLab() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{order.id} | {order.token}{order.uhid ? ` | ${order.uhid}` : ""}</p>
-                    <h3 className="mt-1 text-lg font-bold text-ink">{order.patientName}</h3>
+                    <h3 className="mt-1 text-lg font-bold text-ink">
+                      <button
+                        type="button"
+                        onClick={() => openDrawer(order.phone, order.patientName)}
+                        title="Open patient summary"
+                        className="rounded text-left underline-offset-4 transition hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+                      >
+                        {order.patientName}
+                      </button>
+                    </h3>
                     {order.criticalFlag ? (
                       order.criticalAcknowledgedAt ? (
                         <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">

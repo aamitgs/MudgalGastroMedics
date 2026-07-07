@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { StaffFooter } from "@/components/StaffFooter";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
+import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
 
 const staffLinks = [
@@ -96,6 +97,7 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
         </div>
       </header>
       {children}
+      <PatientDrawer />
       <StaffFooter />
       <Toaster richColors closeButton position="top-right" theme={dark ? "dark" : "light"} />
     </div>

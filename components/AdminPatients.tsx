@@ -9,6 +9,7 @@ import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Gender", "Blood Group", "City", "Status", "Last Visit"];
 
@@ -39,6 +40,7 @@ const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 te
 type DuplicateMatch = { id: string; uhid: string; name: string; phone: string };
 
 export function AdminPatients() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -268,7 +270,17 @@ export function AdminPatients() {
                       <span className="rounded-full border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-brand">{patient.uhid}</span>
                       <span className="rounded-full border border-line bg-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-muted">{patient.status}</span>
                     </div>
-                    <h3 className="mt-3 flex items-center gap-2 text-xl font-bold text-ink"><UserRoundCheck size={20} className="text-brand" /> {patient.name}</h3>
+                    <h3 className="mt-3 flex items-center gap-2 text-xl font-bold text-ink">
+                      <UserRoundCheck size={20} className="text-brand" />
+                      <button
+                        type="button"
+                        onClick={() => openDrawer(patient.phone, patient.name)}
+                        title="Open patient summary"
+                        className="rounded text-left underline-offset-4 transition hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+                      >
+                        {patient.name}
+                      </button>
+                    </h3>
                     <div className="mt-3 grid gap-2 text-sm text-muted md:grid-cols-2">
                       <p><span className="font-bold text-ink">Phone:</span> {patient.phone}</p>
                       <p><span className="font-bold text-ink">Age/Gender:</span> {[patient.age, patient.gender].filter(Boolean).join(" / ") || "-"}</p>
