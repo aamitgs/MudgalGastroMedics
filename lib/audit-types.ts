@@ -4,6 +4,8 @@ export type AuditActorRole = "admin" | "doctor" | "patient" | "mobile" | "system
 
 export type AuditSeverity = "info" | "warning" | "critical";
 
+export const auditSeverities: AuditSeverity[] = ["info", "warning", "critical"];
+
 /** A single field's value before and after a mutation. */
 export type AuditFieldChange = { before: unknown; after: unknown };
 
