@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryPatients, type PatientSortField, type SortDirection } from "@/lib/patient-query";
-import { createPatient, listPatients, updatePatient } from "@/lib/patient-store";
+import { createPatient, findPatientByPhone, listPatients, updatePatient } from "@/lib/patient-store";
 import { patientStatuses } from "@/lib/patient-types";
 import type { PatientStatus } from "@/lib/patient-types";
 
@@ -59,9 +60,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Patient name and valid phone are required." }, { status: 400 });
   }
 
+  const forceNew = body.forceNew === true;
+  const existingMatch = forceNew ? await findPatientByPhone(phone) : null;
+
   const patient = (await createPatient(body));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Unable to create patient." }, { status: 400 });
+  }
+
+  // Track 0.3: a deliberate "different person, shared number" decision is
+  // clinically significant (two people's records could otherwise be
+  // conflated), so it gets its own audit trail distinct from a normal create.
+  if (existingMatch) {
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "patient.created.duplicate_phone_confirmed",
+      entityType: "patient",
+      entityId: patient.id,
+      severity: "warning",
+      metadata: { newPatientUhid: patient.uhid, existingPatientId: existingMatch.id, existingPatientUhid: existingMatch.uhid, phone, ...auditRequestMetadata(request) }
+    });
   }
 
   return NextResponse.json({ ok: true, patient });

@@ -15,6 +15,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const visitId = typeof body.visitId === "string" ? body.visitId.trim() : "";
   const allergies = typeof body.allergies === "string" ? body.allergies.trim() : "";
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (!visitId || !allergies) {
     return NextResponse.json({ ok: false, error: "visitId and allergies are required." }, { status: 400 });
   }
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     entityType: "opd_visit",
     entityId: visitId,
     severity: "info",
-    metadata: { allergies, ...auditRequestMetadata(request) }
+    metadata: { allergies, reason: reason || "Not specified", ...auditRequestMetadata(request) }
   });
 
   return NextResponse.json({ ok: true });

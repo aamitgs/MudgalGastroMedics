@@ -67,6 +67,7 @@ export function AdminPatients() {
   const [error, setError] = useState("");
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
   const [typedName, setTypedName] = useState("");
+  const [confirmedNewPatient, setConfirmedNewPatient] = useState(false);
 
   const sortField = (sorting[0]?.id as PatientSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -117,8 +118,11 @@ export function AdminPatients() {
 
   // Duplicate-patient detection (Track 0.3): the store merges on phone match, so
   // a "new" registration silently updates the existing record. Look the number
-  // up as staff type it so they see the match before submitting.
+  // up as staff type it so they see the match before submitting, and give them
+  // an explicit choice (update existing vs. confirm this is a different person
+  // sharing a number) rather than always silently merging.
   async function checkDuplicate(phone: string) {
+    setConfirmedNewPatient(false);
     if (phone.replace(/\D/g, "").length < 6) {
       setDuplicateMatch(null);
       return;
@@ -135,7 +139,7 @@ export function AdminPatients() {
     const response = await fetch("/api/patients", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ ...payload, forceNew: duplicateMatch && confirmedNewPatient })
     });
     const data = (await response.json().catch(() => ({}))) as PatientResponse;
     if (!response.ok || !data.ok || !data.patient) {
@@ -144,9 +148,10 @@ export function AdminPatients() {
       notify.error(data.error || "Unable to save patient.");
       return;
     }
-    notify.success(duplicateMatch ? "Existing patient updated" : "Patient saved");
+    notify.success(duplicateMatch && !confirmedNewPatient ? "Existing patient updated" : duplicateMatch ? "New patient saved as a separate record (shared number confirmed)" : "Patient saved");
     form.reset();
     setDuplicateMatch(null);
+    setConfirmedNewPatient(false);
     setTypedName("");
     void loadPatients();
   }
@@ -332,19 +337,46 @@ export function AdminPatients() {
               {duplicateMatch ? (
                 <div className="flex items-start gap-2.5 rounded border-2 border-amber-300 bg-amber-50 p-3 dark:bg-amber-950" role="alert">
                   <UsersRound size={18} className="mt-0.5 shrink-0 text-amber-600" />
-                  <div className="text-sm text-amber-900 dark:text-amber-200">
+                  <div className="flex-1 text-sm text-amber-900 dark:text-amber-200">
                     <p className="font-black uppercase tracking-[0.1em] text-amber-700 dark:text-amber-300">Possible existing patient</p>
                     <p className="mt-1 font-semibold">
                       {duplicateMatch.name} · {duplicateMatch.uhid} · {duplicateMatch.phone}
                     </p>
                     <p className="mt-1 leading-relaxed">
-                      This number is already on file, so saving will <span className="font-bold">update that record</span>, not create a new one.
+                      This number is already on file.
                       {typedName.trim() && typedName.trim().toLowerCase() !== duplicateMatch.name.toLowerCase() ? (
                         <span className="mt-1 block font-bold text-red-700 dark:text-red-300">
-                          Different name entered — verify this is the same person before saving (shared number?).
+                          Different name entered — this may be a shared number (e.g. a family member), not the same person.
                         </span>
                       ) : null}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmedNewPatient(false)}
+                        aria-pressed={!confirmedNewPatient}
+                        className={`rounded border px-3 py-1.5 text-xs font-bold transition ${!confirmedNewPatient ? "border-amber-600 bg-amber-600 text-white" : "border-amber-300 bg-white text-amber-800"}`}
+                      >
+                        Same person — update existing record
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmedNewPatient(true)}
+                        aria-pressed={confirmedNewPatient}
+                        className={`rounded border px-3 py-1.5 text-xs font-bold transition ${confirmedNewPatient ? "border-amber-600 bg-amber-600 text-white" : "border-amber-300 bg-white text-amber-800"}`}
+                      >
+                        Different person — create a new record
+                      </button>
+                    </div>
+                    {confirmedNewPatient ? (
+                      <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
+                        Saving will create a new, separate patient record with its own UHID, even though the number matches {duplicateMatch.name}.
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
+                        Saving will update {duplicateMatch.name}&apos;s existing record — no new UHID is generated.
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : null}

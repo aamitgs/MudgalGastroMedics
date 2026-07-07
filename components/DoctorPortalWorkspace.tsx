@@ -71,11 +71,16 @@ function AiPatientSummaryPanel({ phone }: { phone: string }) {
  * Active allergy alert at prescribe time (Clinical Safety, Track 0.1). Renders
  * only when the patient has a recorded allergy. Non-blocking — the prescription
  * still autosaves — but the clinician must actively acknowledge review, which
- * is audit-logged. Resets per visit (keyed on visit id at the call site).
+ * is audit-logged along with an optional clinical reason (e.g. "prescribed
+ * anyway — patient no longer reacts", "switched to alternative drug"). The
+ * reason is optional, not required, to keep acknowledgement itself
+ * non-obstructive; the audit trail records "Not specified" when omitted.
+ * Resets per visit (keyed on visit id at the call site).
  */
 function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: string }) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [reason, setReason] = useState("");
   const recorded = allergies?.trim();
   if (!recorded) return null;
 
@@ -85,7 +90,7 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
       const response = await fetch("/api/clinical/allergy-acknowledged", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitId, allergies: recorded })
+        body: JSON.stringify({ visitId, allergies: recorded, reason: reason.trim() })
       });
       if (!response.ok) {
         notify.error("Could not record acknowledgement. Try again.");
@@ -102,12 +107,13 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
     return (
       <div className="flex items-center gap-2 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
         <ShieldCheck size={17} className="shrink-0" /> Allergies reviewed before prescribing: {recorded}
+        {reason.trim() ? <span className="font-normal text-emerald-700"> — {reason.trim()}</span> : null}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border-2 border-red-300 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
+    <div className="flex flex-col gap-3 rounded border-2 border-red-300 bg-red-50 p-4" role="alert">
       <div className="flex items-start gap-2.5">
         <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-600" />
         <div>
@@ -117,14 +123,22 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => void acknowledge()}
-        disabled={saving}
-        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded border border-red-600 bg-red-600 px-4 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
-      >
-        <CheckCircle2 size={16} /> {saving ? "Recording..." : "Acknowledge — reviewed"}
-      </button>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          placeholder="Optional: note how this was addressed (e.g. switched drug, patient no longer reacts)"
+          className="min-h-10 flex-1 rounded border border-red-300 bg-white px-3 text-sm text-ink placeholder:text-red-900/40 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10"
+        />
+        <button
+          type="button"
+          onClick={() => void acknowledge()}
+          disabled={saving}
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded border border-red-600 bg-red-600 px-4 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+        >
+          <CheckCircle2 size={16} /> {saving ? "Recording..." : "Acknowledge — reviewed"}
+        </button>
+      </div>
     </div>
   );
 }

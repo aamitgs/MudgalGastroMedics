@@ -94,7 +94,12 @@ export async function createPatient(input: Record<string, unknown>) {
 
   const doc = await store.load();
   const existing = findByPhoneIn(doc.patients, phone);
-  if (existing) return (await updatePatient({ ...input, id: existing.id }));
+  // Duplicate-patient detection (Track 0.3): a phone match normally merges
+  // into the existing record, since that's usually the same person
+  // re-registering. forceNew is the explicit staff override for a genuinely
+  // different person sharing a number (e.g. a family member) — confirmed via
+  // the "Different person" choice in the registration form, never silent.
+  if (existing && input.forceNew !== true) return (await updatePatient({ ...input, id: existing.id }));
 
   const now = new Date().toISOString();
   const patient: PatientRecord = {
