@@ -60,6 +60,16 @@ describe("queryOpdVisits", () => {
     expect(result.visits.map((v) => v.id)).toEqual(["V4"]);
   });
 
+  it("excludes a status via excludeStatus (Doctor Workflow's active-worklist filter)", () => {
+    const result = queryOpdVisits(fixture, { page: 0, pageSize: 10, excludeStatus: "Cancelled", sortBy: "createdAt", sortDir: "asc" });
+    expect(result.visits.map((v) => v.id)).toEqual(["V1", "V2", "V3"]);
+  });
+
+  it("status and excludeStatus can combine without contradiction producing an empty result", () => {
+    const result = queryOpdVisits(fixture, { page: 0, pageSize: 10, status: "Cancelled", excludeStatus: "Cancelled" });
+    expect(result.visits).toEqual([]);
+  });
+
   it("defaults to newest-first by createdAt when no sort is given", () => {
     const result = queryOpdVisits(fixture, { page: 0, pageSize: 10 });
     expect(result.visits.map((v) => v.id)).toEqual(["V4", "V3", "V2", "V1"]);

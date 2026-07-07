@@ -18,9 +18,9 @@ export async function GET(request: Request) {
   const pageParam = params.get("page");
   const allVisits = await listOpdVisits();
 
-  // Backward compatible: existing callers (Doctor Workflow, Billing, Doctor
-  // Portal, Appointments) that pass no pagination params keep getting the
-  // full flat list they always got.
+  // Backward compatible: existing callers (Billing, Doctor Portal,
+  // Appointments) that pass no pagination params keep getting the full flat
+  // list they always got.
   if (pageParam === null) {
     return NextResponse.json({ ok: true, visits: allVisits });
   }
@@ -28,6 +28,7 @@ export async function GET(request: Request) {
   const sortBy = params.get("sortBy");
   const sortDir = params.get("sortDir");
   const status = params.get("status");
+  const excludeStatus = params.get("excludeStatus");
 
   const result = queryOpdVisits(allVisits, {
     page: Number(pageParam) || 0,
@@ -35,7 +36,8 @@ export async function GET(request: Request) {
     sortBy: sortBy && sortFields.includes(sortBy as OpdSortField) ? (sortBy as OpdSortField) : undefined,
     sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
     query: params.get("q") ?? undefined,
-    status: status && opdVisitStatuses.includes(status as OpdVisitStatus) ? (status as OpdVisitStatus) : undefined
+    status: status && opdVisitStatuses.includes(status as OpdVisitStatus) ? (status as OpdVisitStatus) : undefined,
+    excludeStatus: excludeStatus && opdVisitStatuses.includes(excludeStatus as OpdVisitStatus) ? (excludeStatus as OpdVisitStatus) : undefined
   });
 
   const stats = {

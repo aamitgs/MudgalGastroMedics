@@ -10,6 +10,7 @@ export type OpdQueryParams = {
   sortDir?: SortDirection;
   query?: string;
   status?: OpdVisitStatus;
+  excludeStatus?: OpdVisitStatus;
 };
 
 export type OpdQueryResult = {
@@ -42,7 +43,9 @@ function compareBy(field: OpdSortField, direction: SortDirection) {
 /**
  * Server-side pagination/sorting/filtering for the OPD Queue module
  * (Track 3.1 rollout). Same pure, in-memory shape as the other *-query
- * modules (patient/appointment/lab).
+ * modules (patient/appointment/lab). Also reused by Doctor Workflow, which
+ * operates on the same OpdVisit records and defaults to excludeStatus:
+ * "Cancelled" to keep cancelled visits off the doctor's active worklist.
  */
 export function queryOpdVisits(allVisits: OpdVisit[], params: OpdQueryParams): OpdQueryResult {
   const page = Math.max(0, Math.floor(params.page));
@@ -51,6 +54,7 @@ export function queryOpdVisits(allVisits: OpdVisit[], params: OpdQueryParams): O
 
   let filtered = allVisits;
   if (params.status) filtered = filtered.filter((visit) => visit.status === params.status);
+  if (params.excludeStatus) filtered = filtered.filter((visit) => visit.status !== params.excludeStatus);
   if (query) filtered = filtered.filter((visit) => matchesQuery(visit, query));
 
   const sortBy = params.sortBy ?? "createdAt";
