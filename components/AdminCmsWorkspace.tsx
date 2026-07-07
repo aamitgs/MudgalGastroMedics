@@ -1,14 +1,16 @@
 "use client";
 
 import { Download, Eye, FileText, History, ImageIcon, Plus, RefreshCw, SearchCheck } from "lucide-react";
-import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import type { CmsContentItem, CmsContentRevision, CmsContentStatus } from "@/lib/cms-types";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
+import type { CmsContentSortField } from "@/lib/cms-content-query";
 import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
-import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DataTable } from "@/components/design-system/DataTable";
+import { notify } from "@/lib/notify";
 
 const cmsExportHeaders = ["Title", "Type", "Status", "Slug", "Owner", "Published At", "Updated"];
 
@@ -22,10 +24,12 @@ type CmsResponse = {
   item?: CmsContentItem;
   revisions?: CmsContentRevision[];
   currentUser?: StaffMember;
+  pageCount?: number;
   error?: string;
 };
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+const pageSize = 25;
 
 const statusTone: Record<CmsContentStatus, string> = {
   Draft: "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300",
@@ -39,23 +43,68 @@ export function AdminCmsWorkspace() {
   const [previewItem, setPreviewItem] = useState<CmsContentItem | null>(null);
   const [revisions, setRevisions] = useState<CmsContentRevision[]>([]);
   const [currentUser, setCurrentUser] = useState<StaffMember | null>(null);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<CmsContentStatus | "">("");
+  const [typeFilter, setTypeFilter] = useState<CmsContentType | "">("");
+  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const sortField = (sorting[0]?.id as CmsContentSortField | undefined) ?? "createdAt";
+  const sortDir = sorting[0]?.desc ? "desc" : "asc";
+  const autoPreviewedRef = useRef(false);
 
   async function loadItems() {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/cms", { cache: "no-store" });
-    const data = (await response.json().catch(() => ({}))) as CmsResponse;
-    if (!response.ok || !data.ok) {
+    const params = new URLSearchParams({ page: String(pageIndex), pageSize: String(pageSize), sortBy: sortField, sortDir });
+    if (globalFilter.trim()) params.set("q", globalFilter.trim());
+    if (statusFilter) params.set("status", statusFilter);
+    if (typeFilter) params.set("type", typeFilter);
+
+    const response = await fetch(`/api/cms?${params.toString()}`, { cache: "no-store" }).catch(() => null);
+    const data = ((await response?.json().catch(() => ({}))) ?? {}) as CmsResponse;
+    if (!response?.ok || !data.ok) {
       setError(data.error || "Unable to load CMS content.");
       setLoading(false);
       return;
     }
     setItems(data.items ?? []);
-    setRevisions(data.revisions ?? []);
     setCurrentUser(data.currentUser ?? null);
+    setPageCount(data.pageCount ?? 1);
     setLoading(false);
+    setPreviewItem((current) => {
+      if (!current) return current;
+      return data.items?.find((item) => item.id === current.id) ?? current;
+    });
+    if (!autoPreviewedRef.current && data.items && data.items.length > 0) {
+      autoPreviewedRef.current = true;
+      void previewContent(data.items[0]);
+    }
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadItems(), globalFilter ? 250 : 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageIndex, sortField, sortDir, globalFilter, statusFilter, typeFilter]);
+
+  function updateGlobalFilter(value: string) {
+    setGlobalFilter(value);
+    setPageIndex(0);
+  }
+
+  function updateStatusFilter(value: CmsContentStatus | "") {
+    setStatusFilter(value);
+    setPageIndex(0);
+  }
+
+  function updateTypeFilter(value: CmsContentType | "") {
+    setTypeFilter(value);
+    setPageIndex(0);
   }
 
   async function previewContent(item: CmsContentItem) {
@@ -63,11 +112,11 @@ export function AdminCmsWorkspace() {
     const response = await fetch(`/api/cms?itemId=${encodeURIComponent(item.id)}`, { cache: "no-store" });
     const data = (await response.json().catch(() => ({}))) as CmsResponse;
     if (!response.ok || !data.ok) {
-      setError(data.error || "Unable to load CMS revisions.");
+      notify.error(data.error || "Unable to load CMS revisions.");
       return;
     }
     setRevisions(data.revisions ?? []);
-    setCurrentUser(data.currentUser ?? currentUser);
+    setCurrentUser((current) => data.currentUser ?? current);
   }
 
   async function saveItem(event: FormEvent<HTMLFormElement>) {
@@ -81,11 +130,11 @@ export function AdminCmsWorkspace() {
     });
     const data = (await response.json().catch(() => ({}))) as CmsResponse;
     if (!response.ok || !data.ok || !data.item) {
-      setError(data.error || "Unable to save CMS content.");
+      notify.error(data.error || "Unable to save CMS content.");
       return;
     }
-    setItems((entries) => [data.item as CmsContentItem, ...entries.filter((entry) => entry.id !== data.item?.id)]);
     form.reset();
+    void loadItems();
   }
 
   async function updateStatus(id: string, status: CmsContentStatus) {
@@ -96,44 +145,69 @@ export function AdminCmsWorkspace() {
     });
     const data = (await response.json().catch(() => ({}))) as CmsResponse;
     if (!response.ok || !data.ok || !data.item) {
-      setError(data.error || "Unable to update CMS status.");
+      notify.error(data.error || "Unable to update CMS status.");
       return;
     }
-    setItems((entries) => entries.map((entry) => (entry.id === id ? data.item as CmsContentItem : entry)));
+    const updated = data.item as CmsContentItem;
+    setItems((entries) => entries.map((entry) => (entry.id === id ? updated : entry)));
+    setPreviewItem((current) => (current?.id === id ? updated : current));
   }
 
-  useEffect(() => {
-    let active = true;
+  const stats = useMemo(
+    () => [
+      { label: "Content Items", value: items.length, icon: FileText },
+      { label: "Published", value: items.filter((item) => item.status === "Published").length, icon: SearchCheck },
+      { label: "In Review", value: items.filter((item) => item.status === "In Review").length, icon: RefreshCw },
+      { label: "Media Records", value: items.filter((item) => item.type === "Gallery").length, icon: ImageIcon }
+    ],
+    [items]
+  );
 
-    async function loadInitialItems() {
-      const response = await fetch("/api/cms", { cache: "no-store" });
-      const data = (await response.json().catch(() => ({}))) as CmsResponse;
-      if (!active) return;
-      if (!response.ok || !data.ok) {
-        setError(data.error || "Unable to load CMS content.");
-        setLoading(false);
-        return;
+  const columns = useMemo<ColumnDef<CmsContentItem, unknown>[]>(
+    () => [
+      { accessorKey: "title", header: "Title", size: 190 },
+      { accessorKey: "type", header: "Type", size: 110 },
+      { id: "slug", header: "Slug", size: 190, enableSorting: false, cell: ({ row }) => <span className="font-mono text-xs text-muted">{row.original.slug}</span> },
+      { accessorKey: "owner", header: "Owner", size: 130 },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        cell: ({ row }) => (
+          <select
+            aria-label="CMS status"
+            value={row.original.status}
+            onChange={(event) => void updateStatus(row.original.id, event.target.value as CmsContentStatus)}
+            className={`rounded-full border px-2 py-1 text-xs font-bold ${statusTone[row.original.status]}`}
+          >
+            {cmsContentStatuses.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+        )
+      },
+      {
+        id: "updatedAt",
+        header: "Updated",
+        size: 130,
+        enableSorting: false,
+        cell: ({ row }) => <span className="text-muted">{new Date(row.original.updatedAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 150,
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => (
+          <ActionButton variant="secondary" size="sm" onClick={() => void previewContent(row.original)} aria-expanded={previewItem?.id === row.original.id}>
+            <Eye size={13} /> Preview + History
+          </ActionButton>
+        )
       }
-      setItems(data.items ?? []);
-      setRevisions(data.revisions ?? []);
-      setCurrentUser(data.currentUser ?? null);
-      setPreviewItem(data.items?.[0] ?? null);
-      setLoading(false);
-    }
-
-    void loadInitialItems();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const stats = useMemo(() => [
-    { label: "Content Items", value: items.length, icon: FileText },
-    { label: "Published", value: items.filter((item) => item.status === "Published").length, icon: SearchCheck },
-    { label: "In Review", value: items.filter((item) => item.status === "In Review").length, icon: RefreshCw },
-    { label: "Media Records", value: items.filter((item) => item.type === "Gallery").length, icon: ImageIcon }
-  ], [items]);
+    ],
+    [previewItem]
+  );
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
@@ -150,24 +224,7 @@ export function AdminCmsWorkspace() {
             </p>
           ) : null}
         </div>
-        <div className="flex flex-wrap gap-3">
-          <ActionButton
-            variant="secondary"
-            onClick={() => downloadCsv(cmsExportHeaders, items.map(cmsExportRow), "cms-content.csv")}
-            disabled={items.length === 0}
-          >
-            <Download size={17} /> Export CSV
-          </ActionButton>
-          <ActionButton
-            variant="secondary"
-            onClick={() => void loadItems()}
-          >
-            <RefreshCw size={17} /> Refresh CMS
-          </ActionButton>
-        </div>
       </div>
-
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (
@@ -184,14 +241,20 @@ export function AdminCmsWorkspace() {
       <div className="grid gap-5 p-4 xl:grid-cols-[0.8fr_1.2fr]">
         <div className="grid gap-5">
           <form onSubmit={saveItem} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-            <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Plus size={19} /> Add content item</p>
+            <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+              <Plus size={19} /> Add content item
+            </p>
             <div className="grid gap-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <select aria-label="Type" name="type" className={fieldClass} defaultValue="Page">
-                  {cmsContentTypes.map((type) => <option key={type}>{type}</option>)}
+                  {cmsContentTypes.map((type) => (
+                    <option key={type}>{type}</option>
+                  ))}
                 </select>
                 <select aria-label="Status" name="status" className={fieldClass} defaultValue="Draft">
-                  {cmsContentStatuses.map((status) => <option key={status}>{status}</option>)}
+                  {cmsContentStatuses.map((status) => (
+                    <option key={status}>{status}</option>
+                  ))}
                 </select>
               </div>
               <input name="title" className={fieldClass} placeholder="Content title" required />
@@ -211,7 +274,9 @@ export function AdminCmsWorkspace() {
           </form>
 
           <aside className="rounded border border-line bg-surface p-4 shadow-sm">
-            <p className="mb-3 flex items-center gap-2 text-lg font-bold text-ink"><Eye size={19} /> Preview & history</p>
+            <p className="mb-3 flex items-center gap-2 text-lg font-bold text-ink">
+              <Eye size={19} /> Preview & history
+            </p>
             {previewItem ? (
               <div className="grid gap-4">
                 <div className="rounded border border-line bg-soft/60 p-4">
@@ -220,18 +285,26 @@ export function AdminCmsWorkspace() {
                   <p className="mt-2 text-sm font-semibold text-muted">{previewItem.slug}</p>
                   <p className="mt-4 leading-relaxed text-muted">{previewItem.summary || "No summary available."}</p>
                   <div className="mt-4 rounded border border-line bg-surface p-3 text-xs text-muted">
-                    <p><span className="font-bold text-ink">SEO title:</span> {previewItem.seoTitle || "-"}</p>
-                    <p className="mt-1"><span className="font-bold text-ink">SEO description:</span> {previewItem.seoDescription || "-"}</p>
+                    <p>
+                      <span className="font-bold text-ink">SEO title:</span> {previewItem.seoTitle || "-"}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-bold text-ink">SEO description:</span> {previewItem.seoDescription || "-"}
+                    </p>
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-muted"><History size={15} /> Revision history</p>
+                  <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-muted">
+                    <History size={15} /> Revision history
+                  </p>
                   <div className="grid max-h-64 gap-2 overflow-auto">
                     {revisions.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-3 text-sm font-semibold text-muted">No revisions yet.</p> : null}
                     {revisions.map((revision) => (
                       <div key={revision.id} className="rounded border border-line bg-surface p-3 text-sm">
                         <div className="flex items-center justify-between gap-3">
-                          <p className="font-bold text-ink">v{revision.version} | {revision.action}</p>
+                          <p className="font-bold text-ink">
+                            v{revision.version} | {revision.action}
+                          </p>
                           <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${statusTone[revision.status]}`}>{revision.status}</span>
                         </div>
                         <p className="mt-1 text-xs text-muted">{new Date(revision.createdAt).toLocaleString("en-IN")}</p>
@@ -246,43 +319,83 @@ export function AdminCmsWorkspace() {
           </aside>
         </div>
 
-        <div className="grid max-h-[760px] gap-3 overflow-auto pr-1">
-          {loading ? <ModuleSkeleton /> : null}
-          {!loading && items.length === 0 ? (
-            <ModuleEmptyState
-              icon={FileText}
-              title="No CMS records yet"
-              description="Website content — services, articles and gallery items — is managed here and published to the public site. Create your first record above."
-            />
-          ) : null}
-          {items.map((item) => (
-            <article key={item.id} className="rounded border border-line bg-surface p-4 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{item.type} | {item.owner}</p>
-                  <h3 className="mt-1 text-xl font-bold text-ink">{item.title}</h3>
-                  <p className="mt-1 text-sm font-semibold text-muted">{item.slug}</p>
-                </div>
-                <select aria-label="Status"
-                  value={item.status}
-                  onChange={(event) => void updateStatus(item.id, event.target.value as CmsContentStatus)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-bold ${statusTone[item.status]}`}
-                >
-                  {cmsContentStatuses.map((status) => <option key={status}>{status}</option>)}
-                </select>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-muted">{item.summary || "No summary added."}</p>
-              <div className="mt-3 grid gap-2 rounded border border-line bg-soft/60 p-3 text-xs text-muted">
-                <p><span className="font-bold text-ink">SEO:</span> {item.seoTitle || "-"} | {item.seoDescription || "-"}</p>
-                <p><span className="font-bold text-ink">Media:</span> {item.mediaUrl || "-"}</p>
-                <p><span className="font-bold text-ink">Notes:</span> {item.notes || "-"}</p>
-              </div>
-              <ActionButton variant="secondary" onClick={() => void previewContent(item)} className="mt-3 min-h-10 px-3 text-sm">
-                <Eye size={15} /> Preview + History
-              </ActionButton>
-            </article>
-          ))}
-        </div>
+        <DataTable
+          columns={columns}
+          data={items}
+          getRowId={(item) => item.id}
+          pageIndex={pageIndex}
+          pageCount={pageCount}
+          onPageChange={setPageIndex}
+          sorting={sorting}
+          onSortingChange={setSorting}
+          globalFilter={globalFilter}
+          onGlobalFilterChange={updateGlobalFilter}
+          searchPlaceholder="Search title, slug, summary, owner"
+          loading={loading}
+          error={error || undefined}
+          onRetry={() => void loadItems()}
+          emptyState={{
+            icon: FileText,
+            title: globalFilter || statusFilter || typeFilter ? "No CMS items match your filters" : "No CMS records yet",
+            description:
+              globalFilter || statusFilter || typeFilter
+                ? "Try a different search term, or clear the status/type filters."
+                : "Website content — services, articles and gallery items — is managed here and published to the public site. Create your first record with the form.",
+            action: globalFilter || statusFilter || typeFilter ? "Clear filters" : undefined,
+            onAction:
+              globalFilter || statusFilter || typeFilter
+                ? () => {
+                    setGlobalFilter("");
+                    setStatusFilter("");
+                    setTypeFilter("");
+                  }
+                : undefined
+          }}
+          export={{ headers: cmsExportHeaders, row: cmsExportRow, filename: "cms-content.csv" }}
+          stickyFirstColumn
+          toolbarExtra={
+            <>
+              <select
+                aria-label="Filter by status"
+                value={statusFilter}
+                onChange={(event) => updateStatusFilter(event.target.value as CmsContentStatus | "")}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+              >
+                <option value="">All statuses</option>
+                {cmsContentStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Filter by type"
+                value={typeFilter}
+                onChange={(event) => updateTypeFilter(event.target.value as CmsContentType | "")}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+              >
+                <option value="">All types</option>
+                {cmsContentTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </>
+          }
+          bulkActions={(selected, clear) => (
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                downloadCsv(cmsExportHeaders, selected.map(cmsExportRow), "selected-cms-content.csv");
+                clear();
+              }}
+            >
+              <Download size={14} /> Export selected
+            </ActionButton>
+          )}
+        />
       </div>
     </div>
   );

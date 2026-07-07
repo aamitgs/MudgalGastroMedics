@@ -3,18 +3,50 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } from "@/lib/cms-store";
+import { queryCmsContent, type CmsContentSortField, type SortDirection } from "@/lib/cms-content-query";
 import { getAdminAuthContext, requirePermission } from "@/lib/rbac";
+
+const sortFields: CmsContentSortField[] = ["title", "type", "status", "owner", "createdAt"];
 
 export async function GET(request: Request) {
   const context = await getAdminAuthContext(request);
   const allowed = requirePermission(context, "cms:read");
   if (!allowed.ok) return NextResponse.json({ ok: false, error: allowed.error }, { status: allowed.status });
 
-  const url = new URL(request.url);
-  const itemId = url.searchParams.get("itemId") || undefined;
+  const params = new URL(request.url).searchParams;
+  const itemId = params.get("itemId") || undefined;
+  const pageParam = params.get("page");
+  const allItems = await listCmsContent();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({
+      ok: true,
+      items: allItems,
+      revisions: (await listCmsRevisions(itemId)),
+      currentUser: context.staff
+    });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+  const type = params.get("type");
+
+  const result = queryCmsContent(allItems, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as CmsContentSortField) ? (sortBy as CmsContentSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && cmsContentStatuses.includes(status as CmsContentStatus) ? (status as CmsContentStatus) : undefined,
+    type: type && cmsContentTypes.includes(type as CmsContentType) ? (type as CmsContentType) : undefined
+  });
+
   return NextResponse.json({
     ok: true,
-    items: (await listCmsContent(url.searchParams.get("type") || undefined)),
+    ...result,
     revisions: (await listCmsRevisions(itemId)),
     currentUser: context.staff
   });
