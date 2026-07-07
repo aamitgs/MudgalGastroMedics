@@ -109,7 +109,7 @@ context one click away; a real notification inbox and live global search.
 
 | # | Item | Current state | Build | Pri | Effort | Depends on |
 |---|---|---|---|---|---|---|
-| 3.1 | **Shared enterprise DataTable** | ✅ Primitive built. ✅ **Patients**, ✅ **Appointments**, ✅ **Laboratory**, ✅ **OPD Queue** adopted with server pagination/sort/filter (`lib/patient-query.ts`, `lib/appointment-query.ts`, `lib/lab-query.ts`, `lib/opd-query.ts` — all backward compatible; OPD had 4 other GET consumers, all unaffected). 22 modules still card-stacks | Adopt module-by-module: **Pharmacy or IPD & Beds next** | **High** | L | — |
+| 3.1 | **Shared enterprise DataTable** | ✅ Primitive built. ✅ **Patients**, ✅ **Appointments**, ✅ **Laboratory**, ✅ **OPD Queue**, ✅ **Pharmacy** adopted with server pagination/sort/filter (`lib/*-query.ts` per module, all backward compatible). Pharmacy has no PATCH endpoint, so payment status is read-only in-table with a "View" detail panel for the itemized breakdown. 21 modules still card-stacks | Adopt module-by-module: **IPD & Beds next** | **High** | L | — |
 | 3.2 | **Advanced forms** | Basic; doctor autosave only | Shared RHF+Zod wrapper: smart defaults, autocomplete, recently-used values, searchable dropdowns, grouped sections, inline validation, autosave, undo, success feedback (P4/P6) | Med | L | — |
 | 3.3 | **Print center** | 3 PDFs (Rx/invoice/discharge) | Unified print surface: + medical certificate, patient card, barcode labels, wristbands; consistent branded templates (P4) | Med | M | — |
 | 3.4 | **Export center** | CSV/Excel in 17 spots, ad hoc | Central export (PDF/Excel/CSV/print/email; scheduled/encrypted later) reused by every table (P4) | Med | M | 3.1 |
