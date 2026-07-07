@@ -4,12 +4,45 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
 import type { AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType } from "@/lib/automation-types";
 import { createAutomationTask, generateAutomationTasks, listAutomationTasks, updateAutomationTask } from "@/lib/automation-store";
+import { queryAutomationTasks, type AutomationTaskSortField, type SortDirection } from "@/lib/automation-task-query";
+
+const sortFields: AutomationTaskSortField[] = ["title", "type", "priority", "status", "dueAt", "createdAt"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "system-settings", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({ ok: true, tasks: (await listAutomationTasks()) });
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allTasks = await listAutomationTasks();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, tasks: allTasks });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+
+  const result = queryAutomationTasks(allTasks, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as AutomationTaskSortField) ? (sortBy as AutomationTaskSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && automationTaskStatuses.includes(status as AutomationTaskStatus) ? (status as AutomationTaskStatus) : undefined
+  });
+
+  const stats = {
+    open: allTasks.filter((task) => task.status === "Open").length,
+    queued: allTasks.filter((task) => task.status === "Queued").length,
+    escalated: allTasks.filter((task) => task.status === "Escalated").length,
+    done: allTasks.filter((task) => task.status === "Done").length
+  };
+
+  return NextResponse.json({ ok: true, ...result, stats });
 }
 
 export async function POST(request: Request) {
