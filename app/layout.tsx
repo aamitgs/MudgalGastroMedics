@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { AppChrome } from "@/components/AppChrome";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}
         />
         <AppChrome>{children}</AppChrome>
+        <Analytics />
       </body>
     </html>
   );
