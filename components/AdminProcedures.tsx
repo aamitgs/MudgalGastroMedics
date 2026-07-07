@@ -1,14 +1,17 @@
 "use client";
 
-import { CalendarClock, ClipboardCheck, Download, RefreshCw, Search } from "lucide-react";
-import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { CalendarClock, ClipboardCheck, Download, Edit3 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { ProcedureChecklist, ProcedureSchedule, ProcedureScheduleStatus } from "@/lib/procedure-types";
 import { procedureRooms, procedureScheduleStatuses } from "@/lib/procedure-types";
+import type { ProcedureScheduleSortField } from "@/lib/procedure-schedule-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
-import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DataTable } from "@/components/design-system/DataTable";
+import { notify } from "@/lib/notify";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const procedureExportHeaders = ["Patient", "Phone", "Procedure", "Scheduled Date", "Scheduled Time", "Room", "Doctor", "Priority", "Status"];
 
@@ -38,10 +41,12 @@ type ProcedureResponse = {
   schedule?: ProcedureSchedule;
   visits?: OpdVisit[];
   procedures?: ProcedureOption[];
+  pageCount?: number;
   error?: string;
 };
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+const pageSize = 25;
 
 const checklistLabels: Array<{ key: keyof ProcedureChecklist; label: string }> = [
   { key: "consent", label: "Consent" },
@@ -60,19 +65,33 @@ function checklistProgress(schedule: ProcedureSchedule) {
 }
 
 export function AdminProcedures() {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [schedules, setSchedules] = useState<ProcedureSchedule[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
   const [procedureOptions, setProcedureOptions] = useState<ProcedureOption[]>([]);
-  const [query, setQuery] = useState("");
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ProcedureScheduleStatus | "">("");
+  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingSchedule, setEditingSchedule] = useState<ProcedureSchedule | null>(null);
+
+  const sortField = (sorting[0]?.id as ProcedureScheduleSortField | undefined) ?? "createdAt";
+  const sortDir = sorting[0]?.desc ? "desc" : "asc";
 
   async function loadProcedures() {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/procedures/schedule", { cache: "no-store" });
-    const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
-    if (!response.ok || !data.ok) {
+    const params = new URLSearchParams({ page: String(pageIndex), pageSize: String(pageSize), sortBy: sortField, sortDir });
+    if (globalFilter.trim()) params.set("q", globalFilter.trim());
+    if (statusFilter) params.set("status", statusFilter);
+
+    const response = await fetch(`/api/procedures/schedule?${params.toString()}`, { cache: "no-store" }).catch(() => null);
+    const data = ((await response?.json().catch(() => ({}))) ?? {}) as ProcedureResponse;
+    if (!response?.ok || !data.ok) {
       setError(data.error || "Unable to load procedure schedules.");
       setLoading(false);
       return;
@@ -80,50 +99,35 @@ export function AdminProcedures() {
     setSchedules(data.schedules ?? []);
     setVisits(data.visits ?? []);
     setProcedureOptions(data.procedures ?? []);
+    setPageCount(data.pageCount ?? 1);
     setLoading(false);
+    setEditingSchedule((current) => {
+      if (!current) return current;
+      return data.schedules?.find((schedule) => schedule.id === current.id) ?? current;
+    });
   }
 
   useEffect(() => {
-    let active = true;
+    const timer = window.setTimeout(() => void loadProcedures(), globalFilter ? 250 : 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageIndex, sortField, sortDir, globalFilter, statusFilter]);
 
-    async function loadInitialProcedures() {
-      const response = await fetch("/api/procedures/schedule", { cache: "no-store" });
-      const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
-      if (!active) return;
-      if (!response.ok || !data.ok) {
-        setError(data.error || "Unable to load procedure schedules.");
-        setLoading(false);
-        return;
-      }
-      setSchedules(data.schedules ?? []);
-      setVisits(data.visits ?? []);
-      setProcedureOptions(data.procedures ?? []);
-      setLoading(false);
-    }
+  function updateGlobalFilter(value: string) {
+    setGlobalFilter(value);
+    setPageIndex(0);
+  }
 
-    void loadInitialProcedures();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const filteredSchedules = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return schedules;
-    return schedules.filter((schedule) =>
-      [schedule.id, schedule.token, schedule.uhid, schedule.patientName, schedule.procedureTitle, schedule.room, schedule.status]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery)
-    );
-  }, [schedules, query]);
+  function updateStatusFilter(value: ProcedureScheduleStatus | "") {
+    setStatusFilter(value);
+    setPageIndex(0);
+  }
 
   const stats = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
     return [
       { label: "Scheduled", value: schedules.length },
-      { label: "Today", value: schedules.filter((schedule) => schedule.scheduledDate === new Date().toISOString().slice(0, 10)).length },
+      { label: "Today", value: schedules.filter((schedule) => schedule.scheduledDate === today).length },
       { label: "In Procedure", value: schedules.filter((schedule) => schedule.status === "In Procedure").length },
       { label: "Completed", value: schedules.filter((schedule) => schedule.status === "Completed").length }
     ];
@@ -139,15 +143,19 @@ export function AdminProcedures() {
     });
     const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
     if (!response.ok || !data.ok || !data.schedule) {
-      setError(data.error || "Unable to create procedure schedule.");
+      notify.error(data.error || "Unable to create procedure schedule.");
       return;
     }
-    setSchedules((items) => [data.schedule as ProcedureSchedule, ...items]);
     event.currentTarget.reset();
-    setError("");
+    void loadProcedures();
   }
 
-  async function updateSchedule(id: string, updates: Partial<Pick<ProcedureSchedule, "status" | "findings" | "complications" | "notes" | "scheduledDate" | "scheduledTime" | "room" | "doctor" | "anesthesiaPlan">> & { checklist?: Partial<ProcedureChecklist> }) {
+  async function updateSchedule(
+    id: string,
+    updates: Partial<Pick<ProcedureSchedule, "status" | "findings" | "complications" | "notes" | "scheduledDate" | "scheduledTime" | "room" | "doctor" | "anesthesiaPlan">> & {
+      checklist?: Partial<ProcedureChecklist>;
+    }
+  ) {
     const response = await fetch("/api/procedures/schedule", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -155,11 +163,103 @@ export function AdminProcedures() {
     });
     const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
     if (!response.ok || !data.ok || !data.schedule) {
-      setError(data.error || "Unable to update procedure schedule.");
+      notify.error(data.error || "Unable to update procedure schedule.");
       return;
     }
-    setSchedules((items) => items.map((item) => (item.id === id ? data.schedule as ProcedureSchedule : item)));
+    const updated = data.schedule as ProcedureSchedule;
+    setSchedules((items) => items.map((item) => (item.id === id ? updated : item)));
+    setEditingSchedule((current) => (current?.id === id ? updated : current));
   }
+
+  const columns = useMemo<ColumnDef<ProcedureSchedule, unknown>[]>(
+    () => [
+      {
+        accessorKey: "patientName",
+        header: "Patient",
+        size: 170,
+        cell: ({ row }) => (
+          <div>
+            <button
+              type="button"
+              onClick={() => openDrawer(row.original.phone, row.original.patientName)}
+              title="Open patient summary"
+              className="rounded text-left font-bold text-ink underline-offset-4 hover:text-brand hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              {row.original.patientName}
+            </button>
+            {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
+          </div>
+        )
+      },
+      { accessorKey: "procedureTitle", header: "Procedure", size: 190 },
+      {
+        accessorKey: "scheduledDate",
+        header: "Scheduled",
+        size: 140,
+        cell: ({ row }) => (
+          <span>
+            {row.original.scheduledDate} <span className="text-muted">{row.original.scheduledTime}</span>
+          </span>
+        )
+      },
+      { accessorKey: "room", header: "Room", size: 140 },
+      { id: "doctor", header: "Doctor", size: 150, enableSorting: false, cell: ({ row }) => row.original.doctor },
+      {
+        id: "priority",
+        header: "Priority",
+        size: 90,
+        enableSorting: false,
+        cell: ({ row }) =>
+          row.original.priority === "Urgent" ? (
+            <span className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">Urgent</span>
+          ) : (
+            <span className="text-muted">Routine</span>
+          )
+      },
+      {
+        id: "checklist",
+        header: "Checklist",
+        size: 110,
+        enableSorting: false,
+        cell: ({ row }) => <span className="font-bold text-ink">{checklistProgress(row.original)}%</span>
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        cell: ({ row }) => (
+          <select
+            aria-label="Procedure status"
+            value={row.original.status}
+            onChange={(event) => void updateSchedule(row.original.id, { status: event.target.value as ProcedureScheduleStatus })}
+            className="rounded border border-line bg-soft px-2 py-1 text-xs font-bold text-ink"
+          >
+            {procedureScheduleStatuses.map((status) => (
+              <option key={status}>{status}</option>
+            ))}
+          </select>
+        )
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 90,
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => (
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            onClick={() => setEditingSchedule((current) => (current?.id === row.original.id ? null : row.original))}
+            aria-expanded={editingSchedule?.id === row.original.id}
+          >
+            <Edit3 size={13} /> Manage
+          </ActionButton>
+        )
+      }
+    ],
+    [openDrawer, editingSchedule]
+  );
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
@@ -171,21 +271,7 @@ export function AdminProcedures() {
             Schedule procedures from OPD visits, manage prep and safety checks, then record findings and recovery instructions.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <ActionButton
-            variant="secondary"
-            onClick={() => downloadCsv(procedureExportHeaders, filteredSchedules.map(procedureExportRow), "procedures.csv")}
-            disabled={filteredSchedules.length === 0}
-          >
-            <Download size={17} /> Export CSV
-          </ActionButton>
-          <ActionButton variant="secondary" onClick={() => void loadProcedures()}>
-            <RefreshCw size={17} /> Refresh Procedures
-          </ActionButton>
-        </div>
       </div>
-
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
@@ -198,17 +284,26 @@ export function AdminProcedures() {
 
       <div className="grid gap-5 p-4 xl:grid-cols-[0.84fr_1.16fr]">
         <form onSubmit={createSchedule} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
-          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><CalendarClock size={19} /> Schedule procedure</p>
+          <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+            <CalendarClock size={19} /> Schedule procedure
+          </p>
           <div className="grid gap-3">
             <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
-                <option key={visit.id} value={visit.id}>{visit.token} | {visit.patientName}{visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}</option>
+                <option key={visit.id} value={visit.id}>
+                  {visit.token} | {visit.patientName}
+                  {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
+                </option>
               ))}
             </select>
             <select aria-label="Procedure" name="procedureSlug" className={fieldClass} required>
               <option value="">Select procedure</option>
-              {procedureOptions.map((procedure) => <option key={procedure.slug} value={procedure.slug}>{procedure.title}</option>)}
+              {procedureOptions.map((procedure) => (
+                <option key={procedure.slug} value={procedure.slug}>
+                  {procedure.title}
+                </option>
+              ))}
             </select>
             <div className="grid gap-3 md:grid-cols-2">
               <input aria-label="Scheduled date" name="scheduledDate" className={fieldClass} type="date" required />
@@ -216,9 +311,14 @@ export function AdminProcedures() {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <select aria-label="Room" name="room" className={fieldClass} defaultValue="Endoscopy Room">
-                {procedureRooms.map((room) => <option key={room}>{room}</option>)}
+                {procedureRooms.map((room) => (
+                  <option key={room}>{room}</option>
+                ))}
               </select>
-              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine"><option>Routine</option><option>Urgent</option></select>
+              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine">
+                <option>Routine</option>
+                <option>Urgent</option>
+              </select>
             </div>
             <input name="doctor" className={fieldClass} placeholder="Doctor" defaultValue="Dr. Deepak Kumar Sharma" />
             <input name="anesthesiaPlan" className={fieldClass} placeholder="Sedation / anesthesia plan" />
@@ -230,62 +330,138 @@ export function AdminProcedures() {
         </form>
 
         <div>
-          <label className="relative block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search procedure, UHID, patient, room" className="min-h-10 w-full rounded border border-line bg-surface pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-          </label>
-          <div className="mt-4 grid max-h-[820px] gap-3 overflow-auto pr-1">
-            {loading ? <ModuleSkeleton /> : null}
-            {!loading && filteredSchedules.length === 0 ? (
-              <ModuleEmptyState
-                icon={CalendarClock}
-                title="No procedures scheduled"
-                description="Endoscopies, colonoscopies and other procedures you schedule appear here. Add one above, or adjust your search if you expected results."
+          <DataTable
+            columns={columns}
+            data={schedules}
+            getRowId={(schedule) => schedule.id}
+            pageIndex={pageIndex}
+            pageCount={pageCount}
+            onPageChange={setPageIndex}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            globalFilter={globalFilter}
+            onGlobalFilterChange={updateGlobalFilter}
+            searchPlaceholder="Search procedure, UHID, patient, room"
+            loading={loading}
+            error={error || undefined}
+            onRetry={() => void loadProcedures()}
+            emptyState={{
+              icon: CalendarClock,
+              title: globalFilter || statusFilter ? "No procedures match your filters" : "No procedures scheduled",
+              description:
+                globalFilter || statusFilter
+                  ? "Try a different search term, or clear the status filter."
+                  : "Endoscopies, colonoscopies and other procedures you schedule appear here. Add one with the form.",
+              action: globalFilter || statusFilter ? "Clear filters" : undefined,
+              onAction:
+                globalFilter || statusFilter
+                  ? () => {
+                      setGlobalFilter("");
+                      setStatusFilter("");
+                    }
+                  : undefined
+            }}
+            export={{ headers: procedureExportHeaders, row: procedureExportRow, filename: "procedures.csv" }}
+            stickyFirstColumn
+            toolbarExtra={
+              <select
+                aria-label="Filter by status"
+                value={statusFilter}
+                onChange={(event) => updateStatusFilter(event.target.value as ProcedureScheduleStatus | "")}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+              >
+                <option value="">All statuses</option>
+                {procedureScheduleStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            }
+            bulkActions={(selected, clear) => (
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  downloadCsv(procedureExportHeaders, selected.map(procedureExportRow), "selected-procedures.csv");
+                  clear();
+                }}
+              >
+                <Download size={14} /> Export selected
+              </ActionButton>
+            )}
+          />
+
+          {editingSchedule ? (
+            <div className="mt-4 rounded border border-line bg-surface p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
+                    {editingSchedule.id} | {editingSchedule.token}
+                    {editingSchedule.uhid ? ` | ${editingSchedule.uhid}` : ""}
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold text-ink">{editingSchedule.procedureTitle}</h3>
+                  <p className="mt-1 text-sm text-muted">{editingSchedule.patientName}</p>
+                </div>
+                <ActionButton variant="ghost" size="sm" onClick={() => setEditingSchedule(null)}>
+                  Close
+                </ActionButton>
+              </div>
+
+              <div className="mt-4 rounded border border-cyan-200 bg-cyan-50 p-3 dark:border-cyan-900 dark:bg-cyan-950">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-bold text-cyan-900 dark:text-cyan-300">Checklist progress</p>
+                  <p className="text-sm font-black text-brand">{checklistProgress(editingSchedule)}%</p>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {checklistLabels.map((item) => (
+                    <label key={item.key} className="flex items-center gap-2 rounded border border-cyan-100 bg-surface px-3 py-2 text-xs font-bold text-ink dark:border-cyan-900">
+                      <input
+                        type="checkbox"
+                        checked={editingSchedule.checklist[item.key]}
+                        onChange={(event) => void updateSchedule(editingSchedule.id, { checklist: { [item.key]: event.target.checked } })}
+                        className="h-4 w-4 accent-cyan-600"
+                      />
+                      {item.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <input
+                  defaultValue={editingSchedule.doctor}
+                  onBlur={(event) => void updateSchedule(editingSchedule.id, { doctor: event.target.value })}
+                  className={fieldClass}
+                  placeholder="Doctor"
+                />
+                <input
+                  defaultValue={editingSchedule.anesthesiaPlan}
+                  onBlur={(event) => void updateSchedule(editingSchedule.id, { anesthesiaPlan: event.target.value })}
+                  className={fieldClass}
+                  placeholder="Sedation / anesthesia"
+                />
+              </div>
+              <textarea
+                defaultValue={editingSchedule.findings}
+                onBlur={(event) => void updateSchedule(editingSchedule.id, { findings: event.target.value })}
+                className={`${fieldClass} mt-3 min-h-20 py-3`}
+                placeholder="Procedure findings"
               />
-            ) : null}
-            {filteredSchedules.map((schedule) => (
-              <article key={schedule.id} className="rounded border border-line bg-surface p-4 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{schedule.id} | {schedule.token}{schedule.uhid ? ` | ${schedule.uhid}` : ""}</p>
-                    <h3 className="mt-1 text-lg font-bold text-ink">{schedule.procedureTitle}</h3>
-                    <p className="mt-1 text-sm text-muted">{schedule.patientName} | {schedule.scheduledDate} {schedule.scheduledTime} | {schedule.room}</p>
-                  </div>
-                  <select aria-label="Status" value={schedule.status} onChange={(event) => void updateSchedule(schedule.id, { status: event.target.value as ProcedureScheduleStatus })} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">
-                    {procedureScheduleStatuses.map((status) => <option key={status}>{status}</option>)}
-                  </select>
-                </div>
-
-                <div className="mt-4 rounded border border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-bold text-cyan-900 dark:text-cyan-300">Checklist progress</p>
-                    <p className="text-sm font-black text-brand">{checklistProgress(schedule)}%</p>
-                  </div>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                    {checklistLabels.map((item) => (
-                      <label key={item.key} className="flex items-center gap-2 rounded border border-cyan-100 dark:border-cyan-900 bg-surface px-3 py-2 text-xs font-bold text-ink">
-                        <input
-                          type="checkbox"
-                          checked={schedule.checklist[item.key]}
-                          onChange={(event) => void updateSchedule(schedule.id, { checklist: { [item.key]: event.target.checked } })}
-                          className="h-4 w-4 accent-cyan-600"
-                        />
-                        {item.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  <input defaultValue={schedule.doctor} onBlur={(event) => void updateSchedule(schedule.id, { doctor: event.target.value })} className={fieldClass} placeholder="Doctor" />
-                  <input defaultValue={schedule.anesthesiaPlan} onBlur={(event) => void updateSchedule(schedule.id, { anesthesiaPlan: event.target.value })} className={fieldClass} placeholder="Sedation / anesthesia" />
-                </div>
-                <textarea defaultValue={schedule.findings} onBlur={(event) => void updateSchedule(schedule.id, { findings: event.target.value })} className={`${fieldClass} mt-3 min-h-20 py-3`} placeholder="Procedure findings" />
-                <textarea defaultValue={schedule.complications} onBlur={(event) => void updateSchedule(schedule.id, { complications: event.target.value })} className={`${fieldClass} mt-3 min-h-16 py-3`} placeholder="Complications / none" />
-                <textarea defaultValue={schedule.notes} onBlur={(event) => void updateSchedule(schedule.id, { notes: event.target.value })} className={`${fieldClass} mt-3 min-h-16 py-3`} placeholder="Preparation / recovery notes" />
-              </article>
-            ))}
-          </div>
+              <textarea
+                defaultValue={editingSchedule.complications}
+                onBlur={(event) => void updateSchedule(editingSchedule.id, { complications: event.target.value })}
+                className={`${fieldClass} mt-3 min-h-16 py-3`}
+                placeholder="Complications / none"
+              />
+              <textarea
+                defaultValue={editingSchedule.notes}
+                onBlur={(event) => void updateSchedule(editingSchedule.id, { notes: event.target.value })}
+                className={`${fieldClass} mt-3 min-h-16 py-3`}
+                placeholder="Preparation / recovery notes"
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

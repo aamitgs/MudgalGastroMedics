@@ -3,19 +3,42 @@ import { authorize } from "@/lib/access/guard";
 import { getPublicProcedures } from "@/lib/cms-public";
 import { listOpdVisits } from "@/lib/opd-store";
 import { createProcedureSchedule, listProcedureSchedules, updateProcedureSchedule } from "@/lib/procedure-store";
+import { queryProcedureSchedules, type ProcedureScheduleSortField, type SortDirection } from "@/lib/procedure-schedule-query";
 import { procedureScheduleStatuses } from "@/lib/procedure-types";
 import type { ProcedureScheduleStatus } from "@/lib/procedure-types";
+
+const sortFields: ProcedureScheduleSortField[] = ["patientName", "procedureTitle", "room", "status", "scheduledDate", "createdAt"];
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "appointments", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  return NextResponse.json({
-    ok: true,
-    schedules: (await listProcedureSchedules()),
-    visits: (await listOpdVisits()),
-    procedures: await getPublicProcedures()
+  const params = new URL(request.url).searchParams;
+  const pageParam = params.get("page");
+  const allSchedules = await listProcedureSchedules();
+  const visits = await listOpdVisits();
+  const procedures = await getPublicProcedures();
+
+  // Backward compatible: existing callers that pass no pagination params
+  // keep getting the full flat list they always got.
+  if (pageParam === null) {
+    return NextResponse.json({ ok: true, schedules: allSchedules, visits, procedures });
+  }
+
+  const sortBy = params.get("sortBy");
+  const sortDir = params.get("sortDir");
+  const status = params.get("status");
+
+  const result = queryProcedureSchedules(allSchedules, {
+    page: Number(pageParam) || 0,
+    pageSize: Number(params.get("pageSize")) || 25,
+    sortBy: sortBy && sortFields.includes(sortBy as ProcedureScheduleSortField) ? (sortBy as ProcedureScheduleSortField) : undefined,
+    sortDir: sortDir === "asc" || sortDir === "desc" ? (sortDir as SortDirection) : undefined,
+    query: params.get("q") ?? undefined,
+    status: status && procedureScheduleStatuses.includes(status as ProcedureScheduleStatus) ? (status as ProcedureScheduleStatus) : undefined
   });
+
+  return NextResponse.json({ ok: true, ...result, visits, procedures });
 }
 
 export async function POST(request: Request) {
