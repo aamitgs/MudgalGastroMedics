@@ -27,7 +27,7 @@ const englishHashtags = [
   "#StomachCare",
   "#MedicalCamp",
   "#DrDeepakKumarSharma",
-  "#MudgalGastroMedicus",
+  "#MudgalGastroMedics",
   "#AgraHealth"
 ];
 const hindiHashtags = [
@@ -35,7 +35,7 @@ const hindiHashtags = [
   "#HealthCamp",
   "#GastroCamp",
   "#LiverCare",
-  "#MudgalGastroMedicus",
+  "#MudgalGastroMedics",
   "#DrDeepakKumarSharma",
   "#AgraHealth",
   "#MedicalCamp"

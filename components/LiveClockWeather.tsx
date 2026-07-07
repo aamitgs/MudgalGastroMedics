@@ -30,7 +30,7 @@ const istDayFormat = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata"
 });
 
-/** Hospital hours: Mon-Sat, 10:00-18:00 IST. */
+/** OPD hours: Mon-Sat, 11:00-18:00 IST. Hospital operation is 24/7. */
 function isHospitalOpen(now: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -40,7 +40,7 @@ function isHospitalOpen(now: Date) {
   }).formatToParts(now);
   const weekday = parts.find((part) => part.type === "weekday")?.value ?? "";
   const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
-  return weekday !== "Sun" && hour >= 10 && hour < 18;
+  return weekday !== "Sun" && hour >= 11 && hour < 18;
 }
 
 /**

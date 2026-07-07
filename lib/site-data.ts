@@ -318,7 +318,7 @@ export function hospitalSchema() {
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        opens: "10:00",
+        opens: "11:00",
         closes: "18:00"
       }
     ],

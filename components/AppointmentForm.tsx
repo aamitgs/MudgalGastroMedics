@@ -44,6 +44,28 @@ const commonSymptoms = [
   "Liver swelling / ascites"
 ];
 
+const additionalServices = [
+  "Gastroenterology Consultation",
+  "Liver Consultation",
+  "Stomach Pain Consultation",
+  "Acidity / GERD Consultation",
+  "Constipation Treatment",
+  "Diarrhea / Loose Motion Treatment",
+  "Jaundice Evaluation",
+  "Fatty Liver Consultation",
+  "Pancreatitis Consultation",
+  "Gallbladder / Bile Duct Consultation",
+  "IBS / Bowel Habit Consultation",
+  "Blood in Stool Evaluation",
+  "Vomiting / Nausea Consultation",
+  "Abdominal Bloating / Gas Consultation",
+  "GI Cancer Screening",
+  "Obesity / Weight Loss Endoscopy Consultation",
+  "Nutrition and Diet Guidance",
+  "Report Review / Second Opinion",
+  "Emergency Gastro Advice"
+];
+
 export function AppointmentForm() {
   const [status, setStatus] = useState("");
   const [selectedReport, setSelectedReport] = useState("");
@@ -77,7 +99,7 @@ export function AppointmentForm() {
     }
 
     const text = encodeURIComponent(
-      `Appointment request:\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email || "-"}\nAge: ${data.age || "-"}\nGender: ${data.gender || "-"}\nPatient type: ${data.patientType || "-"}\nPreferred contact: ${data.contactMethod || "Phone / WhatsApp"}\nService: ${data.service}\nPreferred date: ${data.date || "Flexible"}\nPreferred time: ${data.timeSlot || "Flexible"}\nPriority: ${data.priority || "Routine"}\nSymptoms: ${symptoms.length ? symptoms.join(", ") : "-"}\nDuration: ${data.duration || "-"}\nCurrent medicines/allergies: ${data.medicines || "-"}\nNeeds assistance: ${data.assistance ? "Yes" : "No"}\nReport attached: ${reportFileName || "No"}\nMessage: ${data.message || "-"}`
+      `Appointment request:\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email || "-"}\nAge: ${data.age || "-"}\nGender: ${data.gender || "-"}\nAddress: ${data.addressLine || "-"}\nCity: ${data.city || "-"}\nState: ${data.state || "-"}\nPIN code: ${data.postalCode || "-"}\nPatient type: ${data.patientType || "-"}\nPreferred contact: ${data.contactMethod || "Phone / WhatsApp"}\nService: ${data.service}\nPreferred date: ${data.date || "Flexible"}\nPreferred time: ${data.timeSlot || "Flexible"}\nPriority: ${data.priority || "Routine"}\nSymptoms: ${symptoms.length ? symptoms.join(", ") : "-"}\nDuration: ${data.duration || "-"}\nCurrent medicines/allergies: ${data.medicines || "-"}\nNeeds assistance: ${data.assistance ? "Yes" : "No"}\nReport attached: ${reportFileName || "No"}\nMessage: ${data.message || "-"}`
     );
     setStatus(`${savedAppointment ? `Request saved as ${savedAppointment.id}. ` : "Request prepared. "}Please send it on WhatsApp: https://wa.me/${site.whatsapp}?text=${text}`);
   }
@@ -146,6 +168,22 @@ export function AppointmentForm() {
               ))}
             </div>
           </div>
+          <label className="lg:col-span-6">
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Address</span><span data-hi lang="hi">पता</span></span>
+            <input name="addressLine" autoComplete="street-address" className={fieldClass} placeholder="House number, street, locality" />
+          </label>
+          <label className="lg:col-span-2">
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>City</span><span data-hi lang="hi">शहर</span></span>
+            <input name="city" autoComplete="address-level2" className={fieldClass} placeholder="City" />
+          </label>
+          <label className="lg:col-span-2">
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>State</span><span data-hi lang="hi">राज्य</span></span>
+            <input name="state" autoComplete="address-level1" className={fieldClass} placeholder="State" />
+          </label>
+          <label className="lg:col-span-2">
+            <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>PIN Code</span><span data-hi lang="hi">पिन कोड</span></span>
+            <input name="postalCode" autoComplete="postal-code" inputMode="numeric" className={fieldClass} placeholder="PIN" />
+          </label>
         </div>
       </div>
 
@@ -166,11 +204,12 @@ export function AppointmentForm() {
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Service</span><span data-hi lang="hi">सेवा</span></span>
             <select name="service" required className={fieldClass}>
               <option value="">Select service</option>
-              {procedures.slice(0, 10).map((procedure) => (
+              {procedures.map((procedure) => (
                 <option key={procedure.slug}>{procedure.title}</option>
               ))}
-              <option>Gastroenterology Consultation</option>
-              <option>Liver Consultation</option>
+              {additionalServices.map((service) => (
+                <option key={service}>{service}</option>
+              ))}
             </select>
           </label>
           <label className="lg:col-span-3">
@@ -181,7 +220,7 @@ export function AppointmentForm() {
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Time</span><span data-hi lang="hi">पसंदीदा समय</span></span>
             <select name="timeSlot" className={fieldClass}>
               <option>Flexible</option>
-              <option>10 AM-1 PM</option>
+              <option>11 AM-1 PM</option>
               <option>1 PM-4 PM</option>
             </select>
           </label>

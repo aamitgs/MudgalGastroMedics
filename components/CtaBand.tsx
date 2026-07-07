@@ -23,8 +23,8 @@ export function CtaBand() {
                 <Clock className="mt-1 shrink-0 text-cyan-100" size={19} />
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white">Business Hours</p>
-                  <p className="mt-1">Mon-Sat, 10 AM-6 PM</p>
-                  <p className="mt-1 text-sm text-white/62">Call reception for urgent assistance.</p>
+                  <p className="mt-1">OPD: Mon-Sat, 11 AM-6 PM</p>
+                  <p className="mt-1 text-sm text-white/62">Hospital operates 24/7. Call reception for urgent assistance.</p>
                 </div>
               </div>
               <div className="mt-5 grid max-w-3xl gap-3 md:grid-cols-3">

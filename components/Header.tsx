@@ -121,7 +121,7 @@ export function Header() {
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/75">
             <LiveClockWeather variant="site" />
-            <span className="inline-flex items-center gap-1.5"><Clock size={15} /> Mon-Sat, 10 AM-6 PM</span>
+            <span className="inline-flex items-center gap-1.5"><Clock size={15} /> OPD: Mon-Sat, 11 AM-6 PM</span>
             <span className="hidden items-center gap-1.5 sm:inline-flex"><MapPin size={15} /> Shaheed Nagar, Agra</span>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { AppointmentForm } from "@/components/AppointmentForm";
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
-import { fullAddress, site } from "@/lib/site-data";
+import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -65,39 +65,48 @@ export default function ContactPage() {
       </section>
 
       <Section className="-mt-10 relative z-10 pt-0">
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <MotionReveal>
-          <div id="appointment" className="h-full overflow-hidden rounded border border-line bg-white shadow-lift">
+        <MotionReveal>
+          <div id="appointment" className="overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="border-b border-line bg-[linear-gradient(135deg,#ecfeff,#ffffff)] p-6">
               <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Book Appointment</p>
               <h2 className="mt-2 text-3xl font-black">Share your details with reception</h2>
               <p className="mt-2 text-muted">The team can use your request to prepare the next call or WhatsApp follow-up.</p>
             </div>
             <div className="p-6">
-            <AppointmentForm />
+              <AppointmentForm />
             </div>
           </div>
-          </MotionReveal>
-          <MotionReveal delay={0.08}>
-          <div className="h-full overflow-hidden rounded border border-line bg-white shadow-soft">
-            <div className="p-6">
+        </MotionReveal>
+      </Section>
+
+      <Section muted className="pt-0">
+        <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr] lg:items-stretch">
+          <MotionReveal>
+            <div className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Visit MGM</p>
-              <h2 className="mt-2 text-3xl font-black">Shaheed Nagar, Agra</h2>
-              <div className="mt-5 grid gap-4">
-                <InfoLine icon={<MapPin size={20} />} title="Address" text={fullAddress} />
-                <InfoLine icon={<Clock size={20} />} title="Hospital Timings" text="Mon-Sat, 10:00 AM-6:00 PM" />
-                <InfoLine icon={<ShieldCheck size={20} />} title="Urgent Assistance" text="For urgent symptoms, call reception before visiting." />
+              <h2 className="mt-2 text-3xl font-black leading-tight text-ink">Shaheed Nagar, Agra</h2>
+              <div className="mt-6 grid gap-4">
+                <InfoLine icon={<MapPin size={20} />} title="Address" text="16 HIG, Shaheed Nagar, Behind Shaheed Nagar Police Chowki, Agra, Uttar Pradesh 282001" />
+                <InfoLine icon={<Clock size={20} />} title="OPD / Business Hours" text="Mon-Sat, 11:00 AM-6:00 PM" />
+                <InfoLine icon={<ShieldCheck size={20} />} title="Urgent Assistance" text="Hospital operates 24/7. For urgent symptoms, call reception before visiting." />
               </div>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <ButtonLink href={`tel:${site.phone}`}>Call</ButtonLink>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
                 <ButtonLink href={site.directionsUrl} variant="ghost">Get Directions</ButtonLink>
               </div>
             </div>
-            <div className="border-t border-line bg-soft/60 p-3">
-              <iframe className="h-96 w-full rounded border-0" src={site.mapEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Mudgal Gastromedics Hospital map" />
+          </MotionReveal>
+          <MotionReveal delay={0.08}>
+            <div className="h-full overflow-hidden rounded border border-line bg-white p-3 shadow-soft">
+              <iframe
+                className="h-[520px] w-full rounded border-0"
+                src={site.mapEmbed}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Mudgal Gastromedics Hospital map"
+              />
             </div>
-          </div>
           </MotionReveal>
         </div>
       </Section>

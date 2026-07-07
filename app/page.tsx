@@ -573,7 +573,7 @@ export default async function Home() {
             </h2>
           </div>
           <div className="rounded border border-line/80 bg-white/85 p-4 text-muted shadow-sm">
-            <p className="font-semibold text-ink">Mon-Sat, 10 AM-6 PM</p>
+            <p className="font-semibold text-ink">OPD: Mon-Sat, 11 AM-6 PM</p>
             <p className="mt-1 text-sm">Shaheed Nagar, Agra</p>
           </div>
         </div>

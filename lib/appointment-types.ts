@@ -11,6 +11,10 @@ export type AppointmentRecord = {
   email?: string;
   age?: string;
   gender?: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   patientType?: string;
   contactMethod?: string;
   service: string;
