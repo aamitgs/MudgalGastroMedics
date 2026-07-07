@@ -26,6 +26,7 @@ import { AdminReports } from "@/components/AdminReports";
 import { AdminSettings } from "@/components/AdminSettings";
 import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { Section } from "@/components/Section";
+import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
 import { visibleAdminModules } from "@/lib/access/admin-modules";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
@@ -91,6 +92,7 @@ export default async function AdminPage() {
         <Section muted className="pb-10 pt-8 md:pb-12 md:pt-10">
           {isAuthenticated ? (
             <div className="grid gap-4">
+              <RoleTodayBand role={context.activeRole} />
               {modules.map((module) => (
                 <section key={module.id} id={module.id} className="scroll-mt-28">
                   {moduleComponents[module.id]}

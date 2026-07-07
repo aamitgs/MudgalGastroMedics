@@ -130,7 +130,8 @@ export async function createAnalyticsSnapshot() {
     queues: {
       opdInFlight: opdVisits.filter((visit) => visit.status === "Waiting" || visit.status === "In Consultation").length,
       labPending: labOrders.filter((order) => !["Result Ready", "Delivered", "Cancelled"].includes(order.status)).length,
-      pharmacyUnpaid: dispenses.filter((record) => record.paymentStatus === "Unpaid").length
+      pharmacyUnpaid: dispenses.filter((record) => record.paymentStatus === "Unpaid").length,
+      receptionNew: appointments.filter((appointment) => appointment.status === "New").length
     },
     workload: [
       { label: "Reception Requests", value: appointments.filter((appointment) => appointment.status === "New").length },
@@ -149,7 +150,8 @@ export async function createAnalyticsSnapshot() {
       flaggedPatients: patients.filter((patient) => patient.status === "Flagged").length,
       escalatedAiReviews: aiReviews.filter((review) => review.status === "Escalated").length,
       unpaidLab: labOrders.filter((order) => order.paymentStatus === "Unpaid").length,
-      unpaidPharmacy: dispenses.filter((record) => record.paymentStatus === "Unpaid").length
+      unpaidPharmacy: dispenses.filter((record) => record.paymentStatus === "Unpaid").length,
+      criticalLabsUnacked: labOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length
     }
   };
 }
