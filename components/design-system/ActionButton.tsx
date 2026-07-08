@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  * `default`) does not match this product's visual language. This is the one
  * source of truth for staff action buttons.
  */
-export type ActionButtonVariant = "primary" | "success" | "warning" | "secondary" | "danger" | "ghost";
+export type ActionButtonVariant = "primary" | "success" | "warning" | "secondary" | "danger" | "ghost" | "outline";
 export type ActionButtonSize = "sm" | "md" | "lg";
 
 const base =
@@ -33,7 +33,8 @@ const variants: Record<ActionButtonVariant, string> = {
     "border border-amber-300 dark:border-amber-800/40 bg-amber-500 text-white hover:bg-amber-600 focus-visible:ring-amber-500/25",
   secondary: "border border-line bg-soft text-ink hover:border-brand hover:text-brand",
   danger: "border border-red-600 bg-red-600 text-white hover:bg-red-700",
-  ghost: "text-muted hover:bg-soft hover:text-brand"
+  ghost: "text-muted hover:bg-soft hover:text-brand",
+  outline: "border border-line text-muted hover:border-brand hover:text-brand"
 };
 
 type ActionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
