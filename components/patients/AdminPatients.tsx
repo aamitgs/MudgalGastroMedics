@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, FileHeart, Plus, UserRoundCheck, UsersRound } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
@@ -9,8 +9,14 @@ import type { PatientSortField } from "@/lib/patient-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
+import { FormSection } from "@/components/design-system/FormSection";
+import { RecentValueChips } from "@/components/design-system/RecentValueChips";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { useRecentValues } from "@/hooks/useRecentValues";
+import { patientCreateSchema, type PatientCreateInput } from "@/lib/validation/patients";
 
 const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Gender", "Blood Group", "City", "Status", "Last Visit"];
 
@@ -132,28 +138,48 @@ export function AdminPatients() {
     setDuplicateMatch(response.ok && data.ok ? data.match : null);
   }
 
-  async function addPatient(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/patients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, forceNew: duplicateMatch && confirmedNewPatient })
-    });
-    const data = (await response.json().catch(() => ({}))) as PatientResponse;
-    if (!response.ok || !data.ok || !data.patient) {
+  const allergyRecents = useRecentValues("patient-allergies");
+  const conditionRecents = useRecentValues("patient-chronic-conditions");
+  const medicineRecents = useRecentValues("patient-current-medicines");
+
+  const {
+    register,
+    setValue,
+    getValues,
+    reset,
+    formState: { errors, isSubmitting },
+    submit: submitPatient
+  } = useAdvancedForm<PatientCreateInput>({
+    schema: patientCreateSchema,
+    defaultValues: { name: "", phone: "" },
+    async onValid(values) {
       // Mutation failures are transient/non-blocking (toast), never the
       // table's load-error state — a failed create must not blank the list.
-      notify.error(data.error || "Unable to save patient.");
-      return;
+      const response = await fetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, forceNew: duplicateMatch && confirmedNewPatient })
+      });
+      const data = (await response.json().catch(() => ({}))) as PatientResponse;
+      if (!response.ok || !data.ok || !data.patient) {
+        notify.error(data.error || "Unable to save patient.");
+        return;
+      }
+      notify.success(duplicateMatch && !confirmedNewPatient ? "Existing patient updated" : duplicateMatch ? "New patient saved as a separate record (shared number confirmed)" : "Patient saved");
+      for (const token of (values.allergies ?? "").split(",")) allergyRecents.remember(token);
+      for (const token of (values.chronicConditions ?? "").split(",")) conditionRecents.remember(token);
+      for (const token of (values.currentMedicines ?? "").split(",")) medicineRecents.remember(token);
+      reset();
+      setDuplicateMatch(null);
+      setConfirmedNewPatient(false);
+      setTypedName("");
+      void loadPatients();
     }
-    notify.success(duplicateMatch && !confirmedNewPatient ? "Existing patient updated" : duplicateMatch ? "New patient saved as a separate record (shared number confirmed)" : "Patient saved");
-    form.reset();
-    setDuplicateMatch(null);
-    setConfirmedNewPatient(false);
-    setTypedName("");
-    void loadPatients();
+  });
+
+  function insertRecentValue(field: "allergies" | "chronicConditions" | "currentMedicines", value: string) {
+    const current = (getValues(field) ?? "").trim();
+    setValue(field, current ? `${current}, ${value}` : value, { shouldValidate: true });
   }
 
   async function updateStatus(id: string, status: PatientStatus) {
@@ -304,36 +330,86 @@ export function AdminPatients() {
         </div>
 
         <div className="p-4">
-          <form onSubmit={addPatient} className="mb-4 rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+          <form onSubmit={submitPatient} noValidate className="mb-4 rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
               <Plus size={19} /> Create patient record
             </p>
-            <div className="grid gap-3">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input name="name" className={fieldClass} placeholder="Patient name" required onChange={(event) => setTypedName(event.target.value)} />
-                <input name="phone" className={fieldClass} placeholder="Mobile number" inputMode="tel" required onBlur={(event) => void checkDuplicate(event.target.value)} />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <input name="age" className={fieldClass} placeholder="Age" inputMode="numeric" />
-                <select aria-label="Gender" name="gender" className={fieldClass} defaultValue="">
-                  <option value="">Gender</option>
-                  <option>Female</option>
-                  <option>Male</option>
-                  <option>Other</option>
-                </select>
-                <select aria-label="Blood group" name="bloodGroup" className={fieldClass} defaultValue="">
-                  <option value="">Blood group</option>
-                  {bloodGroups.filter(Boolean).map((group) => (
-                    <option key={group}>{group}</option>
-                  ))}
-                </select>
-              </div>
-              <input name="email" className={fieldClass} placeholder="Email" type="email" />
-              <input name="emergencyContact" className={fieldClass} placeholder="Emergency contact" />
-              <textarea name="address" className={`${fieldClass} min-h-20 py-3`} placeholder="Address" />
-              <textarea name="allergies" className={`${fieldClass} min-h-20 py-3`} placeholder="Allergies / drug reactions" />
-              <textarea name="chronicConditions" className={`${fieldClass} min-h-20 py-3`} placeholder="Chronic conditions, liver disease history, diabetes, hypertension..." />
-              <textarea name="currentMedicines" className={`${fieldClass} min-h-20 py-3`} placeholder="Current medicines" />
+            <div className="grid gap-4">
+              <FormSection title="Identity">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Patient name" htmlFor="patient-name" required error={errors.name?.message}>
+                    <input
+                      id="patient-name"
+                      className={fieldClass}
+                      placeholder="Patient name"
+                      {...register("name", { onChange: (event) => setTypedName(event.target.value) })}
+                    />
+                  </FormField>
+                  <FormField label="Mobile number" htmlFor="patient-phone" required error={errors.phone?.message}>
+                    <input
+                      id="patient-phone"
+                      className={fieldClass}
+                      placeholder="Mobile number"
+                      inputMode="tel"
+                      {...register("phone", { onBlur: (event) => void checkDuplicate(event.target.value) })}
+                    />
+                  </FormField>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <FormField label="Age" htmlFor="patient-age" error={errors.age?.message}>
+                    <input id="patient-age" className={fieldClass} placeholder="Age" inputMode="numeric" {...register("age")} />
+                  </FormField>
+                  <FormField label="Gender" htmlFor="patient-gender">
+                    <select id="patient-gender" className={fieldClass} defaultValue="" {...register("gender")}>
+                      <option value="">Gender</option>
+                      <option>Female</option>
+                      <option>Male</option>
+                      <option>Other</option>
+                    </select>
+                  </FormField>
+                  <FormField label="Blood group" htmlFor="patient-blood-group">
+                    <select id="patient-blood-group" className={fieldClass} defaultValue="" {...register("bloodGroup")}>
+                      <option value="">Blood group</option>
+                      {bloodGroups.filter(Boolean).map((group) => (
+                        <option key={group}>{group}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                </div>
+              </FormSection>
+
+              <FormSection title="Contact">
+                <FormField label="Email" htmlFor="patient-email" error={errors.email?.message}>
+                  <input id="patient-email" className={fieldClass} placeholder="Email" type="email" {...register("email")} />
+                </FormField>
+                <FormField label="Emergency contact" htmlFor="patient-emergency-contact" error={errors.emergencyContact?.message}>
+                  <input id="patient-emergency-contact" className={fieldClass} placeholder="Emergency contact" {...register("emergencyContact")} />
+                </FormField>
+                <FormField label="Address" htmlFor="patient-address" error={errors.address?.message}>
+                  <textarea id="patient-address" className={`${fieldClass} min-h-20 py-3`} placeholder="Address" {...register("address")} />
+                </FormField>
+              </FormSection>
+
+              <FormSection title="Clinical" description="Free text — recently used entries appear as quick-insert chips.">
+                <FormField label="Allergies / drug reactions" htmlFor="patient-allergies" error={errors.allergies?.message}>
+                  <textarea id="patient-allergies" className={`${fieldClass} min-h-20 py-3`} placeholder="Allergies / drug reactions" {...register("allergies")} />
+                  <RecentValueChips values={allergyRecents.values} onPick={(value) => insertRecentValue("allergies", value)} />
+                </FormField>
+                <FormField label="Chronic conditions" htmlFor="patient-chronic-conditions" error={errors.chronicConditions?.message}>
+                  <textarea
+                    id="patient-chronic-conditions"
+                    className={`${fieldClass} min-h-20 py-3`}
+                    placeholder="Chronic conditions, liver disease history, diabetes, hypertension..."
+                    {...register("chronicConditions")}
+                  />
+                  <RecentValueChips values={conditionRecents.values} onPick={(value) => insertRecentValue("chronicConditions", value)} />
+                </FormField>
+                <FormField label="Current medicines" htmlFor="patient-current-medicines" error={errors.currentMedicines?.message}>
+                  <textarea id="patient-current-medicines" className={`${fieldClass} min-h-20 py-3`} placeholder="Current medicines" {...register("currentMedicines")} />
+                  <RecentValueChips values={medicineRecents.values} onPick={(value) => insertRecentValue("currentMedicines", value)} />
+                </FormField>
+              </FormSection>
+
               {duplicateMatch ? (
                 <div className="flex items-start gap-2.5 rounded border-2 border-amber-300 bg-amber-50 p-3 dark:bg-amber-950" role="alert">
                   <UsersRound size={18} className="mt-0.5 shrink-0 text-amber-600" />
@@ -380,7 +456,7 @@ export function AdminPatients() {
                   </div>
                 </div>
               ) : null}
-              <ActionButton type="submit" variant="primary">
+              <ActionButton type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
                 Save Patient + Generate UHID
               </ActionButton>
             </div>
