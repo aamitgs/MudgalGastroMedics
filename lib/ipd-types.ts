@@ -87,6 +87,9 @@ export const wardMeta: Record<HospitalWard, WardMeta> = {
 /** Beyond this many minutes since the last HDU vitals check, the bed map flags it for staff attention. */
 export const hduVitalsOverdueMinutes = 60;
 
+/** Beds sitting in Cleaning status longer than this are flagged as overdue turnover. */
+export const turnoverOverdueMinutes = 120;
+
 export type HduEscalation = {
   overdue: boolean;
   outOfThreshold: boolean;

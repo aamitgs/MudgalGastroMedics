@@ -2,9 +2,9 @@ import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryExpiryStatus } from "@/lib/inventory-types";
-import type { IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import type { HospitalBed, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
 import type { LabOrder } from "@/lib/lab-types";
-import { computeHduEscalation, hduVitalsOverdueMinutes } from "@/lib/ipd-types";
+import { computeHduEscalation, hduVitalsOverdueMinutes, turnoverOverdueMinutes } from "@/lib/ipd-types";
 import type { NotificationCategory, NotificationPriority } from "@/lib/notification-types";
 import type { OpdVisit } from "@/lib/opd-types";
 
@@ -21,7 +21,7 @@ export type NotificationInput = {
 export const opdWaitAlertMinutes = 60;
 
 /** Rule prefixes owned by the sync; open notifications with these sources auto-resolve when the condition clears. */
-export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:"];
+export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:", "turnover:"];
 
 export type NotificationRuleInputs = {
   inventory: InventoryItem[];
@@ -31,6 +31,7 @@ export type NotificationRuleInputs = {
   aiReviews: AiCaseReview[];
   opdVisits: OpdVisit[];
   labOrders: LabOrder[];
+  beds: HospitalBed[];
 };
 
 /**
@@ -139,6 +140,21 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         title: `Long wait: ${visit.patientName}`,
         detail: `Token ${visit.token} has been waiting ${waitedMinutes} minutes (alert threshold ${opdWaitAlertMinutes}).`,
         href: "/admin#module-opd"
+      });
+    }
+  }
+
+  for (const bed of inputs.beds) {
+    if (bed.status !== "Cleaning" || !bed.statusUpdatedAt) continue;
+    const overdueMinutes = Math.round((now.getTime() - new Date(bed.statusUpdatedAt).getTime()) / 60000);
+    if (overdueMinutes > turnoverOverdueMinutes) {
+      active.push({
+        source: `turnover:${bed.id}`,
+        category: "Administrative",
+        priority: "High",
+        title: `Bed turnover overdue: ${bed.label}`,
+        detail: `In Cleaning status for ${overdueMinutes} minutes — past the ${turnoverOverdueMinutes}-minute turnover target.`,
+        href: "/admin#module-ipd"
       });
     }
   }

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { InventoryItem } from "@/lib/inventory-types";
-import type { IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import type { HospitalBed, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import { turnoverOverdueMinutes } from "@/lib/ipd-types";
 import type { LabOrder } from "@/lib/lab-types";
 import { evaluateNotificationRules, opdWaitAlertMinutes, type NotificationRuleInputs } from "@/lib/notification-rules";
 import type { OpdVisit } from "@/lib/opd-types";
@@ -14,7 +15,7 @@ function minutesAgo(minutes: number) {
 }
 
 function inputs(overrides: Partial<NotificationRuleInputs> = {}): NotificationRuleInputs {
-  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], labOrders: [], ...overrides };
+  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], labOrders: [], beds: [], ...overrides };
 }
 
 function item(overrides: Partial<InventoryItem> = {}): InventoryItem {
@@ -107,6 +108,18 @@ function visit(overrides: Partial<OpdVisit> = {}): OpdVisit {
     service: "OPD consult",
     symptoms: [],
     billingStatus: "Not Started",
+    ...overrides
+  };
+}
+
+function bed(overrides: Partial<HospitalBed> = {}): HospitalBed {
+  return {
+    id: "BED-1",
+    ward: "General",
+    label: "General 1",
+    status: "Cleaning",
+    statusUpdatedAt: minutesAgo(turnoverOverdueMinutes + 10),
+    dailyRate: 1500,
     ...overrides
   };
 }
@@ -222,6 +235,27 @@ describe("evaluateNotificationRules", () => {
     expect(result[0].priority).toBe("Critical");
     expect(result[0].detail).toContain("Potassium 6.9");
     expect(result[0].detail).toContain("acknowledgement");
+  });
+
+  it("flags a bed stuck in Cleaning past the turnover target", () => {
+    const result = evaluateNotificationRules(inputs({ beds: [bed()] }), now);
+    expect(result.map((n) => n.source)).toEqual(["turnover:BED-1"]);
+    expect(result[0].category).toBe("Administrative");
+    expect(result[0].detail).toContain("turnover target");
+  });
+
+  it("ignores beds within the turnover window, not Cleaning, or with no status timestamp", () => {
+    const result = evaluateNotificationRules(
+      inputs({
+        beds: [
+          bed({ id: "FRESH", statusUpdatedAt: minutesAgo(turnoverOverdueMinutes - 10) }),
+          bed({ id: "VACANT", status: "Vacant" }),
+          bed({ id: "NO-TS", statusUpdatedAt: undefined })
+        ]
+      }),
+      now
+    );
+    expect(result).toEqual([]);
   });
 
   it("always explains why a notification fired", () => {

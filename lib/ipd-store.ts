@@ -2,6 +2,7 @@ import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
+import { turnoverOverdueMinutes } from "@/lib/ipd-types";
 
 type IpdStore = {
   beds: HospitalBed[];
@@ -43,8 +44,6 @@ function setBedStatus(bed: HospitalBed, status: BedStatus) {
   bed.statusUpdatedAt = new Date().toISOString();
 }
 
-/** Beds sitting in Cleaning status longer than this are flagged as overdue turnover. */
-const turnoverOverdueMinutes = 120;
 
 export async function listBeds() {
   return (await store.load()).beds;
