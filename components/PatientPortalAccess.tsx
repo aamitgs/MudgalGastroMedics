@@ -36,7 +36,7 @@ const inputClass =
   "min-h-13 w-full rounded-lg border border-line bg-white px-4 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
 const primaryButton =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70";
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70";
 
 export function PatientPortalAccess() {
   const [step, setStep] = useState<AuthStep>("phone");

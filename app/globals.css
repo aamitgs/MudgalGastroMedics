@@ -13,6 +13,9 @@
   --site-soft: #ecfeff;
   --site-brand: #0891b2;
   --site-brand-dark: #0e7490;
+  /* Same in light and dark mode (identical to the CTA buttons already using
+     it) — a single source of truth for the gradient repeated across 5 files. */
+  --site-brand-gradient: linear-gradient(135deg, #0ea5c2, #087d9e);
   --site-teal: #059669;
   --site-teal-dark: #047857;
   --site-gold: #b9852f;

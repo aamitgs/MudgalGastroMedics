@@ -43,7 +43,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             type="button"
             onClick={() => setFilter(category)}
             aria-pressed={filter === category}
-            className={`rounded-full border px-4 py-2 text-sm font-bold tracking-[0.01em] transition duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 ${filter === category ? "border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] text-white shadow-[0_14px_34px_rgba(8,145,178,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]" : "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-sm hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand hover:shadow-soft"}`}
+            className={`rounded-full border px-4 py-2 text-sm font-bold tracking-[0.01em] transition duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 ${filter === category ? "border-cyan-300/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_14px_34px_rgba(8,145,178,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]" : "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-sm hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand hover:shadow-soft"}`}
           >
             {category}
           </button>

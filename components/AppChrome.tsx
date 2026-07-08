@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { CtaBand } from "@/components/CtaBand";
 import { Footer } from "@/components/Footer";
@@ -17,20 +18,30 @@ const staffChromeRoutes = ["/admin", "/doctor", "/login"];
 export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
 
+  // Single root switch every route renders through, so wrapping here makes
+  // every motion.* component honor the OS reduced-motion setting
+  // automatically (Track 1.8) — individual components no longer each need
+  // their own useReducedMotion() check to be covered by this baseline; a
+  // few still call it explicitly to skip non-duration motion (e.g. initial
+  // slide-in offsets), which MotionConfig alone doesn't affect.
   if (pathname?.startsWith("/mudgalgastromedics-os")) {
-    return <>{children}</>;
+    return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
   }
 
   if (staffChromeRoutes.some((route) => pathname?.startsWith(route))) {
-    return <StaffChrome>{children}</StaffChrome>;
+    return (
+      <MotionConfig reducedMotion="user">
+        <StaffChrome>{children}</StaffChrome>
+      </MotionConfig>
+    );
   }
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <Header />
       {children}
       <CtaBand />
       <Footer />
-    </>
+    </MotionConfig>
   );
 }

@@ -26,7 +26,7 @@ const sizes: Record<ActionButtonSize, string> = {
 
 const variants: Record<ActionButtonVariant, string> = {
   primary:
-    "border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)] hover:-translate-y-0.5",
+    "border border-cyan-300 dark:border-cyan-800/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)] hover:-translate-y-0.5",
   success:
     "border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)] hover:-translate-y-0.5",
   warning:
