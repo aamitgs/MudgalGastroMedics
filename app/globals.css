@@ -335,6 +335,37 @@ body.lang-hi .inline-lang [data-hi] {
     margin-top: 20px;
     padding-top: 12px;
   }
+
+  .print-data-table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .print-data-table th,
+  .print-data-table td {
+    border: 1px solid #cdeef4;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .print-data-table thead {
+    display: table-header-group;
+  }
+
+  .print-data-table th {
+    background: #f8ffff;
+    color: #087d9e;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .print-data-table tr {
+    break-inside: avoid;
+  }
 }
 
 @theme inline {

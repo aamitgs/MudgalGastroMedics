@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stethoscope, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stamp, Stethoscope, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -734,7 +734,7 @@ function DoctorConsultationCard({
               disabled={!identityConfirmed}
               className={inputClass}
             />
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className="mt-4 grid gap-2 sm:grid-cols-4">
               <ActionButton variant="secondary" onClick={() => void copySummary(visit, patient)}>
                 <Copy size={16} /> Copy Summary
               </ActionButton>
@@ -743,6 +743,9 @@ function DoctorConsultationCard({
               </ActionButton>
               <a href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">
                 <FileDown size={16} /> Download PDF
+              </a>
+              <a href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
+                <Stamp size={16} /> Certificate
               </a>
             </div>
           </label>

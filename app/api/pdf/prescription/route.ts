@@ -21,7 +21,8 @@ export async function GET(request: Request) {
     entityType: "opd_visit",
     entityId: visitId,
     severity: result.ok ? "info" : "warning",
-    metadata: { ok: result.ok, ...auditRequestMetadata(request) }
+    metadata: { ok: result.ok },
+    device: auditRequestMetadata(request)
   });
 
   if (!result.ok) {

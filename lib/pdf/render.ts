@@ -6,6 +6,7 @@ import { findPatientByPhone, getPatientById } from "@/lib/patient-store";
 import { registerPdfFonts } from "@/lib/pdf/branding";
 import { PrescriptionDocument } from "@/lib/pdf/prescription-document";
 import { InvoiceDocument } from "@/lib/pdf/invoice-document";
+import { MedicalCertificateDocument } from "@/lib/pdf/medical-certificate-document";
 import { buildDischargeSummaryFooterTemplate, buildDischargeSummaryHeaderTemplate, buildDischargeSummaryHtml } from "@/lib/pdf/discharge-summary-html";
 import { renderHtmlToPdf } from "@/lib/pdf/chromium";
 
@@ -33,6 +34,16 @@ export async function renderPrescriptionPdf(visitId: string): Promise<PdfRenderR
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(PrescriptionDocument({ visit, patient }));
   return { ok: true, buffer, filename: `prescription-${slugify(visit.patientName)}-${visit.token}.pdf` };
+}
+
+export async function renderMedicalCertificatePdf(visitId: string): Promise<PdfRenderResult> {
+  const visit = (await getOpdVisitById(visitId));
+  if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
+
+  registerPdfFonts();
+  const patient = await findPatientForVisit(visit.patientId, visit.phone);
+  const buffer = await renderToBuffer(MedicalCertificateDocument({ visit, patient }));
+  return { ok: true, buffer, filename: `medical-certificate-${slugify(visit.patientName)}-${visit.token}.pdf` };
 }
 
 export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult> {

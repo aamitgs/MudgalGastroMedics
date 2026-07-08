@@ -18,6 +18,7 @@ import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { site } from "@/lib/site-data";
 import { downloadCsv } from "@/lib/table-export";
 
 /**
@@ -71,6 +72,8 @@ type DataTableProps<TData> = {
   export?: DataTableExport<TData>;
   toolbarExtra?: React.ReactNode;
   stickyFirstColumn?: boolean;
+  /** Shown above the printed table (e.g. "Patients"). Defaults to "Records". */
+  printTitle?: string;
 };
 
 function SortIcon({ direction }: { direction: false | "asc" | "desc" }) {
@@ -98,7 +101,8 @@ export function DataTable<TData>({
   emptyState,
   export: exportConfig,
   toolbarExtra,
-  stickyFirstColumn
+  stickyFirstColumn,
+  printTitle = "Records"
 }: DataTableProps<TData>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -310,6 +314,53 @@ export function DataTable<TData>({
           </Table>
         </div>
       )}
+
+      {!error && !loading && data.length > 0 ? (
+        // Print button below renders window.print(), and the global print
+        // stylesheet (app/globals.css) hides everything except .patient-print
+        // — without a matching printable view, every module's "Print" button
+        // silently produced a blank page. Rebuilds the current page's visible
+        // rows/columns as a plain table, dropping the select/actions columns
+        // (checkboxes and row buttons aren't meaningful on paper).
+        <section className="patient-print">
+          <div className="print-sheet">
+            <header className="print-header">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mgm-logo.png" alt={`${site.name} logo`} />
+              <div>
+                <h1>{site.name}</h1>
+                <p>{printTitle}</p>
+                <p>Generated {new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+              </div>
+            </header>
+            <table className="print-data-table">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers
+                      .filter((header) => header.column.id !== "select" && header.column.id !== "actions")
+                      .map((header) => (
+                        <th key={header.id}>{typeof header.column.columnDef.header === "string" ? header.column.columnDef.header : header.column.id}</th>
+                      ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row
+                      .getVisibleCells()
+                      .filter((cell) => cell.column.id !== "select" && cell.column.id !== "actions")
+                      .map((cell) => (
+                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       {!error && !loading && data.length > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-3 py-2.5 text-sm">
