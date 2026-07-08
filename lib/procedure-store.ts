@@ -28,6 +28,11 @@ export async function listProcedureSchedules() {
   return doc.schedules;
 }
 
+export async function getProcedureScheduleById(id: string) {
+  const doc = await docStore.load();
+  return doc.schedules.find((item) => item.id === id) ?? null;
+}
+
 export async function createProcedureSchedule(input: Record<string, unknown>) {
   const doc = await docStore.load();
   const visitId = normalizeText(input.visitId);
@@ -73,6 +78,13 @@ export async function createProcedureSchedule(input: Record<string, unknown>) {
   return { schedule };
 }
 
+/**
+ * Statuses reachable only after consent is recorded (Track 0.7): prep and
+ * beyond touch the patient directly, so consent must be on file before any
+ * of them, not just before the procedure itself.
+ */
+const statusesRequiringConsent: ProcedureScheduleStatus[] = ["Prep Started", "In Procedure", "Recovery", "Completed"];
+
 export async function updateProcedureSchedule(input: {
   id: string;
   status?: ProcedureScheduleStatus;
@@ -85,10 +97,15 @@ export async function updateProcedureSchedule(input: {
   room?: string;
   doctor?: string;
   anesthesiaPlan?: string;
-}) {
+}): Promise<ProcedureSchedule | { error: string } | null> {
   const doc = await docStore.load();
   const schedule = doc.schedules.find((item) => item.id === input.id);
   if (!schedule) return null;
+
+  const consentAfterUpdate = input.checklist?.consent ?? schedule.checklist.consent;
+  if (input.status && statusesRequiringConsent.includes(input.status) && !consentAfterUpdate) {
+    return { error: "Patient consent must be recorded before moving past Planned." };
+  }
 
   if (input.status && procedureScheduleStatuses.includes(input.status)) schedule.status = input.status;
   if (input.checklist) schedule.checklist = { ...schedule.checklist, ...input.checklist };

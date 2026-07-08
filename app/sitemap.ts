@@ -5,14 +5,19 @@ import { site } from "@/lib/site-data";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "",
+    "/about",
     "/blog",
     "/blog/stomach-intestine-liver-consultation-check-up-camp",
     "/gallery",
     "/life-at-mgm",
     "/duty-doctor",
     "/contact",
+    "/cookie-policy",
+    "/disclaimer",
+    "/patient-rights-responsibilities",
     "/portal",
     "/privacy",
+    "/refund-cancellation-policy",
     "/terms"
   ];
   const procedures = await getPublicProcedures();

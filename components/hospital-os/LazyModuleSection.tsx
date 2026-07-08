@@ -50,7 +50,11 @@ export const ADMIN_MODULE_JUMP_EVENT = "admin-module-jump";
  * modules' `rootMargin` zones at once, triggering a cascade of concurrent
  * loads whose content keeps resolving from skeleton to real (taller) height
  * for a few seconds and shifting the page — the *target* module shouldn't
- * have to wait out that settling just to start loading its own data.
+ * have to wait out that settling just to start loading its own data. The
+ * same applies to a URL that already carries the hash on first load (a
+ * bookmark, an external link like the Patient Drawer's quick actions, or a
+ * browser refresh) — there's no click to catch, so mount is also checked
+ * against `location.hash` directly on mount.
  *
  * Once mounted, a module stays mounted (never unmounts on scroll-away) so its
  * local state and in-flight data aren't lost as the page is used normally.
@@ -75,6 +79,8 @@ export function LazyModuleSection({ id }: { id: string }) {
         if (active) setComponent(() => mod.default);
       });
     }
+
+    if (window.location.hash === `#${id}`) mount();
 
     function onJump(event: Event) {
       if ((event as CustomEvent<{ id: string }>).detail?.id === id) mount();

@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
+import { MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
 import { site } from "@/lib/site-data";
 
 const companyLinks = [
-  { href: "/#doctor", label: "About MGM" },
+  { href: "/about", label: "About MGM" },
   { href: "/#doctor", label: "Doctor Profile" },
   { href: "/blog", label: "Blog" },
   { href: "/gallery", label: "Facilities" },
@@ -26,6 +26,10 @@ const supportLinks = [
   { href: site.directionsUrl, label: "Get Directions" },
   { href: "/gallery", label: "Hospital Gallery" },
   { href: "/privacy", label: "Privacy Policy" },
+  { href: "/cookie-policy", label: "Cookie Policy" },
+  { href: "/patient-rights-responsibilities", label: "Patient Rights" },
+  { href: "/refund-cancellation-policy", label: "Refund Policy" },
+  { href: "/disclaimer", label: "Disclaimer" },
   { href: "/terms", label: "Terms" }
 ];
 
@@ -113,9 +117,6 @@ export function Footer() {
       </div>
 
       <div className="fixed bottom-5 right-4 z-40 grid gap-3 md:bottom-7 md:right-6">
-        <a href={`mailto:${site.email}`} className="grid h-12 w-12 place-items-center rounded-full bg-[#191919] text-white shadow-[0_10px_30px_rgba(0,0,0,0.32)] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-brand" aria-label="Email MGM">
-          <Mail size={18} />
-        </a>
         <a href={`https://wa.me/${site.whatsapp}`} className="grid h-12 w-12 place-items-center rounded-full bg-[#191919] text-white shadow-[0_10px_30px_rgba(0,0,0,0.32)] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-teal" aria-label="WhatsApp MGM">
           <MessageCircle size={20} />
         </a>

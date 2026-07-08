@@ -48,8 +48,10 @@ type ProcedureResponse = {
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 const pageSize = 25;
 
+// "consent" is handled separately below (Track 0.7) — a legal/regulatory
+// requirement audited server-side, not a routine housekeeping checkbox like
+// these 7.
 const checklistLabels: Array<{ key: keyof ProcedureChecklist; label: string }> = [
-  { key: "consent", label: "Consent" },
   { key: "fastingConfirmed", label: "Fasting" },
   { key: "vitalsChecked", label: "Vitals" },
   { key: "allergiesReviewed", label: "Allergies" },
@@ -406,6 +408,27 @@ export function AdminProcedures() {
                 <ActionButton variant="ghost" size="sm" onClick={() => setEditingSchedule(null)}>
                   Close
                 </ActionButton>
+              </div>
+
+              <div className={`mt-4 rounded border-2 p-3 ${editingSchedule.checklist.consent ? "border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950" : "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950"}`} role={editingSchedule.checklist.consent ? undefined : "alert"}>
+                <label className="flex items-start gap-2.5">
+                  <input
+                    type="checkbox"
+                    checked={editingSchedule.checklist.consent}
+                    onChange={(event) => void updateSchedule(editingSchedule.id, { checklist: { consent: event.target.checked } })}
+                    className="mt-0.5 h-4 w-4 accent-emerald-600"
+                  />
+                  <span>
+                    <span className={`block text-sm font-black uppercase tracking-[0.1em] ${editingSchedule.checklist.consent ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
+                      Patient consent {editingSchedule.checklist.consent ? "recorded" : "required"}
+                    </span>
+                    <span className="mt-1 block text-sm font-semibold leading-relaxed text-ink">
+                      {editingSchedule.checklist.consent
+                        ? "Recorded and audited. Status can now move past Planned."
+                        : "Must be recorded before this procedure can move past Planned — status changes are rejected server-side until then."}
+                    </span>
+                  </span>
+                </label>
               </div>
 
               <div className="mt-4 rounded border border-cyan-200 bg-cyan-50 p-3 dark:border-cyan-900 dark:bg-cyan-950">

@@ -152,6 +152,20 @@ export const procedures = [
     hiSummary: "पेट या बड़ी आंत के पॉलीप्स को एंडोस्कोपी से निकालना।"
   },
   {
+    slug: "colon-polyp-removal",
+    title: "Colon Polyp Removal",
+    hiTitle: "कोलन पॉलीप रिमूवल",
+    summary: "Colonoscopy-guided removal of suitable colon polyps with biopsy reporting and future surveillance planning.",
+    hiSummary: "कोलोनोस्कोपी द्वारा उपयुक्त कोलन पॉलीप्स को निकालना और बायोप्सी व आगे की निगरानी की योजना।"
+  },
+  {
+    slug: "endoscopic-biopsy",
+    title: "Endoscopic Biopsy",
+    hiTitle: "एंडोस्कोपिक बायोप्सी",
+    summary: "Targeted tissue sampling during endoscopy or colonoscopy to help diagnose ulcers, inflammation, infection, polyps, or suspected growths.",
+    hiSummary: "अल्सर, सूजन, संक्रमण, पॉलीप्स या संदिग्ध ग्रोथ की जांच के लिए एंडोस्कोपी या कोलोनोस्कोपी के दौरान ऊतक सैंपल लेना।"
+  },
+  {
     slug: "ryles-tube-placement",
     title: "Ryle's Tube Placement",
     hiTitle: "राइल्स ट्यूब प्लेसमेंट",
@@ -194,11 +208,39 @@ export const procedures = [
     hiSummary: "भोजन नली या जीआई ट्रैक्ट के संकरे हिस्सों को एंडोस्कोपी से चौड़ा करना।"
   },
   {
+    slug: "esophageal-dilation",
+    title: "Esophageal Dilation",
+    hiTitle: "ईसोफेजियल डाइलेशन",
+    summary: "Endoscopic widening of selected food-pipe narrowing that causes swallowing difficulty or food sticking.",
+    hiSummary: "निगलने में दिक्कत या भोजन फंसने वाली भोजन नली की सिकुड़न को एंडोस्कोपी से चौड़ा करना।"
+  },
+  {
     slug: "gi-stenting",
     title: "GI Stenting",
     hiTitle: "जीआई स्टेंटिंग",
     summary: "Stent placement for selected GI blockages, strictures, bile duct obstruction, and palliative care needs.",
     hiSummary: "जीआई रुकावट, स्ट्रिक्चर और पित्त नली अवरोध में स्टेंटिंग।"
+  },
+  {
+    slug: "bile-duct-stenting",
+    title: "Bile Duct Stenting",
+    hiTitle: "बाइल डक्ट स्टेंटिंग",
+    summary: "ERCP-guided stent placement to relieve bile duct blockage from stones, strictures, tumors, or pancreaticobiliary disease.",
+    hiSummary: "पथरी, सिकुड़न, ट्यूमर या पैंक्रियाटोबिलियरी रोग से पित्त नली की रुकावट में ईआरसीपी द्वारा स्टेंट लगाना।"
+  },
+  {
+    slug: "endoscopic-hemostasis",
+    title: "Endoscopic Hemostasis",
+    hiTitle: "एंडोस्कोपिक हीमोस्टेसिस",
+    summary: "Endoscopic treatment to control selected gastrointestinal bleeding using clips, injection, thermal therapy, or other suitable techniques.",
+    hiSummary: "क्लिप, इंजेक्शन, थर्मल थेरेपी या अन्य तकनीकों से चुनी हुई जीआई ब्लीडिंग को एंडोस्कोपी द्वारा नियंत्रित करना।"
+  },
+  {
+    slug: "argon-plasma-coagulation",
+    title: "Argon Plasma Coagulation (APC)",
+    hiTitle: "आर्गन प्लाज्मा कोएगुलेशन",
+    summary: "Non-contact endoscopic coagulation used for selected bleeding vascular lesions, radiation injury, and suitable superficial GI lesions.",
+    hiSummary: "चयनित ब्लीडिंग वैस्कुलर लेजन, रेडिएशन इंजरी और उपयुक्त सतही जीआई लेजन के लिए नॉन-कॉन्टैक्ट एंडोस्कोपिक कोएगुलेशन।"
   },
   {
     slug: "intragastric-balloon-placement",
@@ -220,6 +262,104 @@ export const procedures = [
     hiTitle: "एसाइटिक फ्लूइड टैपिंग",
     summary: "Clinical drainage and testing support for abdominal fluid in liver and other medical conditions.",
     hiSummary: "लिवर और अन्य रोगों में पेट के पानी की जांच और निकासी।"
+  },
+  {
+    slug: "varices",
+    title: "Varices",
+    hiTitle: "वेरिसेस",
+    summary: "Evaluation and treatment planning for enlarged food-pipe or stomach veins, commonly associated with chronic liver disease and bleeding risk.",
+    hiSummary: "लिवर रोग से जुड़ी भोजन नली या पेट की सूजी नसों और ब्लीडिंग जोखिम की जांच व उपचार योजना।"
+  },
+  {
+    slug: "liver-cirrhosis",
+    title: "Liver Cirrhosis",
+    hiTitle: "लिवर सिरोसिस",
+    summary: "Specialist assessment for chronic liver damage, portal hypertension, fluid in the abdomen, varices, jaundice, and long-term liver care planning.",
+    hiSummary: "पुराने लिवर नुकसान, पोर्टल हाइपरटेंशन, पेट में पानी, वेरिसेस, पीलिया और लंबी अवधि की लिवर देखभाल की जांच।"
+  },
+  {
+    slug: "fatty-liver",
+    title: "Fatty Liver",
+    hiTitle: "फैटी लिवर",
+    summary: "Assessment of fatty liver, liver stiffness, metabolic risk, abnormal liver tests, and lifestyle-based prevention of progressive liver disease.",
+    hiSummary: "फैटी लिवर, लिवर कठोरता, मेटाबॉलिक जोखिम, असामान्य लिवर रिपोर्ट और जीवनशैली आधारित बचाव की जांच।"
+  },
+  {
+    slug: "liver-fibrosis",
+    title: "Liver Fibrosis",
+    hiTitle: "लिवर फाइब्रोसिस",
+    summary: "Non-invasive evaluation and monitoring for liver scarring caused by fatty liver, alcohol, viral hepatitis, or chronic liver conditions.",
+    hiSummary: "फैटी लिवर, अल्कोहल, वायरल हेपेटाइटिस या पुराने लिवर रोग से होने वाली लिवर स्कारिंग की जांच और निगरानी।"
+  },
+  {
+    slug: "obstructive-jaundice",
+    title: "Obstructive Jaundice",
+    hiTitle: "अवरोधक पीलिया",
+    summary: "Evaluation of jaundice caused by bile duct blockage, stones, strictures, tumors, or pancreaticobiliary disease with ERCP planning when needed.",
+    hiSummary: "पित्त नली में रुकावट, पथरी, सिकुड़न, ट्यूमर या पैंक्रियाटोबिलियरी रोग से होने वाले पीलिया की जांच।"
+  },
+  {
+    slug: "bile-duct-stricture",
+    title: "Bile Duct Stricture",
+    hiTitle: "बाइल डक्ट सिकुड़न",
+    summary: "Diagnosis and treatment planning for narrowed bile ducts causing jaundice, itching, infection, abnormal liver tests, or recurrent bile duct symptoms.",
+    hiSummary: "पित्त नली की सिकुड़न से होने वाले पीलिया, खुजली, संक्रमण और असामान्य लिवर रिपोर्ट की जांच व उपचार योजना।"
+  },
+  {
+    slug: "pancreatic-disorders",
+    title: "Pancreatic Disorders",
+    hiTitle: "पैंक्रियास रोग",
+    summary: "Consultation for pancreatitis, pancreatic duct stones, recurrent upper abdominal pain, pancreatic fluid collections, and related digestive complications.",
+    hiSummary: "पैंक्रियाटाइटिस, पैंक्रियाटिक डक्ट स्टोन, बार-बार ऊपरी पेट दर्द, पैंक्रियास फ्लूइड कलेक्शन और संबंधित पाचन समस्याओं की जांच।"
+  },
+  {
+    slug: "acidity-gerd",
+    title: "Acidity & GERD",
+    hiTitle: "एसिडिटी और जीईआरडी",
+    summary: "Evaluation for chronic acidity, reflux, heartburn, regurgitation, chest discomfort, throat irritation, and complications needing endoscopy.",
+    hiSummary: "लंबे समय की एसिडिटी, रिफ्लक्स, सीने में जलन, खट्टा पानी, गले में जलन और एंडोस्कोपी की जरूरत वाली समस्याओं की जांच।"
+  },
+  {
+    slug: "peptic-ulcer-disease",
+    title: "Peptic Ulcer Disease",
+    hiTitle: "पेप्टिक अल्सर रोग",
+    summary: "Diagnosis and treatment support for stomach or duodenal ulcers causing pain, acidity, vomiting, anemia, black stools, or bleeding symptoms.",
+    hiSummary: "पेट या ड्यूडेनम के अल्सर से होने वाले दर्द, एसिडिटी, उल्टी, एनीमिया, काला मल या ब्लीडिंग की जांच और उपचार।"
+  },
+  {
+    slug: "difficulty-swallowing",
+    title: "Difficulty Swallowing",
+    hiTitle: "निगलने में दिक्कत",
+    summary: "Assessment of swallowing difficulty due to food-pipe narrowing, reflux-related injury, motility problems, strictures, or suspected growths.",
+    hiSummary: "भोजन नली की सिकुड़न, रिफ्लक्स से नुकसान, मोटिलिटी समस्या, स्ट्रिक्चर या संदिग्ध ग्रोथ से निगलने में दिक्कत की जांच।"
+  },
+  {
+    slug: "gi-stricture",
+    title: "GI Stricture",
+    hiTitle: "जीआई सिकुड़न",
+    summary: "Evaluation of narrowed areas in the food pipe, stomach, intestine, bile duct, or colon with endoscopic dilation or stenting planning when suitable.",
+    hiSummary: "भोजन नली, पेट, आंत, पित्त नली या कोलन की सिकुड़न की जांच और जरूरत अनुसार डाइलेशन या स्टेंटिंग की योजना।"
+  },
+  {
+    slug: "colon-polyps",
+    title: "Colon Polyps",
+    hiTitle: "कोलन पॉलीप्स",
+    summary: "Colonoscopy-based assessment and removal planning for colon polyps, cancer screening, bleeding evaluation, and biopsy-guided follow-up.",
+    hiSummary: "कोलन पॉलीप्स, कैंसर स्क्रीनिंग, ब्लीडिंग जांच और बायोप्सी आधारित फॉलो-अप के लिए कोलोनोस्कोपी योजना।"
+  },
+  {
+    slug: "ibd-colitis",
+    title: "IBD / Colitis",
+    hiTitle: "आईबीडी / कोलाइटिस",
+    summary: "Care for suspected or known inflammatory bowel disease, colitis, chronic diarrhea, bleeding, abdominal pain, and colonoscopy-based monitoring.",
+    hiSummary: "आईबीडी, कोलाइटिस, लंबे समय के दस्त, ब्लीडिंग, पेट दर्द और कोलोनोस्कोपी आधारित निगरानी की देखभाल।"
+  },
+  {
+    slug: "ascites",
+    title: "Ascites",
+    hiTitle: "पेट में पानी",
+    summary: "Evaluation of abdominal fluid commonly linked with liver disease, infection, low protein states, or other medical conditions requiring testing and treatment planning.",
+    hiSummary: "लिवर रोग, संक्रमण, कम प्रोटीन या अन्य कारणों से पेट में पानी की जांच, टेस्टिंग और उपचार योजना।"
   }
 ];
 

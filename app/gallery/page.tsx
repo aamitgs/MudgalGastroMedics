@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { GalleryGrid } from "@/components/GalleryGrid";
-import { Section } from "@/components/Section";
+import { Section, SectionHead } from "@/components/Section";
 import { getPublicGalleryItems } from "@/lib/cms-public";
 import { equipment } from "@/lib/site-data";
 
@@ -17,6 +17,75 @@ export default async function GalleryPage() {
     title: item.name,
     src: item.src
   }));
+  const allGalleryItems = [...galleryItems, ...equipmentGallery];
+  const facilitySections = [
+    {
+      id: "reception",
+      eyebrow: "Reception",
+      title: "Reception & Waiting Area",
+      description: "Preview the arrival, reception and waiting areas before visiting the hospital.",
+      items: galleryItems.filter((item) => item.category === "Reception")
+    },
+    {
+      id: "consultation-areas",
+      eyebrow: "OPD",
+      title: "OPD Consultation Rooms",
+      description: "Doctor consultation and duty doctor spaces used for patient evaluation and follow-up.",
+      items: galleryItems.filter((item) => item.category === "Consultation Areas")
+    },
+    {
+      id: "endoscopy-unit",
+      eyebrow: "Endoscopy",
+      title: "Endoscopy Unit",
+      description: "Clinical areas and procedure visuals related to endoscopy and advanced gastro procedures.",
+      items: galleryItems.filter((item) => item.category === "Endoscopy Unit")
+    },
+    {
+      id: "ercp-setup",
+      eyebrow: "ERCP",
+      title: "ERCP Setup",
+      description: "Equipment and imaging support used for pancreaticobiliary procedures such as ERCP.",
+      items: [
+        ...galleryItems.filter((item) => item.title === "CBD Stone Removal"),
+        ...equipmentGallery.filter((item) => ["ERCP Scope", "C-Arm Machine"].includes(item.title))
+      ]
+    },
+    {
+      id: "hdu",
+      eyebrow: "HDU",
+      title: "HDU & Day Care",
+      description: "High-dependency and monitored care areas for patients needing closer observation.",
+      items: galleryItems.filter((item) => item.category === "HDU")
+    },
+    {
+      id: "patient-rooms",
+      eyebrow: "Rooms",
+      title: "Patient Rooms",
+      description: "Patient rooms, lobbies and IPD waiting spaces for admitted patients and attendants.",
+      items: galleryItems.filter((item) => item.category === "Patient Rooms")
+    },
+    {
+      id: "pharmacy",
+      eyebrow: "Support",
+      title: "Pharmacy",
+      description: "In-house pharmacy support for medicines and patient convenience.",
+      items: galleryItems.filter((item) => item.title === "Pharmacy")
+    },
+    {
+      id: "equipment",
+      eyebrow: "Technology",
+      title: "Equipment",
+      description: "Clinical equipment used for endoscopy, colonoscopy, ERCP, Fibroscan and therapeutic procedures.",
+      items: equipmentGallery
+    },
+    {
+      id: "accessibility",
+      eyebrow: "Access",
+      title: "Accessibility Facilities",
+      description: "Access points and patient movement support, including lift and arrival areas.",
+      items: galleryItems.filter((item) => ["Lift", "Entrance", "IPD Waiting Area"].includes(item.title))
+    }
+  ].filter((section) => section.items.length > 0);
 
   return (
     <main>
@@ -29,9 +98,20 @@ export default async function GalleryPage() {
           </p>
         </div>
       </section>
-      <Section>
-        <GalleryGrid items={[...galleryItems, ...equipmentGallery]} />
+      <Section id="hospital-gallery">
+        <SectionHead eyebrow="Hospital Gallery" title="All facilities in one place">
+          <p>Browse all hospital spaces, patient areas, clinical units and equipment together.</p>
+        </SectionHead>
+        <GalleryGrid items={allGalleryItems} />
       </Section>
+      {facilitySections.map((section, index) => (
+        <Section key={section.id} id={section.id} muted={index % 2 === 0}>
+          <SectionHead eyebrow={section.eyebrow} title={section.title}>
+            <p>{section.description}</p>
+          </SectionHead>
+          <GalleryGrid items={section.items} />
+        </Section>
+      ))}
     </main>
   );
 }

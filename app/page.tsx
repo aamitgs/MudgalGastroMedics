@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Activity, ArrowRight, Award, CalendarCheck, CheckCircle2, ClipboardList, FileText, GraduationCap, HeartPulse, ShieldCheck, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, Award, CalendarCheck, CheckCircle2, ClipboardList, FileText, GraduationCap, HeartPulse, Phone, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { ButtonLink } from "@/components/ButtonLink";
 import { GalleryGrid } from "@/components/GalleryGrid";
@@ -16,19 +16,37 @@ export default async function Home() {
   const treatmentGroups = [
     {
       title: "Diagnostic Endoscopy",
-      links: procedures.filter((procedure) => ["endoscopy", "colonoscopy", "enteroscopy", "fibroscan"].includes(procedure.slug))
+      links: procedures.filter((procedure) => ["endoscopy", "colonoscopy", "enteroscopy", "fibroscan", "endoscopic-biopsy"].includes(procedure.slug))
     },
     {
       title: "Therapeutic Procedures",
-      links: procedures.filter((procedure) => ["ercp", "cbd-stone-removal", "gi-stenting", "polypectomy", "stricture-dilation"].includes(procedure.slug))
+      links: procedures.filter((procedure) => [
+        "polypectomy",
+        "colon-polyp-removal",
+        "stricture-dilation",
+        "esophageal-dilation",
+        "gi-stenting",
+        "foreign-body-removal",
+        "endoscopic-hemostasis",
+        "argon-plasma-coagulation"
+      ].includes(procedure.slug))
     },
     {
-      title: "Bleeding & Liver Care",
-      links: procedures.filter((procedure) => ["gastrointestinal-bleeding-management", "variceal-banding", "sclerotherapy", "ascitic-fluid-tapping"].includes(procedure.slug))
+      title: "Pancreatic & Biliary Care",
+      links: procedures.filter((procedure) => ["ercp", "cbd-stone-removal", "bile-duct-stenting", "pancreatic-duct-stone-removal"].includes(procedure.slug))
     },
     {
-      title: "Nutrition & Support",
-      links: procedures.filter((procedure) => ["ryles-tube-placement", "nasojejunal-tube-placement", "peg-tube-placement", "intragastric-balloon-placement"].includes(procedure.slug))
+      title: "Liver, Bleeding & Support",
+      links: procedures.filter((procedure) => [
+        "gastrointestinal-bleeding-management",
+        "variceal-banding",
+        "sclerotherapy",
+        "ascitic-fluid-tapping",
+        "ryles-tube-placement",
+        "nasojejunal-tube-placement",
+        "peg-tube-placement",
+        "intragastric-balloon-placement"
+      ].includes(procedure.slug))
     }
   ];
   const procedureBadges = ["Diagnostic", "Therapeutic", "Liver Care", "Screening", "Access", "Support"];
@@ -95,24 +113,35 @@ export default async function Home() {
           </div>
         </div>
         <div className="mx-auto grid min-h-[720px] w-[min(1280px,calc(100%-32px))] items-center gap-10 py-16 md:py-24">
-          <MotionReveal className="max-w-[620px]">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-cyan-100 backdrop-blur">
+          <MotionReveal className="max-w-[560px] rounded-lg border border-white/25 bg-[rgba(3,31,38,0.84)] p-5 shadow-[0_34px_100px_rgba(2,22,29,0.52),inset_0_1px_0_rgba(255,255,255,0.16)] ring-1 ring-cyan-100/10 backdrop-blur-xl sm:p-7 lg:p-8">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100/40 bg-[rgba(255,255,255,0.12)] px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-cyan-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur">
               <ShieldCheck size={16} /> {site.secondaryTagline}
+              </div>
+              <span className="h-px min-w-16 flex-1 bg-gradient-to-r from-gold/90 via-cyan-200/60 to-transparent" />
             </div>
-            <h1 className="max-w-[11ch] text-5xl font-black leading-[0.94] tracking-tight sm:text-7xl">
+            <h1 className="max-w-[11ch] text-4xl font-black leading-[0.95] tracking-tight text-white drop-shadow-[0_5px_18px_rgba(0,0,0,0.34)] sm:text-6xl">
               Mudgal Gastromedics Hospital
             </h1>
-            <p className="mt-5 max-w-2xl text-2xl font-black leading-tight text-cyan-50 sm:text-4xl">Advanced Gastro, Liver & Endoscopy Care in Agra</p>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/82" data-en>
+            <div className="mt-5 flex items-center gap-3">
+              <span className="h-1.5 w-20 rounded-full bg-gold" />
+              <span className="h-1.5 w-10 rounded-full bg-cyan-300" />
+              <span className="h-1.5 w-6 rounded-full bg-teal" />
+            </div>
+            <p className="mt-6 max-w-xl text-2xl font-black leading-tight text-cyan-50 drop-shadow-[0_3px_14px_rgba(0,0,0,0.24)] sm:text-3xl">Advanced Gastro, Liver & Endoscopy Care in Agra</p>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/86" data-en>
               Mudgal Gastromedics Hospital provides focused care for digestive, liver, pancreatic and biliary diseases with modern endoscopy and patient-centered treatment planning.
             </p>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/82" data-hi lang="hi">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/86" data-hi lang="hi">
               आगरा में एंडोस्कोपी, लिवर केयर, ईआरसीपी, कोलोनोस्कोपी और उन्नत गैस्ट्रो उपचार के लिए सुपरस्पेशियलिटी सेंटर।
             </p>
-            <div className="mt-8 flex max-w-[620px] flex-wrap gap-3">
-              <ButtonLink href="/contact#appointment" className="min-h-14 px-7 text-lg">Book Appointment</ButtonLink>
-              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-14 px-7 text-lg">WhatsApp</ButtonLink>
-              <ButtonLink href={site.directionsUrl} variant="ghost" className="min-h-14 border-white/25 bg-white/95 px-7 text-lg text-ink">Get Directions</ButtonLink>
+            <div className="mt-8 rounded-lg border border-white/16 bg-[rgba(255,255,255,0.10)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <ButtonLink href="/contact#appointment" className="min-h-13 px-5 text-base shadow-[0_18px_46px_rgba(8,145,178,0.42)]">Book Appointment</ButtonLink>
+                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 border-white/35 bg-white/95 px-5 text-base text-ink shadow-[0_18px_46px_rgba(2,22,29,0.24)]"><Phone size={18} /> Call Reception</ButtonLink>
+                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-5 text-base shadow-[0_18px_46px_rgba(5,150,105,0.38)]">WhatsApp</ButtonLink>
+                <ButtonLink href={site.directionsUrl} variant="ghost" className="min-h-13 border-white/35 bg-white/95 px-5 text-base text-ink shadow-[0_18px_46px_rgba(2,22,29,0.24)]">Get Directions</ButtonLink>
+              </div>
             </div>
           </MotionReveal>
         </div>
@@ -269,6 +298,7 @@ export default async function Home() {
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
+                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost"><Phone size={18} /> Call Reception</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
               </div>
             </div>

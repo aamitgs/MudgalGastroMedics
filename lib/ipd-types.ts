@@ -47,6 +47,9 @@ export type IpdAdmission = {
   markedForDischarge?: boolean;
   escalated?: boolean;
   escalationReason?: string;
+  /** Recorded at intake (Track 0.7) — admission creation is rejected without it. */
+  consentRecorded?: boolean;
+  consentRecordedAt?: string;
 };
 
 export type VitalsReading = {

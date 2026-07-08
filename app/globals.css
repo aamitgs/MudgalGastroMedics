@@ -158,7 +158,7 @@ body.lang-hi .inline-lang [data-hi] {
   isolation: isolate;
   background:
     linear-gradient(90deg, rgba(7, 43, 52, 0.96) 0%, rgba(9, 67, 77, 0.74) 40%, rgba(7, 87, 76, 0.16) 76%, rgba(7, 87, 76, 0.12) 100%),
-    url("/images/hospital/premium-hero-from-facade.png") 58% center / cover;
+    url("/images/hospital/premium-home-hero-generated.png") 58% center / cover;
 }
 
 .hero-bg::after {
@@ -177,14 +177,14 @@ body.lang-hi .inline-lang [data-hi] {
   .hero-bg {
     background:
       linear-gradient(90deg, rgba(7, 43, 52, 0.96) 0%, rgba(9, 67, 77, 0.72) 58%, rgba(7, 87, 76, 0.24) 100%),
-      url("/images/hospital/premium-hero-from-facade.png") 62% center / cover;
+      url("/images/hospital/premium-home-hero-generated.png") 62% center / cover;
   }
 }
 
 .page-hero-bg {
   background:
     linear-gradient(90deg, rgba(13, 56, 66, 0.95), rgba(8, 145, 178, 0.72), rgba(5, 150, 105, 0.38)),
-    url("/images/hospital/reception-waiting-area.jpg") center / cover;
+    url("/images/hospital/waitingarea-full-hero.png") center / cover;
 }
 
 .clinical-grid {

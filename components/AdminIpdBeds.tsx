@@ -421,6 +421,12 @@ export function AdminIpdBeds() {
             </label>
             <input name="diagnosis" className={fieldClass} placeholder="Provisional diagnosis" required />
             <textarea name="carePlan" className={`${fieldClass} min-h-24 py-3`} placeholder="Care plan / monitoring instructions" />
+            <label className="flex items-start gap-2.5 rounded border-2 border-amber-300 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
+              <input type="checkbox" name="consentRecorded" value="true" required className="mt-0.5 h-4 w-4 accent-emerald-600" />
+              <span className="text-sm font-semibold leading-relaxed text-ink">
+                Patient/family consent for admission and care has been explained and confirmed. Admission is rejected server-side without this.
+              </span>
+            </label>
             <ActionButton type="submit" variant="primary">
               Create Admission
             </ActionButton>

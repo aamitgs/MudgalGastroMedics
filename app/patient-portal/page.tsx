@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bell, CalendarCheck, FileUp, KeyRound, MessageCircle, ShieldCheck } from "lucide-react";
+import { Bell, CalendarCheck, FileUp, KeyRound, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Section } from "@/components/Section";
 import { portalFeatures } from "@/lib/platform-data";
@@ -25,6 +25,7 @@ export default function PatientPortalPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/portal" className="min-h-13 px-6">Open Portal</ButtonLink>
               <ButtonLink href="/contact#appointment" variant="ghost" className="min-h-13 px-6">Request Appointment</ButtonLink>
+              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 px-6"><Phone size={18} /> Call Reception</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-6">WhatsApp Reception</ButtonLink>
             </div>
           </div>

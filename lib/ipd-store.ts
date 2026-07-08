@@ -227,7 +227,11 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
     nursingNotes: "",
     dietAdvice: "",
     depositAmount: normalizeNumber(input.depositAmount),
-    dischargeSummary: ""
+    dischargeSummary: "",
+    // Track 0.7: validated required at the route (ipdAdmissionCreateSchema),
+    // so reaching here means it was confirmed.
+    consentRecorded: true,
+    consentRecordedAt: now
   };
 
   setBedStatus(bed, "Occupied");

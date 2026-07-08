@@ -12,7 +12,14 @@ export const ipdAdmissionCreateSchema = z.object({
   expectedDischargeDate: optionalText,
   diagnosis: optionalText,
   carePlan: optionalText,
-  depositAmount: z.coerce.number().optional()
+  depositAmount: z.coerce.number().optional(),
+  // Track 0.7: consent is captured at intake, not a later status transition —
+  // admission is created immediately (there's no "pending" pre-admission
+  // status to gate instead), so this is required at creation time. The
+  // checkbox is inside a FormData-submitted form, which always sends the
+  // string "true" when checked and omits the key entirely when unchecked —
+  // never a real boolean — so this matches the literal string, not `true`.
+  consentRecorded: z.literal("true", { error: "Patient/family consent must be confirmed before admission." })
 });
 
 export const ipdBedUpdateSchema = z.object({

@@ -9,7 +9,7 @@ type SectionProps = {
 
 export function Section({ children, className = "", muted = false, id }: SectionProps) {
   return (
-    <section id={id} className={`py-16 md:py-24 ${muted ? "bg-soft/75 clinical-grid" : "bg-white/80"} ${className}`}>
+    <section id={id} className={`py-16 md:py-24 ${id ? "scroll-mt-32 md:scroll-mt-36" : ""} ${muted ? "bg-soft/75 clinical-grid" : "bg-white/80"} ${className}`}>
       <div className="mx-auto w-[min(1180px,calc(100%-32px))]">{children}</div>
     </section>
   );
