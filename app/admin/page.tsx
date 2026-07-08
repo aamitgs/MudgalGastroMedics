@@ -32,7 +32,7 @@ import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/pa
 
 export const metadata: Metadata = {
   title: { absolute: "Operations • MudgalGastromedics OS" },
-  description: "Internal reception dashboard for appointment requests and HMS workflow planning at Mudgal Gastromedics Hospital.",
+  description: "Internal reception dashboard for appointment requests and hospital operations workflow planning at Mudgal Gastromedics Hospital.",
   alternates: { canonical: "/admin" },
   robots: { index: false, follow: false }
 };

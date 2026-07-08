@@ -15,7 +15,7 @@ export const platformModules = [
     tag: "Patient access"
   },
   {
-    title: "HMS + ERP",
+    title: "Hospital Operations",
     text: "Reception, OPD queue, doctor schedule, billing, pharmacy, inventory, staff roles and operational reports.",
     tag: "Hospital operations"
   },
@@ -37,7 +37,7 @@ export const portalFeatures = [
   "Doctor instruction downloads"
 ];
 
-export const hmsFeatures = [
+export const operationsFeatures = [
   "Patient registration",
   "OPD queue board",
   "Doctor schedule",
@@ -75,7 +75,7 @@ export const implementationPhases = [
   {
     phase: "Phase 3",
     title: "Internal CMS",
-    text: "Approved staff can update procedure content, gallery images, SEO fields and publish-ready website copy without mixing it with HMS operations."
+    text: "Approved staff can update procedure content, gallery images, SEO fields and publish-ready website copy without mixing it with hospital operations."
   },
   {
     phase: "Phase 4",
@@ -84,7 +84,7 @@ export const implementationPhases = [
   },
   {
     phase: "Phase 5",
-    title: "HMS + ERP Core",
+    title: "Hospital Operations Core",
     text: "Billing, pharmacy, inventory, staff roles, procedure records and daily reporting become connected modules."
   },
   {

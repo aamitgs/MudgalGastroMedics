@@ -52,7 +52,7 @@ export default function AiPlanningPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/admin" className="min-h-13 px-6">Open Admin AI Preview</ButtonLink>
               <ButtonLink href="/platform" variant="secondary" className="min-h-13 px-6">Digital Platform</ButtonLink>
-              <ButtonLink href="/hms-erp" variant="ghost" className="min-h-13 px-6">HMS + ERP</ButtonLink>
+              <ButtonLink href="/operations" variant="ghost" className="min-h-13 px-6">Operations Platform</ButtonLink>
             </div>
           </div>
           <div className="rounded border border-white/16 bg-white/10 p-5 shadow-[0_28px_80px_rgba(2,22,29,0.25)] backdrop-blur-md">
@@ -101,7 +101,7 @@ export default function AiPlanningPage() {
             <span className="grid h-14 w-14 place-items-center rounded bg-soft text-brand"><BrainCircuit size={25} /></span>
             <h2 className="mt-6 text-4xl font-bold leading-tight text-ink">AI planning scope</h2>
             <p className="mt-4 leading-relaxed text-muted">
-              These are the safe first-use cases before deeper integration with HMS records and doctor workflows.
+              These are the safe first-use cases before deeper integration with hospital operations records and doctor workflows.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

@@ -3,12 +3,12 @@ import { BarChart3, ClipboardList, CreditCard, PackageCheck, Pill, UsersRound } 
 import { ButtonLink } from "@/components/ButtonLink";
 import { PlatformFeatureCard } from "@/components/PlatformFeatureCard";
 import { Section } from "@/components/Section";
-import { hmsFeatures } from "@/lib/platform-data";
+import { operationsFeatures } from "@/lib/platform-data";
 
 export const metadata: Metadata = {
-  title: "HMS + Hospital ERP",
-  description: "Hospital management system and ERP plan for reception, OPD, billing, pharmacy, inventory and reporting at Mudgal Gastromedics Hospital.",
-  alternates: { canonical: "/hms-erp" }
+  title: "Enterprise Healthcare Platform",
+  description: "Enterprise healthcare platform plan for reception, OPD, billing, pharmacy, inventory and reporting at Mudgal Gastromedics Hospital.",
+  alternates: { canonical: "/operations" }
 };
 
 const coreModules = [
@@ -39,7 +39,7 @@ const coreModules = [
   {
     title: "Inventory",
     text: "Monitor procedure consumables, equipment supplies and low-stock alerts.",
-    tag: "ERP",
+    tag: "Operations",
     icon: PackageCheck
   },
   {
@@ -50,13 +50,13 @@ const coreModules = [
   }
 ];
 
-export default function HmsErpPage() {
+export default function OperationsPage() {
   return (
     <main>
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_1fr]">
           <div>
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">HMS + Hospital ERP</p>
+            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">Enterprise Healthcare Platform</p>
             <h1 className="max-w-4xl text-5xl font-black leading-[1.02] md:text-7xl">Operations dashboard for reception and hospital teams.</h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/82">
               Connect appointments, patients, doctors, billing, pharmacy, inventory and reports into one role-based workspace.
@@ -84,10 +84,10 @@ export default function HmsErpPage() {
         <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
             <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">Core Modules</p>
-            <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">A practical HMS for daily hospital work.</h2>
+            <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">A practical operations platform for daily hospital work.</h2>
           </div>
           <p className="text-lg leading-relaxed text-muted">
-            The first internal release should focus on reception, doctor review, billing and report uploads before adding deeper ERP automation.
+            The first internal release should focus on reception, doctor review, billing and report uploads before adding deeper operations automation.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -99,10 +99,10 @@ export default function HmsErpPage() {
 
       <Section muted>
         <div className="rounded border border-line/80 bg-white p-6 shadow-[0_24px_70px_rgba(8,64,84,0.1)] md:p-8">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">ERP Checklist</p>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">Operations Checklist</p>
           <h2 className="text-4xl font-bold leading-tight text-ink">Modules to activate as the workflow matures.</h2>
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {hmsFeatures.map((feature) => (
+            {operationsFeatures.map((feature) => (
               <div key={feature} className="rounded border border-line bg-soft/60 p-4 font-semibold text-ink">
                 {feature}
               </div>

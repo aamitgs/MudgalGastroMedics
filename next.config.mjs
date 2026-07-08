@@ -22,7 +22,9 @@ const nextConfig = {
       // The old "patient portal plan" page; /portal is the real portal.
       { source: "/patient-portal", destination: "/portal", permanent: true },
       // Product rename: the OS lives at its branded path now.
-      { source: "/hospital-os", destination: "/mudgalgastromedics-os", permanent: true }
+      { source: "/hospital-os", destination: "/mudgalgastromedics-os", permanent: true },
+      // Positioning cleanup: retired "HMS/ERP" language (Track 1.11), same content at /operations.
+      { source: "/hms-erp", destination: "/operations", permanent: true }
     ];
   },
   async headers() {

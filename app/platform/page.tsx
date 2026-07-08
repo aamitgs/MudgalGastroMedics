@@ -8,7 +8,7 @@ import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Digital Hospital Platform",
-  description: "Connected website, patient portal, HMS, hospital ERP and AI planning roadmap for Mudgal Gastromedics Hospital.",
+  description: "Connected website, patient portal, hospital operations platform and AI planning roadmap for Mudgal Gastromedics Hospital.",
   alternates: { canonical: "/platform" }
 };
 
@@ -20,14 +20,14 @@ export default function PlatformPage() {
       <section className="page-hero-bg overflow-hidden py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
           <div>
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">Hospital ERP + HMS + Website + Portal + AI</p>
+            <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">Operations Platform + Website + Portal + AI</p>
             <h1 className="max-w-4xl text-5xl font-black leading-[1.02] md:text-7xl">One connected digital platform for MGM.</h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/82">
               The public website remains the patient-facing front desk, while CMS publishing, reception, doctor workflow, billing, reports, pharmacy and AI-assisted planning connect behind it.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/portal" className="min-h-13 px-6">Patient Portal</ButtonLink>
-              <ButtonLink href="/hms-erp" variant="secondary" className="min-h-13 px-6">HMS + ERP</ButtonLink>
+              <ButtonLink href="/operations" variant="secondary" className="min-h-13 px-6">Operations Platform</ButtonLink>
               <ButtonLink href="/ai-planning" variant="ghost" className="min-h-13 px-6">AI Planning</ButtonLink>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function PlatformPage() {
               <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Phase-one action</p>
               <h2 className="mt-3 text-4xl font-bold leading-tight md:text-5xl">Start from appointments and patient uploads.</h2>
               <p className="mt-4 max-w-3xl text-white/78">
-                This keeps the public website useful immediately and creates the first operational dataset for reception, portal and HMS modules.
+                This keeps the public website useful immediately and creates the first operational dataset for reception, portal and operations modules.
               </p>
             </div>
             <ButtonLink href="/contact#appointment" variant="ghost" className="min-h-13 px-7">
