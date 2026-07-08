@@ -1,7 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
-import { recordAuditEvent } from "@/lib/audit-store";
 import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
 
 type IpdStore = {
@@ -140,21 +139,6 @@ export async function transferBed(input: { admissionId: string; toBedId: string;
   };
   doc.transfers.unshift(transfer);
   await store.save(doc);
-
-  await recordAuditEvent({
-    actorRole: "admin",
-    actorId: transfer.movedBy,
-    action: "ipd.bed.transfer",
-    entityType: "ipd_admission",
-    entityId: admission.id,
-    severity: "info",
-    metadata: {
-      patientName: admission.patientName,
-      fromBed: transfer.fromBedLabel,
-      toBed: transfer.toBedLabel,
-      reason: transfer.reason
-    }
-  });
 
   return { admission, transfer };
 }

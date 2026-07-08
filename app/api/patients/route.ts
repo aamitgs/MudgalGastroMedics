@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryPatients, type PatientSortField, type SortDirection } from "@/lib/patient-query";
-import { createPatient, findPatientByPhone, listPatients, updatePatient } from "@/lib/patient-store";
+import { createPatient, findPatientByPhone, getPatientById, listPatients, updatePatient } from "@/lib/patient-store";
 import { patientStatuses } from "@/lib/patient-types";
 import type { PatientStatus } from "@/lib/patient-types";
 
@@ -79,7 +79,18 @@ export async function POST(request: Request) {
       entityType: "patient",
       entityId: patient.id,
       severity: "warning",
-      metadata: { newPatientUhid: patient.uhid, existingPatientId: existingMatch.id, existingPatientUhid: existingMatch.uhid, phone, ...auditRequestMetadata(request) }
+      metadata: { newPatientUhid: patient.uhid, existingPatientId: existingMatch.id, existingPatientUhid: existingMatch.uhid, phone },
+      device: auditRequestMetadata(request)
+    });
+  } else {
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "patient.created",
+      entityType: "patient",
+      entityId: patient.id,
+      after: patient,
+      device: auditRequestMetadata(request)
     });
   }
 
@@ -102,10 +113,26 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid patient status." }, { status: 400 });
   }
 
+  // Snapshot must be cloned: the document store caches records in memory and
+  // updatePatient mutates the same object in place, so an unclonded reference
+  // would equal `after` by the time the audit diff runs.
+  const before = structuredClone(await getPatientById(id));
   const patient = (await updatePatient(body));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
   }
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "patient.updated",
+    entityType: "patient",
+    entityId: patient.id,
+    severity: status === "Flagged" ? "warning" : "info",
+    before,
+    after: patient,
+    device: auditRequestMetadata(request)
+  });
 
   return NextResponse.json({ ok: true, patient });
 }

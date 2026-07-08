@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { getAppointmentById } from "@/lib/appointment-store";
+import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
-import { createOpdVisit, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
+import { createOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
 import { opdVisitStatuses } from "@/lib/opd-types";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
@@ -63,6 +64,17 @@ export async function POST(request: Request) {
   }
 
   const visit = (await createOpdVisit(appointment));
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "opd.visit.created",
+    entityType: "opd_visit",
+    entityId: visit.id,
+    after: visit,
+    device: auditRequestMetadata(request)
+  });
+
   return NextResponse.json({ ok: true, visit });
 }
 
@@ -107,6 +119,10 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid payment method." }, { status: 400 });
   }
 
+  // Cloned: the document store caches records in memory and updateOpdVisit
+  // mutates the same object in place, so an uncloned reference would equal
+  // `after` by the time the audit diff runs.
+  const before = structuredClone(await getOpdVisitById(id));
   const visit = (await updateOpdVisit({
     id,
     status: status as OpdVisitStatus | undefined,
@@ -123,6 +139,21 @@ export async function PATCH(request: Request) {
   if (!visit) {
     return NextResponse.json({ ok: false, error: "Visit not found." }, { status: 404 });
   }
+
+  // Prescriptions and billing are the clinically/financially sensitive edges
+  // of this route, so each gets its own action name distinct from a plain
+  // queue/status change — matching the field-level authorization split above.
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: touchesClinical ? "opd.prescription.updated" : touchesBilling ? "opd.billing.updated" : "opd.visit.updated",
+    entityType: "opd_visit",
+    entityId: visit.id,
+    severity: touchesClinical ? "warning" : "info",
+    before,
+    after: visit,
+    device: auditRequestMetadata(request)
+  });
 
   return NextResponse.json({ ok: true, visit });
 }
