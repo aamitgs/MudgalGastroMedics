@@ -11,7 +11,26 @@ import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
 import { notify } from "@/lib/notify";
+import { downloadCsv } from "@/lib/table-export";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+
+const ipdExportHeaders = ["Token", "UHID", "Patient", "Phone", "Ward", "Bed", "Status", "Diagnosis", "Admitting Doctor", "Assigned Nurse", "Admitted"];
+
+function ipdExportRow(admission: IpdAdmission) {
+  return [
+    admission.token,
+    admission.uhid ?? "",
+    admission.patientName,
+    admission.phone,
+    admission.ward,
+    admission.bedLabel,
+    admission.status,
+    admission.diagnosis,
+    admission.admittingDoctor,
+    admission.assignedNurse ?? "",
+    admission.createdAt
+  ];
+}
 
 type IpdResponse = {
   ok: boolean;
@@ -488,6 +507,19 @@ export function AdminIpdBeds() {
                 </label>
               </>
             }
+            export={{ headers: ipdExportHeaders, row: ipdExportRow, filename: "ipd-admissions.csv" }}
+            bulkActions={(selected, clear) => (
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  downloadCsv(ipdExportHeaders, selected.map(ipdExportRow), "selected-ipd-admissions.csv");
+                  clear();
+                }}
+              >
+                <FileDown size={14} /> Export selected
+              </ActionButton>
+            )}
           />
 
           {editingAdmission ? (

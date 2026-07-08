@@ -117,6 +117,7 @@ import {
 } from "@/lib/hospital-os-data";
 import type { CommandRecord, DashboardMetric, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
+import { downloadCsv } from "@/lib/table-export";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import {
   appointmentSchema,
@@ -255,16 +256,7 @@ function patientFlowExportRow(patient: PatientFlowRow) {
 }
 
 function downloadCsvFile(rows: string[][], filename: string) {
-  const csv = [patientFlowExportHeaders, ...rows]
-    .map((row) => row.map((cell) => `"${cell.replaceAll("\"", "\"\"")}"`).join(","))
-    .join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  downloadCsv(patientFlowExportHeaders, rows, filename);
 }
 
 function exportPatientFlowRow(patient: PatientFlowRow) {
