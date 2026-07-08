@@ -3,8 +3,8 @@ import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 
 /**
- * Records that a prescriber actively reviewed a patient's recorded allergies
- * before prescribing (Clinical Safety, Track 0.1). This is a patient-safety
+ * Records that a prescriber actively reviewed a detected high-risk drug–drug
+ * interaction before prescribing (Clinical Safety, Track 0.5). A patient-safety
  * audit event, not a workflow gate — the UI warns and requires acknowledgement
  * but never blocks the clinician.
  */
@@ -14,20 +14,21 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const visitId = typeof body.visitId === "string" ? body.visitId.trim() : "";
-  const allergies = typeof body.allergies === "string" ? body.allergies.trim() : "";
+  const drugA = typeof body.drugA === "string" ? body.drugA.trim() : "";
+  const drugB = typeof body.drugB === "string" ? body.drugB.trim() : "";
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (!visitId || !allergies) {
-    return NextResponse.json({ ok: false, error: "visitId and allergies are required." }, { status: 400 });
+  if (!visitId || !drugA || !drugB) {
+    return NextResponse.json({ ok: false, error: "visitId, drugA and drugB are required." }, { status: 400 });
   }
 
   await recordAuditEvent({
     actorRole: auth.context.activeRole,
     actorId: auth.context.userId,
-    action: "clinical.allergy.acknowledged",
+    action: "clinical.interaction.acknowledged",
     entityType: "opd_visit",
     entityId: visitId,
-    severity: "info",
-    metadata: { allergies, reason: reason || "Not specified" },
+    severity: "warning",
+    metadata: { drugA, drugB, reason: reason || "Not specified" },
     device: auditRequestMetadata(request)
   });
 

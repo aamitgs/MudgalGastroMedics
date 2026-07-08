@@ -29,7 +29,8 @@ function normalizeToken(token: string) {
   return token.toLowerCase().replace(/[^a-z]/g, "");
 }
 
-function drugTokens(text: string): Set<string> {
+/** Shared with lib/clinical/drug-interactions.ts so both heuristics tokenize free-text medication lists identically. */
+export function drugTokens(text: string): Set<string> {
   const tokens = text.split(/[\s,;/\n().\-+]+/).map(normalizeToken);
   return new Set(tokens.filter((token) => token.length >= 4 && !medicationNoiseWords.has(token)));
 }
