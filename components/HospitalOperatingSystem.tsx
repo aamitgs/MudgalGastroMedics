@@ -126,6 +126,7 @@ import {
 import type { AppointmentInput, BillingInput, PatientRegistrationInput } from "@/lib/validation/hospital-os";
 import { LiveClockWeather } from "@/components/LiveClockWeather";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
+import { PatientClinicalSnapshot } from "@/components/hospital-os/PatientClinicalSnapshot";
 import { PatientTimelinePanel } from "@/components/hospital-os/PatientTimelinePanel";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import type { LucideIcon } from "lucide-react";
@@ -1204,22 +1205,8 @@ function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
               <TabsTrigger key={tab} value={tab} className="capitalize">{tab === "ai" ? "AI Summary" : tab}</TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="summary" className="mt-0 grid gap-4 lg:grid-cols-[330px_1fr]">
-            <ClinicalBrief />
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                ["Vitals", "BP 126/82, pulse 82, SpO2 98%, pain score 3/10"],
-                ["Prescription", "PPI, antacid, diet plan, follow-up suggestion"],
-                ["Next action", "Review LFT panel before discharge decision"]
-              ].map(([title, text]) => (
-                <Card key={title} className="rounded-lg border-[var(--hos-border)]">
-                  <CardContent className="p-4">
-                    <p className="font-semibold">{title}</p>
-                    <p className="mt-2 text-sm leading-6 text-[var(--hos-muted-text)]">{text}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <TabsContent value="summary" className="mt-0 grid gap-4">
+            <PatientClinicalSnapshot activePatient={activePatient} />
           </TabsContent>
           <TabsContent value="timeline" className="mt-0">
             <PatientTimelinePanel phone={activePatient.phone} patientName={activePatient.patient} />
@@ -1237,27 +1224,6 @@ function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
         </Tabs>
       </CardContent>
     </Card>
-  );
-}
-
-function ClinicalBrief() {
-  return (
-    <div className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-      <p className="text-xs font-semibold uppercase text-[var(--hos-muted-text)]">Clinical brief</p>
-      <dl className="mt-4 grid gap-3 text-sm">
-        {[
-          ["Age / Sex", "42 / Male"],
-          ["Primary Concern", "Abdominal pain, reflux"],
-          ["Risk", "Moderate"],
-          ["Insurance", "Star Health - preauth pending"]
-        ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between gap-3 border-b border-[var(--hos-border)] pb-3 last:border-0 last:pb-0">
-            <dt className="text-[var(--hos-muted-text)]">{label}</dt>
-            <dd className="text-right font-semibold">{value}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
   );
 }
 
