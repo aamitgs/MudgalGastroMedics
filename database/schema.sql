@@ -535,3 +535,27 @@ CREATE TABLE IF NOT EXISTS store_documents (
   doc jsonb NOT NULL,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Uploaded file storage (Track 3.6): binary content lives in a real bytea
+-- column here rather than base64-encoded inside a JSONB blob, same reasoning
+-- as audit_events staying fully relational. group_id ties together every
+-- version of one logical document slot (e.g. "insurance card"); the highest
+-- version per group_id is the current one, older versions are kept for history.
+CREATE TABLE IF NOT EXISTS patient_documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  legacy_id text UNIQUE,
+  group_id text NOT NULL,
+  version integer NOT NULL,
+  entity_type text NOT NULL,
+  entity_id text NOT NULL,
+  filename text NOT NULL,
+  mime_type text NOT NULL,
+  size_bytes integer NOT NULL,
+  content bytea NOT NULL,
+  uploaded_by text,
+  uploaded_by_role text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_patient_documents_entity ON patient_documents (entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_patient_documents_group ON patient_documents (group_id, version DESC);
