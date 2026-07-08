@@ -219,6 +219,79 @@ function InteractionGuard({ visitId, matches }: { visitId: string; matches: Drug
 }
 
 /**
+ * Positive patient identification before clinical writes (Clinical Safety,
+ * Track 0.6). Unlike the allergy/interaction alerts — clinical-judgment calls
+ * the doctor may reasonably override — there is no valid reason to write to a
+ * chart without first confirming it's the right patient, so this is a
+ * one-click gate (not a dismissible warning): the clinical note, prescription,
+ * advice and follow-up fields stay disabled until confirmed. Standard
+ * "two-patient-identifier" practice (name + phone; age when recorded, since
+ * this record has no discrete date-of-birth field), audited per visit.
+ */
+function IdentityGuard({
+  visitId,
+  name,
+  phone,
+  age,
+  onConfirmed
+}: {
+  visitId: string;
+  name: string;
+  phone: string;
+  age?: string;
+  onConfirmed: () => void;
+}) {
+  const [confirmed, setConfirmed] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  async function confirm() {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/clinical/identity-confirmed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitId, patientName: name, phone })
+      });
+      if (!response.ok) {
+        notify.error("Could not record identity confirmation. Try again.");
+        return;
+      }
+      setConfirmed(true);
+      onConfirmed();
+      notify.success("Identity confirmed", { id: "identity-ack" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (confirmed) {
+    return (
+      <div className="flex items-center gap-2 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+        <ShieldCheck size={17} className="shrink-0" /> Identity confirmed — {name}, {phone}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border-2 border-cyan-300 bg-cyan-50 p-4" role="alert">
+      <div className="flex items-start gap-2.5">
+        <ShieldCheck size={20} className="mt-0.5 shrink-0 text-brand" />
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.1em] text-brand">Confirm patient identity</p>
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-ink">
+            Verify with the patient in front of you: <strong>{name}</strong>, phone {phone}
+            {age ? `, age ${age}` : ""}. Clinical note, prescription, advice and follow-up unlock once confirmed.
+          </p>
+        </div>
+      </div>
+      <ActionButton variant="primary" className="self-start" onClick={() => void confirm()} loading={saving}>
+        <CheckCircle2 size={16} /> Confirm identity — matches
+      </ActionButton>
+    </div>
+  );
+}
+
+/**
  * Prescription entry with live duplicate-medication detection (Clinical Safety,
  * Track 0.4) and drug–drug interaction detection (Track 0.5). Advisory only —
  * both checks are free-text heuristics, so they warn and never block. Saving
@@ -227,10 +300,12 @@ function InteractionGuard({ visitId, matches }: { visitId: string; matches: Drug
 function PrescriptionField({
   visit,
   currentMedicines,
+  disabled,
   onSave
 }: {
   visit: OpdVisit;
   currentMedicines?: string;
+  disabled?: boolean;
   onSave: (value: string) => void;
 }) {
   const [draft, setDraft] = useState(visit.prescription ?? "");
@@ -252,6 +327,7 @@ function PrescriptionField({
         defaultValue={visit.prescription}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={(event) => onSave(event.target.value)}
+        disabled={disabled}
         className={textareaClass}
         placeholder="Medicine, dose, frequency, duration, instructions"
       />
@@ -302,8 +378,8 @@ type PrintableDoctorSummary = {
   patient?: PatientRecord;
 };
 
-const textareaClass = "min-h-28 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
-const inputClass = "min-h-9 w-full rounded border border-line bg-white px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+const textareaClass = "min-h-28 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
+const inputClass = "min-h-9 w-full rounded border border-line bg-white px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
 
 export function DoctorPortalWorkspace() {
   const [visits, setVisits] = useState<OpdVisit[]>([]);
@@ -502,6 +578,7 @@ export function DoctorPortalWorkspace() {
           <section className="grid gap-4">
             {selectedVisit ? (
               <DoctorConsultationCard
+                key={selectedVisit.id}
                 visit={selectedVisit}
                 patient={selectedPatient}
                 updateVisit={updateVisit}
@@ -555,6 +632,8 @@ function DoctorConsultationCard({
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
 }) {
+  const [identityConfirmed, setIdentityConfirmed] = useState(false);
+
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
       <div className="border-b border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)] p-4">
@@ -610,12 +689,21 @@ function DoctorConsultationCard({
 
         <AllergyGuard key={visit.id} visitId={visit.id} allergies={patient?.allergies} />
 
+        <IdentityGuard
+          visitId={visit.id}
+          name={visit.patientName}
+          phone={visit.phone}
+          age={patient?.age}
+          onConfirmed={() => setIdentityConfirmed(true)}
+        />
+
         <div className="grid gap-4 lg:grid-cols-2">
           <label>
             <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
             <textarea
               defaultValue={visit.clinicalNote}
               onBlur={(event) => void updateVisit(visit.id, { clinicalNote: event.target.value })}
+              disabled={!identityConfirmed}
               className={textareaClass}
               placeholder="History, examination, impression, procedure note"
             />
@@ -624,6 +712,7 @@ function DoctorConsultationCard({
             key={visit.id}
             visit={visit}
             currentMedicines={patient?.currentMedicines}
+            disabled={!identityConfirmed}
             onSave={(value) => void updateVisit(visit.id, { prescription: value })}
           />
           <label>
@@ -631,6 +720,7 @@ function DoctorConsultationCard({
             <textarea
               defaultValue={visit.advice}
               onBlur={(event) => void updateVisit(visit.id, { advice: event.target.value })}
+              disabled={!identityConfirmed}
               className={textareaClass}
               placeholder="Diet, warning signs, preparation, reports to bring"
             />
@@ -641,6 +731,7 @@ function DoctorConsultationCard({
               type="date"
               defaultValue={visit.followUpDate}
               onBlur={(event) => void updateVisit(visit.id, { followUpDate: event.target.value })}
+              disabled={!identityConfirmed}
               className={inputClass}
             />
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
