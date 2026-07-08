@@ -5,10 +5,10 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
 import { createOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
 import { opdVisitStatuses } from "@/lib/opd-types";
-import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
+import type { OpdVisitStatus } from "@/lib/opd-types";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { opdVisitCreateSchema, opdVisitUpdateSchema } from "@/lib/validation/opd";
 
-const billingStatuses: OpdVisit["billingStatus"][] = ["Not Started", "Estimate Shared", "Paid"];
-const paymentMethods: NonNullable<OpdVisit["paymentMethod"]>[] = ["Cash", "UPI", "Card", "Insurance", "Other"];
 const sortFields: OpdSortField[] = ["patientName", "token", "status", "service", "createdAt"];
 
 export async function GET(request: Request) {
@@ -55,9 +55,11 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "appointments", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const appointmentId = typeof body.appointmentId === "string" ? body.appointmentId : "";
-  const appointment = (await getAppointmentById(appointmentId));
+  const parsed = opdVisitCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const appointment = (await getAppointmentById(parsed.data.appointmentId));
 
   if (!appointment) {
     return NextResponse.json({ ok: false, error: "Appointment not found." }, { status: 404 });
@@ -79,17 +81,11 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" ? body.status : undefined;
-  const billingStatus = typeof body.billingStatus === "string" ? body.billingStatus : undefined;
-  const estimatedAmount = typeof body.estimatedAmount === "string" ? body.estimatedAmount : undefined;
-  const paymentMethod = typeof body.paymentMethod === "string" ? body.paymentMethod : undefined;
-  const notes = typeof body.notes === "string" ? body.notes : undefined;
-  const clinicalNote = typeof body.clinicalNote === "string" ? body.clinicalNote : undefined;
-  const prescription = typeof body.prescription === "string" ? body.prescription : undefined;
-  const advice = typeof body.advice === "string" ? body.advice : undefined;
-  const followUpDate = typeof body.followUpDate === "string" ? body.followUpDate : undefined;
+  const parsed = opdVisitUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const { id, status, billingStatus, estimatedAmount, paymentMethod, notes, clinicalNote, prescription, advice, followUpDate } = parsed.data;
 
   // Field-level enforcement: clinical fields need prescription rights, billing
   // fields need billing rights, and plain queue/status changes only need
@@ -103,22 +99,6 @@ export async function PATCH(request: Request) {
   );
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  if (!id) {
-    return NextResponse.json({ ok: false, error: "Visit id is required." }, { status: 400 });
-  }
-
-  if (status && !opdVisitStatuses.includes(status as OpdVisitStatus)) {
-    return NextResponse.json({ ok: false, error: "Invalid OPD status." }, { status: 400 });
-  }
-
-  if (billingStatus && !billingStatuses.includes(billingStatus as OpdVisit["billingStatus"])) {
-    return NextResponse.json({ ok: false, error: "Invalid billing status." }, { status: 400 });
-  }
-
-  if (paymentMethod && !paymentMethods.includes(paymentMethod as NonNullable<OpdVisit["paymentMethod"]>)) {
-    return NextResponse.json({ ok: false, error: "Invalid payment method." }, { status: 400 });
-  }
-
   // Cloned: the document store caches records in memory and updateOpdVisit
   // mutates the same object in place, so an uncloned reference would equal
   // `after` by the time the audit diff runs.
@@ -126,9 +106,9 @@ export async function PATCH(request: Request) {
   const visit = (await updateOpdVisit({
     id,
     status: status as OpdVisitStatus | undefined,
-    billingStatus: billingStatus as OpdVisit["billingStatus"] | undefined,
+    billingStatus,
     estimatedAmount,
-    paymentMethod: paymentMethod as OpdVisit["paymentMethod"] | undefined,
+    paymentMethod,
     notes,
     clinicalNote,
     prescription,
