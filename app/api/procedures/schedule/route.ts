@@ -6,6 +6,8 @@ import { createProcedureSchedule, listProcedureSchedules, updateProcedureSchedul
 import { queryProcedureSchedules, type ProcedureScheduleSortField, type SortDirection } from "@/lib/procedure-schedule-query";
 import { procedureScheduleStatuses } from "@/lib/procedure-types";
 import type { ProcedureScheduleStatus } from "@/lib/procedure-types";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { procedureScheduleCreateSchema, procedureScheduleUpdateSchema } from "@/lib/validation/procedures";
 
 const sortFields: ProcedureScheduleSortField[] = ["patientName", "procedureTitle", "room", "status", "scheduledDate", "createdAt"];
 
@@ -45,8 +47,11 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "appointments", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const result = (await createProcedureSchedule(body));
+  const parsed = procedureScheduleCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const result = (await createProcedureSchedule(parsed.data));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
@@ -58,31 +63,12 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "appointments", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" ? body.status : undefined;
-
-  if (!id) {
-    return NextResponse.json({ ok: false, error: "Procedure schedule id is required." }, { status: 400 });
+  const parsed = procedureScheduleUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
 
-  if (status && !procedureScheduleStatuses.includes(status as ProcedureScheduleStatus)) {
-    return NextResponse.json({ ok: false, error: "Invalid procedure status." }, { status: 400 });
-  }
-
-  const schedule = (await updateProcedureSchedule({
-    id,
-    status: status as ProcedureScheduleStatus | undefined,
-    checklist: body.checklist && typeof body.checklist === "object" ? body.checklist : undefined,
-    findings: typeof body.findings === "string" ? body.findings : undefined,
-    complications: typeof body.complications === "string" ? body.complications : undefined,
-    notes: typeof body.notes === "string" ? body.notes : undefined,
-    scheduledDate: typeof body.scheduledDate === "string" ? body.scheduledDate : undefined,
-    scheduledTime: typeof body.scheduledTime === "string" ? body.scheduledTime : undefined,
-    room: typeof body.room === "string" ? body.room : undefined,
-    doctor: typeof body.doctor === "string" ? body.doctor : undefined,
-    anesthesiaPlan: typeof body.anesthesiaPlan === "string" ? body.anesthesiaPlan : undefined
-  }));
+  const schedule = (await updateProcedureSchedule({ ...parsed.data, status: parsed.data.status as ProcedureScheduleStatus | undefined }));
 
   if (!schedule) {
     return NextResponse.json({ ok: false, error: "Procedure schedule not found." }, { status: 404 });
