@@ -120,7 +120,9 @@ test("admin dashboard mounts major HMS workspaces", () => {
   ];
 
   for (const component of components) {
-    assert.match(source, new RegExp(`import\\("@/components/${component}"\\)`), `${component} should have a dynamic-import loader in the admin dashboard`);
+    // Track 1.7: each lives in its own per-domain feature folder now
+    // (e.g. "@/components/reports/AdminReports"), not flat under components/.
+    assert.match(source, new RegExp(`import\\("@/components/[\\w-]+/${component}"\\)`), `${component} should have a dynamic-import loader in the admin dashboard`);
   }
 });
 
@@ -152,7 +154,7 @@ test("staff RBAC and CMS publish permissions are enforced", () => {
   assert.match(read("lib/hr-store.ts"), /roleDefaultPermissions/);
   assert.match(read("app/api/cms/route.ts"), /requirePermission/);
   assert.match(read("app/api/cms/route.ts"), /CMS publish permission required/);
-  assert.match(read("components/AdminHR.tsx"), /staffPermissions/);
+  assert.match(read("components/hr/AdminHR.tsx"), /staffPermissions/);
   assert.match(read("database/schema.sql"), /permissions text\[\]/);
 });
 
@@ -160,7 +162,7 @@ test("production readiness surfaces are available", () => {
   assert.equal(exists("app/api/health/route.ts"), true);
   assert.equal(exists("app/api/production/readiness/route.ts"), true);
   assert.equal(exists("lib/production-readiness.ts"), true);
-  assert.equal(exists("components/AdminProductionReadiness.tsx"), true);
+  assert.equal(exists("components/readiness/AdminProductionReadiness.tsx"), true);
   assert.equal(exists("scripts/verify-production-readiness.mjs"), true);
   assert.match(read("lib/production-readiness.ts"), /DATABASE_URL/);
   assert.match(read("lib/production-readiness.ts"), /BACKUP_POLICY/);
@@ -172,7 +174,7 @@ test("audit logging surfaces are available", () => {
   assert.equal(exists("app/api/audit/route.ts"), true);
   assert.equal(exists("lib/audit-store.ts"), true);
   assert.equal(exists("lib/audit-types.ts"), true);
-  assert.equal(exists("components/AdminAuditLog.tsx"), true);
+  assert.equal(exists("components/audit/AdminAuditLog.tsx"), true);
   assert.match(read("lib/audit-store.ts"), /shouldUseDatabaseStores/);
   assert.match(read("lib/audit-store.ts"), /insert into audit_events/);
   assert.match(read("app/api/audit/route.ts"), /await listAuditEvents/);
@@ -186,7 +188,7 @@ test("internal CMS surfaces are available", () => {
   assert.equal(exists("lib/cms-public.ts"), true);
   assert.equal(exists("lib/cms-store.ts"), true);
   assert.equal(exists("lib/cms-types.ts"), true);
-  assert.equal(exists("components/AdminCmsWorkspace.tsx"), true);
+  assert.equal(exists("components/cms/AdminCmsWorkspace.tsx"), true);
   assert.match(read("app/api/cms/route.ts"), /cms\.content\.saved/);
   assert.match(read("lib/cms-store.ts"), /procedures/);
   assert.match(read("lib/cms-public.ts"), /getPublicProcedures/);
@@ -194,7 +196,7 @@ test("internal CMS surfaces are available", () => {
   assert.match(read("app/api/mobile/v1\/procedures\/route.ts"), /getPublicProcedures/);
   assert.match(read("database/schema.sql"), /CREATE TABLE IF NOT EXISTS cms_content_items/);
   assert.match(read("database/schema.sql"), /CREATE TABLE IF NOT EXISTS cms_content_revisions/);
-  assert.match(read("components/AdminCmsWorkspace.tsx"), /Preview \+ History/);
+  assert.match(read("components/cms/AdminCmsWorkspace.tsx"), /Preview \+ History/);
 });
 
 test("database migration baseline is documented", () => {
