@@ -2,6 +2,7 @@
 
 import { LockKeyhole, Stethoscope } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { ActionButton } from "@/components/design-system/ActionButton";
 
 export function DoctorLogin() {
   const [passcode, setPasscode] = useState("");
@@ -51,13 +52,9 @@ export function DoctorLogin() {
             required
           />
         </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex min-h-12 items-center justify-center rounded-lg border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {loading ? "Checking..." : "Open Doctor Portal"}
-        </button>
+        <ActionButton type="submit" variant="primary" size="lg" className="min-h-12 hover:-translate-y-1" loading={loading}>
+          Open Doctor Portal
+        </ActionButton>
       </form>
       {status ? <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{status}</p> : null}
       <p className="mt-4 text-xs leading-relaxed text-muted">
