@@ -22,8 +22,17 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export async function createAdminReport() {
-  const today = todayKey();
+export type ReportRange = { from: string; to: string };
+
+function inRange(dateIso: string | undefined, range: ReportRange) {
+  if (!dateIso) return false;
+  const day = dateIso.slice(0, 10);
+  return day >= range.from && day <= range.to;
+}
+
+// Defaults to "today" (both ends the same day) so every existing caller that
+// omits a range keeps getting exactly today's figures, unchanged.
+export async function createAdminReport(range: ReportRange = { from: todayKey(), to: todayKey() }) {
   const accountEntries = (await listAccountEntries());
   const aiReviews = (await listAiReviews());
   const appointments = (await listAppointments());
@@ -40,18 +49,18 @@ export async function createAdminReport() {
   const patients = (await listPatients());
   const dispenses = (await listPharmacyDispenses());
   const procedureSchedules = (await listProcedureSchedules());
-  const todaysDispenses = dispenses.filter((record) => record.createdAt.slice(0, 10) === today);
-  const todaysLabOrders = labOrders.filter((order) => order.createdAt.slice(0, 10) === today);
-  const todaysProcedures = procedureSchedules.filter((schedule) => schedule.scheduledDate === today);
-  const todaysDischarges = ipdAdmissions.filter((admission) => admission.dischargedAt?.slice(0, 10) === today);
-  const todaysAttendance = attendance.filter((record) => record.date === today);
+  const todaysDispenses = dispenses.filter((record) => inRange(record.createdAt, range));
+  const todaysLabOrders = labOrders.filter((order) => inRange(order.createdAt, range));
+  const todaysProcedures = procedureSchedules.filter((schedule) => inRange(schedule.scheduledDate, range));
+  const todaysDischarges = ipdAdmissions.filter((admission) => inRange(admission.dischargedAt, range));
+  const todaysAttendance = attendance.filter((record) => inRange(record.date, range));
 
-  const todaysAppointments = appointments.filter((appointment) => appointment.createdAt.slice(0, 10) === today);
-  const todaysCommunicationLogs = communicationLogs.filter((log) => log.createdAt.slice(0, 10) === today || log.sentAt?.slice(0, 10) === today);
-  const todaysEntries = accountEntries.filter((entry) => entry.date === today);
-  const todaysOpdVisits = opdVisits.filter((visit) => visit.createdAt.slice(0, 10) === today);
+  const todaysAppointments = appointments.filter((appointment) => inRange(appointment.createdAt, range));
+  const todaysCommunicationLogs = communicationLogs.filter((log) => inRange(log.createdAt, range) || inRange(log.sentAt, range));
+  const todaysEntries = accountEntries.filter((entry) => inRange(entry.date, range));
+  const todaysOpdVisits = opdVisits.filter((visit) => inRange(visit.createdAt, range));
   const paidVisits = opdVisits.filter((visit) => visit.billingStatus === "Paid");
-  const todaysPaidVisits = paidVisits.filter((visit) => visit.paidAt?.slice(0, 10) === today);
+  const todaysPaidVisits = paidVisits.filter((visit) => inRange(visit.paidAt, range));
   const lowStockItems = inventory.filter((item) => item.quantity <= item.reorderLevel);
 
   const revenueByMethod = ["Cash", "UPI", "Card", "Insurance", "Other"].map((method) => ({
@@ -74,7 +83,7 @@ export async function createAdminReport() {
       total: patients.length,
       active: patients.filter((patient) => patient.status === "Active").length,
       flagged: patients.filter((patient) => patient.status === "Flagged").length,
-      addedToday: patients.filter((patient) => patient.createdAt.slice(0, 10) === today).length
+      addedToday: patients.filter((patient) => inRange(patient.createdAt, range)).length
     },
     opd: {
       total: opdVisits.length,

@@ -48,8 +48,8 @@ function topCounts(items: string[], fallback = "Uncategorized") {
     .slice(0, 8);
 }
 
-export async function createAnalyticsSnapshot() {
-  const days = daysBack(14);
+export async function createAnalyticsSnapshot(windowDays = 14) {
+  const days = daysBack(windowDays);
   const appointments = (await listAppointments());
   const aiReviews = (await listAiReviews());
   const communicationLogs = (await listCommunicationLogs());
