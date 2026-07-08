@@ -5,14 +5,12 @@ import { Eye, EyeOff, FileCheck2, KeyRound, LockKeyhole, ShieldCheck, Smartphone
 import { useState } from "react";
 import { roleMeta, staffLoginRoles, type AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
+import { ActionButton } from "@/components/design-system/ActionButton";
 
 type Step = "credentials" | "password-change" | "mfa-setup" | "mfa-verify";
 
 const inputClass =
   "min-h-13 w-full rounded-lg border border-line bg-surface px-4 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] transition focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
-
-const buttonClass =
-  "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-cyan-300 dark:border-cyan-800/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-5 font-bold text-white shadow-[0_18px_42px_rgba(8,145,178,0.34)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70";
 
 export function AccessLogin({
   initialRole = "",
@@ -204,9 +202,9 @@ export function AccessLogin({
                 Picks your workspace if you hold more than one role. Access is always verified against your account, not this selection.
               </span>
             </label>
-            <button type="submit" disabled={loading} className={buttonClass}>
-              <LockKeyhole size={18} /> {loading ? "Signing in..." : "Sign in"}
-            </button>
+            <ActionButton type="submit" variant="primary" className="w-full" loading={loading}>
+              <LockKeyhole size={18} /> Sign in
+            </ActionButton>
             <button
               type="button"
               onClick={() => setShowForgot((value) => !value)}
@@ -253,9 +251,9 @@ export function AccessLogin({
                 required
               />
             </label>
-            <button type="submit" disabled={loading} className={buttonClass}>
-              <KeyRound size={18} /> {loading ? "Saving..." : "Set new password"}
-            </button>
+            <ActionButton type="submit" variant="primary" className="w-full" loading={loading}>
+              <KeyRound size={18} /> Set new password
+            </ActionButton>
           </form>
         ) : null}
 
@@ -284,9 +282,9 @@ export function AccessLogin({
                 required
               />
             </label>
-            <button type="submit" disabled={loading || !totpSecret} className={buttonClass}>
-              <ShieldCheck size={18} /> {loading ? "Verifying..." : "Enable two-factor"}
-            </button>
+            <ActionButton type="submit" variant="primary" className="w-full" disabled={!totpSecret} loading={loading}>
+              <ShieldCheck size={18} /> Enable two-factor
+            </ActionButton>
           </form>
         ) : null}
 
@@ -309,9 +307,9 @@ export function AccessLogin({
                 required
               />
             </label>
-            <button type="submit" disabled={loading} className={buttonClass}>
-              <ShieldCheck size={18} /> {loading ? "Verifying..." : "Verify"}
-            </button>
+            <ActionButton type="submit" variant="primary" className="w-full" loading={loading}>
+              <ShieldCheck size={18} /> Verify
+            </ActionButton>
           </form>
         ) : null}
 
