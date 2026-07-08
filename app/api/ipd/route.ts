@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { bedStatuses, ipdAdmissionStatuses } from "@/lib/ipd-types";
 import type { BedStatus, IpdAdmissionStatus } from "@/lib/ipd-types";
 import {
   createIpdAdmission,
@@ -17,6 +16,15 @@ import {
   updateIpdAdmission
 } from "@/lib/ipd-store";
 import { listOpdVisits } from "@/lib/opd-store";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import {
+  ipdAdmissionCreateSchema,
+  ipdAdmissionUpdateSchema,
+  ipdBedUpdateSchema,
+  ipdEscalateSchema,
+  ipdTransferSchema,
+  ipdVitalsSchema
+} from "@/lib/validation/ipd";
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "beds", "view");
@@ -37,8 +45,11 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "beds", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const result = (await createIpdAdmission(body));
+  const parsed = ipdAdmissionCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const result = (await createIpdAdmission(parsed.data));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
@@ -60,22 +71,15 @@ export async function PATCH(request: Request) {
   const body = await request.json().catch(() => ({}));
   const type = typeof body.type === "string" ? body.type : "admission";
 
-  // Clinical narrative fields (diagnosis, care plan, discharge summary) need
-  // patient-record edit rights; bed status, transfers, vitals and escalation
-  // are ward operations that nurses hold via beds:edit.
-  const touchesClinical =
-    type === "admission" &&
-    [body.diagnosis, body.carePlan, body.dischargeSummary, body.dietAdvice].some((value) => value !== undefined);
-  const auth = await authorize(request, touchesClinical ? "patients" : "beds", "edit");
-  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
-  const staffId = auth.context.userId || "Front desk";
-
   if (type === "bed") {
-    const id = typeof body.id === "string" ? body.id : "";
-    const status = typeof body.status === "string" && bedStatuses.includes(body.status as BedStatus) ? body.status as BedStatus : undefined;
+    const parsed = ipdBedUpdateSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    const auth = await authorize(request, "beds", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
     // Cloned: updateBed mutates the same cached in-memory object in place.
-    const before = structuredClone((await listBeds()).find((item) => item.id === id) ?? null);
-    const bed = (await updateBed({ id, status, notes: typeof body.notes === "string" ? body.notes : undefined }));
+    const before = structuredClone((await listBeds()).find((item) => item.id === parsed.data.id) ?? null);
+    const bed = (await updateBed(parsed.data as { id: string; status?: BedStatus; notes?: string }));
     if (!bed) return NextResponse.json({ ok: false, error: "Bed not found." }, { status: 404 });
 
     await recordAuditEvent({
@@ -93,15 +97,15 @@ export async function PATCH(request: Request) {
   }
 
   if (type === "transfer") {
-    const admissionId = typeof body.admissionId === "string" ? body.admissionId : "";
+    const parsed = ipdTransferSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    const auth = await authorize(request, "beds", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    const staffId = auth.context.userId || "Front desk";
+
     // Cloned: transferBed mutates the same cached in-memory admission in place.
-    const before = structuredClone((await listIpdAdmissions()).find((item) => item.id === admissionId) ?? null);
-    const result = await transferBed({
-      admissionId,
-      toBedId: typeof body.toBedId === "string" ? body.toBedId : "",
-      reason: typeof body.reason === "string" ? body.reason : "",
-      movedBy: staffId
-    });
+    const before = structuredClone((await listIpdAdmissions()).find((item) => item.id === parsed.data.admissionId) ?? null);
+    const result = await transferBed({ ...parsed.data, movedBy: staffId });
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
 
     await recordAuditEvent({
@@ -120,23 +124,29 @@ export async function PATCH(request: Request) {
   }
 
   if (type === "vitals") {
+    const parsed = ipdVitalsSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    const auth = await authorize(request, "beds", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    const staffId = auth.context.userId || "Front desk";
+
     // High-frequency clinical telemetry, not a record mutation in the audit
     // sense (P4 scope is Patients/Prescriptions/Billing/Beds) — auditing every
     // reading would drown the trail in noise without a compliance benefit.
-    const result = (await recordVitals({ ...body, recordedBy: staffId }));
+    const result = (await recordVitals({ ...parsed.data, recordedBy: staffId }));
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true, reading: result.reading });
   }
 
   if (type === "escalate") {
-    const id = typeof body.id === "string" ? body.id : "";
+    const parsed = ipdEscalateSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    const auth = await authorize(request, "beds", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
     // Cloned: setEscalation mutates the same cached in-memory admission in place.
-    const before = structuredClone((await listIpdAdmissions()).find((item) => item.id === id) ?? null);
-    const admission = (await setEscalation({
-      id,
-      escalated: Boolean(body.escalated),
-      reason: typeof body.reason === "string" ? body.reason : undefined
-    }));
+    const before = structuredClone((await listIpdAdmissions()).find((item) => item.id === parsed.data.id) ?? null);
+    const admission = (await setEscalation(parsed.data));
     if (!admission) return NextResponse.json({ ok: false, error: "Admission not found." }, { status: 404 });
 
     await recordAuditEvent({
@@ -154,25 +164,22 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: true, admission });
   }
 
-  const status = typeof body.status === "string" && ipdAdmissionStatuses.includes(body.status as IpdAdmissionStatus) ? body.status as IpdAdmissionStatus : undefined;
-  const depositAmount = body.depositAmount === undefined ? undefined : Number(body.depositAmount);
-  const admissionId = typeof body.id === "string" ? body.id : "";
+  const parsed = ipdAdmissionUpdateSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+
+  // Clinical narrative fields (diagnosis, care plan, discharge summary, diet
+  // advice) need patient-record edit rights; plain admission/bed/discharge
+  // changes are ward operations that nurses hold via beds:edit.
+  const touchesClinical = [parsed.data.diagnosis, parsed.data.carePlan, parsed.data.dischargeSummary, parsed.data.dietAdvice].some(
+    (value) => value !== undefined
+  );
+  const auth = await authorize(request, touchesClinical ? "patients" : "beds", "edit");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const { status } = parsed.data;
   // Cloned: updateIpdAdmission mutates the same cached in-memory admission in place.
-  const beforeAdmission = structuredClone((await listIpdAdmissions()).find((item) => item.id === admissionId) ?? null);
-  const admission = (await updateIpdAdmission({
-    id: admissionId,
-    status,
-    bedId: typeof body.bedId === "string" ? body.bedId : undefined,
-    diagnosis: typeof body.diagnosis === "string" ? body.diagnosis : undefined,
-    carePlan: typeof body.carePlan === "string" ? body.carePlan : undefined,
-    nursingNotes: typeof body.nursingNotes === "string" ? body.nursingNotes : undefined,
-    dietAdvice: typeof body.dietAdvice === "string" ? body.dietAdvice : undefined,
-    assignedNurse: typeof body.assignedNurse === "string" ? body.assignedNurse : undefined,
-    expectedDischargeDate: typeof body.expectedDischargeDate === "string" ? body.expectedDischargeDate : undefined,
-    markedForDischarge: typeof body.markedForDischarge === "boolean" ? body.markedForDischarge : undefined,
-    depositAmount,
-    dischargeSummary: typeof body.dischargeSummary === "string" ? body.dischargeSummary : undefined
-  }));
+  const beforeAdmission = structuredClone((await listIpdAdmissions()).find((item) => item.id === parsed.data.id) ?? null);
+  const admission = (await updateIpdAdmission(parsed.data as { id: string; status?: IpdAdmissionStatus }));
 
   if (!admission) return NextResponse.json({ ok: false, error: "Admission not found or bed unavailable." }, { status: 404 });
 

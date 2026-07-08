@@ -1,0 +1,69 @@
+import { z } from "zod";
+import { bedStatuses, ipdAdmissionStatuses } from "@/lib/ipd-types";
+
+const optionalText = z.string().trim().optional();
+
+export const ipdAdmissionCreateSchema = z.object({
+  visitId: z.string().trim().min(1, "OPD visit is required."),
+  bedId: z.string().trim().min(1, "Bed is required."),
+  admissionType: optionalText,
+  admittingDoctor: optionalText,
+  assignedNurse: optionalText,
+  expectedDischargeDate: optionalText,
+  diagnosis: optionalText,
+  carePlan: optionalText,
+  depositAmount: z.coerce.number().optional()
+});
+
+export const ipdBedUpdateSchema = z.object({
+  id: z.string().trim().min(1, "Bed id is required."),
+  status: z.enum(bedStatuses as [string, ...string[]], { error: "Invalid bed status." }).optional(),
+  notes: optionalText
+});
+
+export const ipdTransferSchema = z.object({
+  admissionId: z.string().trim().min(1, "Admission id is required."),
+  toBedId: z.string().trim().min(1, "Target bed is required."),
+  // Left as a plain (possibly empty) string, not `.min(1)` — transferBed()
+  // already owns the "reason is required" business rule and returns its own
+  // { error } for it; duplicating the check here would just move which layer
+  // reports the identical failure.
+  reason: z.string().trim().default("")
+});
+
+export const ipdVitalsSchema = z.object({
+  admissionId: z.string().trim().min(1, "Admission id is required."),
+  heartRate: z.coerce.number().optional(),
+  spo2: z.coerce.number().optional(),
+  bloodPressure: optionalText,
+  temperature: z.coerce.number().optional(),
+  notes: optionalText
+});
+
+export const ipdEscalateSchema = z.object({
+  id: z.string().trim().min(1, "Admission id is required."),
+  escalated: z.coerce.boolean(),
+  reason: optionalText
+});
+
+export const ipdAdmissionUpdateSchema = z.object({
+  id: z.string().trim().min(1, "Admission id is required."),
+  status: z.enum(ipdAdmissionStatuses as [string, ...string[]], { error: "Invalid admission status." }).optional(),
+  bedId: optionalText,
+  diagnosis: optionalText,
+  carePlan: optionalText,
+  nursingNotes: optionalText,
+  dietAdvice: optionalText,
+  assignedNurse: optionalText,
+  expectedDischargeDate: optionalText,
+  markedForDischarge: z.boolean().optional(),
+  depositAmount: z.coerce.number().optional(),
+  dischargeSummary: optionalText
+});
+
+export type IpdAdmissionCreateInput = z.infer<typeof ipdAdmissionCreateSchema>;
+export type IpdBedUpdateInput = z.infer<typeof ipdBedUpdateSchema>;
+export type IpdTransferInput = z.infer<typeof ipdTransferSchema>;
+export type IpdVitalsInput = z.infer<typeof ipdVitalsSchema>;
+export type IpdEscalateInput = z.infer<typeof ipdEscalateSchema>;
+export type IpdAdmissionUpdateInput = z.infer<typeof ipdAdmissionUpdateSchema>;
