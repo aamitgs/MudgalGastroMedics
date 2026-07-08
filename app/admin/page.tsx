@@ -1,31 +1,9 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { AdminAiReviews } from "@/components/AdminAiReviews";
-import { AdminAnalytics } from "@/components/AdminAnalytics";
-import { AdminAppointments } from "@/components/AdminAppointments";
-import { AdminAuditLog } from "@/components/AdminAuditLog";
-import { AdminAutomation } from "@/components/AdminAutomation";
-import { AdminBillingSummary } from "@/components/AdminBillingSummary";
-import { AdminCmsWorkspace } from "@/components/AdminCmsWorkspace";
-import { AdminCommunication } from "@/components/AdminCommunication";
-import { AdminDoctorWorkflow } from "@/components/AdminDoctorWorkflow";
-import { AdminEnterpriseModules } from "@/components/AdminEnterpriseModules";
-import { AdminFinance } from "@/components/AdminFinance";
-import { AdminHR } from "@/components/AdminHR";
-import { AdminInventory } from "@/components/AdminInventory";
-import { AdminIpdBeds } from "@/components/AdminIpdBeds";
-import { AdminLab } from "@/components/AdminLab";
 import { AdminLogin } from "@/components/AdminLogin";
 import { AdminModuleNav } from "@/components/AdminModuleNav";
-import { AdminOpdQueue } from "@/components/AdminOpdQueue";
-import { AdminPatients } from "@/components/AdminPatients";
-import { AdminPharmacy } from "@/components/AdminPharmacy";
-import { AdminProductionReadiness } from "@/components/AdminProductionReadiness";
-import { AdminProcedures } from "@/components/AdminProcedures";
-import { AdminReports } from "@/components/AdminReports";
-import { AdminSettings } from "@/components/AdminSettings";
-import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { Section } from "@/components/Section";
+import { LazyModuleSection } from "@/components/hospital-os/LazyModuleSection";
 import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
 import { visibleAdminModules } from "@/lib/access/admin-modules";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
@@ -35,33 +13,6 @@ export const metadata: Metadata = {
   description: "Internal reception dashboard for appointment requests and hospital operations workflow planning at Mudgal Gastromedics Hospital.",
   alternates: { canonical: "/admin" },
   robots: { index: false, follow: false }
-};
-
-/** Section renderers keyed by registry id (lib/access/admin-modules.ts). */
-const moduleComponents: Record<string, React.ReactNode> = {
-  "module-reports": <AdminReports />,
-  "module-access": <AdminUserManagement />,
-  "module-readiness": <AdminProductionReadiness />,
-  "module-audit": <AdminAuditLog />,
-  "module-analytics": <AdminAnalytics />,
-  "module-cms": <AdminCmsWorkspace />,
-  "module-modules": <AdminEnterpriseModules />,
-  "module-automation": <AdminAutomation />,
-  "module-ai-reviews": <AdminAiReviews />,
-  "module-patients": <AdminPatients />,
-  "module-appointments": <AdminAppointments />,
-  "module-opd": <AdminOpdQueue />,
-  "module-procedures": <AdminProcedures />,
-  "module-ipd": <AdminIpdBeds />,
-  "module-doctor-workflow": <AdminDoctorWorkflow />,
-  "module-lab": <AdminLab />,
-  "module-pharmacy": <AdminPharmacy />,
-  "module-billing": <AdminBillingSummary />,
-  "module-finance": <AdminFinance />,
-  "module-hr": <AdminHR />,
-  "module-inventory": <AdminInventory />,
-  "module-communication": <AdminCommunication />,
-  "module-settings": <AdminSettings />
 };
 
 export default async function AdminPage() {
@@ -94,9 +45,7 @@ export default async function AdminPage() {
             <div className="grid gap-4">
               <RoleTodayBand role={context.activeRole} />
               {modules.map((module) => (
-                <section key={module.id} id={module.id} className="scroll-mt-28">
-                  {moduleComponents[module.id]}
-                </section>
+                <LazyModuleSection key={module.id} id={module.id} />
               ))}
             </div>
           ) : (

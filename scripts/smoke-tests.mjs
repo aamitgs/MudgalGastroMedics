@@ -91,7 +91,10 @@ test("mobile API exposes versioned token-gated endpoints", () => {
 });
 
 test("admin dashboard mounts major HMS workspaces", () => {
-  const source = read("app/admin/page.tsx");
+  // Track 4.1: modules are dynamically imported and lazy-mounted (not static
+  // JSX in app/admin/page.tsx), so this checks each component's dynamic-import
+  // loader is wired up in LazyModuleSection, which mounts them on demand.
+  const source = read("components/hospital-os/LazyModuleSection.tsx");
   const components = [
     "AdminReports",
     "AdminAuditLog",
@@ -117,7 +120,7 @@ test("admin dashboard mounts major HMS workspaces", () => {
   ];
 
   for (const component of components) {
-    assert.match(source, new RegExp(`<${component}\\s*/>`), `${component} should be mounted in admin dashboard`);
+    assert.match(source, new RegExp(`import\\("@/components/${component}"\\)`), `${component} should have a dynamic-import loader in the admin dashboard`);
   }
 });
 
