@@ -5,6 +5,8 @@ import { queryPatients, type PatientSortField, type SortDirection } from "@/lib/
 import { createPatient, findPatientByPhone, getPatientById, listPatients, updatePatient } from "@/lib/patient-store";
 import { patientStatuses } from "@/lib/patient-types";
 import type { PatientStatus } from "@/lib/patient-types";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { patientCreateSchema, patientUpdateSchema } from "@/lib/validation/patients";
 
 const sortFields: PatientSortField[] = ["name", "uhid", "status", "lastVisitAt", "createdAt"];
 
@@ -52,18 +54,14 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "patients", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-
-  if (!name || phone.replace(/\D/g, "").length < 6) {
-    return NextResponse.json({ ok: false, error: "Patient name and valid phone are required." }, { status: 400 });
+  const parsed = patientCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
-
-  const forceNew = body.forceNew === true;
+  const { phone, forceNew } = parsed.data;
   const existingMatch = forceNew ? await findPatientByPhone(phone) : null;
 
-  const patient = (await createPatient(body));
+  const patient = (await createPatient(parsed.data));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Unable to create patient." }, { status: 400 });
   }
@@ -101,23 +99,17 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "patients", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" ? body.status : "";
-
-  if (!id) {
-    return NextResponse.json({ ok: false, error: "Patient id is required." }, { status: 400 });
+  const parsed = patientUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
-
-  if (status && !patientStatuses.includes(status as PatientStatus)) {
-    return NextResponse.json({ ok: false, error: "Invalid patient status." }, { status: 400 });
-  }
+  const { id, status } = parsed.data;
 
   // Snapshot must be cloned: the document store caches records in memory and
   // updatePatient mutates the same object in place, so an unclonded reference
   // would equal `after` by the time the audit diff runs.
   const before = structuredClone(await getPatientById(id));
-  const patient = (await updatePatient(body));
+  const patient = (await updatePatient(parsed.data));
   if (!patient) {
     return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
   }
