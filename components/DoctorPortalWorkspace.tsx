@@ -6,6 +6,7 @@ import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { site } from "@/lib/site-data";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { notify } from "@/lib/notify";
 
@@ -45,14 +46,9 @@ function AiPatientSummaryPanel({ phone }: { phone: string }) {
     <div className="rounded border border-cyan-200 bg-cyan-50 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-brand"><Sparkles size={15} /> AI Clinical Brief</p>
-        <button
-          type="button"
-          onClick={() => void generate()}
-          disabled={loading}
-          className="inline-flex min-h-9 items-center gap-2 rounded border border-cyan-300 bg-white px-3 text-xs font-bold text-brand transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Sparkles size={13} /> {loading ? "Generating..." : summary ? "Regenerate" : "Generate summary"}
-        </button>
+        <ActionButton variant="secondary" size="sm" onClick={() => void generate()} loading={loading}>
+          <Sparkles size={13} /> {summary ? "Regenerate" : "Generate summary"}
+        </ActionButton>
       </div>
       {error ? <p className="mt-2 text-sm font-semibold text-red-700">{error}</p> : null}
       {summary ? (
@@ -130,14 +126,9 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
           placeholder="Optional: note how this was addressed (e.g. switched drug, patient no longer reacts)"
           className="min-h-10 flex-1 rounded border border-red-300 bg-white px-3 text-sm text-ink placeholder:text-red-900/40 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10"
         />
-        <button
-          type="button"
-          onClick={() => void acknowledge()}
-          disabled={saving}
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded border border-red-600 bg-red-600 px-4 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
-        >
-          <CheckCircle2 size={16} /> {saving ? "Recording..." : "Acknowledge — reviewed"}
-        </button>
+        <ActionButton variant="danger" className="shrink-0" onClick={() => void acknowledge()} loading={saving}>
+          <CheckCircle2 size={16} /> Acknowledge — reviewed
+        </ActionButton>
       </div>
     </div>
   );
@@ -357,9 +348,9 @@ export function DoctorPortalWorkspace() {
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Doctor Queue</p>
                   <h2 className="mt-1 text-xl font-bold text-ink">Consultations</h2>
                 </div>
-                <button type="button" onClick={() => void loadWorkspace()} className="grid h-11 w-11 place-items-center rounded border border-line bg-soft text-ink transition hover:border-brand hover:text-brand" aria-label="Refresh doctor queue">
+                <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
                   <RefreshCw size={17} />
-                </button>
+                </ActionButton>
               </div>
               <label className="relative mt-4 block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
@@ -466,8 +457,8 @@ function DoctorConsultationCard({
             <p className="mt-2 text-sm font-semibold text-muted">{visit.service} | {visit.phone}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 md:min-w-[440px]">
-            <button type="button" onClick={() => void updateVisit(visit.id, { status: "In Consultation" })} className="rounded border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 py-2 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]">Start</button>
-            <button type="button" onClick={() => void updateVisit(visit.id, { status: "Completed" })} className="rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 py-2 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">Complete</button>
+            <ActionButton variant="primary" onClick={() => void updateVisit(visit.id, { status: "In Consultation" })}>Start</ActionButton>
+            <ActionButton variant="success" onClick={() => void updateVisit(visit.id, { status: "Completed" })}>Complete</ActionButton>
             <select aria-label="Visit status"
               value={visit.status}
               onChange={(event) => void updateVisit(visit.id, { status: event.target.value as OpdVisitStatus })}
@@ -545,12 +536,12 @@ function DoctorConsultationCard({
               className={inputClass}
             />
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => void copySummary(visit, patient)} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+              <ActionButton variant="secondary" onClick={() => void copySummary(visit, patient)}>
                 <Copy size={16} /> Copy Summary
-              </button>
-              <button type="button" onClick={() => printSummary(visit, patient)} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-cyan-300/20 bg-[linear-gradient(135deg,#0ea5c2,#087d9e)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(8,145,178,0.24)]">
+              </ActionButton>
+              <ActionButton variant="primary" onClick={() => printSummary(visit, patient)}>
                 <Printer size={16} /> Print
-              </button>
+              </ActionButton>
               <a href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">
                 <FileDown size={16} /> Download PDF
               </a>
