@@ -1,8 +1,9 @@
 "use client";
 
-import { Activity, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AnalyticsSnapshot = {
@@ -148,8 +149,22 @@ export function AdminAnalytics() {
         </ActionButton>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-      {loading ? <ModuleSkeleton /> : null}
+      {error && analytics ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
+      {loading ? (
+        <div className="p-4">
+          <ModuleSkeleton />
+        </div>
+      ) : null}
+
+      {!loading && !analytics ? (
+        <ModuleEmptyState
+          icon={AlertTriangle}
+          title="Unable to load analytics"
+          description={error || "Something went wrong while loading operational intelligence."}
+          action="Retry"
+          onAction={() => void loadAnalytics()}
+        />
+      ) : null}
 
       {analytics ? (
         <>

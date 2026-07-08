@@ -1,8 +1,9 @@
 "use client";
 
-import { BarChart3, CalendarDays, ClipboardList, PackageX, RefreshCw } from "lucide-react";
+import { AlertTriangle, BarChart3, CalendarDays, ClipboardList, PackageX, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type AdminReport = {
@@ -195,20 +196,37 @@ export function AdminReports() {
         </ActionButton>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
+      {error && report ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
-      <div className="grid grid-cols-2 gap-2 border-b border-line p-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
-        {loading ? <ModuleSkeleton /> : null}
-        {kpis.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded border border-line bg-soft/60 px-3 py-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted" title={label}>{label}</p>
-              <Icon className="shrink-0 text-brand" size={14} />
+      {report ? (
+        <div className="grid grid-cols-2 gap-2 border-b border-line p-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
+          {kpis.map(({ label, value, icon: Icon }) => (
+            <div key={label} className="rounded border border-line bg-soft/60 px-3 py-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted" title={label}>{label}</p>
+                <Icon className="shrink-0 text-brand" size={14} />
+              </div>
+              <p className="mt-1 text-lg font-bold leading-tight text-ink">{value}</p>
             </div>
-            <p className="mt-1 text-lg font-bold leading-tight text-ink">{value}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="p-4">
+          <ModuleSkeleton />
+        </div>
+      ) : null}
+
+      {!loading && !report ? (
+        <ModuleEmptyState
+          icon={AlertTriangle}
+          title="Unable to load reports"
+          description={error || "Something went wrong while loading the daily operating summary."}
+          action="Retry"
+          onAction={() => void loadReport()}
+        />
+      ) : null}
 
       {report ? (
         <div className="grid gap-5 p-4 lg:grid-cols-3">

@@ -1,9 +1,10 @@
 "use client";
 
-import { Activity, CheckCircle2, ClipboardList, Layers3, Plus, RefreshCw } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, ClipboardList, Layers3, Plus, RefreshCw } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { HmsBuildStatus, HmsModule, HmsModuleRecord, HmsRecordStatus } from "@/lib/hms-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type HmsResponse = {
@@ -137,22 +138,40 @@ export function AdminEnterpriseModules() {
         </ActionButton>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
+      {error && modules.length > 0 ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-5">
-        {loading ? <ModuleSkeleton /> : null}
-        {stats.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded border border-line bg-soft/60 p-4">
-            <div className="flex items-center justify-between gap-4">
-              <Icon className="text-brand" size={22} />
-              <p className="text-2xl font-bold text-ink">{value}</p>
+      {modules.length > 0 ? (
+        <div className="grid gap-4 border-b border-line p-4 md:grid-cols-5">
+          {stats.map(({ label, value, icon: Icon }) => (
+            <div key={label} className="rounded border border-line bg-soft/60 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <Icon className="text-brand" size={22} />
+                <p className="text-2xl font-bold text-ink">{value}</p>
+              </div>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{label}</p>
             </div>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{label}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.95fr_1.05fr]">
+      {loading ? (
+        <div className="p-4">
+          <ModuleSkeleton />
+        </div>
+      ) : null}
+
+      {!loading && modules.length === 0 ? (
+        <ModuleEmptyState
+          icon={AlertTriangle}
+          title="Unable to load platform modules"
+          description={error || "Something went wrong while loading the platform modules."}
+          action="Retry"
+          onAction={() => void loadModules()}
+        />
+      ) : null}
+
+      {modules.length > 0 ? (
+        <div className="grid gap-5 p-4 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="grid max-h-[760px] gap-3 overflow-auto pr-1 md:grid-cols-2">
           {modules.map((module) => (
             <button
@@ -236,7 +255,8 @@ export function AdminEnterpriseModules() {
             </div>
           </div>
         ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { Building2, MapPin, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Building2, MapPin, RefreshCw, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { sectionAccess, type HospitalOsSection } from "@/lib/hospital-os-data";
 import type { ProductionCheck, ProductionCheckStatus } from "@/lib/production-readiness";
 import { fullAddress, site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ReadinessResponse = {
@@ -141,17 +142,33 @@ export function AdminSettings() {
           </ActionButton>
         </div>
         <p className="mt-1 text-xs text-muted">Pulled from the production readiness report. See the full report below for security and data checks.</p>
-        {error ? <p className="mt-3 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-3 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {loading ? <ModuleSkeleton /> : null}
-          {!loading && checks.length === 0 && !error ? <p className="text-sm font-semibold text-muted">No integration checks available.</p> : null}
-          {checks.map((check) => (
-            <div key={check.id} className={`rounded border p-4 ${statusTone(check.status)}`}>
-              <p className="font-bold">{check.label}</p>
-              <p className="mt-1 text-sm">{check.detail}</p>
-            </div>
-          ))}
-        </div>
+        {error && checks.length > 0 ? <p className="mt-3 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-3 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
+        {loading ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <ModuleSkeleton />
+          </div>
+        ) : null}
+        {!loading && checks.length === 0 ? (
+          <div className="mt-4">
+            <ModuleEmptyState
+              icon={AlertTriangle}
+              title="Unable to load integration status"
+              description={error || "No integration checks are available right now."}
+              action="Retry"
+              onAction={() => void loadIntegrationStatus()}
+            />
+          </div>
+        ) : null}
+        {!loading && checks.length > 0 ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {checks.map((check) => (
+              <div key={check.id} className={`rounded border p-4 ${statusTone(check.status)}`}>
+                <p className="font-bold">{check.label}</p>
+                <p className="mt-1 text-sm">{check.detail}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );

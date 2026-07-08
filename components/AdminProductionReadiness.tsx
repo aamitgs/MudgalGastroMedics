@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, RefreshCw, Rocket, ShieldAlert } from "luc
 import { useEffect, useMemo, useState } from "react";
 import type { ProductionCheck, ProductionCheckStatus } from "@/lib/production-readiness";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 
 type ProductionReadiness = {
@@ -99,8 +100,22 @@ export function AdminProductionReadiness() {
         </ActionButton>
       </div>
 
-      {error ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
-      {loading ? <ModuleSkeleton /> : null}
+      {error && readiness ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
+      {loading ? (
+        <div className="p-4">
+          <ModuleSkeleton />
+        </div>
+      ) : null}
+
+      {!loading && !readiness ? (
+        <ModuleEmptyState
+          icon={AlertTriangle}
+          title="Unable to load production readiness"
+          description={error || "Something went wrong while loading the readiness report."}
+          action="Retry"
+          onAction={() => void loadReadiness()}
+        />
+      ) : null}
 
       {readiness ? (
         <>
