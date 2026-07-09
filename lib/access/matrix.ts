@@ -179,7 +179,11 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     insurance: readWriteExport,
     "hr-records": readWriteExport,
     reports: ["view", "export"],
-    "system-settings": ["view"],
+    // "edit" here specifically covers hospital-wide announcements
+    // (Track 4.11) and the internal HMS build-tracker records the admin
+    // role already has "view" access to — not a broader settings-write
+    // grant than that.
+    "system-settings": ["view", "edit"],
     "user-management": ["view"],
     "liaison-notes": readWriteExport,
     cms: readWriteExport
