@@ -5,7 +5,7 @@ import { site } from "@/lib/site-data";
 
 const companyLinks = [
   { href: "/about", label: "About MGM" },
-  { href: "/#doctor", label: "Doctor Profile" },
+  { href: "/dr-deepak-kumar-sharma-gastroenterologist-agra", label: "Doctor Profile" },
   { href: "/blog", label: "Blog" },
   { href: "/gallery", label: "Facilities" },
   { href: "/contact", label: "Contact" },

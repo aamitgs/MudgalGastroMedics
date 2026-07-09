@@ -17,7 +17,7 @@ const navItems = [
     label: "About Us",
     children: [
       { href: "/about", label: "About MGM" },
-      { href: "/#doctor", label: "Doctor Profile" },
+      { href: "/dr-deepak-kumar-sharma-gastroenterologist-agra", label: "Doctor Profile" },
       { href: "/duty-doctor", label: "Duty Doctor" },
       { href: "/#procedures", label: "Treatments" },
       { href: "/about#why-choose", label: "Why Choose Us" },

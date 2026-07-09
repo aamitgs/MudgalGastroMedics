@@ -297,6 +297,7 @@ export default async function Home() {
                 </div>
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
+                <ButtonLink href="/dr-deepak-kumar-sharma-gastroenterologist-agra" variant="ghost">Read Doctor Profile <ArrowRight size={18} /></ButtonLink>
                 <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost"><Phone size={18} /> Call Reception</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
+import Script from "next/script";
 import "./globals.css";
 import { AppChrome } from "@/components/AppChrome";
 import { hospitalSchema, site } from "@/lib/site-data";
@@ -43,6 +44,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}
         />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-Y70R4VQ7NJ" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Y70R4VQ7NJ');
+          `}
+        </Script>
         <AppChrome>{children}</AppChrome>
         <Analytics />
       </body>
