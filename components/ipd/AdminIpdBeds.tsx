@@ -10,6 +10,7 @@ import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admiss
 import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { AiDischargeSummaryDraft } from "@/components/ipd/AiDischargeSummaryDraft";
 import { notify } from "@/lib/notify";
 import { downloadCsv } from "@/lib/table-export";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
@@ -595,10 +596,15 @@ export function AdminIpdBeds() {
                 placeholder="Diet advice"
               />
               <textarea
+                key={editingAdmission.dischargeSummary}
                 defaultValue={editingAdmission.dischargeSummary}
                 onBlur={(event) => void updateAdmission(editingAdmission.id, { dischargeSummary: event.target.value })}
                 className={`${fieldClass} mt-3 min-h-20 py-3`}
                 placeholder="Discharge summary"
+              />
+              <AiDischargeSummaryDraft
+                admissionId={editingAdmission.id}
+                onUseDraft={(draft) => void updateAdmission(editingAdmission.id, { dischargeSummary: draft })}
               />
               <a
                 href={`/api/pdf/discharge-summary?admissionId=${encodeURIComponent(editingAdmission.id)}`}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
-import { generatePatientSummary } from "@/lib/ai-summary";
+import { generateDischargeSummaryDraft } from "@/lib/ai-discharge-summary";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 
 export async function POST(request: Request) {
@@ -8,19 +8,19 @@ export async function POST(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  if (phone.replace(/\D/g, "").length < 6) {
-    return NextResponse.json({ ok: false, error: "A valid patient phone number is required." }, { status: 400 });
+  const admissionId = typeof body.admissionId === "string" ? body.admissionId.trim() : "";
+  if (!admissionId) {
+    return NextResponse.json({ ok: false, error: "An admission id is required." }, { status: 400 });
   }
 
-  const result = await generatePatientSummary(phone);
+  const result = await generateDischargeSummaryDraft(admissionId);
 
   await recordAuditEvent({
     actorRole: auth.context.activeRole,
     actorId: auth.context.userId,
-    action: "ai.patient_summary.generated",
-    entityType: "patient_summary",
-    entityId: phone,
+    action: "ai.discharge_summary.drafted",
+    entityType: "ipd_admission",
+    entityId: admissionId,
     severity: result.ok ? "info" : "warning",
     metadata: { ok: result.ok },
     device: auditRequestMetadata(request)
@@ -30,5 +30,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true, summary: result.summary, safetyNote: result.safetyNote });
+  return NextResponse.json({ ok: true, draft: result.draft, safetyNote: result.safetyNote });
 }
