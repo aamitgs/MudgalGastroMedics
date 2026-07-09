@@ -1,25 +1,41 @@
 import { NextResponse } from "next/server";
-import { authorize } from "@/lib/access/guard";
+import { getRequestAccessContext } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
+import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes, canEditAutomationTask, canViewAutomationTask } from "@/lib/automation-types";
 import type { AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType } from "@/lib/automation-types";
 import { createAutomationTask, generateAutomationTasks, listAutomationTasks, updateAutomationTask } from "@/lib/automation-store";
 import { queryAutomationTasks, type AutomationTaskSortField, type SortDirection } from "@/lib/automation-task-query";
+import { listStaff } from "@/lib/hr-store";
 
 const sortFields: AutomationTaskSortField[] = ["title", "type", "priority", "status", "dueAt", "createdAt"];
 
+/**
+ * The task queue spans many domains (reception, billing, lab, IPD...), so
+ * — like the notification inbox (Track 2.4) — it's open to every
+ * authenticated staff role, with each task's TYPE gating its own
+ * visibility via canViewAutomationTask (Track 4.7). Previously this
+ * required system-settings:view (admin-only), so tasks nominally owned by
+ * e.g. Reception were invisible to Reception.
+ */
+async function requireStaff(request: Request) {
+  const context = await getRequestAccessContext(request);
+  if (!context.authenticated || context.activeRole === "patient") return null;
+  return context;
+}
+
 export async function GET(request: Request) {
-  const auth = await authorize(request, "system-settings", "view");
-  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  const context = await requireStaff(request);
+  if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
   const params = new URL(request.url).searchParams;
   const pageParam = params.get("page");
-  const allTasks = await listAutomationTasks();
+  const allTasks = (await listAutomationTasks()).filter((task) => canViewAutomationTask(context.activeRole, task.type));
+  const staff = await listStaff();
 
   // Backward compatible: existing callers that pass no pagination params
   // keep getting the full flat list they always got.
   if (pageParam === null) {
-    return NextResponse.json({ ok: true, tasks: allTasks });
+    return NextResponse.json({ ok: true, tasks: allTasks, staff });
   }
 
   const sortBy = params.get("sortBy");
@@ -42,45 +58,55 @@ export async function GET(request: Request) {
     done: allTasks.filter((task) => task.status === "Done").length
   };
 
-  return NextResponse.json({ ok: true, ...result, stats });
+  return NextResponse.json({ ok: true, ...result, staff, stats });
 }
 
 export async function POST(request: Request) {
-  const auth = await authorize(request, "system-settings", "edit");
-  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  const context = await requireStaff(request);
+  if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const action = typeof body.action === "string" ? body.action : "create";
 
   if (action === "generate") {
+    if (!canEditAutomationTask(context.activeRole, "Appointment Follow-up") && context.activeRole !== "super-admin") {
+      return NextResponse.json({ ok: false, error: "Your role does not permit this action." }, { status: 403 });
+    }
     const generated = (await generateAutomationTasks());
     await recordAuditEvent({
-      actorRole: "admin",
+      actorRole: context.activeRole,
+      actorId: context.userId,
       action: "automation.tasks.generated",
       entityType: "automation_task",
       entityId: "generated-batch",
-      metadata: { generated: generated.length, ...auditRequestMetadata(request) }
+      metadata: { generated: generated.length },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: true, generated, tasks: (await listAutomationTasks()) });
   }
 
   const type = typeof body.type === "string" && automationTaskTypes.includes(body.type as AutomationTaskType) ? body.type : "Appointment Follow-up";
+  if (!canEditAutomationTask(context.activeRole, type as AutomationTaskType)) {
+    return NextResponse.json({ ok: false, error: "Your role does not permit this action." }, { status: 403 });
+  }
   const priority = typeof body.priority === "string" && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? body.priority : "Normal";
   const result = (await createAutomationTask({ ...body, type, priority }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   await recordAuditEvent({
-    actorRole: "admin",
+    actorRole: context.activeRole,
+    actorId: context.userId,
     action: "automation.task.created",
     entityType: "automation_task",
     entityId: result.task.id,
-    metadata: { type: result.task.type, priority: result.task.priority, status: result.task.status, ...auditRequestMetadata(request) }
+    metadata: { type: result.task.type, priority: result.task.priority, status: result.task.status },
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, task: result.task });
 }
 
 export async function PATCH(request: Request) {
-  const auth = await authorize(request, "system-settings", "edit");
-  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  const context = await requireStaff(request);
+  if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const id = typeof body.id === "string" ? body.id : "";
@@ -88,22 +114,35 @@ export async function PATCH(request: Request) {
   const priority = typeof body.priority === "string" && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? body.priority as AutomationTaskPriority : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "Automation task id is required." }, { status: 400 });
 
-  const task = (await updateAutomationTask({
+  const existing = (await listAutomationTasks()).find((item) => item.id === id);
+  if (!existing || !canViewAutomationTask(context.activeRole, existing.type)) {
+    return NextResponse.json({ ok: false, error: "Automation task not found." }, { status: 404 });
+  }
+  if (!canEditAutomationTask(context.activeRole, existing.type)) {
+    return NextResponse.json({ ok: false, error: "Your role does not permit this action." }, { status: 403 });
+  }
+
+  const result = (await updateAutomationTask({
     id,
     status,
     priority,
     dueAt: typeof body.dueAt === "string" ? body.dueAt : undefined,
     owner: typeof body.owner === "string" ? body.owner : undefined,
+    ownerStaffId: typeof body.ownerStaffId === "string" ? body.ownerStaffId : undefined,
     notes: typeof body.notes === "string" ? body.notes : undefined
   }));
 
-  if (!task) return NextResponse.json({ ok: false, error: "Automation task not found." }, { status: 404 });
+  if (!result) return NextResponse.json({ ok: false, error: "Automation task not found." }, { status: 404 });
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
   await recordAuditEvent({
-    actorRole: "admin",
+    actorRole: context.activeRole,
+    actorId: context.userId,
     action: "automation.task.updated",
     entityType: "automation_task",
-    entityId: task.id,
-    metadata: { type: task.type, priority: task.priority, status: task.status, ...auditRequestMetadata(request) }
+    entityId: result.id,
+    metadata: { type: result.type, priority: result.priority, status: result.status, ownerStaffId: result.ownerStaffId },
+    device: auditRequestMetadata(request)
   });
-  return NextResponse.json({ ok: true, task });
+  return NextResponse.json({ ok: true, task: result });
 }

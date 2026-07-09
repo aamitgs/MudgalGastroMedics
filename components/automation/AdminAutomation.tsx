@@ -6,6 +6,7 @@ import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus } from "@/lib/automation-types";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
 import type { AutomationTaskSortField } from "@/lib/automation-task-query";
+import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
@@ -23,6 +24,7 @@ type AutomationResponse = {
   tasks?: AutomationTask[];
   task?: AutomationTask;
   generated?: AutomationTask[];
+  staff?: StaffMember[];
   pageCount?: number;
   stats?: { open: number; queued: number; escalated: number; done: number };
   error?: string;
@@ -41,6 +43,7 @@ function priorityClass(priority: AutomationTaskPriority) {
 export function AdminAutomation() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [tasks, setTasks] = useState<AutomationTask[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
   const [stats, setStats] = useState({ open: 0, queued: 0, escalated: 0, done: 0 });
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -69,6 +72,7 @@ export function AdminAutomation() {
       return;
     }
     setTasks(data.tasks ?? []);
+    setStaff(data.staff ?? []);
     setPageCount(data.pageCount ?? 1);
     if (data.stats) setStats(data.stats);
     setLoading(false);
@@ -123,7 +127,7 @@ export function AdminAutomation() {
     void loadAutomation();
   }
 
-  async function updateTask(id: string, updates: Partial<Pick<AutomationTask, "status" | "priority" | "dueAt" | "owner" | "notes">>) {
+  async function updateTask(id: string, updates: Partial<Pick<AutomationTask, "status" | "priority" | "dueAt" | "owner" | "ownerStaffId" | "notes">>) {
     const response = await fetch("/api/automation", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -216,15 +220,22 @@ export function AdminAutomation() {
       {
         id: "owner",
         header: "Owner",
-        size: 140,
+        size: 160,
         enableSorting: false,
         cell: ({ row }) => (
-          <input
-            defaultValue={row.original.owner}
-            onBlur={(event) => void updateTask(row.original.id, { owner: event.target.value })}
+          <select
+            aria-label="Assigned staff"
+            value={row.original.ownerStaffId ?? ""}
+            onChange={(event) => void updateTask(row.original.id, { ownerStaffId: event.target.value })}
             className={`${fieldClass} min-h-8 text-xs`}
-            placeholder="Owner"
-          />
+          >
+            <option value="">{row.original.owner || "Unassigned"}</option>
+            {staff.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name} ({member.role})
+              </option>
+            ))}
+          </select>
         )
       },
       {
@@ -241,7 +252,7 @@ export function AdminAutomation() {
           ) : null
       }
     ],
-    [openDrawer]
+    [openDrawer, staff]
   );
 
   return (
@@ -289,7 +300,14 @@ export function AdminAutomation() {
               ))}
             </select>
             <input aria-label="Due at" name="dueAt" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-            <input name="owner" className={fieldClass} placeholder="Owner" />
+            <select aria-label="Assign to" name="ownerStaffId" className={fieldClass} defaultValue="">
+              <option value="">Unassigned</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name} ({member.role})
+                </option>
+              ))}
+            </select>
             <input name="patientName" className={fieldClass} placeholder="Patient name" />
             <input name="phone" className={fieldClass} placeholder="Phone" />
             <textarea name="description" className={`${fieldClass} min-h-24 py-3`} placeholder="Task description" />

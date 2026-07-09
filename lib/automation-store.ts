@@ -9,6 +9,7 @@ import { listLabOrders } from "@/lib/lab-store";
 import { listOpdVisits } from "@/lib/opd-store";
 import { listPharmacyDispenses } from "@/lib/pharmacy-store";
 import { listProcedureSchedules, procedureChecklistProgress } from "@/lib/procedure-store";
+import { getStaffById } from "@/lib/hr-store";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType } from "@/lib/automation-types";
 
 type AutomationStore = {
@@ -84,6 +85,15 @@ export async function createAutomationTask(input: Record<string, unknown>) {
   const doc = await docStore.load();
   const title = normalizeText(input.title);
   if (!title) return { error: "Task title is required." };
+
+  const ownerStaffId = normalizeText(input.ownerStaffId);
+  let owner = normalizeText(input.owner);
+  if (ownerStaffId) {
+    const staff = await getStaffById(ownerStaffId);
+    if (!staff) return { error: "Staff member not found." };
+    owner = staff.name;
+  }
+
   const now = new Date().toISOString();
   const task: AutomationTask = {
     id: makeId(),
@@ -98,7 +108,8 @@ export async function createAutomationTask(input: Record<string, unknown>) {
     description: normalizeText(input.description),
     patientName: normalizeText(input.patientName),
     phone: normalizeText(input.phone),
-    owner: normalizeText(input.owner),
+    owner,
+    ownerStaffId: ownerStaffId || undefined,
     notes: normalizeText(input.notes)
   };
   doc.tasks.unshift(task);
@@ -112,6 +123,8 @@ export async function updateAutomationTask(input: {
   priority?: AutomationTaskPriority;
   dueAt?: string;
   owner?: string;
+  /** Assigning a real staff member (Track 4.7) also refreshes the display-name `owner` string, so existing UI/CSV export keep working unchanged. Pass "" to unassign. */
+  ownerStaffId?: string;
   notes?: string;
 }) {
   const doc = await docStore.load();
@@ -121,6 +134,16 @@ export async function updateAutomationTask(input: {
   if (input.priority) task.priority = input.priority;
   if (typeof input.dueAt === "string") task.dueAt = input.dueAt.trim();
   if (typeof input.owner === "string") task.owner = input.owner.trim();
+  if (typeof input.ownerStaffId === "string") {
+    if (input.ownerStaffId) {
+      const staff = await getStaffById(input.ownerStaffId);
+      if (!staff) return { error: "Staff member not found." };
+      task.ownerStaffId = staff.id;
+      task.owner = staff.name;
+    } else {
+      task.ownerStaffId = undefined;
+    }
+  }
   if (typeof input.notes === "string") task.notes = input.notes.trim();
   task.updatedAt = new Date().toISOString();
   await docStore.save(doc);
