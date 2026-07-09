@@ -98,7 +98,7 @@ export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ fontSize: 30, fontWeight: 900 }}>{site.name}</div>
-              <div style={{ fontSize: 23, color: "rgba(255,255,255,0.74)" }}>
+              <div style={{ display: "flex", fontSize: 23, color: "rgba(255,255,255,0.74)" }}>
                 {site.addressLine1}, {site.city} | Call {site.mobile}
               </div>
             </div>

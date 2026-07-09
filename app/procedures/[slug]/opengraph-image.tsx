@@ -71,8 +71,8 @@ export default async function Image({ params }: OgImageProps) {
               Mudgal Gastromedics Hospital
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: 72, lineHeight: 0.96, fontWeight: 900, letterSpacing: -2, maxWidth: 920 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", fontSize: 72, lineHeight: 0.96, fontWeight: 900, letterSpacing: -2, maxWidth: 920 }}>
               {title} in Agra
             </div>
             <div style={{ marginTop: 28, fontSize: 30, lineHeight: 1.28, color: "rgba(255,255,255,0.82)", maxWidth: 920 }}>
@@ -81,7 +81,7 @@ export default async function Image({ params }: OgImageProps) {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 24, fontWeight: 800 }}>
             <div>Shaheed Nagar, Agra</div>
-            <div>Call {site.mobile}</div>
+            <div style={{ display: "flex" }}>Call {site.mobile}</div>
           </div>
         </div>
       </div>

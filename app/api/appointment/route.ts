@@ -41,7 +41,10 @@ async function sendHospitalNotification(appointment: AppointmentRecord) {
 }
 
 async function sendAppointmentNotifications(appointment: AppointmentRecord) {
-  await Promise.all([sendHospitalNotification(appointment), sendPatientConfirmation(appointment)]);
+  // Sequential, not Promise.all: two simultaneous connections on the same
+  // SMTP account can get one silently dropped by the provider.
+  await sendHospitalNotification(appointment);
+  await sendPatientConfirmation(appointment);
 }
 
 const sortFields: AppointmentSortField[] = ["name", "service", "status", "date", "createdAt"];

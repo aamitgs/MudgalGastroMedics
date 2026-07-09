@@ -174,6 +174,7 @@ export async function GET(_: Request, { params }: CoverImageProps) {
           <div style={{ maxWidth: 860, display: "flex", flexDirection: "column" }}>
             <div
               style={{
+                display: "flex",
                 alignSelf: "flex-start",
                 padding: "10px 18px",
                 borderRadius: 999,
