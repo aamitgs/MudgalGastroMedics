@@ -1,12 +1,15 @@
 "use client";
 
-import { Archive, Bell, CheckCheck, CheckCircle2, Inbox } from "lucide-react";
+import { Archive, Bell, CheckCheck, CheckCircle2, Inbox, Megaphone } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { NotificationStatus, StaffNotification } from "@/lib/notification-types";
+import { notify } from "@/lib/notify";
+import type { NotificationPriority, NotificationStatus, StaffNotification } from "@/lib/notification-types";
 import { notificationCategories } from "@/lib/notification-types";
 
 type NotificationsResponse = { ok: boolean; notifications?: StaffNotification[]; error?: string };
+type AnnouncementResponse = { ok: boolean; error?: string };
 
 const POLL_MS = 60_000;
 
@@ -51,6 +54,11 @@ export function NotificationCenter() {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("Open");
   const [error, setError] = useState("");
+  const [composing, setComposing] = useState(false);
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementDetail, setAnnouncementDetail] = useState("");
+  const [announcementPriority, setAnnouncementPriority] = useState<NotificationPriority>("Normal");
+  const [posting, setPosting] = useState(false);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
@@ -99,6 +107,27 @@ export function NotificationCenter() {
     void load();
   }
 
+  async function postAnnouncement() {
+    setPosting(true);
+    const response = await fetch("/api/announcements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: announcementTitle, detail: announcementDetail, priority: announcementPriority })
+    });
+    const data = (await response.json().catch(() => ({}))) as AnnouncementResponse;
+    setPosting(false);
+    if (!response.ok || !data.ok) {
+      notify.error(data.error || "Unable to post announcement.");
+      return;
+    }
+    notify.success("Announcement posted");
+    setAnnouncementTitle("");
+    setAnnouncementDetail("");
+    setAnnouncementPriority("Normal");
+    setComposing(false);
+    void load();
+  }
+
   const unread = notifications.filter((item) => item.status === "Unread");
   const hasCritical = unread.some((item) => item.priority === "Critical");
   const visible = useMemo(() => notifications.filter((item) => matchesFilter(item, filter)), [notifications, filter]);
@@ -126,15 +155,64 @@ export function NotificationCenter() {
       <PopoverContent align="end" className="w-[min(420px,92vw)] p-0">
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <p className="text-sm font-bold text-ink">Notifications</p>
-          <button
-            type="button"
-            onClick={() => void act(null, "read-all")}
-            disabled={!unread.length}
-            className="inline-flex items-center gap-1 text-xs font-bold text-muted transition hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <CheckCheck size={13} /> Mark all read
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setComposing((current) => !current)}
+              aria-expanded={composing}
+              className="inline-flex items-center gap-1 text-xs font-bold text-muted transition hover:text-brand"
+            >
+              <Megaphone size={13} /> Announce
+            </button>
+            <button
+              type="button"
+              onClick={() => void act(null, "read-all")}
+              disabled={!unread.length}
+              className="inline-flex items-center gap-1 text-xs font-bold text-muted transition hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <CheckCheck size={13} /> Mark all read
+            </button>
+          </div>
         </div>
+
+        {composing ? (
+          <div className="grid gap-2 border-b border-line bg-soft/60 px-4 py-3">
+            <input
+              value={announcementTitle}
+              onChange={(event) => setAnnouncementTitle(event.target.value)}
+              placeholder="Announcement title"
+              maxLength={120}
+              className="min-h-9 rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+            />
+            <textarea
+              value={announcementDetail}
+              onChange={(event) => setAnnouncementDetail(event.target.value)}
+              placeholder="Message every staff member will see"
+              maxLength={600}
+              className="min-h-16 rounded border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+            />
+            <div className="flex items-center justify-between gap-2">
+              <select
+                aria-label="Announcement priority"
+                value={announcementPriority}
+                onChange={(event) => setAnnouncementPriority(event.target.value as NotificationPriority)}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-xs font-bold text-ink"
+              >
+                <option value="Normal">Normal</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+              <ActionButton
+                variant="primary"
+                size="sm"
+                disabled={posting || !announcementTitle.trim() || !announcementDetail.trim()}
+                onClick={() => void postAnnouncement()}
+              >
+                {posting ? "Posting…" : "Post to all staff"}
+              </ActionButton>
+            </div>
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap gap-1.5 border-b border-line px-4 py-2" role="tablist" aria-label="Notification filters">
           {filters.map((option) => (

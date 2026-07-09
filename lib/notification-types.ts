@@ -10,7 +10,8 @@ export type NotificationCategory =
   | "Administrative"
   | "System"
   | "Emergency"
-  | "Management";
+  | "Management"
+  | "Announcement";
 
 export type NotificationPriority = "Normal" | "High" | "Critical";
 
@@ -45,6 +46,7 @@ export type StaffNotification = {
 
 export const notificationCategories: NotificationCategory[] = [
   "Emergency",
+  "Announcement",
   "Clinical",
   "Laboratory",
   "Pharmacy",
@@ -57,10 +59,14 @@ export const notificationCategories: NotificationCategory[] = [
 /**
  * Which permission gates visibility of each category. Derived from the same
  * matrix the server enforces — no separate audience config to drift.
- * Emergency is visible to every authenticated staff role by design.
+ * Emergency and Announcement are visible to every authenticated staff role
+ * by design — a hospital-wide notice (Track 4.11) needs everyone to see it,
+ * even though only admin-permission roles can post one (enforced server-side
+ * in app/api/announcements/route.ts, not by hiding the compose button).
  */
 const categoryResource: Record<NotificationCategory, AccessResource | null> = {
   Emergency: null,
+  Announcement: null,
   Clinical: "patients",
   Laboratory: "lab-orders",
   Pharmacy: "pharmacy-inventory",
