@@ -7,6 +7,7 @@ import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun, UsersRound } f
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { OfflineBanner } from "@/components/design-system/OfflineBanner";
 import { StaffFooter } from "@/components/StaffFooter";
 import { GlobalCommandPalette } from "@/components/hospital-os/GlobalCommandPalette";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
@@ -56,6 +57,9 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
 
   return (
     <div className={dark ? "dark" : undefined}>
+      <div className="sticky top-0 z-50">
+        <OfflineBanner />
+      </div>
       <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex min-h-14 w-[min(1560px,calc(100%-32px))] items-center gap-4">
           <Link href="/mudgalgastromedics-os" className="flex min-w-0 items-center gap-2.5" aria-label="MudgalGastromedics OS home">

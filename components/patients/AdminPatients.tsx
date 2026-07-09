@@ -155,11 +155,22 @@ export function AdminPatients() {
     async onValid(values) {
       // Mutation failures are transient/non-blocking (toast), never the
       // table's load-error state — a failed create must not blank the list.
-      const response = await fetch("/api/patients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, forceNew: duplicateMatch && confirmedNewPatient })
-      });
+      let response: Response;
+      try {
+        response = await fetch("/api/patients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, forceNew: duplicateMatch && confirmedNewPatient })
+        });
+      } catch {
+        // Network failure (offline/connection drop), not a server response —
+        // the form still holds every field the staff member typed (reset()
+        // only runs below, on success), and Retry re-reads the current form
+        // state rather than a stale captured copy, so an edit made while the
+        // toast is showing isn't silently discarded (Track 4.2).
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitPatient());
+        return;
+      }
       const data = (await response.json().catch(() => ({}))) as PatientResponse;
       if (!response.ok || !data.ok || !data.patient) {
         notify.error(data.error || "Unable to save patient.");

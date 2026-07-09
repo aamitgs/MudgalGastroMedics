@@ -71,5 +71,18 @@ export const notify = {
       action: { label: "Undo", onClick: onUndo },
       ...options
     });
+  },
+  /**
+   * Error with an inline Retry action (Track 4.2) — for a write that failed,
+   * typically from connectivity loss. Retrying re-submits the exact same
+   * in-memory payload; nothing is queued or auto-replayed in the background,
+   * so the caller always sees and explicitly confirms what's being retried.
+   */
+  retryable(message: string, onRetry: () => void, options?: NotifyOptions) {
+    return toast.error(message, {
+      duration: DURATION.error,
+      action: { label: "Retry", onClick: onRetry },
+      ...options
+    });
   }
 };

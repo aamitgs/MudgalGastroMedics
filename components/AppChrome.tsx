@@ -3,6 +3,7 @@
 import { MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { CtaBand } from "@/components/CtaBand";
+import { OfflineBanner } from "@/components/design-system/OfflineBanner";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { StaffChrome } from "@/components/StaffChrome";
@@ -25,7 +26,12 @@ export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>)
   // few still call it explicitly to skip non-duration motion (e.g. initial
   // slide-in offsets), which MotionConfig alone doesn't affect.
   if (pathname?.startsWith("/mudgalgastromedics-os")) {
-    return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
+    return (
+      <MotionConfig reducedMotion="user">
+        <OfflineBanner />
+        {children}
+      </MotionConfig>
+    );
   }
 
   if (staffChromeRoutes.some((route) => pathname?.startsWith(route))) {
