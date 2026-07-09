@@ -67,7 +67,8 @@ const additionalServices = [
 ];
 
 export function AppointmentForm() {
-  const [status, setStatus] = useState("");
+  const [resultMessage, setResultMessage] = useState("");
+  const [whatsappLink, setWhatsappLink] = useState("");
   const [selectedReport, setSelectedReport] = useState("");
   const fieldClass = "min-h-14 w-full rounded-lg border border-line bg-white px-4 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] transition placeholder:text-muted/65 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
   const optionClass = "flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-sm transition hover:border-brand hover:bg-soft/45";
@@ -81,7 +82,8 @@ export function AppointmentForm() {
     const symptoms = formData.getAll("symptoms").map(String).filter(Boolean);
     const data = Object.fromEntries(formData.entries());
     const payload = { ...data, symptoms, report: reportFileName };
-    setStatus("Preparing appointment request...");
+    setResultMessage("Preparing appointment request...");
+    setWhatsappLink("");
     let savedAppointment: AppointmentRecord | null = null;
 
     try {
@@ -101,7 +103,12 @@ export function AppointmentForm() {
     const text = encodeURIComponent(
       `Appointment request:\nName: ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email || "-"}\nAge: ${data.age || "-"}\nGender: ${data.gender || "-"}\nAddress: ${data.addressLine || "-"}\nCity: ${data.city || "-"}\nState: ${data.state || "-"}\nPIN code: ${data.postalCode || "-"}\nPatient type: ${data.patientType || "-"}\nPreferred contact: ${data.contactMethod || "Phone / WhatsApp"}\nService: ${data.service}\nPreferred date: ${data.date || "Flexible"}\nPreferred time: ${data.timeSlot || "Flexible"}\nPriority: ${data.priority || "Routine"}\nSymptoms: ${symptoms.length ? symptoms.join(", ") : "-"}\nDuration: ${data.duration || "-"}\nCurrent medicines/allergies: ${data.medicines || "-"}\nNeeds assistance: ${data.assistance ? "Yes" : "No"}\nReport attached: ${reportFileName || "No"}\nMessage: ${data.message || "-"}`
     );
-    setStatus(`${savedAppointment ? `Request saved as ${savedAppointment.id}. ` : "Request prepared. "}Please send it on WhatsApp: https://wa.me/${site.whatsapp}?text=${text}`);
+    setResultMessage(
+      savedAppointment
+        ? `Request saved as ${savedAppointment.id}. Our reception team will confirm shortly — you can also send it on WhatsApp for a faster response.`
+        : "Request prepared. Please send it on WhatsApp so reception can act on it."
+    );
+    setWhatsappLink(`https://wa.me/${site.whatsapp}?text=${text}`);
   }
 
   return (
@@ -315,7 +322,21 @@ export function AppointmentForm() {
           <Phone size={18} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
         </a>
       </div>
-      {status ? <p className="break-words rounded border border-teal/20 bg-soft/80 p-3 text-sm font-semibold text-teal-dark md:col-span-2">{status}</p> : null}
+      {resultMessage ? (
+        <div className="rounded border border-teal/20 bg-soft/80 p-3 md:col-span-2">
+          <p className="text-sm font-semibold text-teal-dark">{resultMessage}</p>
+          {whatsappLink ? (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 text-sm font-bold text-white transition hover:-translate-y-0.5"
+            >
+              <MessageCircle size={16} /> Send details on WhatsApp
+            </a>
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
 }
