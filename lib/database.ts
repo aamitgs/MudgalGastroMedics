@@ -2,6 +2,7 @@ import "server-only";
 
 import { Pool } from "pg";
 import type { QueryResultRow } from "pg";
+import { logServerError } from "@/lib/error-logger";
 
 type DatabaseHealth = {
   configured: boolean;
@@ -38,7 +39,17 @@ export function getPool() {
 }
 
 export async function query<T extends QueryResultRow = QueryResultRow>(text: string, values: unknown[] = []) {
-  return getPool().query<T>(text, values);
+  try {
+    return await getPool().query<T>(text, values);
+  } catch (error) {
+    // Single choke point for every database-mode store — logging here gives
+    // permanent, searchable visibility into DB failures across the whole
+    // app without touching each of the 70+ API routes individually. The
+    // error still rethrows unchanged so callers' existing handling is
+    // untouched.
+    logServerError("database.query", error, { queryStart: text.trim().slice(0, 80) });
+    throw error;
+  }
 }
 
 export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
