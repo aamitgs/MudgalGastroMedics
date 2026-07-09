@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublicProcedures } from "@/lib/cms-public";
+import { servicePages } from "@/lib/service-pages";
 import { site } from "@/lib/site-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -20,10 +21,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/refund-cancellation-policy",
     "/terms"
   ];
+  const serviceRoutes = servicePages.map((page) => `/services/${page.slug}`);
   const procedures = await getPublicProcedures();
   const procedureRoutes = procedures.map((procedure) => `/procedures/${procedure.slug}`);
 
-  return [...staticRoutes, ...procedureRoutes].map((route) => ({
+  return [...staticRoutes, ...serviceRoutes, ...procedureRoutes].map((route) => ({
     url: `${site.url}${route}`,
     lastModified: new Date()
   }));

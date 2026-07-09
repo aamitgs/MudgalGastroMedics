@@ -15,45 +15,45 @@ import { Section, SectionHead } from "@/components/Section";
 import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About Mudgal Gastromedics Hospital",
   description:
-    "About Mudgal Gastromedics Hospital, a specialty hospital in Agra for gastroenterology, hepatology, digestive health and advanced endoscopic care.",
+    "About Mudgal Gastromedics Hospital, a super-speciality centre in Agra for gastroenterology, liver care, digestive health and advanced therapeutic endoscopy.",
   alternates: { canonical: "/about" }
 };
 
 const missionCommitments = [
-  "Delivering accurate diagnosis and evidence-based treatment for gastrointestinal, liver, pancreatic, and digestive disorders.",
-  "Providing advanced diagnostic and therapeutic endoscopy using modern technology and internationally accepted medical practices.",
-  "Offering compassionate, respectful, and individualized care to every patient.",
-  "Promoting preventive healthcare through awareness, education, and early detection.",
-  "Maintaining the highest standards of patient safety, clinical quality, and ethical medical practice.",
-  "Continuously investing in advanced technology and the professional development of our healthcare team.",
-  "Making specialized gastroenterology services accessible, affordable, and reliable for the community."
+  "Delivering accurate diagnosis and personalized treatment for gastrointestinal, liver, pancreatic, and biliary disorders.",
+  "Providing advanced diagnostic and therapeutic endoscopic procedures using modern technology.",
+  "Promoting preventive healthcare through patient education, early detection, and regular screening.",
+  "Maintaining the highest standards of patient safety, infection control, and clinical excellence.",
+  "Offering ethical, transparent, and compassionate healthcare for every patient.",
+  "Continuously upgrading our medical knowledge, technology, and healthcare services.",
+  "Making specialized gastroenterology and liver care accessible and affordable for patients across the region."
 ];
 
 const coreValues = [
   {
     title: "Compassion",
     description:
-      "We care for every patient with empathy, kindness, and respect. We understand that every healthcare journey is unique, and we strive to provide emotional support alongside medical treatment.",
+      "We treat every patient with empathy, dignity, and respect, ensuring personalized care throughout their healthcare journey.",
     icon: HeartHandshake
   },
   {
     title: "Patient First",
     description:
-      "Every decision we make is centered around the needs, comfort, and well-being of our patients. We believe in listening carefully, communicating openly, and involving patients in their treatment decisions.",
+      "Every treatment decision is made with the patient's health, comfort, safety, and long-term well-being as our highest priority.",
     icon: Stethoscope
   },
   {
     title: "Clinical Excellence",
     description:
-      "We are committed to delivering the highest standards of healthcare through evidence-based medicine, continuous learning, and the adoption of advanced medical technologies.",
+      "We are committed to providing evidence-based healthcare through continuous learning, advanced technology, and internationally accepted medical standards.",
     icon: Sparkles
   },
   {
-    title: "Integrity & Ethics",
+    title: "Integrity",
     description:
-      "Honesty, transparency, confidentiality, and ethical medical practice are fundamental to the trust our patients place in us. We uphold these principles in every consultation, diagnosis, and treatment.",
+      "We practice medicine with honesty, transparency, confidentiality, and the highest ethical standards, building lasting trust with our patients.",
     icon: ShieldCheck
   },
   {
@@ -65,32 +65,39 @@ const coreValues = [
   {
     title: "Innovation",
     description:
-      "We embrace medical advancements and minimally invasive procedures to provide safer, more accurate diagnoses and more effective treatments with faster recovery whenever possible.",
+      "We embrace modern diagnostic techniques and minimally invasive therapeutic procedures to provide safer treatments, faster recovery, and better clinical outcomes.",
     icon: Lightbulb
-  },
-  {
-    title: "Respect",
-    description:
-      "We treat every patient, family member, visitor, and healthcare professional with dignity, courtesy, and respect, regardless of background or circumstance.",
-    icon: HeartHandshake
   },
   {
     title: "Teamwork",
     description:
-      "Quality healthcare is achieved through collaboration. Our doctors, nurses, technicians, and support staff work together to provide seamless, coordinated, and compassionate care.",
+      "Our doctors, nurses, technicians, and support staff work together to deliver coordinated, efficient, and compassionate healthcare.",
     icon: Users
-  },
-  {
-    title: "Continuous Improvement",
-    description:
-      "We continuously evaluate and enhance our services, clinical practices, and patient experience to ensure we remain at the forefront of digestive healthcare.",
-    icon: Activity
   },
   {
     title: "Community Commitment",
     description:
-      "We believe healthcare extends beyond the hospital. Through health awareness programs, preventive screenings, and patient education, we strive to improve the digestive health of our community.",
+      "We believe healthcare extends beyond hospital walls. Through health awareness, preventive screenings, and patient education, we strive to build a healthier community.",
     icon: Users
+  }
+];
+
+const careAreas = [
+  {
+    title: "Liver Diseases",
+    items: ["Fatty Liver Disease", "Metabolic Liver Disease", "Genetic Liver Disorders", "Hepatitis A, B & C", "Liver Cirrhosis", "Liver Failure", "Liver Cancer", "Hemochromatosis", "Portal Hypertension"]
+  },
+  {
+    title: "Esophageal & Stomach Disorders",
+    items: ["GERD / Acid Reflux", "Gastritis", "Peptic Ulcer Disease", "Esophagitis", "Esophageal Stricture", "Difficulty Swallowing", "H. pylori Infection"]
+  },
+  {
+    title: "Intestinal Disorders",
+    items: ["Irritable Bowel Syndrome", "Inflammatory Bowel Disease", "Ulcerative Colitis", "Crohn's Disease", "Chronic Constipation", "Chronic Diarrhea", "Enteritis", "Colon Polyps"]
+  },
+  {
+    title: "Pancreatic & Gallbladder Disorders",
+    items: ["Pancreatitis", "Gallstones", "Biliary Disorders", "Gallbladder Diseases", "Pancreatic Disorders"]
   }
 ];
 
@@ -98,31 +105,44 @@ const diagnostics = [
   "Upper GI Endoscopy",
   "Colonoscopy",
   "FibroScan",
-  "Capsule Endoscopy",
+  "Liver Biopsy",
   "Liver Function Assessment",
-  "Gastrointestinal Disease Screening"
+  "Liver Function Tests",
+  "Gastrointestinal Cancer Screening",
+  "Colon Cancer Screening",
+  "Gastric Cancer Screening",
+  "Esophageal Cancer Screening",
+  "Pancreatic Disease Evaluation",
+  "Gallbladder Disease Evaluation",
+  "Medical Weight Assessment",
+  "Digestive Health Check-up",
+  "Executive GI Health Check-up"
 ];
 
 const therapeuticProcedures = [
   "ERCP",
-  "Endoscopic Polypectomy",
-  "Variceal Band Ligation",
   "Argon Plasma Coagulation (APC)",
-  "PEG Tube Placement",
+  "Variceal Band Ligation",
   "Endoscopic Hemostasis",
   "Foreign Body Removal",
-  "Advanced Therapeutic Endoscopy"
+  "Enteral Stent Placement",
+  "PEG Tube Placement",
+  "Endoscopic Dilatation of Esophageal Strictures",
+  "Endoscopic Management of Gastrointestinal Bleeding",
+  "Endoscopic Removal of Gastrointestinal Polyps",
+  "Biliary Stone Removal",
+  "Biliary & Pancreatic Stenting"
 ];
 
 const whyChoose = [
   {
     title: "Specialized Expertise",
-    description: "Dedicated care for diseases affecting the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract."
+    description: "Focused care for diseases of the digestive system, liver, pancreas, and biliary tract."
   },
   {
-    title: "Experienced Medical Team",
+    title: "Advanced Technology",
     description:
-      "Our specialists and healthcare professionals are dedicated to delivering evidence-based care with compassion, professionalism, and clinical excellence."
+      "Modern diagnostic and therapeutic equipment designed to support accurate diagnosis and minimally invasive treatment."
   },
   {
     title: "Personalized Care",
@@ -130,11 +150,42 @@ const whyChoose = [
       "Every patient receives an individualized treatment plan based on their medical condition, health history, lifestyle, and long-term wellness goals."
   },
   {
-    title: "Modern Infrastructure",
+    title: "Experienced Leadership",
     description:
-      "Our hospital is equipped with advanced medical technology, comfortable patient facilities, and a safe, hygienic environment designed to support high-quality healthcare."
+      "Under the guidance of Dr. Deepak Kumar Sharma, patients receive expert care backed by advanced training and clinical experience in gastroenterology and hepatology."
+  },
+  {
+    title: "Ethical & Transparent Healthcare",
+    description:
+      "We believe in clear communication, evidence-based medicine, informed decision-making, and compassionate patient care."
+  },
+  {
+    title: "Patient Safety",
+    description:
+      "Our hospital follows stringent infection-control practices, quality assurance protocols, and accepted standards of patient safety."
   }
 ];
+
+const localAreas = [
+  "Shaheed Nagar",
+  "Rajpur Chungi",
+  "Kaveri Vihar",
+  "Panchvati",
+  "Fatehabad Road",
+  "Shamsabad Road",
+  "Tajganj",
+  "Agra Cantt",
+  "Civil Lines",
+  "Kamla Nagar",
+  "Dayal Bagh",
+  "Sikandra",
+  "New Agra",
+  "Sanjay Place",
+  "Lohamandi",
+  "Rakabganj"
+];
+
+const nearbyCities = ["Mathura", "Vrindavan", "Firozabad", "Bharatpur", "Dholpur", "Morena", "Gwalior", "Mainpuri", "Etah", "Kasganj", "Hathras", "Aligarh"];
 
 export default function AboutPage() {
   return (
@@ -147,11 +198,11 @@ export default function AboutPage() {
               <span data-hi lang="hi">{site.name} के बारे में</span>
             </p>
             <h1 className="inline-lang max-w-4xl text-5xl font-black leading-tight md:text-7xl">
-              <span data-en>Compassionate Care. Advanced Gastroenterology. Trusted Expertise.</span>
-              <span data-hi lang="hi">दयालु देखभाल। उन्नत गैस्ट्रोएंटरोलॉजी। विश्वसनीय विशेषज्ञता।</span>
+              <span data-en>Advanced Gastroenterology, Liver Care & Therapeutic Endoscopy in Agra</span>
+              <span data-hi lang="hi">आगरा में उन्नत गैस्ट्रोएंटरोलॉजी, लिवर केयर और चिकित्सीय एंडोस्कोपी।</span>
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-en>
-              Specialized gastroenterology, hepatology, digestive health, and advanced endoscopic care in Agra, Uttar Pradesh.
+              Prevention, diagnosis, and treatment for diseases affecting the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract.
             </p>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">
               आगरा, उत्तर प्रदेश में विशेषज्ञ गैस्ट्रोएंटरोलॉजी, हेपेटोलॉजी, पाचन स्वास्थ्य और उन्नत एंडोस्कोपिक देखभाल।
@@ -188,13 +239,13 @@ export default function AboutPage() {
             <h2 className="mt-2 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">Comprehensive digestive healthcare with clinical excellence and compassion</h2>
             <div className="mt-6 grid gap-5 text-muted lg:grid-cols-3">
               <p className="leading-relaxed">
-                Mudgal Gastromedics Hospital is a leading specialty hospital dedicated to providing comprehensive gastroenterology, hepatology, digestive health, and advanced endoscopic care in Agra, Uttar Pradesh. Built on the principles of clinical excellence, compassion, and ethical medical practice, our hospital is committed to delivering high-quality healthcare for patients with disorders of the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract.
+                Mudgal Gastromedics Hospital is a premier super-speciality center dedicated to the prevention, diagnosis, and treatment of diseases affecting the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract. Located in Shaheed Nagar, Agra, our hospital is committed to delivering world-class gastroenterology and hepatology services through clinical excellence, advanced technology, evidence-based medicine, and compassionate patient care.
               </p>
               <p className="leading-relaxed">
-                We understand that digestive health plays a vital role in overall well-being. Our goal is not only to diagnose and treat diseases but also to educate patients, promote preventive healthcare, and support long-term wellness. Every patient receives personalized attention, evidence-based treatment, and compassionate care in a safe and comfortable environment.
+                Founded with the vision of making advanced digestive healthcare accessible to everyone, Mudgal Gastromedics Hospital combines experienced medical expertise with modern diagnostic and therapeutic facilities to provide comprehensive care under one roof. From routine digestive consultations and preventive health check-ups to complex therapeutic endoscopic procedures and liver disease management, we are dedicated to helping every patient achieve better health and an improved quality of life.
               </p>
               <p className="leading-relaxed">
-                At Mudgal Gastromedics Hospital, we combine experienced medical professionals, modern diagnostic technology, and advanced therapeutic procedures to ensure accurate diagnosis, effective treatment, and the best possible clinical outcomes. Whether you need a routine consultation, preventive screening, advanced endoscopy, or specialized treatment for complex gastrointestinal disorders, our team is committed to guiding you at every stage of your healthcare journey.
+                Led by Dr. Deepak Kumar Sharma, Founder & Principal Consultant Gastroenterologist, Hepatologist and Advanced Endoscopist, the hospital has earned the trust of patients from Agra and neighboring districts by providing personalized treatment, accurate diagnosis, and ethical medical care.
               </p>
             </div>
           </article>
@@ -211,10 +262,10 @@ export default function AboutPage() {
               <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Our Vision</p>
               <h2 className="mt-2 text-3xl font-black leading-tight text-ink">To be the most trusted and preferred center for digestive healthcare</h2>
               <p className="mt-4 leading-relaxed text-muted">
-                To be the most trusted and preferred center for gastroenterology, liver care, digestive health, and advanced endoscopic services in Agra and across North India by delivering compassionate, ethical, and evidence-based healthcare.
+                To become the most trusted and preferred center for gastroenterology, hepatology, digestive health, and advanced endoscopic care in Agra and North India by delivering exceptional patient care, clinical excellence, innovation, and ethical medical practice.
               </p>
               <p className="mt-4 leading-relaxed text-muted">
-                We aspire to set new benchmarks in patient care through clinical excellence, innovation, advanced technology, and a commitment to improving the quality of life for every individual we serve.
+                We aspire to improve lives through early diagnosis, advanced treatment, preventive healthcare, and continuous medical innovation while maintaining the highest standards of safety, quality, and compassion.
               </p>
             </article>
           </MotionReveal>
@@ -226,7 +277,7 @@ export default function AboutPage() {
               <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Our Mission</p>
               <h2 className="mt-2 text-3xl font-black leading-tight text-ink">Patient-centered digestive healthcare through advanced expertise</h2>
               <p className="mt-4 leading-relaxed text-muted">
-                Our mission is to provide comprehensive, accessible, and patient-centered digestive healthcare through advanced medical expertise and personalized treatment.
+                Our mission is to provide comprehensive, patient-centered digestive healthcare through advanced medical expertise, state-of-the-art technology, and evidence-based treatment.
               </p>
             </article>
           </MotionReveal>
@@ -250,10 +301,33 @@ export default function AboutPage() {
       </Section>
 
       <Section>
+        <SectionHead eyebrow="Comprehensive Gastroenterology & Liver Care" title="Specialized care for digestive, liver, pancreatic, and biliary diseases">
+          <p>Mudgal Gastromedics Hospital provides focused evaluation and treatment planning for a wide range of digestive and liver conditions.</p>
+        </SectionHead>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {careAreas.map((area, index) => (
+            <MotionReveal key={area.title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
+              <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
+                <h2 className="text-xl font-black text-ink">{area.title}</h2>
+                <div className="mt-4 grid gap-2">
+                  {area.items.map((item) => (
+                    <div key={item} className="flex gap-3 text-sm font-medium text-muted">
+                      <ShieldCheck className="mt-0.5 shrink-0 text-teal" size={16} />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            </MotionReveal>
+          ))}
+        </div>
+      </Section>
+
+      <Section>
         <SectionHead eyebrow="Our Core Values" title="The values guiding every decision">
           <p>Our values define who we are and reflect our commitment to exceptional patient care and medical excellence.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {coreValues.map(({ title, description, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.03, 0.2)}>
               <article className="group h-full rounded border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
@@ -272,7 +346,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Why Choose Mudgal Gastromedics Hospital?" title="Specialized digestive healthcare with quality, safety, and personal attention">
           <p>Choosing the right healthcare provider is one of the most important decisions for you and your family.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {whyChoose.map(({ title, description }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
@@ -289,9 +363,9 @@ export default function AboutPage() {
                 <span className="grid h-12 w-12 place-items-center rounded bg-brand text-white">
                   <Microscope size={24} />
                 </span>
-                <h2 className="text-2xl font-black text-ink">Advanced Diagnostics</h2>
+                <h2 className="text-2xl font-black text-ink">Advanced Diagnostic Services</h2>
               </div>
-              <p className="mt-3 text-muted">State-of-the-art diagnostic facilities for early detection and accurate diagnosis.</p>
+              <p className="mt-3 text-muted">Accurate diagnosis is the foundation of successful treatment. Our hospital offers modern diagnostic services to evaluate digestive and liver disorders with precision.</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {diagnostics.map((item) => (
                   <span key={item} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">{item}</span>
@@ -307,7 +381,7 @@ export default function AboutPage() {
                 </span>
                 <h2 className="text-2xl font-black text-ink">Advanced Therapeutic Procedures</h2>
               </div>
-              <p className="mt-3 text-muted">Comprehensive treatment options using modern endoscopic techniques.</p>
+              <p className="mt-3 text-muted">Mudgal Gastromedics Hospital is equipped to perform a comprehensive range of advanced therapeutic endoscopic procedures that reduce the need for major surgery and promote faster recovery.</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {therapeuticProcedures.map((item) => (
                   <span key={item} className="rounded border border-line bg-soft px-3 py-2 text-sm font-bold text-ink">{item}</span>
@@ -352,14 +426,42 @@ export default function AboutPage() {
       </Section>
 
       <Section muted>
+        <SectionHead eyebrow="Serving Patients Across Agra & Beyond" title="Specialized gastroenterology and liver care for the region">
+          <p>Patients visit Mudgal Gastromedics Hospital from Shaheed Nagar and many nearby areas for digestive, liver, and advanced endoscopic care.</p>
+        </SectionHead>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <MotionReveal>
+            <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
+              <h2 className="text-2xl font-black text-ink">Agra local areas</h2>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {localAreas.map((area) => (
+                  <span key={area} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{area}</span>
+                ))}
+              </div>
+            </article>
+          </MotionReveal>
+          <MotionReveal delay={0.08}>
+            <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
+              <h2 className="text-2xl font-black text-ink">Nearby cities and districts</h2>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {nearbyCities.map((city) => (
+                  <span key={city} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{city}</span>
+                ))}
+              </div>
+            </article>
+          </MotionReveal>
+        </div>
+      </Section>
+
+      <Section muted>
         <MotionReveal>
           <div className="rounded border border-line bg-white p-8 text-center shadow-lift md:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Your Health. Our Expertise. Our Commitment.</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Your Digestive Health is Our Priority</p>
             <h2 className="mx-auto mt-3 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">
-              Experience compassionate care, advanced medical expertise, and trusted gastroenterology services all under one roof.
+              Experience trusted gastroenterology, advanced liver care, and modern endoscopic treatment at Mudgal Gastromedics Hospital.
             </h2>
             <p className="mx-auto mt-5 max-w-3xl leading-relaxed text-muted">
-              Whether you are seeking preventive care, expert consultation, advanced diagnostic services, or specialized treatment for complex digestive disorders, Mudgal Gastromedics Hospital is here to support you every step of the way.
+              Whether you need a routine digestive health consultation, preventive screening, advanced therapeutic endoscopy, or specialized treatment for complex gastrointestinal or liver diseases, our dedicated team is here to help you achieve better health with confidence.
             </p>
           </div>
         </MotionReveal>

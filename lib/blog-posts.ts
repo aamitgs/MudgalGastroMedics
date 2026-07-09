@@ -1,4 +1,5 @@
 import { site } from "@/lib/site-data";
+import { additionalSeoBlogPosts } from "@/lib/additional-blog-posts";
 
 export type BlogPost = {
   slug: string;
@@ -11,6 +12,8 @@ export type BlogPost = {
   relatedHref: string;
   relatedLabel: string;
   keywords: string[];
+  coverImage?: string;
+  ogImage?: string;
   intro: string;
   sections: Array<{ title: string; body: string; items?: string[] }>;
   faqs: Array<{ question: string; answer: string }>;
@@ -22,12 +25,14 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "What Is Fatty Liver? Symptoms, Causes and When to Consult",
     description: "A simple guide to fatty liver symptoms, common causes, liver tests, FibroScan and when Indian patients should consult a liver specialist in Agra.",
-    date: "January 1, 2026",
+    date: "July 9, 2026",
     readTime: "6 min read",
     accent: "#b9852f",
     relatedHref: "/procedures/fatty-liver",
     relatedLabel: "Fatty Liver Treatment in Agra",
     keywords: ["What is Fatty Liver", "Fatty Liver Symptoms", "Fatty Liver Treatment in Agra", "Fatty Liver Specialist in Agra", "Liver Specialist in Agra", "FibroScan in Agra"],
+    coverImage: "/images/blog/what-is-fatty-liver-symptoms-causes-cover.jpg",
+    ogImage: "/images/blog/what-is-fatty-liver-symptoms-causes-og.jpg",
     intro: "Fatty liver means excess fat has built up in liver cells. It is very common in India and may be linked with diabetes, obesity, high triglycerides, alcohol intake or sedentary lifestyle. Many patients feel normal, so reports and follow-up matter.",
     sections: [
       {
@@ -61,7 +66,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Best Diet for Fatty Liver: Indian Food Guide",
     description: "A practical Indian diet guide for fatty liver covering chapati, rice, oil, sugar, fruits, protein, alcohol avoidance and lifestyle habits.",
-    date: "January 2, 2026",
+    date: "July 6, 2026",
     readTime: "7 min read",
     accent: "#84cc16",
     relatedHref: "/procedures/fatty-liver",
@@ -100,7 +105,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Stomach Care",
     title: "GERD and Acid Reflux: Symptoms, Causes and Treatment",
     description: "Understand acidity, GERD, heartburn, reflux symptoms, lifestyle triggers, warning signs and when endoscopy may be needed.",
-    date: "January 3, 2026",
+    date: "July 3, 2026",
     readTime: "6 min read",
     accent: "#22d3ee",
     relatedHref: "/procedures/acidity-gerd",
@@ -139,7 +144,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Stomach Pain Causes: When Should You See a Gastroenterologist?",
     description: "Stomach pain may be due to acidity, ulcers, gallstones, pancreatitis, liver disease or intestinal problems. Learn warning signs and when to consult.",
-    date: "January 4, 2026",
+    date: "June 30, 2026",
     readTime: "6 min read",
     accent: "#14b8a6",
     relatedHref: "/procedures/peptic-ulcer-disease",
@@ -178,7 +183,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Intestine Care",
     title: "IBS Symptoms and Treatment: Indian Patient Guide",
     description: "Understand IBS symptoms, triggers, bowel habit changes, bloating, stress connection, diet planning and when tests like colonoscopy may be needed.",
-    date: "January 5, 2026",
+    date: "June 27, 2026",
     readTime: "7 min read",
     accent: "#06b6d4",
     relatedHref: "/procedures/ibs",
@@ -217,7 +222,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Intestine Care",
     title: "Chronic Constipation: Causes, Tests and Treatment Options",
     description: "A patient guide to chronic constipation causes, fiber, hydration, medicines, warning signs and when colonoscopy or specialist care is needed.",
-    date: "January 6, 2026",
+    date: "June 24, 2026",
     readTime: "6 min read",
     accent: "#0f766e",
     relatedHref: "/procedures/chronic-constipation",
@@ -256,7 +261,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Liver Cirrhosis Symptoms and Warning Signs",
     description: "Learn common liver cirrhosis symptoms, complications, variceal bleeding warning signs, ascites, jaundice and when urgent care is needed.",
-    date: "January 7, 2026",
+    date: "June 21, 2026",
     readTime: "7 min read",
     accent: "#f59e0b",
     relatedHref: "/procedures/liver-cirrhosis",
@@ -295,7 +300,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Intestine Care",
     title: "Chronic Diarrhea: When It Needs Specialist Evaluation",
     description: "Learn chronic diarrhea causes, warning signs, stool tests, colonoscopy need, dehydration risk and when to consult a gastroenterologist.",
-    date: "January 8, 2026",
+    date: "June 18, 2026",
     readTime: "6 min read",
     accent: "#0891b2",
     relatedHref: "/procedures/chronic-diarrhea",
@@ -334,7 +339,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Hepatitis B and Hepatitis C: Tests, Symptoms and Treatment",
     description: "Patient guide to hepatitis B and C symptoms, blood tests, liver monitoring, treatment planning, family screening and when to consult a liver specialist.",
-    date: "January 9, 2026",
+    date: "June 15, 2026",
     readTime: "7 min read",
     accent: "#0ea5e9",
     relatedHref: "/procedures/liver-cirrhosis",
@@ -373,7 +378,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Biliary Care",
     title: "Gallstones and Bile Duct Stones: Difference, Symptoms and Treatment",
     description: "Understand gallstones, CBD stones, bile duct blockage, jaundice, fever, ERCP, surgery referral and when urgent gastro care is needed.",
-    date: "January 10, 2026",
+    date: "June 12, 2026",
     readTime: "7 min read",
     accent: "#f97316",
     relatedHref: "/procedures/cbd-stone-removal",
@@ -412,7 +417,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Pancreas Care",
     title: "Pancreatitis: Symptoms, Causes and Treatment in Agra",
     description: "Understand acute and chronic pancreatitis symptoms, alcohol and gallstone causes, warning signs, tests and when specialist care is needed.",
-    date: "January 11, 2026",
+    date: "June 9, 2026",
     readTime: "7 min read",
     accent: "#8b5cf6",
     relatedHref: "/procedures/pancreatic-disorders",
@@ -451,7 +456,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Colon Health",
     title: "Colon Cancer Symptoms and Screening: When Colonoscopy Is Needed",
     description: "Learn colon cancer warning signs, colon polyps, blood in stool, anemia, family history and when colonoscopy screening should be discussed.",
-    date: "January 12, 2026",
+    date: "June 6, 2026",
     readTime: "7 min read",
     accent: "#10b981",
     relatedHref: "/procedures/colonoscopy",
@@ -489,7 +494,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Procedure Guide",
     title: "Endoscopy Preparation: What Indian Patients Should Know",
     description: "A practical endoscopy preparation guide for Indian patients, including fasting, medicines, blood thinners, attendant advice and when to call a gastroenterologist in Agra.",
-    date: "January 13, 2026",
+    date: "June 3, 2026",
     readTime: "6 min read",
     accent: "#22d3ee",
     relatedHref: "/procedures/endoscopy",
@@ -529,7 +534,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Procedure Guide",
     title: "Colonoscopy Preparation Guide: Diet, Bowel Prep and Safety",
     description: "Patient-friendly colonoscopy preparation guide covering diet, bowel cleansing, medicines, attendant requirement, recovery and warning symptoms.",
-    date: "January 14, 2026",
+    date: "May 31, 2026",
     readTime: "7 min read",
     accent: "#10b981",
     relatedHref: "/procedures/colonoscopy",
@@ -568,7 +573,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Fatty Liver Disease: Symptoms, Tests and Treatment in Agra",
     description: "Understand fatty liver symptoms, causes, FibroScan, liver tests, lifestyle care and when to consult a liver specialist in Agra.",
-    date: "January 15, 2026",
+    date: "May 28, 2026",
     readTime: "6 min read",
     accent: "#b9852f",
     relatedHref: "/procedures/fatty-liver",
@@ -607,7 +612,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Blood in Stool: Causes and When to Consult a Gastroenterologist",
     description: "Blood in stool can occur from piles, fissure, colitis, polyps, ulcers or serious disease. Learn warning signs and when colonoscopy may be needed.",
-    date: "January 16, 2026",
+    date: "May 25, 2026",
     readTime: "6 min read",
     accent: "#dc2626",
     relatedHref: "/procedures/gastrointestinal-bleeding-management",
@@ -646,7 +651,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Jaundice: Causes, Warning Signs and Treatment in Agra",
     description: "Jaundice may be caused by hepatitis, liver disease, bile duct stones or obstruction. Learn warning symptoms and when ERCP or liver care may be needed.",
-    date: "January 17, 2026",
+    date: "May 22, 2026",
     readTime: "6 min read",
     accent: "#f59e0b",
     relatedHref: "/procedures/obstructive-jaundice",
@@ -685,7 +690,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Patient Guide",
     title: "When Should You See a Gastroenterologist?",
     description: "Know when acidity, abdominal pain, jaundice, bleeding, bowel changes, weight loss or liver reports need specialist gastroenterology care.",
-    date: "January 18, 2026",
+    date: "May 19, 2026",
     readTime: "6 min read",
     accent: "#0891b2",
     relatedHref: "/dr-deepak-kumar-sharma-gastroenterologist-agra",
@@ -710,7 +715,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Procedure Guide",
     title: "Endoscopy vs Colonoscopy: Difference, Preparation and Uses",
     description: "Understand the difference between upper GI endoscopy and colonoscopy, when each is advised, preparation, sedation and recovery.",
-    date: "January 19, 2026",
+    date: "May 16, 2026",
     readTime: "7 min read",
     accent: "#22d3ee",
     relatedHref: "/procedures/endoscopy",
@@ -735,7 +740,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Black Stool: Causes and When It Is an Emergency",
     description: "Black stool can be caused by medicines, iron, food or upper GI bleeding. Learn danger signs and when urgent endoscopy may be needed.",
-    date: "January 20, 2026",
+    date: "May 13, 2026",
     readTime: "6 min read",
     accent: "#334155",
     relatedHref: "/procedures/gastrointestinal-bleeding-management",
@@ -760,7 +765,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Emergency Symptoms",
     title: "Vomiting Blood: Causes, Emergency Warning Signs and Treatment",
     description: "Vomiting blood may be due to ulcer bleeding, varices, gastritis or severe upper GI bleeding. Learn urgent warning signs and treatment steps.",
-    date: "January 21, 2026",
+    date: "May 10, 2026",
     readTime: "6 min read",
     accent: "#dc2626",
     relatedHref: "/procedures/gastrointestinal-bleeding-management",
@@ -785,7 +790,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Difficulty Swallowing: Causes, Tests and Treatment",
     description: "Difficulty swallowing may be caused by reflux injury, food-pipe narrowing, stricture, motility problems or growths. Learn when endoscopy is needed.",
-    date: "January 22, 2026",
+    date: "May 7, 2026",
     readTime: "6 min read",
     accent: "#0ea5e9",
     relatedHref: "/procedures/difficulty-swallowing",
@@ -810,7 +815,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Bloating and Gas: Common Causes and When to Consult",
     description: "Bloating and gas may be due to indigestion, IBS, constipation, food intolerance, acidity or serious digestive disease when warning signs are present.",
-    date: "January 23, 2026",
+    date: "May 4, 2026",
     readTime: "6 min read",
     accent: "#14b8a6",
     relatedHref: "/procedures/ibs",
@@ -835,7 +840,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Stomach Care",
     title: "H. pylori Infection: Symptoms, Testing and Treatment",
     description: "H. pylori can cause gastritis, ulcers, acidity and recurrent stomach pain. Learn symptoms, testing, treatment and follow-up.",
-    date: "January 24, 2026",
+    date: "May 1, 2026",
     readTime: "6 min read",
     accent: "#f97316",
     relatedHref: "/procedures/peptic-ulcer-disease",
@@ -860,7 +865,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Intestine Care",
     title: "Ulcerative Colitis vs Crohn's Disease: Key Differences",
     description: "Understand the difference between ulcerative colitis and Crohn's disease, symptoms, colonoscopy, biopsy, treatment and follow-up.",
-    date: "January 25, 2026",
+    date: "April 28, 2026",
     readTime: "7 min read",
     accent: "#8b5cf6",
     relatedHref: "/procedures/ibd-colitis",
@@ -885,7 +890,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "FibroScan Test: Why It Is Done for Fatty Liver and Liver Fibrosis",
     description: "Learn how FibroScan helps assess fatty liver, liver stiffness, fibrosis risk, cirrhosis monitoring and chronic liver disease.",
-    date: "January 26, 2026",
+    date: "April 25, 2026",
     readTime: "6 min read",
     accent: "#b9852f",
     relatedHref: "/procedures/fibroscan",
@@ -908,9 +913,9 @@ export const seoBlogPosts: BlogPost[] = [
   {
     slug: "ercp-procedure-cbd-stones-jaundice",
     category: "Procedure Guide",
-    title: "ERCP Procedure: When It Is Needed for CBD Stones and Jaundice",
-    description: "Understand ERCP for common bile duct stones, obstructive jaundice, bile duct blockage, stenting, risks, preparation and recovery.",
-    date: "January 27, 2026",
+    title: "ERCP Specialist in Agra: When ERCP Is Needed for CBD Stones and Jaundice",
+    description: "Understand when to consult an ERCP specialist in Agra for common bile duct stones, obstructive jaundice, bile duct blockage, stenting, risks, preparation and recovery.",
+    date: "April 22, 2026",
     readTime: "7 min read",
     accent: "#0ea5e9",
     relatedHref: "/procedures/ercp",
@@ -935,7 +940,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Alcoholic Liver Disease: Symptoms, Tests and Treatment",
     description: "Learn how alcohol affects the liver, symptoms, liver tests, fatty liver, cirrhosis risk, FibroScan and when to consult a liver specialist.",
-    date: "January 28, 2026",
+    date: "April 19, 2026",
     readTime: "7 min read",
     accent: "#f59e0b",
     relatedHref: "/procedures/liver-cirrhosis",
@@ -960,7 +965,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Liver Care",
     title: "Foods Good for Liver Health: Indian Diet Tips",
     description: "Indian diet tips for liver health, fatty liver, protein, vegetables, sugar reduction, alcohol avoidance and practical meal planning.",
-    date: "January 29, 2026",
+    date: "April 16, 2026",
     readTime: "6 min read",
     accent: "#84cc16",
     relatedHref: "/procedures/fatty-liver",
@@ -985,7 +990,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Colon Health",
     title: "Colon Polyps: Symptoms, Removal and Cancer Prevention",
     description: "Learn what colon polyps are, symptoms, colonoscopy removal, biopsy, surveillance and how polyp removal can reduce colon cancer risk.",
-    date: "January 30, 2026",
+    date: "April 13, 2026",
     readTime: "6 min read",
     accent: "#10b981",
     relatedHref: "/procedures/colon-polyps",
@@ -1010,7 +1015,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Persistent Vomiting: Gastro Causes and Warning Signs",
     description: "Persistent vomiting may be due to acidity, obstruction, ulcer, pancreatitis, infection, liver or metabolic causes. Learn warning signs.",
-    date: "January 31, 2026",
+    date: "April 10, 2026",
     readTime: "6 min read",
     accent: "#0f766e",
     relatedHref: "/procedures/peptic-ulcer-disease",
@@ -1035,7 +1040,7 @@ export const seoBlogPosts: BlogPost[] = [
     category: "Symptom Guide",
     title: "Unexplained Weight Loss and Digestive Symptoms: When to Investigate",
     description: "Unexplained weight loss with acidity, pain, diarrhea, bleeding or swallowing difficulty may need endoscopy, colonoscopy and specialist evaluation.",
-    date: "February 1, 2026",
+    date: "April 7, 2026",
     readTime: "7 min read",
     accent: "#64748b",
     relatedHref: "/procedures/colonoscopy",
@@ -1054,7 +1059,547 @@ export const seoBlogPosts: BlogPost[] = [
       { question: "Will I need endoscopy or colonoscopy?", answer: "The doctor decides based on age, symptoms, examination and reports." },
       { question: "Where can I get digestive evaluation in Agra?", answer: `GI evaluation, endoscopy and colonoscopy are available at ${site.name}.` }
     ]
-  }
+  },
+  {
+    slug: "blood-in-stool-vs-black-stool-difference",
+    category: "Symptom Guide",
+    title: "Blood in Stool vs Black Stool: What Is the Difference?",
+    description: "Learn the difference between fresh blood in stool and black stool, common causes, emergency warning signs and when endoscopy or colonoscopy may be needed.",
+    date: "April 4, 2026",
+    readTime: "7 min read",
+    accent: "#dc2626",
+    relatedHref: "/procedures/gastrointestinal-bleeding-management",
+    relatedLabel: "GI Bleeding Management",
+    keywords: ["Blood in Stool", "Black Stool", "GI Bleeding", "Endoscopy Near Me", "Colonoscopy in Agra", "Gastroenterologist in Agra"],
+    intro: "Fresh red blood and black stool can both be signs of bleeding, but they often point to different parts of the digestive tract. Color, smell, weakness, vomiting blood and liver history help decide urgency.",
+    sections: [
+      { title: "What red blood may suggest", body: "Fresh red blood is often from the lower digestive tract, but the exact cause needs evaluation.", items: ["Piles or fissure", "Colitis or infection", "Colon polyps", "Rectal or colon bleeding", "Rarely heavy upper GI bleeding"] },
+      { title: "What black stool may suggest", body: "Black, tarry, foul-smelling stool can indicate digested blood from the upper digestive tract.", items: ["Stomach or duodenal ulcer", "Severe gastritis", "Variceal bleeding in liver disease", "Blood thinner-related bleeding", "Iron tablets can also darken stool"] },
+      { title: "Warning signs", body: "Bleeding with weakness, dizziness, fast pulse, vomiting blood or known liver disease needs urgent attention." },
+      { title: "Tests that may be advised", body: "Depending on symptoms, the doctor may advise CBC, stool testing, endoscopy, colonoscopy, liver tests or admission for monitoring." }
+    ],
+    faqs: [
+      { question: "Is black stool always bleeding?", answer: "No. Iron tablets, bismuth medicines and some foods can darken stool, but tarry black stool with weakness should be evaluated." },
+      { question: "Is fresh blood always piles?", answer: "No. Piles are common, but colitis, polyps and other colon problems can also cause bleeding." },
+      { question: "Which test is needed?", answer: "Endoscopy or colonoscopy is selected based on stool color, symptoms, age, hemoglobin and examination." },
+      { question: "Where can I consult in Agra?", answer: `GI bleeding evaluation is available at ${site.name}, Shaheed Nagar, Agra.` }
+    ]
+  },
+  {
+    slug: "jaundice-with-fever-urgent-warning-signs",
+    category: "Liver Care",
+    title: "Jaundice With Fever: Why It Can Be Urgent",
+    description: "Jaundice with fever can indicate bile duct infection or blockage. Learn warning symptoms, tests and when urgent ERCP evaluation may be needed.",
+    date: "April 1, 2026",
+    readTime: "6 min read",
+    accent: "#eab308",
+    relatedHref: "/procedures/obstructive-jaundice",
+    relatedLabel: "Obstructive Jaundice Treatment",
+    keywords: ["Jaundice With Fever", "Jaundice Treatment in Agra", "ERCP Specialist in Agra", "CBD Stone", "Liver Specialist in Agra"],
+    intro: "Yellow eyes or dark urine should be evaluated, but jaundice with fever, chills or abdominal pain can be more urgent because it may indicate blocked infected bile flow.",
+    sections: [
+      { title: "Why fever matters", body: "Fever with jaundice can occur when bile drainage is blocked and infection develops.", items: ["CBD stone", "Bile duct stricture", "Cholangitis", "Pancreaticobiliary disease", "Post-surgery duct problems"] },
+      { title: "Urgent warning signs", body: "These symptoms should not wait for routine review.", items: ["High fever or chills", "Severe right upper abdominal pain", "Confusion or low BP", "Persistent vomiting", "Very dark urine and pale stool"] },
+      { title: "Tests used for evaluation", body: "Liver function tests, CBC, ultrasound, CT or MRCP may help locate the blockage." },
+      { title: "Treatment planning", body: "Some patients need antibiotics, admission, ERCP, stone removal or stenting depending on the cause." }
+    ],
+    faqs: [
+      { question: "Is jaundice with fever an emergency?", answer: "It can be. Fever with jaundice may indicate infection in a blocked bile duct and needs urgent medical advice." },
+      { question: "Can CBD stone cause fever and jaundice?", answer: "Yes. A CBD stone can block bile drainage and cause jaundice, pain and infection." },
+      { question: "When is ERCP needed?", answer: "ERCP may be needed when imaging suggests a treatable bile duct blockage such as a stone or stricture." },
+      { question: "Where is jaundice care available in Agra?", answer: `Jaundice and ERCP evaluation are available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "persistent-acidity-despite-medicine-causes-next-steps",
+    category: "Stomach Care",
+    title: "Persistent Acidity Despite Medicine: Causes and Next Steps",
+    description: "Persistent acidity despite regular medicine may need review for GERD, ulcers, H. pylori, medicines, lifestyle triggers or endoscopy warning signs.",
+    date: "March 29, 2026",
+    readTime: "6 min read",
+    accent: "#22d3ee",
+    relatedHref: "/procedures/acidity-gerd",
+    relatedLabel: "Acidity and GERD Treatment",
+    keywords: ["Persistent Acidity", "GERD Treatment", "Acidity Doctor in Agra", "Upper GI Endoscopy", "Stomach Specialist in Agra"],
+    intro: "Many patients take acidity medicines repeatedly. If symptoms keep returning or warning signs appear, the cause should be reviewed rather than only changing tablets.",
+    sections: [
+      { title: "Why acidity may continue", body: "Persistent symptoms can happen due to lifestyle triggers or an untreated underlying problem.", items: ["Late meals or lying down after food", "GERD or hiatal hernia", "Gastritis or peptic ulcer", "H. pylori infection", "Painkiller or tobacco use"] },
+      { title: "Warning signs", body: "These symptoms need medical evaluation and may require endoscopy.", items: ["Difficulty swallowing", "Vomiting or weight loss", "Black stool or anemia", "Persistent pain despite treatment", "Symptoms starting at older age"] },
+      { title: "What the doctor checks", body: "Medicine timing, dose, triggers, old reports and risk factors are reviewed before changing treatment." },
+      { title: "Next steps", body: "Treatment may include medicine correction, lifestyle changes, H. pylori testing or upper GI endoscopy if indicated." }
+    ],
+    faqs: [
+      { question: "Can I take acidity tablets daily?", answer: "Some patients need longer treatment, but persistent symptoms should be reviewed by a doctor." },
+      { question: "When is endoscopy advised?", answer: "Endoscopy may be advised for warning signs, persistent symptoms, swallowing difficulty, bleeding or weight loss." },
+      { question: "Can H. pylori cause acidity?", answer: "H. pylori can cause gastritis and ulcers in some patients and may need specific treatment." },
+      { question: "Where can I consult for acidity in Agra?", answer: `GERD and acidity evaluation are available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "loss-of-appetite-weight-loss-digestive-causes",
+    category: "Symptom Guide",
+    title: "Loss of Appetite and Weight Loss: Digestive Causes to Check",
+    description: "Loss of appetite and unexplained weight loss may be linked to ulcers, liver disease, pancreatic disease, IBD, infection or cancer risk in selected patients.",
+    date: "March 26, 2026",
+    readTime: "7 min read",
+    accent: "#64748b",
+    relatedHref: "/services/diagnostic-services",
+    relatedLabel: "Diagnostic Services",
+    keywords: ["Loss of Appetite", "Unexplained Weight Loss", "Digestive Disease Specialist", "GI Cancer Screening", "Endoscopy in Agra"],
+    intro: "Loss of appetite can happen with simple illness, but persistent appetite loss with weight loss, anemia, vomiting or bowel changes needs digestive evaluation.",
+    sections: [
+      { title: "Possible digestive causes", body: "The cause depends on associated symptoms and reports.", items: ["Gastritis or peptic ulcer", "Liver disease or jaundice", "Pancreatic disease", "IBD or chronic infection", "GI cancer risk in selected patients"] },
+      { title: "Symptoms to mention", body: "Small details help the doctor decide the right tests.", items: ["Difficulty swallowing", "Vomiting or early fullness", "Blood in stool or black stool", "Chronic diarrhea", "Abdominal pain or jaundice"] },
+      { title: "Tests that may be needed", body: "The doctor may advise blood tests, liver tests, stool tests, ultrasound, endoscopy, colonoscopy or CT depending on symptoms." },
+      { title: "Why early evaluation helps", body: "Early diagnosis can prevent anemia, dehydration, malnutrition and delayed treatment of serious disease." }
+    ],
+    faqs: [
+      { question: "When is weight loss concerning?", answer: "Unintentional weight loss that persists or occurs with digestive symptoms should be checked." },
+      { question: "Can acidity cause appetite loss?", answer: "It can reduce appetite, but weight loss or vomiting needs evaluation." },
+      { question: "Will I need endoscopy?", answer: "The doctor decides based on symptoms, age, warning signs and reports." },
+      { question: "Where can I get evaluated in Agra?", answer: `Digestive diagnostic care is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "chronic-gas-bloating-indian-diet-triggers-warning-signs",
+    category: "Symptom Guide",
+    title: "Chronic Gas and Bloating: Indian Diet Triggers and Warning Signs",
+    description: "Understand chronic gas and bloating, Indian diet triggers, constipation, IBS, acidity, warning signs and when to consult a gastroenterologist.",
+    date: "March 23, 2026",
+    readTime: "6 min read",
+    accent: "#10b981",
+    relatedHref: "/procedures/ibs",
+    relatedLabel: "IBS and Bloating Care",
+    keywords: ["Bloating Treatment", "Gas Problem", "IBS Treatment in Agra", "Indigestion Treatment", "Digestive Problems Doctor"],
+    intro: "Gas and bloating are common, but chronic or worsening symptoms should be interpreted with stool pattern, diet, stress, medicines and warning signs.",
+    sections: [
+      { title: "Common Indian diet triggers", body: "Triggers vary, but some habits commonly worsen bloating.", items: ["Fast eating", "Late dinner", "Excess tea, fried snacks or sweets", "Large portions of chana, rajma or cabbage", "Carbonated drinks"] },
+      { title: "Medical causes", body: "Bloating can be linked with treatable digestive conditions.", items: ["Constipation", "IBS", "Acidity or gastritis", "Food intolerance", "Colitis or malabsorption in selected patients"] },
+      { title: "Warning signs", body: "Bloating with weight loss, vomiting, anemia, blood in stool or persistent pain needs review." },
+      { title: "Treatment approach", body: "Treatment may include diet correction, constipation care, IBS management, reflux treatment or targeted testing." }
+    ],
+    faqs: [
+      { question: "Is gas always due to food?", answer: "No. Food habits are common triggers, but constipation, IBS, acidity and other conditions can contribute." },
+      { question: "Can stress worsen bloating?", answer: "Yes. Stress, irregular meals and poor sleep can worsen IBS-type symptoms." },
+      { question: "When should I consult?", answer: "Consult if bloating is persistent, painful, associated with weight loss, vomiting, bleeding or anemia." },
+      { question: "Where can I consult in Agra?", answer: `IBS and bloating care are available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "colonoscopy-report-explained-polyps-colitis-biopsy",
+    category: "Procedure Guide",
+    title: "Colonoscopy Report Explained: Polyps, Colitis and Biopsy",
+    description: "Understand common colonoscopy report terms including polyps, colitis, ulcers, biopsy, bowel preparation quality and follow-up advice.",
+    date: "March 20, 2026",
+    readTime: "7 min read",
+    accent: "#0f766e",
+    relatedHref: "/procedures/colonoscopy",
+    relatedLabel: "Colonoscopy in Agra",
+    keywords: ["Colonoscopy Report", "Colon Polyps", "Colitis", "Biopsy Report", "Colonoscopy in Agra"],
+    intro: "A colonoscopy report can mention terms such as polyps, colitis, ulcer, biopsy and bowel preparation. Understanding the report helps patients follow the next plan correctly.",
+    sections: [
+      { title: "Bowel preparation quality", body: "The report may comment on whether the colon was clean enough to see clearly.", items: ["Good preparation improves accuracy", "Poor preparation may require repeat test", "Diet and laxative instructions matter"] },
+      { title: "Polyps and removal", body: "Polyps are growths that may be removed and sent for biopsy when suitable.", items: ["Number and size matter", "Histopathology guides risk", "Repeat colonoscopy timing depends on report"] },
+      { title: "Colitis and ulcers", body: "Inflammation may suggest infection, IBD, ischemia or other causes. Biopsy can help clarify." },
+      { title: "Follow-up after report", body: "Bring the colonoscopy images, report and biopsy result for final treatment and surveillance planning." }
+    ],
+    faqs: [
+      { question: "Is biopsy always cancer?", answer: "No. Biopsy is often taken to diagnose inflammation, infection, colitis or polyp type." },
+      { question: "What does poor preparation mean?", answer: "It means stool limited visibility. A repeat test may sometimes be needed." },
+      { question: "Do all polyps need removal?", answer: "The doctor decides based on size, type, number and safety." },
+      { question: "Where can I discuss a colonoscopy report?", answer: `Colonoscopy report review is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "fibroscan-score-explained-cap-kpa-fatty-liver-risk",
+    category: "Procedure Guide",
+    title: "FibroScan Score Explained: CAP, kPa and Fatty Liver Risk",
+    description: "Learn what FibroScan CAP and kPa scores mean, how they relate to fatty liver and fibrosis risk, and when specialist review is needed.",
+    date: "March 17, 2026",
+    readTime: "7 min read",
+    accent: "#84cc16",
+    relatedHref: "/procedures/fibroscan",
+    relatedLabel: "FibroScan in Agra",
+    keywords: ["FibroScan Score", "CAP Score", "kPa FibroScan", "Fatty Liver Test", "Liver Fibrosis Scan"],
+    intro: "FibroScan is a non-invasive liver test. Patients often see CAP and kPa values on the report and want to know what they mean for fatty liver and fibrosis risk.",
+    sections: [
+      { title: "What CAP suggests", body: "CAP gives an estimate of fat in the liver. It must be interpreted with weight, diabetes, ultrasound and liver tests." },
+      { title: "What kPa suggests", body: "kPa estimates liver stiffness. Higher stiffness may suggest fibrosis or cirrhosis risk, but inflammation and other factors can affect results." },
+      { title: "Who needs FibroScan", body: "FibroScan is commonly used in patients with fatty liver or chronic liver risk.", items: ["Fatty liver on ultrasound", "High SGPT/SGOT", "Diabetes or obesity", "Alcohol-related liver risk", "Hepatitis B or C"] },
+      { title: "What to do after the report", body: "The report should be reviewed with symptoms, blood tests and imaging before deciding treatment or follow-up interval." }
+    ],
+    faqs: [
+      { question: "Is FibroScan painful?", answer: "No. It is usually quick and painless." },
+      { question: "Does high CAP mean cirrhosis?", answer: "No. CAP estimates fat, while kPa relates more to stiffness. Both need clinical interpretation." },
+      { question: "Can FibroScan replace all liver tests?", answer: "No. It supports assessment but does not replace blood tests and clinical evaluation." },
+      { question: "Where is FibroScan available in Agra?", answer: `FibroScan evaluation is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "ercp-vs-surgery-for-cbd-stones",
+    category: "Procedure Guide",
+    title: "ERCP vs Surgery for CBD Stones: What Patients Should Know",
+    description: "Understand when ERCP is used for CBD stones, how it differs from gallbladder surgery, preparation, risks and recovery.",
+    date: "March 14, 2026",
+    readTime: "7 min read",
+    accent: "#f59e0b",
+    relatedHref: "/procedures/ercp",
+    relatedLabel: "ERCP for CBD Stones",
+    keywords: ["ERCP vs Surgery", "CBD Stone Removal", "ERCP Specialist in Agra", "Jaundice Treatment", "Bile Duct Stone"],
+    intro: "CBD stones are stones in the common bile duct. ERCP and gallbladder surgery treat different parts of the problem, so patients often need both specialist advice and surgical planning.",
+    sections: [
+      { title: "What ERCP treats", body: "ERCP can remove stones from the bile duct and improve drainage in suitable patients.", items: ["CBD stone", "Obstructive jaundice", "Cholangitis", "Bile duct stenting", "Duct narrowing in selected cases"] },
+      { title: "What surgery treats", body: "Gallbladder surgery removes the gallbladder when gallstones are the source. It does not always remove CBD stones." },
+      { title: "Preparation and risks", body: "ERCP usually needs fasting, blood tests, imaging review, medicine review and attendant support. Risks include pancreatitis, bleeding, infection or perforation in uncommon cases." },
+      { title: "Recovery", body: "Recovery depends on infection, jaundice, stone size, stenting and whether surgery is planned later." }
+    ],
+    faqs: [
+      { question: "Can ERCP avoid surgery?", answer: "ERCP can treat bile duct stones, but gallbladder surgery may still be advised if gallstones remain." },
+      { question: "Is ERCP a surgery?", answer: "ERCP is an endoscopic procedure, not open surgery." },
+      { question: "Is ERCP urgent for jaundice with fever?", answer: "It can be urgent if infection and blockage are suspected." },
+      { question: "Where can I get ERCP in Agra?", answer: `ERCP evaluation is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "upper-gi-endoscopy-report-meaning",
+    category: "Procedure Guide",
+    title: "Upper GI Endoscopy: What the Report Means",
+    description: "Understand common upper GI endoscopy report findings such as gastritis, esophagitis, ulcer, biopsy, H. pylori and hiatal hernia.",
+    date: "March 11, 2026",
+    readTime: "6 min read",
+    accent: "#0891b2",
+    relatedHref: "/procedures/endoscopy",
+    relatedLabel: "Upper GI Endoscopy",
+    keywords: ["Upper GI Endoscopy", "Endoscopy Report", "Gastritis", "H Pylori", "Endoscopy in Agra"],
+    intro: "Endoscopy reports may mention gastritis, ulcer, esophagitis, bile reflux, hiatal hernia or biopsy. The report should be interpreted with symptoms and biopsy results.",
+    sections: [
+      { title: "Food pipe findings", body: "The report may mention reflux injury, esophagitis, stricture, varices or suspicious lesions depending on what is seen." },
+      { title: "Stomach findings", body: "Common terms include gastritis, erosions, ulcer, bile reflux, polyp or growth. Biopsy may be advised in selected findings." },
+      { title: "Biopsy and H. pylori", body: "Biopsy can help diagnose H. pylori, inflammation, celiac disease or suspicious tissue depending on site." },
+      { title: "Next steps", body: "Treatment may include medicines, H. pylori therapy, repeat endoscopy, biopsy follow-up or urgent care for bleeding." }
+    ],
+    faqs: [
+      { question: "Is gastritis serious?", answer: "Many cases are treatable, but bleeding, ulcer, weight loss or persistent symptoms need follow-up." },
+      { question: "Why was biopsy taken?", answer: "Biopsy helps confirm infection, inflammation or tissue diagnosis." },
+      { question: "Can endoscopy detect cancer?", answer: "Endoscopy can identify suspicious areas, but biopsy confirms diagnosis." },
+      { question: "Where can I discuss my report?", answer: `Endoscopy report review is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "colonoscopy-preparation-mistakes-indian-patients",
+    category: "Procedure Guide",
+    title: "Colonoscopy Preparation Mistakes Indian Patients Should Avoid",
+    description: "Avoid common colonoscopy preparation mistakes with diet, bowel prep timing, medicines, diabetes tablets, blood thinners and hydration.",
+    date: "March 8, 2026",
+    readTime: "7 min read",
+    accent: "#14b8a6",
+    relatedHref: "/procedures/colonoscopy",
+    relatedLabel: "Colonoscopy Preparation",
+    keywords: ["Colonoscopy Preparation", "Bowel Prep", "Colonoscopy in Agra", "Colon Cancer Screening", "Blood in Stool"],
+    intro: "Good bowel preparation is essential for a useful colonoscopy. Poor preparation can hide polyps, inflammation or bleeding sources and may require repeat testing.",
+    sections: [
+      { title: "Diet mistakes", body: "Patients may accidentally eat foods that leave residue in the colon.", items: ["Seeds and high-fiber foods close to procedure", "Heavy oily meals", "Ignoring clear liquid advice", "Eating after fasting time"] },
+      { title: "Bowel prep mistakes", body: "Timing and completion of laxative solution matter.", items: ["Not finishing prep", "Taking prep too early or too late", "Not drinking enough clear fluids", "Stopping because stool looks partly clear"] },
+      { title: "Medicine mistakes", body: "Diabetes medicines, insulin, BP medicines and blood thinners need specific instructions from the doctor." },
+      { title: "Attendant and recovery", body: "If sedation is planned, come with an adult attendant and avoid driving that day." }
+    ],
+    faqs: [
+      { question: "Why is bowel prep important?", answer: "A clean colon helps the doctor see polyps, ulcers, bleeding and inflammation clearly." },
+      { question: "Can I take diabetes medicines?", answer: "Ask the doctor for specific instructions because fasting and bowel prep can affect sugar levels." },
+      { question: "What if prep is poor?", answer: "The report may be limited and repeat colonoscopy may be needed." },
+      { question: "Where can I get colonoscopy in Agra?", answer: `Colonoscopy is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "fatty-liver-grade-1-2-3-meaning",
+    category: "Liver Care",
+    title: "Fatty Liver Grade 1, 2 and 3: What It Means",
+    description: "Understand fatty liver grade 1, 2 and 3 on ultrasound, fibrosis risk, FibroScan need, lifestyle changes and when to consult a liver specialist.",
+    date: "March 5, 2026",
+    readTime: "7 min read",
+    accent: "#84cc16",
+    relatedHref: "/procedures/fatty-liver",
+    relatedLabel: "Fatty Liver Treatment",
+    keywords: ["Fatty Liver Grade 1", "Fatty Liver Grade 2", "Fatty Liver Grade 3", "Fatty Liver Treatment", "Liver Specialist in Agra"],
+    intro: "Ultrasound reports often mention fatty liver grade 1, 2 or 3. Grade describes how fatty the liver appears, but it does not always show whether scarring has started.",
+    sections: [
+      { title: "What grades mean", body: "Higher grade usually means more visible fat on ultrasound, but symptoms and risk vary.", items: ["Grade 1: mild fatty change", "Grade 2: moderate fatty change", "Grade 3: severe fatty change", "Fibrosis cannot be judged by grade alone"] },
+      { title: "Why FibroScan may be needed", body: "FibroScan helps estimate stiffness and fibrosis risk, especially in diabetes, obesity, high SGPT or long-standing fatty liver." },
+      { title: "Treatment approach", body: "Weight control, diet, exercise, diabetes control, cholesterol care and alcohol avoidance are central." },
+      { title: "When to consult", body: "Consult if SGPT/SGOT are high, diabetes is present, FibroScan is abnormal or there are signs of advanced liver disease." }
+    ],
+    faqs: [
+      { question: "Is grade 1 fatty liver dangerous?", answer: "It can be early and reversible, but metabolic risk should still be managed." },
+      { question: "Does grade 3 mean cirrhosis?", answer: "Not necessarily. Fibrosis and cirrhosis need further assessment." },
+      { question: "Can fatty liver improve?", answer: "Many cases improve with weight loss, diet, exercise and risk control." },
+      { question: "Where can I consult for fatty liver in Agra?", answer: `Fatty liver care is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "high-sgpt-sgot-common-causes-when-to-consult",
+    category: "Liver Care",
+    title: "High SGPT/SGOT: Common Causes and When to Consult",
+    description: "High SGPT or SGOT can be due to fatty liver, alcohol, viral hepatitis, medicines or liver injury. Learn when specialist review is needed.",
+    date: "March 2, 2026",
+    readTime: "6 min read",
+    accent: "#b9852f",
+    relatedHref: "/services/hepatology-liver-care",
+    relatedLabel: "Hepatology and Liver Care",
+    keywords: ["High SGPT", "High SGOT", "Liver Function Test", "Liver Specialist in Agra", "Fatty Liver Treatment"],
+    intro: "SGPT and SGOT are liver enzymes commonly checked in liver function tests. Mild elevation is common, but repeated or high values need evaluation for the cause.",
+    sections: [
+      { title: "Common causes", body: "Many conditions can raise liver enzymes.", items: ["Fatty liver", "Alcohol intake", "Viral hepatitis", "Medicines or supplements", "Bile duct blockage or infection"] },
+      { title: "When to consult", body: "Consult a liver specialist if values remain high, rise quickly or occur with symptoms.", items: ["Jaundice", "Fever or abdominal pain", "Fatty liver with diabetes", "Low platelets or abnormal ultrasound", "Alcohol-related liver risk"] },
+      { title: "Tests that may be advised", body: "Evaluation may include repeat LFT, CBC, INR, viral markers, ultrasound, FibroScan or MRCP depending on findings." },
+      { title: "Treatment depends on cause", body: "There is no single SGPT tablet. Treatment targets fatty liver, alcohol, hepatitis, medicines, bile duct disease or other cause." }
+    ],
+    faqs: [
+      { question: "Is high SGPT always serious?", answer: "Not always, but persistent or high elevation should be evaluated." },
+      { question: "Can fatty liver raise SGPT?", answer: "Yes. Fatty liver is a common cause of raised SGPT/SGOT." },
+      { question: "Should I stop all medicines?", answer: "Do not stop prescribed medicines without medical advice. Tell the doctor all medicines and supplements." },
+      { question: "Where can I consult for high SGPT in Agra?", answer: `Liver evaluation is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "liver-cirrhosis-diet-salt-protein-indian-food",
+    category: "Liver Care",
+    title: "Liver Cirrhosis Diet: Salt, Protein and Indian Food Guidance",
+    description: "A practical Indian diet guide for liver cirrhosis covering salt restriction, protein, dal, roti, rice, fluid, ascites and when to call urgently.",
+    date: "February 27, 2026",
+    readTime: "7 min read",
+    accent: "#0f766e",
+    relatedHref: "/procedures/liver-cirrhosis",
+    relatedLabel: "Liver Cirrhosis Care",
+    keywords: ["Liver Cirrhosis Diet", "Cirrhosis Treatment", "Liver Specialist in Agra", "Ascites Diet", "Protein in Cirrhosis"],
+    intro: "Diet in cirrhosis should be personalized. Many patients need salt restriction, adequate protein, alcohol avoidance and monitoring for ascites, confusion and bleeding risk.",
+    sections: [
+      { title: "Salt and swelling", body: "Salt restriction is often important when ascites or leg swelling is present.", items: ["Avoid extra salt", "Reduce packaged salty snacks", "Avoid pickle and papad if advised", "Follow doctor's fluid advice"] },
+      { title: "Protein guidance", body: "Many cirrhosis patients need adequate protein, but the plan depends on condition and encephalopathy risk.", items: ["Dal, curd, paneer, eggs or lean protein as advised", "Small frequent meals", "Avoid long fasting", "Late evening snack may be advised"] },
+      { title: "Foods and habits to avoid", body: "Alcohol must be avoided. Unsafe painkillers, herbal products and high-salt foods can worsen risk." },
+      { title: "Urgent symptoms", body: "Vomiting blood, black stools, confusion, fever, increasing swelling or reduced urine need urgent care." }
+    ],
+    faqs: [
+      { question: "Should cirrhosis patients stop protein?", answer: "Usually no. Protein needs should be personalized; stopping protein can worsen weakness." },
+      { question: "Is salt restriction needed for all?", answer: "It is especially important with ascites or swelling. Follow doctor advice." },
+      { question: "Can alcohol be taken occasionally?", answer: "Alcohol avoidance is strongly advised in cirrhosis." },
+      { question: "Where can I consult for cirrhosis diet in Agra?", answer: `Cirrhosis care is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "peptic-ulcer-painkiller-use-h-pylori",
+    category: "Stomach Care",
+    title: "Peptic Ulcer Disease: Painkiller Use and H. pylori",
+    description: "Understand peptic ulcer disease, painkiller-related ulcers, H. pylori infection, black stool, endoscopy and treatment planning.",
+    date: "February 24, 2026",
+    readTime: "6 min read",
+    accent: "#f97316",
+    relatedHref: "/procedures/peptic-ulcer-disease",
+    relatedLabel: "Peptic Ulcer Treatment",
+    keywords: ["Peptic Ulcer Disease", "H Pylori Treatment", "Painkiller Ulcer", "Black Stool", "Endoscopy in Agra"],
+    intro: "Peptic ulcers can occur in the stomach or duodenum. Common contributors include H. pylori infection and painkiller use, especially when taken frequently or without medical supervision.",
+    sections: [
+      { title: "Common symptoms", body: "Ulcer symptoms vary from burning pain to bleeding.", items: ["Upper abdominal pain", "Acidity or nausea", "Vomiting", "Black stool", "Anemia or weakness"] },
+      { title: "Painkiller risk", body: "Medicines such as NSAIDs can injure the stomach lining and increase bleeding risk, especially with blood thinners or alcohol." },
+      { title: "H. pylori role", body: "H. pylori is a bacterial infection that can cause gastritis and ulcers. It needs a complete prescribed treatment course when confirmed." },
+      { title: "Diagnosis and treatment", body: "Endoscopy may be advised for bleeding, persistent pain, anemia, weight loss or older age onset. Treatment depends on cause." }
+    ],
+    faqs: [
+      { question: "Can ulcers bleed?", answer: "Yes. Black stool, vomiting blood or severe weakness can indicate bleeding." },
+      { question: "Should I stop painkillers?", answer: "Discuss with a doctor. Do not stop critical medicines without advice, but avoid self-medication." },
+      { question: "Is H. pylori curable?", answer: "It is usually treated with a combination of medicines taken as prescribed." },
+      { question: "Where can I get ulcer treatment in Agra?", answer: `Peptic ulcer evaluation is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "gerd-vs-heart-attack-chest-burning-urgent-care",
+    category: "Stomach Care",
+    title: "GERD vs Heart Attack: When Chest Burning Needs Urgent Care",
+    description: "Chest burning may be due to GERD, acidity or a heart problem. Learn warning signs, when to seek emergency care and when gastro evaluation is needed.",
+    date: "February 21, 2026",
+    readTime: "7 min read",
+    accent: "#ef4444",
+    relatedHref: "/procedures/acidity-gerd",
+    relatedLabel: "GERD and Acidity Care",
+    keywords: ["GERD vs Heart Attack", "Chest Burning", "Acidity Treatment", "Heartburn Specialist", "Gastroenterologist in Agra", "Emergency Warning Signs"],
+    intro: "Chest burning is often blamed on acidity, but not every chest symptom is GERD. Some heart-related symptoms can feel like burning or pressure, so warning signs should be taken seriously.",
+    sections: [
+      {
+        title: "Symptoms that may suggest GERD",
+        body: "GERD symptoms often relate to meals, posture and sour reflux, though symptoms can vary.",
+        items: ["Burning after meals", "Sour belching or regurgitation", "Symptoms worse on lying down", "Throat irritation or chronic cough", "Relief with doctor-advised acidity treatment"]
+      },
+      {
+        title: "Symptoms that need urgent heart evaluation",
+        body: "Do not assume acidity if chest symptoms are severe, new or associated with warning signs.",
+        items: ["Chest pressure or heaviness", "Pain spreading to arm, jaw, back or shoulder", "Sweating, breathlessness or fainting", "Symptoms during exertion", "Diabetes, BP, smoking or heart disease risk"]
+      },
+      {
+        title: "When gastro evaluation is useful",
+        body: "After urgent heart causes are excluded when needed, a gastroenterologist can evaluate reflux, gastritis, ulcers, swallowing issues or persistent acidity symptoms."
+      },
+      {
+        title: "Tests that may be advised",
+        body: "Depending on symptoms, the doctor may advise ECG or emergency cardiac care first, and later upper GI endoscopy, H. pylori testing or reflux treatment review when appropriate."
+      }
+    ],
+    faqs: [
+      { question: "Can acidity feel like chest pain?", answer: "Yes. GERD can cause burning or discomfort in the chest, but heart-related causes must be considered when warning signs are present." },
+      { question: "When should I go to emergency care?", answer: "Go urgently for chest pressure, breathlessness, sweating, fainting, pain spreading to arm or jaw, or symptoms during exertion." },
+      { question: "Can endoscopy diagnose heart attack?", answer: "No. Endoscopy evaluates the food pipe and stomach. Heart symptoms need cardiac evaluation." },
+      { question: "Where can I consult for persistent reflux in Agra?", answer: `GERD and acidity evaluation are available at ${site.name}, Shaheed Nagar, Agra.` }
+    ]
+  },
+  {
+    slug: "ibs-vs-ibd-functional-inflammatory-difference",
+    category: "Bowel Health",
+    title: "IBS vs IBD: Difference Between Functional and Inflammatory Disease",
+    description: "Understand the difference between IBS and IBD, symptoms, warning signs, colonoscopy, biopsy and when specialist evaluation is needed.",
+    date: "February 18, 2026",
+    readTime: "7 min read",
+    accent: "#7c3aed",
+    relatedHref: "/procedures/ibd-colitis",
+    relatedLabel: "IBD and Colitis Care",
+    keywords: ["IBS vs IBD", "IBS Treatment", "IBD Specialist", "Ulcerative Colitis", "Crohn's Disease", "Colonoscopy in Agra"],
+    intro: "IBS and IBD sound similar but are different. IBS is a functional bowel disorder, while IBD involves inflammation such as ulcerative colitis or Crohn's disease.",
+    sections: [
+      { title: "IBS pattern", body: "IBS commonly causes pain, bloating and bowel habit changes without visible inflammation on routine tests.", items: ["Cramping relieved by stool", "Constipation or diarrhea pattern", "Bloating and gas", "Stress or food triggers"] },
+      { title: "IBD pattern", body: "IBD causes inflammation and may need long-term medical treatment.", items: ["Blood or mucus in stool", "Chronic diarrhea", "Weight loss", "Fever or anemia", "Colonoscopy biopsy findings"] },
+      { title: "Warning signs", body: "Blood, anemia, fever, night symptoms, weight loss or family history should not be labeled as simple IBS without evaluation." },
+      { title: "Tests and treatment", body: "IBD may need blood tests, stool tests, colonoscopy, biopsy and long-term monitoring. IBS care focuses on triggers and symptom control." }
+    ],
+    faqs: [
+      { question: "Can IBS turn into IBD?", answer: "IBS does not turn into IBD, but symptoms can overlap and need correct diagnosis." },
+      { question: "Does blood in stool happen in IBS?", answer: "Blood in stool is not typical IBS and should be evaluated." },
+      { question: "Is colonoscopy needed?", answer: "It may be advised when warning signs or suspected colitis are present." },
+      { question: "Where can I consult for IBS or IBD in Agra?", answer: `IBS and IBD evaluation are available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "best-gastroenterologist-in-agra-when-to-visit",
+    category: "Local SEO",
+    title: "Best Gastroenterologist in Agra: When to Visit a Specialist",
+    description: "Learn when to visit a gastroenterologist in Agra for acidity, abdominal pain, jaundice, blood in stool, liver disease, endoscopy or colonoscopy.",
+    date: "February 15, 2026",
+    readTime: "6 min read",
+    accent: "#0891b2",
+    relatedHref: "/dr-deepak-kumar-sharma-gastroenterologist-agra",
+    relatedLabel: "Gastroenterologist in Agra",
+    keywords: ["Best Gastroenterologist in Agra", "Gastro Doctor Near Me", "Digestive Disease Specialist", "Stomach Specialist in Agra", "Liver Specialist in Agra"],
+    intro: "A gastroenterologist evaluates digestive, liver, pancreatic, bile duct and bowel problems. Timely specialist review helps avoid repeated temporary treatment without diagnosis.",
+    sections: [
+      { title: "Symptoms that need consultation", body: "Persistent or recurrent digestive symptoms should be assessed.", items: ["Acidity or reflux", "Abdominal pain or bloating", "Constipation or diarrhea", "Blood in stool or black stool", "Difficulty swallowing"] },
+      { title: "Liver symptoms", body: "A gastroenterologist also manages liver-related problems.", items: ["Fatty liver", "High SGPT/SGOT", "Jaundice", "Ascites", "Cirrhosis and varices"] },
+      { title: "Procedures commonly advised", body: "Endoscopy, colonoscopy, FibroScan, ERCP or biopsy may be recommended only when clinically useful." },
+      { title: "What to bring", body: "Bring prescriptions, blood reports, ultrasound, CT/MRCP, endoscopy or colonoscopy reports." }
+    ],
+    faqs: [
+      { question: "When should I see a gastroenterologist?", answer: "Consult for persistent acidity, pain, bowel changes, bleeding, jaundice, weight loss or abnormal liver reports." },
+      { question: "Does a gastroenterologist treat liver disease?", answer: "Yes. Gastroenterologists with hepatology expertise treat fatty liver, hepatitis, cirrhosis and jaundice." },
+      { question: "Where can I consult in Agra?", answer: `${site.name} provides gastroenterology and liver care in Shaheed Nagar, Agra.` },
+      { question: "Can I book online?", answer: "You can call, WhatsApp or use the appointment form on the website." }
+    ]
+  },
+  {
+    slug: "endoscopy-in-agra-cost-factors-preparation-safety",
+    category: "Local SEO",
+    title: "Endoscopy in Agra: Cost Factors, Preparation and Safety",
+    description: "Planning endoscopy in Agra? Learn why it is done, preparation, fasting, biopsy, sedation, safety and cost factors.",
+    date: "February 12, 2026",
+    readTime: "7 min read",
+    accent: "#06b6d4",
+    relatedHref: "/procedures/endoscopy",
+    relatedLabel: "Endoscopy in Agra",
+    keywords: ["Endoscopy in Agra", "Upper GI Endoscopy", "Endoscopy Cost in Agra", "Gastroscopy", "Stomach Endoscopy"],
+    intro: "Upper GI endoscopy examines the food pipe, stomach and duodenum. It is commonly advised for persistent acidity, pain, vomiting, black stool, anemia or swallowing difficulty.",
+    sections: [
+      { title: "Why endoscopy is done", body: "Endoscopy helps diagnose conditions not visible from symptoms alone.", items: ["GERD complications", "Gastritis or ulcer", "Bleeding source", "Swallowing difficulty", "Biopsy for selected findings"] },
+      { title: "Preparation", body: "Fasting is usually required. Tell the doctor about diabetes, BP, pregnancy, allergies and blood thinners." },
+      { title: "Safety", body: "Endoscopy is commonly performed safely, but risks such as bleeding, reaction to medicines or perforation are uncommon and explained before the procedure." },
+      { title: "Cost factors", body: "Cost depends on biopsy, sedation, emergency need, admission, consumables and hospital policy." }
+    ],
+    faqs: [
+      { question: "Is endoscopy painful?", answer: "Most patients tolerate it well. Sedation or throat spray may be used depending on case." },
+      { question: "Can biopsy be taken?", answer: "Yes, if needed for diagnosis. Biopsy is not always cancer-related." },
+      { question: "How long is fasting?", answer: "Usually 6-8 hours, but final instructions come from the hospital team." },
+      { question: "Where is endoscopy available in Agra?", answer: `Upper GI endoscopy is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "colonoscopy-in-agra-when-needed-how-to-prepare",
+    category: "Local SEO",
+    title: "Colonoscopy in Agra: When It Is Needed and How to Prepare",
+    description: "Learn when colonoscopy is needed in Agra for blood in stool, diarrhea, constipation, polyps, colitis and colon cancer screening.",
+    date: "February 9, 2026",
+    readTime: "7 min read",
+    accent: "#10b981",
+    relatedHref: "/procedures/colonoscopy",
+    relatedLabel: "Colonoscopy in Agra",
+    keywords: ["Colonoscopy in Agra", "Colonoscopy Preparation", "Colon Cancer Screening", "Blood in Stool", "Colitis Specialist"],
+    intro: "Colonoscopy examines the large intestine and rectum. It is useful for bleeding, bowel habit changes, chronic diarrhea, suspected colitis, polyps and screening.",
+    sections: [
+      { title: "When it is needed", body: "The doctor may advise colonoscopy based on symptoms and risk.", items: ["Blood in stool", "Chronic diarrhea or constipation", "Unexplained anemia", "Suspected IBD or colitis", "Colon polyp or cancer screening"] },
+      { title: "Preparation", body: "Colonoscopy needs bowel preparation, diet instructions and fasting. Poor prep can reduce accuracy." },
+      { title: "Medicine precautions", body: "Discuss diabetes medicines, insulin, BP medicines and blood thinners before the procedure." },
+      { title: "After colonoscopy", body: "Recovery advice depends on sedation, biopsy, polyp removal and findings." }
+    ],
+    faqs: [
+      { question: "Is colonoscopy painful?", answer: "Sedation may be used to improve comfort depending on patient and procedure plan." },
+      { question: "Can polyps be removed?", answer: "Suitable polyps can often be removed during colonoscopy." },
+      { question: "Do I need an attendant?", answer: "If sedation is planned, an adult attendant is usually required." },
+      { question: "Where can I get colonoscopy in Agra?", answer: `Colonoscopy is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "liver-specialist-in-agra-symptoms-not-ignore",
+    category: "Local SEO",
+    title: "Liver Specialist in Agra: Symptoms You Should Not Ignore",
+    description: "Learn which liver symptoms need specialist review in Agra, including jaundice, high SGPT, fatty liver, ascites, bleeding and confusion.",
+    date: "February 6, 2026",
+    readTime: "6 min read",
+    accent: "#b9852f",
+    relatedHref: "/services/hepatology-liver-care",
+    relatedLabel: "Liver Specialist in Agra",
+    keywords: ["Liver Specialist in Agra", "Hepatologist in Agra", "Fatty Liver Treatment", "Jaundice Treatment", "Cirrhosis Doctor"],
+    intro: "Liver disease can be silent in early stages. Symptoms such as jaundice, swelling, bleeding, confusion or repeated abnormal reports should not be ignored.",
+    sections: [
+      { title: "Symptoms to watch", body: "Liver symptoms may be subtle or serious.", items: ["Yellow eyes or dark urine", "Abdominal swelling", "Leg swelling", "Vomiting blood or black stool", "Confusion or excessive sleepiness"] },
+      { title: "Report findings that matter", body: "High SGPT/SGOT, low platelets, abnormal ultrasound, fatty liver or high FibroScan score need review." },
+      { title: "Common liver conditions", body: "A liver specialist evaluates fatty liver, hepatitis B/C, alcohol-related disease, cirrhosis, ascites and jaundice." },
+      { title: "Urgent situations", body: "Fever with jaundice, bleeding, confusion or severe weakness needs urgent medical advice." }
+    ],
+    faqs: [
+      { question: "Can fatty liver need a specialist?", answer: "Yes, especially with diabetes, high enzymes, fibrosis risk or obesity." },
+      { question: "Is jaundice always liver disease?", answer: "Jaundice can be due to liver disease or bile duct blockage and needs evaluation." },
+      { question: "What tests may be needed?", answer: "LFT, CBC, INR, ultrasound, viral markers, FibroScan or MRCP may be advised." },
+      { question: "Where can I consult a liver specialist in Agra?", answer: `Liver care is available at ${site.name}.` }
+    ]
+  },
+  {
+    slug: "gastro-hospital-shaheed-nagar-agra-services",
+    category: "Local SEO",
+    title: "Gastro Hospital in Shaheed Nagar, Agra: Services Available",
+    description: "Mudgal Gastromedics Hospital in Shaheed Nagar, Agra provides gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan and advanced GI services.",
+    date: "February 3, 2026",
+    readTime: "6 min read",
+    accent: "#0e7490",
+    relatedHref: "/services/gastroenterology",
+    relatedLabel: "Gastroenterology Services in Agra",
+    keywords: ["Gastro Hospital in Shaheed Nagar", "Gastro Hospital in Agra", "Mudgal Gastromedics", "Endoscopy in Agra", "Liver Specialist in Agra"],
+    intro: "Patients looking for digestive and liver care in Shaheed Nagar, Agra can access consultation, diagnostic and therapeutic gastroenterology services at Mudgal Gastromedics Hospital.",
+    sections: [
+      { title: "Core services", body: "The hospital provides focused care for digestive, liver, pancreatic and biliary diseases.", items: ["Gastroenterology consultation", "Hepatology and liver care", "Endoscopy and colonoscopy", "ERCP and bile duct care", "FibroScan and diagnostics"] },
+      { title: "Symptoms evaluated", body: "Patients commonly visit for acidity, abdominal pain, bloating, vomiting, constipation, diarrhea, jaundice, bleeding and weight loss." },
+      { title: "Procedures available", body: "Services include upper GI endoscopy, colonoscopy, ERCP, FibroScan, polypectomy, variceal banding, GI bleeding care and selected therapeutic procedures." },
+      { title: "Location and appointment", body: `${site.name} is located at ${site.addressLine1}, ${site.addressLine2}, ${site.city}. Call or WhatsApp reception before visiting.` }
+    ],
+    faqs: [
+      { question: "Where is Mudgal Gastromedics Hospital?", answer: `${site.name} is located at ${site.addressLine1}, ${site.addressLine2}, ${site.city}.` },
+      { question: "Is endoscopy available?", answer: "Yes. Upper GI endoscopy and colonoscopy services are available." },
+      { question: "Is liver care available?", answer: "Yes. Fatty liver, jaundice, cirrhosis, ascites and liver report evaluation are available." },
+      { question: "How can I book an appointment?", answer: `Call ${site.mobile}, WhatsApp reception or use the appointment form.` }
+    ]
+  },
+  ...additionalSeoBlogPosts
 ];
 
 export function getSeoBlogPost(slug: string) {

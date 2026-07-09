@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
+import { MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { site } from "@/lib/site-data";
 
 const companyLinks = [
@@ -33,6 +34,12 @@ const supportLinks = [
   { href: "/terms", label: "Terms" }
 ];
 
+const socialLinks = {
+  whatsappChannel: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d",
+  facebook: "https://www.facebook.com/MudgalGastromedics",
+  youtube: "https://www.youtube.com/@mudgalgastromedics9355"
+};
+
 export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-[#111111] px-5 pb-7 pt-14 text-sm text-[#969696] md:px-8">
@@ -45,22 +52,6 @@ export function Footer() {
             <p className="mt-5 max-w-sm leading-6">
               Advanced gastroenterology, hepatology and endoscopy care in Agra with specialized treatment for digestive and liver diseases.
             </p>
-            <a
-              href={site.directionsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white transition hover:border-cyan-200/60 hover:bg-white/10"
-            >
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-white text-[#4285f4]">G</span>
-              <span className="flex text-[#ffd43b]">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} size={15} fill="currentColor" />
-                ))}
-              </span>
-              <span>4.8</span>
-              <span className="h-5 w-px bg-white/20" />
-              <span className="text-xs text-white/55">Google Reviews</span>
-            </a>
           </div>
 
           <FooterColumn title="Company" links={companyLinks} />
@@ -90,12 +81,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-          <SocialPill href={site.directionsUrl} label="Google Reviews" />
-          <SocialPill href={`https://wa.me/${site.whatsapp}`} label="WhatsApp" icon={<MessageCircle size={16} />} />
-          <SocialPill href="#" label="Facebook" icon="f" />
-          <SocialPill href="#" label="Instagram" icon="IG" />
-          <SocialPill href="#" label="YouTube" icon="YT" />
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+          <SocialPill href={socialLinks.whatsappChannel} label="WhatsApp Channel" tone="whatsapp" icon={<MessageCircle size={16} />} />
+          <SocialPill href={socialLinks.facebook} label="Facebook" tone="facebook" icon="f" />
+          <SocialPill href={socialLinks.youtube} label="YouTube" tone="youtube" icon="YT" />
         </div>
 
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs md:flex-row md:items-center md:justify-between">
@@ -117,6 +106,7 @@ export function Footer() {
       </div>
 
       <div className="fixed bottom-5 right-4 z-40 grid gap-3 md:bottom-7 md:right-6">
+        <LanguageToggle compact className="ring-1 ring-black/10" />
         <a href={`https://wa.me/${site.whatsapp}`} className="grid h-12 w-12 place-items-center rounded-full bg-[#191919] text-white shadow-[0_10px_30px_rgba(0,0,0,0.32)] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-teal" aria-label="WhatsApp MGM">
           <MessageCircle size={20} />
         </a>
@@ -158,10 +148,21 @@ function ContactLine({ icon, label, value, href }: { icon: React.ReactNode; labe
   );
 }
 
-function SocialPill({ href, label, icon }: { href: string; label: string; icon?: React.ReactNode }) {
+function SocialPill({ href, label, icon, tone }: { href: string; label: string; icon?: React.ReactNode; tone: "whatsapp" | "facebook" | "youtube" }) {
+  const tones = {
+    whatsapp: "border-emerald-300/30 bg-[linear-gradient(135deg,rgba(16,185,129,0.2),rgba(255,255,255,0.04))] text-emerald-50 hover:border-emerald-300/70 hover:bg-[linear-gradient(135deg,rgba(16,185,129,0.32),rgba(255,255,255,0.08))] [&_span]:bg-emerald-400/18 [&_span]:text-emerald-100",
+    facebook: "border-sky-300/28 bg-[linear-gradient(135deg,rgba(37,99,235,0.2),rgba(255,255,255,0.04))] text-sky-50 hover:border-sky-300/70 hover:bg-[linear-gradient(135deg,rgba(37,99,235,0.3),rgba(255,255,255,0.08))] [&_span]:bg-sky-400/18 [&_span]:text-sky-100",
+    youtube: "border-red-300/28 bg-[linear-gradient(135deg,rgba(220,38,38,0.18),rgba(255,255,255,0.04))] text-red-50 hover:border-red-300/70 hover:bg-[linear-gradient(135deg,rgba(220,38,38,0.3),rgba(255,255,255,0.08))] [&_span]:bg-red-400/18 [&_span]:text-red-100"
+  };
+
   return (
-    <a href={href} target={href === "#" ? undefined : "_blank"} rel={href === "#" ? undefined : "noreferrer"} className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.03] px-4 py-2 text-sm font-black text-white/70 transition hover:border-white/70 hover:bg-white/10 hover:text-white">
-      <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs">{icon ?? "G"}</span>
+    <a
+      href={href}
+      target={href === "#" ? undefined : "_blank"}
+      rel={href === "#" ? undefined : "noreferrer"}
+      className={`group inline-flex min-h-12 items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-black shadow-[0_18px_44px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.12)] transition duration-300 hover:-translate-y-1 hover:text-white hover:shadow-[0_24px_60px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.18)] ${tones[tone]}`}
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-full text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:scale-105">{icon ?? "G"}</span>
       {label}
     </a>
   );

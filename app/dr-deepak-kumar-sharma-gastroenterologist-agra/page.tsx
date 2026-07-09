@@ -92,6 +92,29 @@ const whyChoose = [
   "Comprehensive care under one roof at Mudgal Gastromedics Hospital"
 ];
 
+const consultationGuide = [
+  {
+    title: "When to consult Dr. Deepak",
+    text: "Patients should consider gastroenterology consultation when symptoms persist, recur, or are linked with warning signs.",
+    items: ["Frequent acidity, abdominal pain, bloating or vomiting", "Constipation, diarrhea or altered bowel habits", "Blood in stool, black stools or vomiting blood", "Jaundice, fatty liver or abnormal liver tests", "Difficulty swallowing or unexplained weight loss"]
+  },
+  {
+    title: "What to bring",
+    text: "Previous records help avoid repeat testing and make the consultation more useful.",
+    items: ["Old prescriptions and current medicines", "Blood reports, LFT, CBC, INR and stool reports", "Ultrasound, CT, MRCP or FibroScan reports", "Endoscopy, colonoscopy, biopsy or discharge summaries", "Diabetes, BP, allergy and blood thinner details"]
+  },
+  {
+    title: "What happens during consultation",
+    text: "The consultation focuses on symptom pattern, report review, diagnosis, treatment planning and follow-up guidance.",
+    items: ["History and warning-sign review", "Previous report assessment", "Medicine and diet guidance", "Test or procedure planning if needed", "Follow-up and emergency warning advice"]
+  },
+  {
+    title: "When to call urgently",
+    text: "Some symptoms should not wait for a routine appointment.",
+    items: ["Vomiting blood or black stools", "Severe abdominal pain or persistent vomiting", "Fever with jaundice", "Fainting, severe weakness or dehydration", "Confusion or increasing abdominal swelling in liver disease"]
+  }
+];
+
 const educationRows = [
   ["DM Gastroenterology", "SMS Medical College, Jaipur, 2017"],
   ["MD Medicine", "S.N. Medical College, Agra, 2013"],
@@ -315,6 +338,47 @@ export default function DoctorProfilePage() {
             <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
           </div>
+        </div>
+      </Section>
+
+      <Section muted>
+        <SectionHead eyebrow="Patient Consultation Guide" title="When to consult, what to bring and what to expect">
+          <p>Use this guide before booking an appointment with Dr. Deepak Kumar Sharma.</p>
+        </SectionHead>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {consultationGuide.map((block) => (
+            <article key={block.title} className="rounded border border-line bg-white p-5 shadow-soft">
+              <h2 className="text-2xl font-black leading-tight text-ink">{block.title}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{block.text}</p>
+              <ul className="mt-4 grid gap-3">
+                {block.items.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm text-muted">
+                    <ShieldCheck className="mt-0.5 shrink-0 text-teal" size={17} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section>
+        <SectionHead eyebrow="Care Pathway" title="How the visit is usually planned" />
+        <div className="grid gap-5 md:grid-cols-3">
+          {[
+            { title: "Consultation", text: "Symptoms, duration, medicine history and previous reports are reviewed carefully.", icon: Stethoscope },
+            { title: "Diagnosis plan", text: "Blood tests, imaging, endoscopy, colonoscopy, FibroScan or ERCP are advised only when clinically useful.", icon: HeartPulse },
+            { title: "Follow-up", text: "Treatment response, reports, diet, lifestyle and warning signs are discussed for ongoing care.", icon: ShieldCheck }
+          ].map(({ title, text, icon: Icon }) => (
+            <article key={title} className="rounded border border-line bg-white p-6 shadow-soft">
+              <span className="mb-4 grid h-11 w-11 place-items-center rounded bg-soft text-brand">
+                <Icon size={21} />
+              </span>
+              <h2 className="text-xl font-black text-ink">{title}</h2>
+              <p className="mt-2 text-muted">{text}</p>
+            </article>
+          ))}
         </div>
       </Section>
 

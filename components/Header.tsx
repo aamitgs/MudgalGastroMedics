@@ -7,7 +7,6 @@ import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/ButtonLink";
-import { LanguageToggle } from "@/components/LanguageToggle";
 import { LiveClockWeather } from "@/components/LiveClockWeather";
 
 const navItems = [
@@ -40,6 +39,18 @@ const navItems = [
       { href: "/gallery#pharmacy", label: "Pharmacy" },
       { href: "/gallery#equipment", label: "Equipment" },
       { href: "/gallery#accessibility", label: "Accessibility Facilities" }
+    ]
+  },
+  {
+    href: "/services/gastroenterology",
+    label: "Services",
+    children: [
+      { href: "/services/gastroenterology", label: "Gastroenterology" },
+      { href: "/services/hepatology-liver-care", label: "Hepatology / Liver Care" },
+      { href: "/services/advanced-endoscopy-centre", label: "Advanced Endoscopy Centre" },
+      { href: "/services/diagnostic-services", label: "Diagnostic Services" },
+      { href: "/services/preventive-health-check-up", label: "Preventive Health Check-up" },
+      { href: "/services/medical-weight-management", label: "Medical Weight Management" }
     ]
   },
   {
@@ -90,20 +101,20 @@ const navItems = [
     href: "/contact#appointment",
     label: "Symptoms",
     children: [
-      { href: "/contact#appointment", label: "Abdominal Pain" },
-      { href: "/contact#appointment", label: "Acidity / Reflux" },
-      { href: "/contact#appointment", label: "Jaundice" },
-      { href: "/contact#appointment", label: "Blood in Stool" },
-      { href: "/contact#appointment", label: "Vomiting Blood" },
-      { href: "/contact#appointment", label: "Black Stools" },
+      { href: "/services/gastroenterology", label: "Abdominal Pain" },
+      { href: "/procedures/acidity-gerd", label: "Acidity / Reflux" },
+      { href: "/procedures/obstructive-jaundice", label: "Jaundice" },
+      { href: "/procedures/gastrointestinal-bleeding-management", label: "Blood in Stool" },
+      { href: "/procedures/gastrointestinal-bleeding-management", label: "Vomiting Blood" },
+      { href: "/procedures/gastrointestinal-bleeding-management", label: "Black Stools" },
       { href: "/procedures/chronic-diarrhea", label: "Severe Diarrhea" },
-      { href: "/contact#appointment", label: "Persistent Vomiting" },
-      { href: "/contact#appointment", label: "Difficulty Swallowing" },
-      { href: "/contact#appointment", label: "Unexplained Weight Loss" },
-      { href: "/contact#appointment", label: "Abdominal Swelling" },
-      { href: "/contact#appointment", label: "Liver Cirrhosis Symptoms" },
+      { href: "/services/gastroenterology", label: "Persistent Vomiting" },
+      { href: "/procedures/difficulty-swallowing", label: "Difficulty Swallowing" },
+      { href: "/services/diagnostic-services", label: "Unexplained Weight Loss" },
+      { href: "/procedures/ascites", label: "Abdominal Swelling" },
+      { href: "/procedures/liver-cirrhosis", label: "Liver Cirrhosis Symptoms" },
       { href: "/procedures/chronic-constipation", label: "Severe Constipation" },
-      { href: "/contact#appointment", label: "Pancreatic Pain" }
+      { href: "/procedures/pancreatic-disorders", label: "Pancreatic Pain" }
     ]
   },
   { href: "/life-at-mgm", label: "Life@MGM" },
@@ -120,6 +131,13 @@ const navHindi: Record<string, string> = {
   "Home": "होम",
   "About Us": "हमारे बारे में",
   "Facilities": "सुविधाएँ",
+  "Services": "सेवाएँ",
+  "Gastroenterology": "गैस्ट्रोएंटरोलॉजी",
+  "Hepatology / Liver Care": "हेपेटोलॉजी / लिवर केयर",
+  "Advanced Endoscopy Centre": "एडवांस्ड एंडोस्कोपी सेंटर",
+  "Diagnostic Services": "डायग्नोस्टिक सेवाएँ",
+  "Preventive Health Check-up": "प्रीवेंटिव हेल्थ चेक-अप",
+  "Medical Weight Management": "मेडिकल वेट मैनेजमेंट",
   "Hospital Gallery": "हॉस्पिटल गैलरी",
   "Reception & Waiting Area": "रिसेप्शन और वेटिंग एरिया",
   "OPD Consultation Rooms": "ओपीडी कंसल्टेशन रूम",
@@ -231,7 +249,7 @@ export function Header() {
             <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "168px", height: "auto" }} />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-5 2xl:gap-6">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-5 2xl:gap-7">
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
@@ -242,9 +260,9 @@ export function Header() {
                   {item.children?.length ? <ChevronDown size={17} strokeWidth={3} /> : null}
                 </Link>
                 {item.children?.length ? (
-                  <div className="invisible absolute left-0 top-full max-h-[70vh] min-w-64 translate-y-2 overflow-y-auto rounded border border-line bg-white p-2.5 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="invisible absolute left-0 top-full max-h-[70vh] min-w-64 translate-y-2 overflow-y-auto rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-3 text-[15px] font-semibold text-ink/80 hover:bg-soft hover:text-brand">
+                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-[13px] font-semibold text-ink/78 hover:bg-soft hover:text-brand xl:text-[14px]">
                         <NavLabel label={child.label} />
                       </Link>
                     ))}
@@ -255,8 +273,7 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <LanguageToggle />
-            <ButtonLink href="/portal#book" className="hidden min-w-[176px] whitespace-nowrap border-coral bg-coral px-5 text-base hover:bg-brand-dark md:inline-flex">
+            <ButtonLink href="/portal#book" className="hidden min-w-[154px] whitespace-nowrap border-coral bg-coral px-4 text-sm hover:bg-brand-dark md:inline-flex xl:min-w-[166px] xl:text-[15px]">
               <span data-en>Book Appointment</span>
               <span data-hi lang="hi">बुक करें</span>
             </ButtonLink>

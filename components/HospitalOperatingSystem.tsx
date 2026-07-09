@@ -103,6 +103,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { MetricCard } from "@/components/design-system/MetricCard";
+import { AcceptancePanel } from "@/components/hospital-os/AcceptancePanel";
+import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
+import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import {
   canAccessCommandEntity,
   accessRoleToHospitalRole,
@@ -115,7 +118,7 @@ import {
   roleFallbackMessage,
   v1AiScope
 } from "@/lib/hospital-os-data";
-import type { CommandRecord, DashboardMetric, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
+import type { AuditTrailItem, CommandRecord, DashboardMetric, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { downloadCsv } from "@/lib/table-export";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
@@ -148,14 +151,6 @@ type FormFieldProps = {
   label: string;
   error?: string;
   children: React.ReactNode;
-};
-
-type AuditTrailItem = {
-  id: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  recordedAt: string;
 };
 
 type DoctorAssignment = {
@@ -1028,36 +1023,6 @@ function TopNav({
   );
 }
 
-function ShortcutsDialog({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
-  const shortcuts = [
-    ["Ctrl/⌘ K", "Open command palette"],
-    ["?", "Open keyboard shortcuts"],
-    ["↑ / ↓", "Move through sidebar items"],
-    ["Enter", "Activate focused sidebar item"],
-    ["Esc", "Close overlays"]
-  ];
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="hospital-os-theme border-[var(--hos-border)] bg-[var(--hos-surface)] text-[var(--hos-text)] sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Keyboard shortcuts</DialogTitle>
-          <DialogDescription>
-            Fast navigation for the Hospital OS workspace.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-2">
-          {shortcuts.map(([keys, action]) => (
-            <div key={keys} className="flex items-center justify-between gap-4 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-3">
-              <span className="text-sm text-[var(--hos-muted-text)]">{action}</span>
-              <kbd className="rounded-md border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 py-1 text-xs font-semibold">{keys}</kbd>
-            </div>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function DashboardOverview({
   realtimeMessages,
@@ -2030,88 +1995,6 @@ function AssignDoctorDialog({
         ) : null}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function AuditTrailPanel({ items }: { items: AuditTrailItem[] }) {
-  return (
-    <Card id="session-audit-trail" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">DPDP-aware access record</p>
-        <CardTitle className="text-xl">Session audit trail</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {items.length === 0 ? (
-          <EmptyState
-            icon={ShieldCheck}
-            title="No session audit events yet"
-            description="Successful Hospital OS mutations will appear here with their server audit IDs."
-            action="Start Registration"
-            onAction={() => document.querySelector("#patient-registration")?.scrollIntoView({ block: "start" })}
-          />
-        ) : (
-          <div className="grid gap-3">
-            {items.map((item) => (
-              <div key={item.id} className="rounded-lg border border-[var(--hos-border)] p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--hos-text)]">{item.action}</p>
-                    <p className="mt-1 text-xs text-[var(--hos-muted-text)]">{item.entityType}: {item.entityId}</p>
-                  </div>
-                  <time className="shrink-0 text-xs text-[var(--hos-muted-text)]" dateTime={item.recordedAt}>
-                    {new Date(item.recordedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </time>
-                </div>
-                <p className="mt-3 break-all rounded-md bg-[var(--hos-muted)] px-2 py-1 text-xs font-semibold text-[var(--hos-muted-text)]">Audit {item.id}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function AcceptancePanel({ flowStatus }: { flowStatus: { patientRegistration: string; appointment: string; billing: string } }) {
-  return (
-    <Card className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">v1 scope and controls</p>
-        <CardTitle className="text-xl">Acceptance coverage inside this build</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4 lg:grid-cols-2">
-        <div className="grid gap-2">
-          {[
-            "Role-based sidebar, top nav, branch switcher stub, and command palette",
-            "Patient Workspace and Doctor Workspace as single-screen experiences",
-            "Recharts dashboard with live-updating feed and polling fallback",
-            "TanStack Table with sort, filter, pagination, selection, bulk actions, row menus",
-            "Dark mode across the Hospital OS route",
-            "Skeleton, empty, and error states without bare no-data screens",
-            "DPDP-aware audit/access language without unsupported compliance claims"
-          ].map((item) => (
-            <div key={item} className="flex gap-3 rounded-lg border border-[var(--hos-border)] p-3 text-sm">
-              <Check size={16} className="mt-0.5 text-[var(--hos-success)]" />
-              <span>{item}</span>
-            </div>
-          ))}
-        </div>
-        <div className="grid gap-4">
-          <Alert>
-            <Sparkles size={18} />
-            <AlertTitle>AI v1 scope</AlertTitle>
-            <AlertDescription>{v1AiScope.join(", ")}. AI Receptionist is deferred to v2.</AlertDescription>
-          </Alert>
-          <Alert>
-            <ShieldCheck size={18} />
-            <AlertTitle>Critical flow status</AlertTitle>
-            <AlertDescription>
-              Registration: {flowStatus.patientRegistration}; Appointment: {flowStatus.appointment}; Billing: {flowStatus.billing}.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

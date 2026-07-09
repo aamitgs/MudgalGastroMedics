@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ButtonLink } from "@/components/ButtonLink";
-import { Section } from "@/components/Section";
+import { Section, SectionHead } from "@/components/Section";
 import { fullAddress, site } from "@/lib/site-data";
 
 const title = "Stomach, Intestine & Liver Consultation and Check-Up Camp";
@@ -39,6 +39,38 @@ const hindiHashtags = [
   "#DrDeepakKumarSharma",
   "#AgraHealth",
   "#MedicalCamp"
+];
+
+const campGuide = [
+  {
+    title: "Who should attend?",
+    text: "This camp is suitable for patients with digestive, bowel or liver-related symptoms who need consultation and basic guidance.",
+    items: ["Acidity, abdominal pain, bloating or vomiting", "Constipation, diarrhea or blood in stool", "Jaundice, fatty liver or abnormal liver reports", "Need for endoscopy, colonoscopy or FibroScan advice"]
+  },
+  {
+    title: "What is included?",
+    text: "The camp includes free consultation with registration, report review and guidance about tests or procedures if clinically needed.",
+    items: ["Free consultation", "Blood test discount", "Endoscopy, colonoscopy and FibroScan discount", "Treatment and follow-up guidance"]
+  },
+  {
+    title: "What to bring?",
+    text: "Please bring previous records so the doctor can understand your medical history clearly.",
+    items: ["Previous prescriptions", "Blood reports and liver function tests", "Ultrasound, CT, MRCP, endoscopy or colonoscopy reports", "List of current medicines and allergies"]
+  },
+  {
+    title: "When to call before visiting",
+    text: "Call reception before travelling if symptoms are urgent or severe.",
+    items: ["Vomiting blood or black stools", "Severe abdominal pain", "Fever with jaundice", "Persistent vomiting, fainting or severe weakness"]
+  }
+];
+
+const campFaqs = [
+  ["Is consultation free in this camp?", "Yes, consultation is free. Registration is required and the registration fee is ₹200/-."],
+  ["Can patients come without registration?", "No. Patients will not be seen without registration."],
+  ["What discounts are available?", "Blood tests have 50% discount. Endoscopy, colonoscopy and FibroScan have 25% discount during the camp terms."],
+  ["Should I bring old reports?", "Yes. Bring previous prescriptions, blood reports, ultrasound, CT/MRCP, endoscopy, colonoscopy and discharge summaries if available."],
+  ["Who should call urgently before visiting?", "Patients with vomiting blood, black stools, severe pain, fever with jaundice, persistent vomiting or fainting should call reception before travelling."],
+  ["Where is the camp?", `The camp is at ${venue}.`]
 ];
 
 export const metadata: Metadata = {
@@ -113,6 +145,40 @@ export default function CampBlogPostPage() {
             className="h-auto w-full rounded object-contain"
             priority
           />
+        </div>
+      </Section>
+
+      <Section>
+        <SectionHead eyebrow="Camp Patient Guide" title="Who should attend and what to prepare">
+          <p>Use this quick guide before coming for registration and consultation.</p>
+        </SectionHead>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {campGuide.map((block) => (
+            <article key={block.title} className="rounded border border-line bg-white p-5 shadow-soft">
+              <h2 className="text-2xl font-black leading-tight text-ink">{block.title}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{block.text}</p>
+              <ul className="mt-4 grid gap-3">
+                {block.items.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm text-muted">
+                    <CheckCircle2 className="mt-0.5 shrink-0 text-teal" size={17} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section muted>
+        <SectionHead eyebrow="FAQs" title="Camp FAQs" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {campFaqs.map(([question, answer]) => (
+            <details key={question} className="group rounded border border-line bg-white p-5 shadow-sm">
+              <summary className="cursor-pointer list-none text-lg font-black text-ink">{question}</summary>
+              <p className="mt-3 leading-relaxed text-muted">{answer}</p>
+            </details>
+          ))}
         </div>
       </Section>
 

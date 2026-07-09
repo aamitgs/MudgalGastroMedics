@@ -81,6 +81,15 @@ export type ClinicalEvent = {
 /** Live per-module counts for sidebar badges, computed server-side in the snapshot. */
 export type NavBadgeCounts = Partial<Record<"OPD" | "Laboratory" | "Pharmacy", number>>;
 
+/** Client-side record of a successful Hospital OS mutation, shown in AuditTrailPanel (Track 4.10). */
+export type AuditTrailItem = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  recordedAt: string;
+};
+
 export type DashboardMetric = {
   label: string;
   value: string;
