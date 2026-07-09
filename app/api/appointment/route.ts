@@ -8,7 +8,7 @@ import { queryAppointments, type AppointmentSortField, type SortDirection } from
 import { sendEmail } from "@/lib/email";
 import { site } from "@/lib/site-data";
 
-async function sendAppointmentConfirmation(appointment: AppointmentRecord) {
+async function sendPatientConfirmation(appointment: AppointmentRecord) {
   if (!appointment.email?.includes("@")) return;
   await sendEmail({
     to: appointment.email,
@@ -16,6 +16,32 @@ async function sendAppointmentConfirmation(appointment: AppointmentRecord) {
     text: `Hi ${appointment.name},\n\nWe've received your appointment request (reference ${appointment.id}) for ${appointment.service}${appointment.date ? ` on ${appointment.date}` : ""}${appointment.timeSlot ? ` (${appointment.timeSlot})` : ""}.\n\nOur reception team will contact you shortly at ${appointment.phone} to confirm. For urgent concerns, call ${site.phone} or WhatsApp ${site.mobile}.\n\n${site.name}`,
     html: `<p>Hi ${appointment.name},</p><p>We've received your appointment request (reference <strong>${appointment.id}</strong>) for <strong>${appointment.service}</strong>${appointment.date ? ` on ${appointment.date}` : ""}${appointment.timeSlot ? ` (${appointment.timeSlot})` : ""}.</p><p>Our reception team will contact you shortly at ${appointment.phone} to confirm. For urgent concerns, call ${site.phone} or WhatsApp ${site.mobile}.</p><p>${site.name}</p>`
   });
+}
+
+async function sendHospitalNotification(appointment: AppointmentRecord) {
+  const detailLines: [string, string | undefined][] = [
+    ["Phone", appointment.phone],
+    ["Email", appointment.email],
+    ["Service", appointment.service],
+    ["Preferred date", appointment.date],
+    ["Preferred time", appointment.timeSlot],
+    ["Priority", appointment.priority],
+    ["Patient type", appointment.patientType],
+    ["Preferred contact", appointment.contactMethod],
+    ["Symptoms", appointment.symptoms.length ? appointment.symptoms.join(", ") : undefined],
+    ["Message", appointment.message]
+  ].filter((row): row is [string, string] => Boolean(row[1]));
+
+  await sendEmail({
+    to: site.email,
+    subject: `New appointment request — ${appointment.name} (${appointment.id})`,
+    text: `New appointment request from ${appointment.name}:\n\n${detailLines.map(([label, value]) => `${label}: ${value}`).join("\n")}\n\nView in the OS: ${site.url}/admin#module-appointments`,
+    html: `<p>New appointment request from <strong>${appointment.name}</strong>:</p><ul>${detailLines.map(([label, value]) => `<li><strong>${label}:</strong> ${value}</li>`).join("")}</ul><p><a href="${site.url}/admin#module-appointments">View in the OS</a></p>`
+  });
+}
+
+async function sendAppointmentNotifications(appointment: AppointmentRecord) {
+  await Promise.all([sendHospitalNotification(appointment), sendPatientConfirmation(appointment)]);
 }
 
 const sortFields: AppointmentSortField[] = ["name", "service", "status", "date", "createdAt"];
@@ -80,7 +106,7 @@ export async function POST(request: Request) {
     device: auditRequestMetadata(request)
   });
 
-  await sendAppointmentConfirmation(appointment);
+  await sendAppointmentNotifications(appointment);
 
   return NextResponse.json({
     ok: true,
