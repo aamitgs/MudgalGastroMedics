@@ -1,5 +1,8 @@
 import "server-only";
 
+import { sendEmail } from "@/lib/email";
+import { site } from "@/lib/site-data";
+
 /**
  * OTP / magic-link delivery adapters.
  *
@@ -10,11 +13,10 @@ import "server-only";
  * NOTE: the first live send after keys arrive should be smoke-tested against
  * MSG91's dashboard before relying on it for patients.
  *
- * Email: log-based until self-hosted Postal/Mailu delivery lands (deferred
- * infrastructure decision). The adapter boundary means wiring SMTP later
- * changes this file only.
+ * Email: routed through lib/email.ts (SMTP_URL-configured, logs instead of
+ * sending until that's set).
  */
-export type DeliveryResult = { channel: "sms" | "log"; ok: boolean; error?: string };
+export type DeliveryResult = { channel: "sms" | "email" | "log"; ok: boolean; error?: string };
 
 function smsConfigured() {
   return Boolean(process.env.SMS_PROVIDER_KEY?.trim() && process.env.MSG91_TEMPLATE_ID?.trim());
@@ -54,8 +56,15 @@ export async function sendOtpSms(phone: string, code: string): Promise<DeliveryR
 }
 
 export async function sendMagicLinkEmail(email: string, link: string): Promise<DeliveryResult> {
-  // Deferred infra: log-based delivery until Postal/Mailu SMTP is connected.
-  console.warn(`[patient-magic-link] Email delivery not configured; sign-in link for ${email} was generated but not emailed.`);
-  console.warn(`[patient-magic-link] ${link}`);
-  return { channel: "log", ok: true };
+  const result = await sendEmail({
+    to: email,
+    subject: `Sign in to ${site.shortName} Patient Portal`,
+    text: `Use this link to sign in to your patient portal:\n${link}\n\nThis link expires shortly and can only be used once. If you didn't request it, you can ignore this email.`,
+    html: `<p>Use the link below to sign in to your patient portal:</p><p><a href="${link}">${link}</a></p><p>This link expires shortly and can only be used once. If you didn't request it, you can ignore this email.</p>`
+  });
+  if (result.channel === "log") {
+    console.warn(`[patient-magic-link] Email delivery not configured; sign-in link for ${email} was generated but not emailed.`);
+    console.warn(`[patient-magic-link] ${link}`);
+  }
+  return result;
 }

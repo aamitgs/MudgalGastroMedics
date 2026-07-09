@@ -35,7 +35,7 @@ and non-blocking-by-default — warn, don't obstruct the clinician; log override
 - Strict TypeScript. Zero `any`, zero `@ts-ignore` in source. Never bypass types or lint.
 - Server-side validation for every write. Converge REST routes onto the Zod schemas in
   `lib/validation/` (server actions already use them) — do not add new hand-rolled checks.
-- Minimal dependencies (28 runtime). Before adding one: can existing libs or native APIs do it?
+- Minimal dependencies (29 runtime). Before adding one: can existing libs or native APIs do it?
 - Comments explain business rules, healthcare logic, or constraints code can't show —
   never what the next line does.
 

@@ -3,8 +3,20 @@ import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { createAppointment, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
 import { appointmentStatuses } from "@/lib/appointment-types";
-import type { AppointmentStatus } from "@/lib/appointment-types";
+import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { queryAppointments, type AppointmentSortField, type SortDirection } from "@/lib/appointment-query";
+import { sendEmail } from "@/lib/email";
+import { site } from "@/lib/site-data";
+
+async function sendAppointmentConfirmation(appointment: AppointmentRecord) {
+  if (!appointment.email?.includes("@")) return;
+  await sendEmail({
+    to: appointment.email,
+    subject: `Appointment request received — ${site.shortName}`,
+    text: `Hi ${appointment.name},\n\nWe've received your appointment request (reference ${appointment.id}) for ${appointment.service}${appointment.date ? ` on ${appointment.date}` : ""}${appointment.timeSlot ? ` (${appointment.timeSlot})` : ""}.\n\nOur reception team will contact you shortly at ${appointment.phone} to confirm. For urgent concerns, call ${site.phone} or WhatsApp ${site.mobile}.\n\n${site.name}`,
+    html: `<p>Hi ${appointment.name},</p><p>We've received your appointment request (reference <strong>${appointment.id}</strong>) for <strong>${appointment.service}</strong>${appointment.date ? ` on ${appointment.date}` : ""}${appointment.timeSlot ? ` (${appointment.timeSlot})` : ""}.</p><p>Our reception team will contact you shortly at ${appointment.phone} to confirm. For urgent concerns, call ${site.phone} or WhatsApp ${site.mobile}.</p><p>${site.name}</p>`
+  });
+}
 
 const sortFields: AppointmentSortField[] = ["name", "service", "status", "date", "createdAt"];
 
@@ -67,6 +79,8 @@ export async function POST(request: Request) {
     },
     device: auditRequestMetadata(request)
   });
+
+  await sendAppointmentConfirmation(appointment);
 
   return NextResponse.json({
     ok: true,
