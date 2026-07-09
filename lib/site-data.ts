@@ -15,8 +15,8 @@ export const site = {
   mobile: "+91 9828912257",
   whatsapp: "919828912257",
   whatsappAlt: "+91 9084678126",
-  email: "mudgalreception@gmail.com",
-  emailAlt: "mudgalgastromedics@gmail.com",
+  email: "admin@mudgalgastromedics.com",
+  emailAlt: "admin@mudgalgastromedics.com",
   directionsUrl: "https://maps.app.goo.gl/EHcBzTLo2GUqdLtt5",
   mapEmbed:
     "https://www.google.com/maps?q=Mudgal%20Gastromedics%20Hospital%2016%20HIG%20Shaheed%20Nagar%20Agra&output=embed"
