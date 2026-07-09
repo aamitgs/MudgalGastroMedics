@@ -6,7 +6,7 @@ export const allowedDocumentMimeTypes = ["application/pdf", "image/jpeg", "image
 
 export const maxDocumentSizeBytes = 10 * 1024 * 1024;
 
-export const documentEntityTypes = ["patient"] as const;
+export const documentEntityTypes = ["patient", "external-referral"] as const;
 
 export const documentUploadFieldsSchema = z.object({
   entityType: z.enum(documentEntityTypes, { error: "Invalid entity type." }),

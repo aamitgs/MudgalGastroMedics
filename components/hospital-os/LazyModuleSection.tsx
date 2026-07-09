@@ -26,6 +26,8 @@ const moduleLoaders: Record<string, () => Promise<{ default: ComponentType }>> =
   "module-ipd": () => import("@/components/ipd/AdminIpdBeds").then((m) => ({ default: m.AdminIpdBeds })),
   "module-doctor-workflow": () => import("@/components/doctor-workflow/AdminDoctorWorkflow").then((m) => ({ default: m.AdminDoctorWorkflow })),
   "module-lab": () => import("@/components/lab/AdminLab").then((m) => ({ default: m.AdminLab })),
+  "module-external-referrals": () =>
+    import("@/components/external-referrals/AdminExternalReferrals").then((m) => ({ default: m.AdminExternalReferrals })),
   "module-pharmacy": () => import("@/components/pharmacy/AdminPharmacy").then((m) => ({ default: m.AdminPharmacy })),
   "module-billing": () => import("@/components/billing/AdminBillingSummary").then((m) => ({ default: m.AdminBillingSummary })),
   "module-finance": () => import("@/components/finance/AdminFinance").then((m) => ({ default: m.AdminFinance })),

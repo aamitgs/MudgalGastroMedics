@@ -35,6 +35,9 @@ export const adminModules: AdminModuleDef[] = [
   { id: "module-ipd", label: "IPD & Beds", resource: "beds" },
   { id: "module-doctor-workflow", label: "Doctor Workflow", resource: "prescriptions" },
   { id: "module-lab", label: "Lab", resource: "lab-orders" },
+  // No in-house radiologist/pathologist — external referral tracking, so it
+  // shares the same "diagnostics ordering" resource/audience as Lab (Track 4.6).
+  { id: "module-external-referrals", label: "Radiology & Pathology", resource: "lab-orders" },
   { id: "module-pharmacy", label: "Pharmacy", resource: "pharmacy-inventory" },
   { id: "module-billing", label: "Billing", resource: "billing" },
   { id: "module-finance", label: "Finance", resource: "insurance" },

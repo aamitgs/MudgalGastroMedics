@@ -10,7 +10,7 @@ import type { LabOrder } from "@/lib/lab-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
-import { PatientDocumentsSection } from "@/components/hospital-os/PatientDocumentsSection";
+import { EntityDocumentsSection } from "@/components/design-system/EntityDocumentsSection";
 
 type PatientSummary = {
   patient: PatientRecord | null;
@@ -211,7 +211,7 @@ export function PatientDrawer() {
 
               {patient?.id ? (
                 <Section title="Documents">
-                  <PatientDocumentsSection patientId={patient.id} />
+                  <EntityDocumentsSection entityType="patient" entityId={patient.id} />
                 </Section>
               ) : null}
             </>

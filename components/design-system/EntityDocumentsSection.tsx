@@ -26,14 +26,17 @@ function formatSize(bytes: number) {
 }
 
 /**
- * Patient Drawer's Documents section (Track 3.6): upload/preview/download/
- * version history for real files (PDF/JPEG/PNG/WEBP), stored as bytea in
- * Postgres (or base64 in the local JSON fallback) — not the filename-only
- * "attachment" that existed before. Access is gated by the same `patients`
- * RBAC resource as everything else here, and every upload/download/preview
- * is audited via the existing recordAuditEvent pattern (no separate log).
+ * Reusable Documents section (Track 3.6, generalized in Track 4.6):
+ * upload/preview/download/version history for real files (PDF/JPEG/PNG/
+ * WEBP), stored as bytea in Postgres (or base64 in the local JSON
+ * fallback) — not a filename-only "attachment." Access is gated by the
+ * same RBAC resource the caller's own route uses, and every upload/
+ * download/preview is audited via the existing recordAuditEvent pattern
+ * (no separate log). `entityType` must be one of `documentEntityTypes`
+ * (lib/validation/documents.ts) — first used for patients (Patient Drawer),
+ * generalized for external lab/imaging referrals (Track 4.6).
  */
-export function PatientDocumentsSection({ patientId }: { patientId: string }) {
+export function EntityDocumentsSection({ entityType, entityId }: { entityType: "patient" | "external-referral"; entityId: string }) {
   const [documents, setDocuments] = useState<DocumentMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -45,7 +48,7 @@ export function PatientDocumentsSection({ patientId }: { patientId: string }) {
 
   async function loadDocuments() {
     setLoading(true);
-    const response = await fetch(`/api/documents?entityType=patient&entityId=${patientId}`, { cache: "no-store" });
+    const response = await fetch(`/api/documents?entityType=${entityType}&entityId=${entityId}`, { cache: "no-store" });
     const data = (await response.json().catch(() => ({}))) as DocumentsResponse;
     setDocuments(response.ok && data.ok ? (data.documents ?? []) : []);
     setLoading(false);
@@ -54,21 +57,21 @@ export function PatientDocumentsSection({ patientId }: { patientId: string }) {
   useEffect(() => {
     let active = true;
 
-    async function loadOnPatientChange() {
+    async function loadOnEntityChange() {
       setLoading(true);
-      const response = await fetch(`/api/documents?entityType=patient&entityId=${patientId}`, { cache: "no-store" });
+      const response = await fetch(`/api/documents?entityType=${entityType}&entityId=${entityId}`, { cache: "no-store" });
       const data = (await response.json().catch(() => ({}))) as DocumentsResponse;
       if (!active) return;
       setDocuments(response.ok && data.ok ? (data.documents ?? []) : []);
       setLoading(false);
     }
 
-    void loadOnPatientChange();
+    void loadOnEntityChange();
 
     return () => {
       active = false;
     };
-  }, [patientId]);
+  }, [entityType, entityId]);
 
   async function loadVersions(groupId: string) {
     const response = await fetch(`/api/documents/versions?groupId=${groupId}`, { cache: "no-store" });
@@ -79,8 +82,8 @@ export function PatientDocumentsSection({ patientId }: { patientId: string }) {
   async function upload(file: File, groupId?: string) {
     setUploading(true);
     const formData = new FormData();
-    formData.append("entityType", "patient");
-    formData.append("entityId", patientId);
+    formData.append("entityType", entityType);
+    formData.append("entityId", entityId);
     if (groupId) formData.append("groupId", groupId);
     formData.append("file", file);
     const response = await fetch("/api/documents", { method: "POST", body: formData });
