@@ -355,6 +355,27 @@ export const procedures = [
     hiSummary: "आईबीडी, कोलाइटिस, लंबे समय के दस्त, ब्लीडिंग, पेट दर्द और कोलोनोस्कोपी आधारित निगरानी की देखभाल।"
   },
   {
+    slug: "ibs",
+    title: "IBS",
+    hiTitle: "आईबीएस",
+    summary: "Evaluation and treatment planning for irritable bowel syndrome with abdominal pain, bloating, constipation, diarrhea, urgency, and recurrent bowel habit changes.",
+    hiSummary: "पेट दर्द, गैस, कब्ज, दस्त, जल्दी शौच की जरूरत और बार-बार बदलती मल आदतों वाले आईबीएस की जांच और उपचार योजना।"
+  },
+  {
+    slug: "chronic-constipation",
+    title: "Chronic Constipation",
+    hiTitle: "लंबे समय की कब्ज",
+    summary: "Assessment of long-standing constipation, hard stools, straining, incomplete evacuation, bloating, medicine causes, and colonoscopy need when warning signs are present.",
+    hiSummary: "लंबे समय की कब्ज, सख्त मल, जोर लगना, अधूरा शौच, गैस, दवा से जुड़ी वजह और जरूरत होने पर कोलोनोस्कोपी की जांच।"
+  },
+  {
+    slug: "chronic-diarrhea",
+    title: "Chronic Diarrhea",
+    hiTitle: "लंबे समय के दस्त",
+    summary: "Evaluation of persistent diarrhea, loose stools, urgency, blood or mucus in stool, weight loss, infection, IBS, colitis, and malabsorption concerns.",
+    hiSummary: "लगातार दस्त, पतला मल, जल्दी शौच, मल में खून या म्यूकस, वजन घटना, संक्रमण, आईबीएस, कोलाइटिस और मालएब्जॉर्प्शन की जांच।"
+  },
+  {
     slug: "ascites",
     title: "Ascites",
     hiTitle: "पेट में पानी",

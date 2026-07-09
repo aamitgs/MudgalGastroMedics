@@ -66,7 +66,6 @@ const procedures = [
   "ERCP",
   "FibroScan",
   "Capsule Endoscopy",
-  "Endoscopic Ultrasound",
   "Polypectomy",
   "Variceal Band Ligation",
   "Endoscopic Hemostasis",

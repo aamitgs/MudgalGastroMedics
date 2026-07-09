@@ -99,7 +99,6 @@ const diagnostics = [
   "Colonoscopy",
   "FibroScan",
   "Capsule Endoscopy",
-  "Endoscopic Ultrasound (EUS)",
   "Liver Function Assessment",
   "Gastrointestinal Disease Screening"
 ];

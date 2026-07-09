@@ -80,6 +80,9 @@ const navItems = [
       { href: "/procedures/gi-stricture", label: "GI Stricture" },
       { href: "/procedures/colon-polyps", label: "Colon Polyps" },
       { href: "/procedures/ibd-colitis", label: "IBD / Colitis" },
+      { href: "/procedures/ibs", label: "IBS" },
+      { href: "/procedures/chronic-constipation", label: "Chronic Constipation" },
+      { href: "/procedures/chronic-diarrhea", label: "Chronic Diarrhea" },
       { href: "/procedures/ascites", label: "Ascites" }
     ]
   },
@@ -93,13 +96,13 @@ const navItems = [
       { href: "/contact#appointment", label: "Blood in Stool" },
       { href: "/contact#appointment", label: "Vomiting Blood" },
       { href: "/contact#appointment", label: "Black Stools" },
-      { href: "/contact#appointment", label: "Severe Diarrhea" },
+      { href: "/procedures/chronic-diarrhea", label: "Severe Diarrhea" },
       { href: "/contact#appointment", label: "Persistent Vomiting" },
       { href: "/contact#appointment", label: "Difficulty Swallowing" },
       { href: "/contact#appointment", label: "Unexplained Weight Loss" },
       { href: "/contact#appointment", label: "Abdominal Swelling" },
       { href: "/contact#appointment", label: "Liver Cirrhosis Symptoms" },
-      { href: "/contact#appointment", label: "Severe Constipation" },
+      { href: "/procedures/chronic-constipation", label: "Severe Constipation" },
       { href: "/contact#appointment", label: "Pancreatic Pain" }
     ]
   },
@@ -174,6 +177,9 @@ const navHindi: Record<string, string> = {
   "GI Stricture": "जीआई सिकुड़न",
   "Colon Polyps": "कोलन पॉलीप्स",
   "IBD / Colitis": "आईबीडी / कोलाइटिस",
+  "IBS": "आईबीएस",
+  "Chronic Constipation": "लंबे समय की कब्ज",
+  "Chronic Diarrhea": "लंबे समय के दस्त",
   "Ascites": "पेट में पानी",
   "Doctor Profile": "डॉक्टर प्रोफ़ाइल",
   "Duty Doctor": "ड्यूटी डॉक्टर",

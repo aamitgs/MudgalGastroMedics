@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartPulse, MessageCircle, Phone, ShieldCheck, Stethoscope } from "lucide-react";
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
+import { seoBlogPosts } from "@/lib/blog-posts";
 import { getPublicProcedure, getPublicProcedures } from "@/lib/cms-public";
 import { site } from "@/lib/site-data";
 
@@ -17,6 +19,22 @@ type PageCopy = {
   consultCues: string[];
   relatedTerms: string[];
   pathway: Array<{ title: string; text: string }>;
+};
+
+type ArticleSection = {
+  title: string;
+  text: string;
+  items?: string[];
+};
+
+type ArticleFaq = {
+  question: string;
+  answer: string;
+};
+
+type ProcedureArticle = {
+  sections: ArticleSection[];
+  faqs: ArticleFaq[];
 };
 
 const diseaseSlugs = new Set([
@@ -33,6 +51,9 @@ const diseaseSlugs = new Set([
   "gi-stricture",
   "colon-polyps",
   "ibd-colitis",
+  "ibs",
+  "chronic-constipation",
+  "chronic-diarrhea",
   "ascites"
 ]);
 
@@ -192,7 +213,7 @@ const pageCopyBySlug: Record<string, PageCopy> = {
     consultCues: ["Chronic pancreatitis with duct stone on imaging", "Recurrent upper abdominal pain radiating to the back", "Pancreatic duct blockage or dilation", "Doctor-advised ERCP-based pancreatic therapy"],
     relatedTerms: ["Pancreatic duct stone Agra", "Chronic pancreatitis treatment Agra", "Pancreatic ERCP Agra", "Pancreas specialist Agra"],
     pathway: [
-      { title: "Pancreas imaging review", text: "CT, MRCP, EUS or prior reports are reviewed to locate stones and duct changes." },
+      { title: "Pancreas imaging review", text: "CT, MRCP or prior reports are reviewed to locate stones and duct changes." },
       { title: "Duct therapy planning", text: "Stone extraction, stenting or staged treatment is considered based on suitability." },
       { title: "Pain and follow-up plan", text: "Diet, medicines, enzyme support and repeat treatment needs are discussed." }
     ]
@@ -417,6 +438,36 @@ const pageCopyBySlug: Record<string, PageCopy> = {
       { title: "Long-term control", text: "Medicines, diet, flare warning signs and surveillance are planned." }
     ]
   },
+  "ibs": {
+    overview: "IBS care focuses on recurrent abdominal pain, bloating, gas, constipation, diarrhea or mixed bowel habits when warning signs are absent or have been ruled out. The goal is to identify triggers, avoid unnecessary medicines and build a practical long-term symptom-control plan.",
+    consultCues: ["Abdominal cramps linked with bowel movement", "Bloating, gas or urgency after meals", "Constipation, diarrhea or alternating bowel habits", "Symptoms worsened by stress, irregular meals or poor sleep"],
+    relatedTerms: ["IBS treatment Agra", "Irritable bowel syndrome doctor Agra", "Bloating treatment Agra", "Digestive problems doctor Agra"],
+    pathway: [
+      { title: "Symptom and trigger review", text: "Pain pattern, stool frequency, diet, stress, sleep and medicine history are reviewed." },
+      { title: "Warning sign check", text: "Blood in stool, anemia, weight loss, fever, night symptoms and family history are checked before labeling IBS." },
+      { title: "Personalized control plan", text: "Diet, bowel routine, stress management and medicines are planned according to IBS type." }
+    ]
+  },
+  "chronic-constipation": {
+    overview: "Chronic constipation care evaluates hard stool, straining, incomplete evacuation, bloating and long-term laxative use. The plan may include diet correction, medicine review, bowel routine and colon evaluation when warning signs are present.",
+    consultCues: ["Constipation lasting weeks or months", "Hard stool, straining or incomplete evacuation", "Bloating, abdominal discomfort or poor appetite", "Blood in stool, anemia, weight loss or new constipation in older age"],
+    relatedTerms: ["Chronic constipation treatment Agra", "Constipation doctor Agra", "Colonoscopy for constipation Agra", "Digestive problems doctor Agra"],
+    pathway: [
+      { title: "Cause assessment", text: "Diet, hydration, activity, thyroid/diabetes risk and constipating medicines are reviewed." },
+      { title: "Warning symptom evaluation", text: "Bleeding, anemia, weight loss, severe pain and age-related screening needs are checked." },
+      { title: "Bowel plan", text: "Fiber, fluids, toilet routine and safe medicines are planned with follow-up." }
+    ]
+  },
+  "chronic-diarrhea": {
+    overview: "Chronic diarrhea care investigates loose stools lasting several weeks, urgency, mucus, blood, weight loss or night-time stools. Evaluation may include stool tests, blood tests, celiac screening, colonoscopy or biopsy depending on symptoms.",
+    consultCues: ["Loose stools continuing for more than 3-4 weeks", "Blood or mucus in stool", "Night-time diarrhea, fever, anemia or weight loss", "Repeated antibiotics without lasting improvement"],
+    relatedTerms: ["Chronic diarrhea treatment Agra", "Diarrhea specialist Agra", "Colitis evaluation Agra", "IBS diarrhea Agra"],
+    pathway: [
+      { title: "Pattern review", text: "Duration, frequency, blood, mucus, fever, food relation and weight changes are reviewed." },
+      { title: "Targeted testing", text: "Stool tests, blood tests, celiac testing, colonoscopy or biopsy are selected based on warning signs." },
+      { title: "Cause-based treatment", text: "Treatment is planned for infection, IBS, colitis, malabsorption or medicine-related diarrhea." }
+    ]
+  },
   "ascites": {
     overview: "Ascites is fluid buildup in the abdomen, most often related to liver disease but sometimes caused by infection, low protein states or other conditions. Evaluation identifies cause and complications.",
     consultCues: ["Increasing abdominal swelling or tightness", "Known liver disease with fluid in abdomen", "Breathlessness, leg swelling or reduced appetite due to fluid", "Fever, pain or suspected infection in ascitic fluid"],
@@ -447,6 +498,188 @@ function getPageCopy(slug: string, title: string, isDisease: boolean): PageCopy 
   };
 }
 
+function getCareMode(slug: string, isDisease: boolean) {
+  const noSedation = new Set(["fibroscan", "ascitic-fluid-tapping"]);
+  const therapeutic = new Set([
+    "ercp",
+    "cbd-stone-removal",
+    "pancreatic-duct-stone-removal",
+    "bile-duct-stenting",
+    "variceal-banding",
+    "sclerotherapy",
+    "polypectomy",
+    "colon-polyp-removal",
+    "stricture-dilation",
+    "esophageal-dilation",
+    "gi-stenting",
+    "peg-tube-placement",
+    "endoscopic-hemostasis",
+    "argon-plasma-coagulation",
+    "foreign-body-removal",
+    "intragastric-balloon-placement"
+  ]);
+  if (isDisease) return "consultation";
+  if (noSedation.has(slug)) return "minor";
+  if (therapeutic.has(slug)) return "therapeutic";
+  return "diagnostic";
+}
+
+function getProcedureArticle(slug: string, title: string, isDisease: boolean, pageCopy: PageCopy): ProcedureArticle {
+  const mode = getCareMode(slug, isDisease);
+  const lowerTitle = title.toLowerCase();
+  const isErcpLike = ["ercp", "cbd-stone-removal", "pancreatic-duct-stone-removal", "bile-duct-stenting"].includes(slug);
+  const isColonLike = ["colonoscopy", "polypectomy", "colon-polyp-removal", "ibd-colitis", "colon-polyps", "ibs", "chronic-constipation", "chronic-diarrhea"].includes(slug);
+  const isLiverLike = ["fibroscan", "fatty-liver", "liver-cirrhosis", "liver-fibrosis", "varices", "ascites", "ascitic-fluid-tapping"].includes(slug);
+
+  const preparationItems = isDisease
+    ? [
+        "Bring previous prescriptions, blood reports, ultrasound/CT/MRCP reports, discharge summaries and endoscopy or colonoscopy reports.",
+        "Carry a list of current medicines, allergies, diabetes or BP history and any blood thinner use such as aspirin, clopidogrel or warfarin.",
+        "Do not stop important medicines on your own; reception or the doctor will guide changes if a procedure is planned.",
+        "For urgent symptoms such as vomiting blood, black stool, severe pain or jaundice with fever, call reception before travelling."
+      ]
+    : [
+        isColonLike ? "Follow the bowel preparation and diet plan exactly as advised; poor preparation can reduce report quality." : "Fasting is usually needed for 6-8 hours, but the final instruction depends on your procedure and medical condition.",
+        "Inform the team if you have diabetes, high BP, heart disease, kidney disease, pregnancy, allergies or previous anesthesia problems.",
+        "Tell the doctor about aspirin, clopidogrel, warfarin, apixaban, rivaroxaban or any other blood thinner before the procedure.",
+        "Bring previous reports and come with an adult attendant if sedation or a therapeutic procedure is planned."
+      ];
+
+  const risks = isDisease
+    ? [
+        "Delay in evaluation may allow bleeding, jaundice, liver disease or intestinal inflammation to worsen.",
+        "Some conditions need blood tests, imaging or endoscopy/colonoscopy before the final plan is clear.",
+        "Treatment response varies by cause, stage of disease, age, diabetes, alcohol use and other medical problems."
+      ]
+    : [
+        "Most procedures are completed safely, but uncommon risks may include bleeding, infection, medicine reaction or aspiration.",
+        mode === "therapeutic" ? "Therapeutic procedures may carry additional risks depending on the site treated, biopsy, dilation, stent, stone removal or bleeding control." : "Diagnostic procedures may rarely need biopsy or additional therapy if an abnormality is found.",
+        isErcpLike ? "ERCP-related procedures can rarely cause pancreatitis, infection, bleeding or perforation and may need observation or admission." : "Perforation is uncommon but important and needs urgent medical attention if it occurs."
+      ];
+
+  const recoveryItems = isDisease
+    ? [
+        "Follow the medicine, diet, lifestyle and testing plan explained during consultation.",
+        "Keep follow-up dates, especially for liver disease, IBD, pancreatic disorders, bleeding symptoms or abnormal reports.",
+        "Call reception if symptoms worsen before the planned review."
+      ]
+    : [
+        mode === "minor" ? "Most patients can resume routine activity soon after observation, unless the doctor advises rest." : "Rest after sedation and avoid driving, alcohol, heavy machinery or important decisions for the rest of the day.",
+        "Eating and medicines are restarted as advised after the report or procedure note is reviewed.",
+        "Biopsy, stent, polyp or therapeutic procedure reports may need follow-up discussion and further planning."
+      ];
+
+  const sections: ArticleSection[] = [
+    {
+      title: "What Is It?",
+      text: isDisease
+        ? `${title} care at Mudgal Gastromedics Hospital focuses on identifying the cause of symptoms, reviewing reports and planning treatment for digestive, liver, pancreatic or intestinal disease. ${pageCopy.overview}`
+        : `${title} is a gastroenterology service used to diagnose, monitor or treat selected digestive, liver, pancreatic, biliary or intestinal problems. ${pageCopy.overview}`
+    },
+    {
+      title: "Why Is It Done?",
+      text: `${title} may be advised when symptoms, blood reports, imaging or previous endoscopy/colonoscopy findings suggest that specialist gastroenterology review is needed.`,
+      items: pageCopy.consultCues
+    },
+    {
+      title: "Who May Need It?",
+      text: "Indian patients commonly seek gastro care when symptoms are persistent, recurring, unexplained or affecting daily life.",
+      items: [
+        isLiverLike ? "Patients with fatty liver, jaundice, abnormal liver tests, hepatitis, alcohol-related liver risk or abdominal swelling." : "Patients with acidity, abdominal pain, bloating, vomiting, difficulty swallowing or unexplained weight loss.",
+        isColonLike ? "Patients with blood in stool, black stool, chronic constipation, chronic diarrhea, anemia, polyps or family history of colon disease." : "Patients with blood in stool, black stool, anemia, jaundice, pancreatic pain or abnormal ultrasound/CT/MRCP findings.",
+        "Patients from Agra, Shaheed Nagar, Tajganj, Fatehabad Road, Kamla Nagar, Sikandra, Mathura, Firozabad, Bharatpur and nearby areas looking for specialist digestive care."
+      ]
+    },
+    {
+      title: "How To Prepare",
+      text: "Preparation depends on the procedure, symptoms and medical condition. The hospital team confirms final instructions before your visit.",
+      items: preparationItems
+    },
+    {
+      title: isDisease ? "What Happens During Consultation?" : "What Happens During The Procedure?",
+      text: isDisease
+        ? "The doctor reviews symptoms, previous records, medicines and risk factors, examines the patient when needed and explains whether tests, medicines, diet changes or procedures are required."
+        : "The team verifies identity, reports, consent and fitness. Monitoring is done when required, the procedure is performed using appropriate equipment and the findings are explained after recovery.",
+      items: [
+        "Bring prior reports so the doctor can compare current findings with earlier disease status.",
+        "Ask questions about the reason for the test, expected benefit, alternatives and follow-up plan.",
+        "Available at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra."
+      ]
+    },
+    {
+      title: "Is It Painful?",
+      text: isDisease
+        ? "Consultation itself is not painful. If a test or procedure is needed, comfort options and preparation are explained before scheduling."
+        : mode === "minor"
+          ? `${title} is usually done with local comfort measures or simple observation, depending on the service. The team explains what to expect before starting.`
+          : `${title} may involve sedation or anesthesia support when appropriate. Most patients remember little discomfort, but throat irritation, bloating, mild cramps or tiredness can occur depending on the procedure.`
+    },
+    {
+      title: "Risks & Safety",
+      text: "The doctor balances benefit and risk before advising any test or procedure. Risks are usually uncommon but should be understood clearly.",
+      items: risks
+    },
+    {
+      title: "Recovery & Aftercare",
+      text: "Recovery advice depends on whether the visit was a consultation, diagnostic test or therapeutic procedure.",
+      items: recoveryItems
+    },
+    {
+      title: "When To Call The Hospital Urgently",
+      text: "Do not wait for a routine appointment if warning symptoms occur.",
+      items: [
+        "Fever with jaundice, chills, severe abdominal pain or persistent vomiting.",
+        "Vomiting blood, black stool, fresh blood in stool, fainting or severe weakness.",
+        "Breathing difficulty, chest discomfort, severe dehydration or worsening abdominal swelling.",
+        "Severe pain after a procedure, repeated vomiting, inability to eat/drink or any symptom that feels unsafe."
+      ]
+    },
+    {
+      title: "Cost & Insurance Notes",
+      text: "The cost depends on consultation type, procedure complexity, biopsy, stent, anesthesia, consumables, admission need and insurance or cashless process. Reception can guide estimated billing before scheduling where possible."
+    }
+  ];
+
+  const faqs: ArticleFaq[] = [
+    {
+      question: `Is ${title} available in Agra?`,
+      answer: `Yes. ${title} care is available at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra, with gastroenterology consultation and procedure planning where clinically required.`
+    },
+    {
+      question: `Do I need fasting for ${lowerTitle}?`,
+      answer: isDisease
+        ? "Fasting is usually not required for a routine consultation, but it may be advised if same-day tests or procedures are planned."
+        : isColonLike
+          ? "Colonoscopy-related procedures need bowel preparation and dietary restrictions. Follow the hospital instructions exactly."
+          : "Fasting is commonly required for many endoscopy-related procedures, usually 6-8 hours, but the doctor or reception will confirm exact instructions."
+    },
+    {
+      question: "Should I stop diabetes, BP or blood thinner medicines?",
+      answer: "Do not stop medicines on your own. Tell the doctor about insulin, diabetes tablets, BP medicines, aspirin, clopidogrel, warfarin or other blood thinners so safe instructions can be given."
+    },
+    {
+      question: "Do I need an attendant?",
+      answer: mode === "diagnostic" || mode === "therapeutic"
+        ? "An adult attendant is usually advised when sedation, anesthesia or a therapeutic procedure is planned."
+        : "An attendant is helpful for elderly patients, weak patients, urgent symptoms or when procedures may be scheduled."
+    },
+    {
+      question: "What reports should I bring?",
+      answer: "Bring previous prescriptions, blood tests, ultrasound, CT, MRCP, FibroScan, endoscopy, colonoscopy, biopsy and discharge summaries if available."
+    },
+    {
+      question: `Is ${lowerTitle} safe?`,
+      answer: "The doctor advises it only when the expected benefit is greater than the risk. Most patients do well, but risks and safety instructions are explained before any procedure."
+    },
+    {
+      question: "How do I book an appointment?",
+      answer: `Call reception at ${site.mobile}, send a WhatsApp message, or use the appointment form on this website.`
+    }
+  ];
+
+  return { sections, faqs };
+}
+
 export async function generateStaticParams() {
   return (await getPublicProcedures()).map((procedure) => ({ slug: procedure.slug }));
 }
@@ -460,7 +693,20 @@ export async function generateMetadata({ params }: ProcedurePageProps): Promise<
   return {
     title: procedure.seoTitle || `${procedure.title} in Agra`,
     description: procedure.seoDescription || `${procedure.title} at Mudgal Gastromedics Hospital, Agra. ${procedure.summary}`,
-    alternates: { canonical: `/procedures/${procedure.slug}` }
+    alternates: { canonical: `/procedures/${procedure.slug}` },
+    openGraph: {
+      title: procedure.seoTitle || `${procedure.title} in Agra`,
+      description: procedure.seoDescription || `${procedure.title} at Mudgal Gastromedics Hospital, Agra. ${procedure.summary}`,
+      url: `${site.url}/procedures/${procedure.slug}`,
+      type: "article",
+      images: [`/procedures/${procedure.slug}/opengraph-image`]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: procedure.seoTitle || `${procedure.title} in Agra`,
+      description: procedure.seoDescription || `${procedure.title} at Mudgal Gastromedics Hospital, Agra. ${procedure.summary}`,
+      images: [`/procedures/${procedure.slug}/opengraph-image`]
+    }
   };
 }
 
@@ -471,6 +717,8 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const isBleeding = procedure.slug === "gastrointestinal-bleeding-management";
   const isDisease = diseaseSlugs.has(procedure.slug);
   const pageCopy = getPageCopy(procedure.slug, procedure.title, isDisease);
+  const article = getProcedureArticle(procedure.slug, procedure.title, isDisease, pageCopy);
+  const relatedBlogPosts = seoBlogPosts.filter((post) => post.relatedHref === `/procedures/${procedure.slug}`);
 
   const heroImage = isBleeding ? "/images/hospital/cbd-stone-removal.jpg" : "/images/hospital/endoscopy-room.jpg";
   const quickFacts = [
@@ -481,14 +729,26 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
   ];
   const schema = {
     "@context": "https://schema.org",
-    "@type": isDisease ? "MedicalCondition" : "MedicalProcedure",
-    name: procedure.title,
-    description: procedure.summary,
-    provider: {
-      "@type": "Hospital",
-      name: site.name,
-      url: site.url
-    }
+    "@graph": [
+      {
+        "@type": isDisease ? "MedicalCondition" : "MedicalProcedure",
+        name: procedure.title,
+        description: procedure.summary,
+        provider: {
+          "@type": "Hospital",
+          name: site.name,
+          url: site.url
+        }
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: article.faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: { "@type": "Answer", text: faq.answer }
+        }))
+      }
+    ]
   };
 
   return (
@@ -572,6 +832,52 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
         </div>
       </Section>
 
+      <Section>
+        <MotionReveal>
+          <div className="relative overflow-hidden rounded border border-line bg-ink p-6 text-white shadow-lift md:p-8">
+            <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.22),transparent_24rem),linear-gradient(135deg,rgba(8,145,178,0.42),rgba(5,150,105,0.22)_48%,rgba(2,22,29,0.96))]" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Patient Education Guide</p>
+                <h2 className="mt-3 max-w-4xl text-4xl font-black leading-tight md:text-5xl">{procedure.title}: complete guide for Indian patients</h2>
+                <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/82">
+                  Clear information about why it is done, preparation, medicine precautions, safety, recovery, cost factors and when to call reception.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                {["Bring previous reports", "Ask about fasting", "Discuss blood thinners", "Call reception for urgent symptoms"].map((item) => (
+                  <div key={item} className="rounded border border-white/15 bg-white/10 px-4 py-3 font-semibold text-cyan-50 backdrop-blur">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </MotionReveal>
+      </Section>
+
+      <Section muted>
+        <SectionHead eyebrow="Patient Guide" title={`${procedure.title}: what patients should know`} />
+        <div className="grid gap-5 lg:grid-cols-2">
+          {article.sections.map((section) => (
+            <article key={section.title} className="rounded border border-line bg-white p-6 shadow-soft">
+              <h3 className="text-2xl font-black leading-tight text-ink">{section.title}</h3>
+              <p className="mt-3 leading-relaxed text-muted">{section.text}</p>
+              {section.items?.length ? (
+                <ul className="mt-4 grid gap-3">
+                  {section.items.map((item) => (
+                    <li key={item} className="flex gap-3 text-muted">
+                      <ShieldCheck className="mt-0.5 shrink-0 text-teal" size={18} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </Section>
+
       <Section muted>
         <SectionHead eyebrow="Care Pathway" title="What patients can expect" />
         <div className="grid gap-5 md:grid-cols-3">
@@ -590,6 +896,42 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
           ))}
         </div>
       </Section>
+
+      <Section>
+        <SectionHead eyebrow="FAQs" title={`${procedure.title} FAQs`} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {article.faqs.map((faq) => (
+            <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
+              <summary className="cursor-pointer list-none text-lg font-black text-ink">
+                {faq.question}
+              </summary>
+              <p className="mt-3 leading-relaxed text-muted">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
+      {relatedBlogPosts.length ? (
+        <Section muted>
+          <SectionHead eyebrow="Related Reading" title={`Patient guides for ${procedure.title}`} />
+          <div className="grid gap-5 md:grid-cols-2">
+            {relatedBlogPosts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group rounded border border-line bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
+              >
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">{post.category}</p>
+                <h3 className="mt-3 text-2xl font-black leading-tight text-ink">{post.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{post.description}</p>
+                <span className="mt-5 inline-flex items-center gap-2 font-black text-brand">
+                  Read guide <ArrowRight size={17} className="transition group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
