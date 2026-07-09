@@ -205,7 +205,7 @@ export default function AboutPage() {
               Prevention, diagnosis, and treatment for diseases affecting the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract.
             </p>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">
-              आगरा, उत्तर प्रदेश में विशेषज्ञ गैस्ट्रोएंटरोलॉजी, हेपेटोलॉजी, पाचन स्वास्थ्य और उन्नत एंडोस्कोपिक देखभाल।
+              पाचन तंत्र, लिवर, अग्न्याशय, पित्ताशय और जठरांत्र मार्ग को प्रभावित करने वाली बीमारियों की रोकथाम, निदान और उपचार।
             </p>
           </div>
           <div className="rounded border border-white/20 bg-white/12 p-5 shadow-[0_24px_70px_rgba(2,22,29,0.22)] backdrop-blur-md">
