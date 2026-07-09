@@ -22,7 +22,7 @@ const navItems = [
       { href: "/about#why-choose", label: "Why Choose Us" },
       { href: "/gallery", label: "Our Facilities" },
       { href: "/patient-rights-responsibilities", label: "Patient Rights" },
-      { href: "/contact#appointment", label: "Book Appointment" }
+      { href: "/portal#appointment", label: "Book Appointment" }
     ]
   },
   {
@@ -98,7 +98,7 @@ const navItems = [
     ]
   },
   {
-    href: "/contact#appointment",
+    href: "/portal#appointment",
     label: "Symptoms",
     children: [
       { href: "/services/gastroenterology", label: "Abdominal Pain" },
@@ -273,7 +273,7 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <ButtonLink href="/portal#book" className="hidden min-w-[154px] whitespace-nowrap border-coral bg-coral px-4 text-sm hover:bg-brand-dark md:inline-flex xl:min-w-[166px] xl:text-[15px]">
+            <ButtonLink href="/portal#appointment" className="hidden min-w-[154px] whitespace-nowrap border-coral bg-coral px-4 text-sm hover:bg-brand-dark md:inline-flex xl:min-w-[166px] xl:text-[15px]">
               <span data-en>Book Appointment</span>
               <span data-hi lang="hi">बुक करें</span>
             </ButtonLink>
@@ -315,7 +315,7 @@ export function Header() {
                 ) : null}
               </div>
             ))}
-            <ButtonLink href="/contact#appointment" className="mt-2">
+            <ButtonLink href="/portal#appointment" className="mt-2">
               Book Appointment
             </ButtonLink>
           </motion.nav>

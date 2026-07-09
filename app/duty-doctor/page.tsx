@@ -33,7 +33,7 @@ export default function DutyDoctorPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="gap-2"><Phone size={18} /> Call Reception</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>
-              <ButtonLink href="/contact#appointment" variant="ghost" className="border-white/25 bg-white/95 text-ink">Book Appointment</ButtonLink>
+              <ButtonLink href="/portal#appointment" variant="ghost" className="border-white/25 bg-white/95 text-ink">Book Appointment</ButtonLink>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -143,7 +143,7 @@ export default function DutyDoctorPage() {
           <div className="flex flex-wrap gap-3">
             <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-            <ButtonLink href="/contact#appointment" variant="ghost">Book Appointment</ButtonLink>
+            <ButtonLink href="/portal#appointment" variant="ghost">Book Appointment</ButtonLink>
           </div>
         </div>
       </Section>

@@ -28,7 +28,7 @@ export function CtaBand() {
                 </div>
               </div>
               <div className="mt-5 grid max-w-3xl gap-3 md:grid-cols-3">
-                <ButtonLink href="/contact#appointment" className="min-h-13 px-6">Book Appointment</ButtonLink>
+                <ButtonLink href="/portal#appointment" className="min-h-13 px-6">Book Appointment</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-6">WhatsApp</ButtonLink>
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 border-white/20 bg-white text-ink">Call Reception</ButtonLink>
               </div>

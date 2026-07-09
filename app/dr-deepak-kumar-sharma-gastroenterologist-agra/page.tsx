@@ -203,7 +203,7 @@ export default function DoctorProfilePage() {
               Trusted DM Gastroenterologist in Agra for digestive disorders, liver disease, ERCP, colonoscopy, endoscopy, pancreatic care and pancreato-biliary diseases.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/contact#appointment">Book Consultation</ButtonLink>
+              <ButtonLink href="/portal#appointment">Book Consultation</ButtonLink>
               <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
             </div>
@@ -238,7 +238,7 @@ export default function DoctorProfilePage() {
                 <InfoLine icon={<MapPin size={18} />} text={fullAddress} />
               </div>
               <div className="mt-6 grid gap-3">
-                <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
+                <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call {site.mobile}</ButtonLink>
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function DoctorProfilePage() {
             Take the first step toward better digestive and liver health by scheduling a consultation with Dr. Deepak Kumar Sharma at Mudgal Gastromedics Hospital, Agra.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <ButtonLink href="/contact#appointment">Book Consultation</ButtonLink>
+            <ButtonLink href="/portal#appointment">Book Consultation</ButtonLink>
             <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
           </div>

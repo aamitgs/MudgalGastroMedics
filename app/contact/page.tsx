@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
-import { AppointmentForm } from "@/components/AppointmentForm";
 import { ButtonLink } from "@/components/ButtonLink";
+import { ContactForm } from "@/components/ContactForm";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { site } from "@/lib/site-data";
@@ -75,21 +75,25 @@ export default function ContactPage() {
 
       <Section className="-mt-10 relative z-10 pt-0">
         <MotionReveal>
-          <div id="appointment" className="overflow-hidden rounded border border-line bg-white shadow-lift">
+          <div id="appointment" className="mx-auto max-w-2xl overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="border-b border-line bg-[linear-gradient(135deg,#ecfeff,#ffffff)] p-6">
               <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
-                <span data-en>Book Appointment</span>
-                <span data-hi lang="hi">अपॉइंटमेंट बुक करें</span>
+                <span data-en>Get in Touch</span>
+                <span data-hi lang="hi">संपर्क करें</span>
               </p>
               <h2 className="inline-lang mt-2 text-3xl font-black">
-                <span data-en>Share your details with reception</span>
-                <span data-hi lang="hi">रिसेप्शन के साथ अपनी जानकारी साझा करें</span>
+                <span data-en>Send us a message</span>
+                <span data-hi lang="hi">हमें संदेश भेजें</span>
               </h2>
-              <p className="mt-2 text-muted" data-en>The team can use your request to prepare the next call or WhatsApp follow-up.</p>
-              <p className="mt-2 text-muted" data-hi lang="hi">टीम आपके अनुरोध का उपयोग अगली कॉल या व्हाट्सएप फॉलो-अप की तैयारी के लिए कर सकती है।</p>
+              <p className="mt-2 text-muted" data-en>
+                Looking to book a visit? Use the <a href="/portal" className="font-semibold text-brand hover:underline">Patient Portal</a> for the full appointment form — this is for general questions.
+              </p>
+              <p className="mt-2 text-muted" data-hi lang="hi">
+                विज़िट बुक करनी है? पूरे अपॉइंटमेंट फॉर्म के लिए <a href="/portal" className="font-semibold text-brand hover:underline">पेशेंट पोर्टल</a> का उपयोग करें — यह सामान्य प्रश्नों के लिए है।
+              </p>
             </div>
             <div className="p-6">
-              <AppointmentForm />
+              <ContactForm />
             </div>
           </div>
         </MotionReveal>

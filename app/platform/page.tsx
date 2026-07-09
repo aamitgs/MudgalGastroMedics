@@ -113,7 +113,7 @@ export default function PlatformPage() {
                 This keeps the public website useful immediately and creates the first operational dataset for reception, portal and operations modules.
               </p>
             </div>
-            <ButtonLink href="/contact#appointment" variant="ghost" className="min-h-13 px-7">
+            <ButtonLink href="/portal#appointment" variant="ghost" className="min-h-13 px-7">
               Open Appointment Flow <ArrowRight size={18} />
             </ButtonLink>
           </div>

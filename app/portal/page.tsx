@@ -33,7 +33,7 @@ export default function PortalPage() {
         </div>
       </section>
 
-      <Section id="book" className="pt-10 md:pt-14">
+      <Section id="appointment" className="pt-10 md:pt-14">
         <div className="mb-8 max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Book Appointment</p>
           <h2 className="mt-2 text-4xl font-bold leading-tight text-ink">

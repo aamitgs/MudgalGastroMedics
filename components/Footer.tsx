@@ -10,7 +10,7 @@ const companyLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/gallery", label: "Facilities" },
   { href: "/contact", label: "Contact" },
-  { href: "/contact#appointment", label: "Book Appointment" }
+  { href: "/portal#appointment", label: "Book Appointment" }
 ];
 
 const serviceLinks = [
@@ -22,7 +22,7 @@ const serviceLinks = [
 ];
 
 const supportLinks = [
-  { href: "/contact#appointment", label: "Appointment Form" },
+  { href: "/portal#appointment", label: "Appointment Form" },
   { href: "/portal", label: "Patient Portal" },
   { href: site.directionsUrl, label: "Get Directions" },
   { href: "/gallery", label: "Hospital Gallery" },

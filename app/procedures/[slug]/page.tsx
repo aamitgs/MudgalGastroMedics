@@ -762,7 +762,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-en>{procedure.summary}</p>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">{procedure.hiSummary}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/contact#appointment" className="gap-2"><CalendarCheck size={18} /> Book Appointment</ButtonLink>
+              <ButtonLink href="/portal#appointment" className="gap-2"><CalendarCheck size={18} /> Book Appointment</ButtonLink>
               <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>
               <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="gap-2 border-white/25 bg-white/95 text-ink"><Phone size={18} /> Call {site.mobile}</ButtonLink>
             </div>
@@ -941,7 +941,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             <p className="mt-2 max-w-2xl text-muted">Share symptoms, prior reports and preferred appointment timing so the hospital team can guide the next step.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/contact#appointment">Book Appointment <ArrowRight size={18} /></ButtonLink>
+            <ButtonLink href="/portal#appointment">Book Appointment <ArrowRight size={18} /></ButtonLink>
             <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost"><Phone size={18} /> Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
           </div>

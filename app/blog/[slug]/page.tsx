@@ -228,7 +228,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <div className="rounded border border-line bg-ink p-5 text-white shadow-soft">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Book / Call</p>
               <div className="mt-4 grid gap-3">
-                <ButtonLink href="/contact#appointment" className="w-full">Book Appointment</ButtonLink>
+                <ButtonLink href="/portal#appointment" className="w-full">Book Appointment</ButtonLink>
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="w-full"><Phone size={18} /> Call Reception</ButtonLink>
                 <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="w-full"><MessageCircle size={18} /> WhatsApp</ButtonLink>
               </div>
@@ -329,7 +329,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
+            <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
             <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
             <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
           </div>

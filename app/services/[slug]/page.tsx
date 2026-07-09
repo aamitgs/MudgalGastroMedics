@@ -209,7 +209,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               <h1 className="max-w-4xl text-4xl font-black leading-[0.98] md:text-6xl">{page.title}</h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82 md:text-xl">{page.hero}</p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/contact#appointment" className="min-w-[190px]">
+                <ButtonLink href="/portal#appointment" className="min-w-[190px]">
                   Book Appointment
                 </ButtonLink>
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-w-[180px] gap-2">
@@ -387,7 +387,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="gap-2 border-line bg-white text-ink">
                 <Phone size={18} /> Call Reception
               </ButtonLink>
-              <ButtonLink href="/contact#appointment">Book Appointment</ButtonLink>
+              <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
             </div>
           </div>
         </div>
