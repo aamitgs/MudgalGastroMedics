@@ -163,7 +163,7 @@ export function AdminDoctorWorkflow() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 190,
         enableSorting: false,
         enableHiding: false,

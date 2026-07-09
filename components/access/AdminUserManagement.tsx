@@ -251,7 +251,7 @@ export function AdminUserManagement() {
       { accessorKey: "lastLoginAt", header: "Last Login", size: 160, cell: ({ row }) => <span className="text-muted">{formatDate(row.original.lastLoginAt)}</span> },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 100,
         enableSorting: false,
         enableHiding: false,

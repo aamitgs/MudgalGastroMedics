@@ -50,7 +50,7 @@ export async function PATCH(request: Request) {
       action: "notification.read_all",
       entityType: "notification",
       entityId: `count:${changed}`,
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: true, changed });
   }
@@ -78,7 +78,8 @@ export async function PATCH(request: Request) {
     action: `notification.${action}`,
     entityType: "notification",
     entityId: id,
-    metadata: { source: existing.source, category: existing.category, ...auditRequestMetadata(request) }
+    metadata: { source: existing.source, category: existing.category },
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, notification });
 }

@@ -21,7 +21,8 @@ export async function POST(request: Request) {
       entityType: "session",
       entityId: "admin-session",
       severity: "warning",
-      metadata: { username: username || "passcode", ...auditRequestMetadata(request) }
+      metadata: { username: username || "passcode" },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: "Invalid staff credentials." }, { status: 401 });
   }
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
     action: "admin.login.success",
     entityType: "session",
     entityId: "admin-session",
-    metadata: { staffName: staff?.name, role: staff?.role, ...auditRequestMetadata(request) }
+    metadata: { staffName: staff?.name, role: staff?.role },
+    device: auditRequestMetadata(request)
   });
 
   const response = NextResponse.json({ ok: true, staff });
@@ -47,7 +49,7 @@ export async function DELETE(request: Request) {
     action: "admin.logout",
     entityType: "session",
     entityId: "admin-session",
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   const response = NextResponse.json({ ok: true });

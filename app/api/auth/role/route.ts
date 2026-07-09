@@ -46,7 +46,8 @@ export async function POST(request: Request) {
         entityType: "access_session",
         entityId: session.id,
         severity: "warning",
-        metadata: { reason: "bad-password", ...auditRequestMetadata(request) }
+        metadata: { reason: "bad-password" },
+        device: auditRequestMetadata(request)
       });
       return NextResponse.json({ ok: false, error: "Password confirmation failed." }, { status: 401 });
     }
@@ -59,7 +60,8 @@ export async function POST(request: Request) {
       entityType: "access_session",
       entityId: session.id,
       severity: "warning",
-      metadata: { from: fromRole, expiresInMinutes: 30, ...auditRequestMetadata(request) }
+      metadata: { from: fromRole, expiresInMinutes: 30 },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: true, activeRole: "super-admin", elevated: true });
   }
@@ -72,7 +74,8 @@ export async function POST(request: Request) {
     action: "access.role_switched",
     entityType: "access_session",
     entityId: session.id,
-    metadata: { from: previousRole, to: role, ...auditRequestMetadata(request) }
+    metadata: { from: previousRole, to: role },
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, activeRole: role });
 }
@@ -89,7 +92,7 @@ export async function DELETE(request: Request) {
     action: "access.elevation.dropped",
     entityType: "access_session",
     entityId: resolved.session.id,
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, activeRole: session?.activeRole });
 }

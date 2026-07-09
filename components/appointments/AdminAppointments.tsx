@@ -204,7 +204,7 @@ export function AdminAppointments() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 170,
         enableSorting: false,
         enableHiding: false,

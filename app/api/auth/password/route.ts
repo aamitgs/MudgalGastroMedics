@@ -56,7 +56,8 @@ export async function POST(request: Request) {
     action: "access.password.changed",
     entityType: "access_user",
     entityId: user.id,
-    metadata: { forced: wasForced, ...auditRequestMetadata(request) }
+    metadata: { forced: wasForced },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, status: nextStatus });

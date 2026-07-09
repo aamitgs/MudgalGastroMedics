@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     action: "patient.summary.viewed",
     entityType: "patient",
     entityId: key,
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   const [patient, appointments, visits, admissions, allLabOrders, allDispenses, timeline] = await Promise.all([

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     action: "hospital_os.patient_timeline.viewed",
     entityType: "patient",
     entityId: phone.replace(/\D/g, "").slice(-10),
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, events: await buildPatientTimeline(phone) });

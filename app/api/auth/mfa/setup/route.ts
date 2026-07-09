@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     action: "access.mfa.enabled",
     entityType: "access_user",
     entityId: user.id,
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, status: "active" });

@@ -17,9 +17,9 @@ export async function GET(request: Request) {
     metadata: {
       releaseGate: readiness.releaseGate,
       failedChecks: readiness.summary.failing,
-      warningChecks: readiness.summary.warning,
-      ...auditRequestMetadata(request)
-    }
+      warningChecks: readiness.summary.warning
+    },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, readiness });

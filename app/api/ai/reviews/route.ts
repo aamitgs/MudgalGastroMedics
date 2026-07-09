@@ -56,7 +56,8 @@ export async function POST(request: Request) {
       action: "ai.reviews.seeded",
       entityType: "ai_case_review",
       entityId: "seeded-batch",
-      metadata: { created, ...auditRequestMetadata(request) }
+      metadata: { created },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: true, created, reviews: (await listAiReviews()) });
   }
@@ -72,7 +73,8 @@ export async function POST(request: Request) {
     action: "ai.review.generated",
     entityType: "ai_case_review",
     entityId: result.review.id,
-    metadata: { source: result.review.source, sourceId: result.review.sourceId, status: result.review.status, ...auditRequestMetadata(request) }
+    metadata: { source: result.review.source, sourceId: result.review.sourceId, status: result.review.status },
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, review: result.review });
 }
@@ -99,7 +101,8 @@ export async function PATCH(request: Request) {
     action: "ai.review.updated",
     entityType: "ai_case_review",
     entityId: review.id,
-    metadata: { source: review.source, sourceId: review.sourceId, status: review.status, ...auditRequestMetadata(request) }
+    metadata: { source: review.source, sourceId: review.sourceId, status: review.status },
+    device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, review });
 }

@@ -358,7 +358,7 @@ export function AdminIpdBeds() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 90,
         enableSorting: false,
         enableHiding: false,

@@ -53,7 +53,8 @@ export async function POST(request: Request) {
       entityType: "access_user",
       entityId: user?.id ?? username,
       severity: "warning",
-      metadata: { reason, username, ...auditRequestMetadata(request) }
+      metadata: { reason, username },
+      device: auditRequestMetadata(request)
     });
 
   if (!user || user.status !== "active") {
@@ -104,7 +105,8 @@ export async function POST(request: Request) {
     entityType: "access_session",
     entityId: session.id,
     severity: activeRole === "super-admin" ? "warning" : "info",
-    metadata: { status, ...auditRequestMetadata(request) }
+    metadata: { status },
+    device: auditRequestMetadata(request)
   });
 
   const response = NextResponse.json({

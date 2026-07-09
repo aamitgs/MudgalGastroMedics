@@ -141,7 +141,8 @@ export async function authorize(
         entityType: "permission",
         entityId: `${resource}:${action}`,
         severity: "info",
-        metadata: { elevated: context.elevated, legacy: context.legacy, ...auditRequestMetadata(request) }
+        metadata: { elevated: context.elevated, legacy: context.legacy },
+        device: auditRequestMetadata(request)
       });
     }
     return { ok: true, context };
@@ -163,7 +164,8 @@ export async function authorize(
         entityType: "permission",
         entityId: `${resource}:${action}`,
         severity: "critical",
-        metadata: { grantId: grant.id, reason: grant.reason, ...auditRequestMetadata(request) }
+        metadata: { grantId: grant.id, reason: grant.reason },
+        device: auditRequestMetadata(request)
       });
       return { ok: true, context: { ...context, breakGlassGrantId: grant.id } };
     }
@@ -176,7 +178,8 @@ export async function authorize(
     entityType: "permission",
     entityId: `${resource}:${action}`,
     severity: "warning",
-    metadata: { roles: context.roles, ...auditRequestMetadata(request) }
+    metadata: { roles: context.roles },
+    device: auditRequestMetadata(request)
   });
 
   return { ok: false, status: 403, error: "Your role does not permit this action." };

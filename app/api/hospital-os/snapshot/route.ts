@@ -85,7 +85,7 @@ export async function GET(request: Request) {
     action: "hospital_os.snapshot.viewed",
     entityType: "hospital_os",
     entityId: "snapshot",
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   const liveRows = await livePatientFlowRows();

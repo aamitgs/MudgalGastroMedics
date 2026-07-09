@@ -76,7 +76,8 @@ export async function POST(request: Request) {
     action: "cms.content.saved",
     entityType: "cms_content",
     entityId: item.id,
-    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role, ...auditRequestMetadata(request) }
+    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, item });
@@ -107,7 +108,8 @@ export async function PATCH(request: Request) {
     action: "cms.content.status.updated",
     entityType: "cms_content",
     entityId: item.id,
-    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role, ...auditRequestMetadata(request) }
+    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, item });

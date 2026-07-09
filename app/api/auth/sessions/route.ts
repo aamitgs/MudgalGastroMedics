@@ -46,7 +46,8 @@ export async function DELETE(request: Request) {
     action: "access.sessions.revoked",
     entityType: "access_user",
     entityId: resolved.user.id,
-    metadata: { revokedCount, ...auditRequestMetadata(request) }
+    metadata: { revokedCount },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, revokedCount });

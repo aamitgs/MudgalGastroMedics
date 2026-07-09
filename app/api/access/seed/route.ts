@@ -86,7 +86,8 @@ export async function POST(request: Request) {
       entityType: "access_user",
       entityId: result.id,
       severity: "warning",
-      metadata: { name: member.name, username: member.username, roles: member.roles, ...auditRequestMetadata(request) }
+      metadata: { name: member.name, username: member.username, roles: member.roles },
+      device: auditRequestMetadata(request)
     });
   }
 

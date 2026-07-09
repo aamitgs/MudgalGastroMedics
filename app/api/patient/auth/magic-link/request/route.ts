@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       action: "patient.magic_link.requested",
       entityType: "patient_login",
       entityId: identity.phone,
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
   }
 

@@ -63,9 +63,9 @@ export async function POST(request: Request) {
     entityId: appointment.id,
     metadata: {
       service: appointment.service,
-      hasReportAttachment: Boolean(appointment.report),
-      ...auditRequestMetadata(request)
-    }
+      hasReportAttachment: Boolean(appointment.report)
+    },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({
@@ -97,7 +97,8 @@ export async function PATCH(request: Request) {
     action: "appointment.status.updated",
     entityType: "appointment",
     entityId: appointment.id,
-    metadata: { status: appointment.status, service: appointment.service, ...auditRequestMetadata(request) }
+    metadata: { status: appointment.status, service: appointment.service },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, appointment });

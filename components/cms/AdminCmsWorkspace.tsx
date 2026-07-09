@@ -195,7 +195,7 @@ export function AdminCmsWorkspace() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 150,
         enableSorting: false,
         enableHiding: false,

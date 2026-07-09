@@ -244,7 +244,7 @@ export function AdminProcedures() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 90,
         enableSorting: false,
         enableHiding: false,

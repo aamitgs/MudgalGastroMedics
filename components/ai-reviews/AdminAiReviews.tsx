@@ -213,7 +213,7 @@ export function AdminAiReviews() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 100,
         enableSorting: false,
         enableHiding: false,

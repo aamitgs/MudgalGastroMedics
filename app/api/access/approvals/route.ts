@@ -66,9 +66,9 @@ export async function POST(request: Request) {
     metadata: {
       approvalId: approval.id,
       requestedBy: approval.requestedByName,
-      roles: approval.payload.roles,
-      ...auditRequestMetadata(request)
-    }
+      roles: approval.payload.roles
+    },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, approval: decided });

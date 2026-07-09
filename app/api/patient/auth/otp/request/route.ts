@@ -26,7 +26,8 @@ export async function POST(request: Request) {
     action: "patient.otp.requested",
     entityType: "patient_login",
     entityId: phone,
-    metadata: { channel: delivery.channel, delivered: delivery.ok, ...auditRequestMetadata(request) }
+    metadata: { channel: delivery.channel, delivered: delivery.ok },
+    device: auditRequestMetadata(request)
   });
 
   if (!delivery.ok) {

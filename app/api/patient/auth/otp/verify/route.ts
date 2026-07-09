@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       entityType: "patient_login",
       entityId: phone,
       severity: "warning",
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: result.error }, { status: 401 });
   }
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     action: "patient.otp.verified",
     entityType: "patient_login",
     entityId: identity.phone,
-    metadata: meta
+    device: meta
   });
 
   const response = NextResponse.json({ ok: true, phone: identity.phone, hasEmail: Boolean(identity.email) });

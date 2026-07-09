@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       action: "patient.logout",
       entityType: "patient_login",
       entityId: session.phone,
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
   }
   const response = NextResponse.json({ ok: true });

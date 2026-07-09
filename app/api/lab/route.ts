@@ -106,7 +106,8 @@ export async function PATCH(request: Request) {
       action: acknowledgeCritical ? "lab.critical.acknowledged" : body.criticalManual ? "lab.critical.marked" : "lab.critical.unmarked",
       entityType: "lab-order",
       entityId: order.id,
-      metadata: { reasons: order.criticalReasons, source: order.criticalSource, ...auditRequestMetadata(request) }
+      metadata: { reasons: order.criticalReasons, source: order.criticalSource },
+      device: auditRequestMetadata(request)
     });
   }
 

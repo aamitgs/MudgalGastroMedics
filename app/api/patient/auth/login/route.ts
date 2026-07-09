@@ -33,7 +33,8 @@ export async function POST(request: Request) {
       entityType: "patient_login",
       entityId: identity?.phone ?? email,
       severity: "warning",
-      metadata: { reason: identity ? "locked-or-no-password" : "unknown-email", ...auditRequestMetadata(request) }
+      metadata: { reason: identity ? "locked-or-no-password" : "unknown-email" },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
@@ -47,7 +48,8 @@ export async function POST(request: Request) {
       entityType: "patient_login",
       entityId: identity.phone,
       severity: "warning",
-      metadata: { reason: "bad-password", ...auditRequestMetadata(request) }
+      metadata: { reason: "bad-password" },
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
     action: "patient.login",
     entityType: "patient_login",
     entityId: identity.phone,
-    metadata: meta
+    device: meta
   });
 
   const response = NextResponse.json({ ok: true, phone: identity.phone, hasEmail: true });

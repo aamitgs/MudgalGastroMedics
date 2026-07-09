@@ -41,7 +41,8 @@ export async function POST(request: Request) {
     entityType: "break_glass_grant",
     entityId: grant.id,
     severity: "critical",
-    metadata: { reason, expiresAt: grant.expiresAt, ...auditRequestMetadata(request) }
+    metadata: { reason, expiresAt: grant.expiresAt },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, grant: { id: grant.id, expiresAt: grant.expiresAt } });

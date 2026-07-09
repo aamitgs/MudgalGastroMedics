@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       entityType: "session",
       entityId: "doctor-session",
       severity: "warning",
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: "Invalid doctor passcode." }, { status: 401 });
   }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     action: "doctor.login.success",
     entityType: "session",
     entityId: "doctor-session",
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   const response = NextResponse.json({ ok: true });
@@ -37,7 +37,7 @@ export async function DELETE(request: Request) {
     action: "doctor.logout",
     entityType: "session",
     entityId: "doctor-session",
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   const response = NextResponse.json({ ok: true });

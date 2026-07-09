@@ -200,7 +200,7 @@ export function AdminOpdQueue() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 90,
         enableSorting: false,
         enableHiding: false,

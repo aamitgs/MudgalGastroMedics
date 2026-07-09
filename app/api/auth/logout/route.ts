@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       action: "access.logout",
       entityType: "access_session",
       entityId: resolved.session.id,
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
   }
   const response = NextResponse.json({ ok: true });

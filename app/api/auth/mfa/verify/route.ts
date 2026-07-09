@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       entityType: "access_session",
       entityId: session.id,
       severity: "warning",
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     action: "access.mfa.verified",
     entityType: "access_session",
     entityId: session.id,
-    metadata: auditRequestMetadata(request)
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, status: "active" });

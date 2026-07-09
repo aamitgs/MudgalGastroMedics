@@ -167,7 +167,7 @@ export function AdminBillingSummary() {
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         size: 130,
         enableSorting: false,
         enableHiding: false,

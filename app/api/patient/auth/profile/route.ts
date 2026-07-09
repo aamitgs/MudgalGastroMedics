@@ -40,7 +40,8 @@ export async function POST(request: Request) {
     action: "patient.profile.updated",
     entityType: "patient_login",
     entityId: identity.phone,
-    metadata: { emailSet: true, ...auditRequestMetadata(request) }
+    metadata: { emailSet: true },
+    device: auditRequestMetadata(request)
   });
 
   return NextResponse.json({ ok: true, hasEmail: true });

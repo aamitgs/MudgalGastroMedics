@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       action: "hospital_os.realtime.polled",
       entityType: "hospital_os",
       entityId: "realtime",
-      metadata: auditRequestMetadata(request)
+      device: auditRequestMetadata(request)
     });
   }
 
