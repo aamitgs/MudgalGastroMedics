@@ -42,10 +42,19 @@ export default function ContactPage() {
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Contact & Appointments</p>
-            <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Need Expert Gastro & Liver Care?</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85">
+            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">
+              <span data-en>Contact & Appointments</span>
+              <span data-hi lang="hi">संपर्क और अपॉइंटमेंट</span>
+            </p>
+            <h1 className="inline-lang max-w-4xl text-5xl font-black leading-tight md:text-7xl">
+              <span data-en>Need Expert Gastro & Liver Care?</span>
+              <span data-hi lang="hi">विशेषज्ञ गैस्ट्रो और लिवर देखभाल चाहिए?</span>
+            </h1>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-en>
             Book your appointment today. Call, WhatsApp, submit the appointment form, or get directions to Mudgal Gastromedics Hospital in Shaheed Nagar, Agra.
+            </p>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">
+            आज ही अपॉइंटमेंट बुक करें। कॉल करें, व्हाट्सएप करें, अपॉइंटमेंट फॉर्म भरें, या आगरा के शहीद नगर स्थित मुदगल गैस्ट्रोमेडिक्स हॉस्पिटल के लिए दिशा-निर्देश प्राप्त करें।
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
@@ -68,9 +77,16 @@ export default function ContactPage() {
         <MotionReveal>
           <div id="appointment" className="overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="border-b border-line bg-[linear-gradient(135deg,#ecfeff,#ffffff)] p-6">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Book Appointment</p>
-              <h2 className="mt-2 text-3xl font-black">Share your details with reception</h2>
-              <p className="mt-2 text-muted">The team can use your request to prepare the next call or WhatsApp follow-up.</p>
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+                <span data-en>Book Appointment</span>
+                <span data-hi lang="hi">अपॉइंटमेंट बुक करें</span>
+              </p>
+              <h2 className="inline-lang mt-2 text-3xl font-black">
+                <span data-en>Share your details with reception</span>
+                <span data-hi lang="hi">रिसेप्शन के साथ अपनी जानकारी साझा करें</span>
+              </h2>
+              <p className="mt-2 text-muted" data-en>The team can use your request to prepare the next call or WhatsApp follow-up.</p>
+              <p className="mt-2 text-muted" data-hi lang="hi">टीम आपके अनुरोध का उपयोग अगली कॉल या व्हाट्सएप फॉलो-अप की तैयारी के लिए कर सकती है।</p>
             </div>
             <div className="p-6">
               <AppointmentForm />
@@ -83,12 +99,36 @@ export default function ContactPage() {
         <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr] lg:items-stretch">
           <MotionReveal>
             <div className="h-full rounded border border-line bg-white p-6 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Visit MGM</p>
-              <h2 className="mt-2 text-3xl font-black leading-tight text-ink">Shaheed Nagar, Agra</h2>
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+                <span data-en>Visit MGM</span>
+                <span data-hi lang="hi">एमजीएम आएं</span>
+              </p>
+              <h2 className="inline-lang mt-2 text-3xl font-black leading-tight text-ink">
+                <span data-en>Shaheed Nagar, Agra</span>
+                <span data-hi lang="hi">शहीद नगर, आगरा</span>
+              </h2>
               <div className="mt-6 grid gap-4">
-                <InfoLine icon={<MapPin size={20} />} title="Address" text="16 HIG, Shaheed Nagar, Behind Shaheed Nagar Police Chowki, Agra, Uttar Pradesh 282001" />
-                <InfoLine icon={<Clock size={20} />} title="OPD / Business Hours" text="Mon-Sat, 11:00 AM-6:00 PM" />
-                <InfoLine icon={<ShieldCheck size={20} />} title="Urgent Assistance" text="Hospital operates 24/7. For urgent symptoms, call reception before visiting." />
+                <InfoLine
+                  icon={<MapPin size={20} />}
+                  title="Address"
+                  hiTitle="पता"
+                  text="16 HIG, Shaheed Nagar, Behind Shaheed Nagar Police Chowki, Agra, Uttar Pradesh 282001"
+                  hiText="16 एचआईजी, शहीद नगर, शहीद नगर पुलिस चौकी के पीछे, आगरा, उत्तर प्रदेश 282001"
+                />
+                <InfoLine
+                  icon={<Clock size={20} />}
+                  title="OPD / Business Hours"
+                  hiTitle="ओपीडी / कार्य समय"
+                  text="Mon-Sat, 11:00 AM-6:00 PM"
+                  hiText="सोम-शनि, सुबह 11:00 - शाम 6:00"
+                />
+                <InfoLine
+                  icon={<ShieldCheck size={20} />}
+                  title="Urgent Assistance"
+                  hiTitle="आपातकालीन सहायता"
+                  text="Hospital operates 24/7. For urgent symptoms, call reception before visiting."
+                  hiText="अस्पताल 24/7 खुला रहता है। आपातकालीन लक्षणों के लिए आने से पहले रिसेप्शन पर कॉल करें।"
+                />
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                 <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call</ButtonLink>
@@ -113,17 +153,37 @@ export default function ContactPage() {
 
       <Section muted>
         <SectionHead eyebrow="Before You Visit" title="A smoother appointment experience">
-          <p>Keep reports, prescriptions and prior investigation details ready so the care team can guide you faster.</p>
+          <p data-en>Keep reports, prescriptions and prior investigation details ready so the care team can guide you faster.</p>
+          <p data-hi lang="hi">रिपोर्ट, प्रिस्क्रिप्शन और पिछली जांच का विवरण तैयार रखें ताकि केयर टीम आपकी तेज़ी से मदद कर सके।</p>
         </SectionHead>
         <div className="grid gap-5 md:grid-cols-3">
           {[
-            ["Bring Reports", "Carry previous endoscopy, liver, ultrasound, CT, blood test or prescription records if available."],
-            ["Confirm Preparation", "Some procedures may require fasting or medicine instructions. Confirm before arrival."],
-            ["Use Direct Routes", "Call or WhatsApp reception for timing, directions and appointment coordination."]
-          ].map(([title, text]) => (
+            [
+              "Bring Reports",
+              "रिपोर्ट लाएं",
+              "Carry previous endoscopy, liver, ultrasound, CT, blood test or prescription records if available.",
+              "यदि उपलब्ध हों तो पिछली एंडोस्कोपी, लिवर, अल्ट्रासाउंड, सीटी, ब्लड टेस्ट या प्रिस्क्रिप्शन रिकॉर्ड साथ लाएं।"
+            ],
+            [
+              "Confirm Preparation",
+              "तैयारी की पुष्टि करें",
+              "Some procedures may require fasting or medicine instructions. Confirm before arrival.",
+              "कुछ प्रक्रियाओं के लिए उपवास या दवा संबंधी निर्देशों की आवश्यकता हो सकती है। आने से पहले पुष्टि करें।"
+            ],
+            [
+              "Use Direct Routes",
+              "सीधे संपर्क करें",
+              "Call or WhatsApp reception for timing, directions and appointment coordination.",
+              "समय, दिशा-निर्देश और अपॉइंटमेंट समन्वय के लिए रिसेप्शन को कॉल या व्हाट्सएप करें।"
+            ]
+          ].map(([title, hiTitle, text, hiText]) => (
             <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
-              <h3 className="text-xl font-black">{title}</h3>
-              <p className="mt-2 text-muted">{text}</p>
+              <h3 className="inline-lang text-xl font-black">
+                <span data-en>{title}</span>
+                <span data-hi lang="hi">{hiTitle}</span>
+              </h3>
+              <p className="mt-2 text-muted" data-en>{text}</p>
+              <p className="mt-2 text-muted" data-hi lang="hi">{hiText}</p>
             </div>
           ))}
         </div>
@@ -132,13 +192,19 @@ export default function ContactPage() {
   );
 }
 
-function InfoLine({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+function InfoLine({ icon, title, hiTitle, text, hiText }: { icon: React.ReactNode; title: string; hiTitle: string; text: string; hiText: string }) {
   return (
     <div className="flex gap-3 rounded border border-line bg-soft/70 p-4">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded bg-white text-brand shadow-sm">{icon}</span>
       <span>
-        <span className="block font-black text-ink">{title}</span>
-        <span className="mt-1 block text-muted">{text}</span>
+        <span className="inline-lang block font-black text-ink">
+          <span data-en>{title}</span>
+          <span data-hi lang="hi">{hiTitle}</span>
+        </span>
+        <span className="inline-lang mt-1 block text-muted">
+          <span data-en>{text}</span>
+          <span data-hi lang="hi">{hiText}</span>
+        </span>
       </span>
     </div>
   );

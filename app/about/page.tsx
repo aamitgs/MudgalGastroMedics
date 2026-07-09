@@ -142,18 +142,38 @@ export default function AboutPage() {
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">About {site.name}</p>
-            <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Compassionate Care. Advanced Gastroenterology. Trusted Expertise.</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85">
+            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">
+              <span data-en>About {site.name}</span>
+              <span data-hi lang="hi">{site.name} के बारे में</span>
+            </p>
+            <h1 className="inline-lang max-w-4xl text-5xl font-black leading-tight md:text-7xl">
+              <span data-en>Compassionate Care. Advanced Gastroenterology. Trusted Expertise.</span>
+              <span data-hi lang="hi">दयालु देखभाल। उन्नत गैस्ट्रोएंटरोलॉजी। विश्वसनीय विशेषज्ञता।</span>
+            </h1>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-en>
               Specialized gastroenterology, hepatology, digestive health, and advanced endoscopic care in Agra, Uttar Pradesh.
+            </p>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85" data-hi lang="hi">
+              आगरा, उत्तर प्रदेश में विशेषज्ञ गैस्ट्रोएंटरोलॉजी, हेपेटोलॉजी, पाचन स्वास्थ्य और उन्नत एंडोस्कोपिक देखभाल।
             </p>
           </div>
           <div className="rounded border border-white/20 bg-white/12 p-5 shadow-[0_24px_70px_rgba(2,22,29,0.22)] backdrop-blur-md">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-cyan-100">Care Focus</p>
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-cyan-100">
+              <span data-en>Care Focus</span>
+              <span data-hi lang="hi">देखभाल क्षेत्र</span>
+            </p>
             <div className="mt-4 grid gap-3">
-              {["Digestive System", "Liver & Pancreas", "Gallbladder Care", "Advanced Endoscopy"].map((item) => (
+              {[
+                ["Digestive System", "पाचन तंत्र"],
+                ["Liver & Pancreas", "लिवर और अग्न्याशय"],
+                ["Gallbladder Care", "पित्ताशय देखभाल"],
+                ["Advanced Endoscopy", "उन्नत एंडोस्कोपी"]
+              ].map(([item, hiItem]) => (
                 <div key={item} className="rounded border border-white/15 bg-white/10 p-4">
-                  <p className="font-black text-white">{item}</p>
+                  <p className="inline-lang font-black text-white">
+                    <span data-en>{item}</span>
+                    <span data-hi lang="hi">{hiItem}</span>
+                  </p>
                 </div>
               ))}
             </div>
