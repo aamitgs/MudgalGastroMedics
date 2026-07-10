@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Section, SectionHead } from "@/components/Section";
 import { fullAddress, site } from "@/lib/site-data";
@@ -248,14 +249,7 @@ export default function CampBlogPostPage() {
           <aside className="grid gap-5">
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Register / Contact</p>
-              <div className="mt-5 grid gap-3">
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="gap-2">
-                  <Phone size={18} /> Call Now
-                </ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2">
-                  <MessageCircle size={18} /> WhatsApp
-                </ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-5" layout="stacked" />
               <p className="mt-4 text-sm leading-relaxed text-muted">
                 Registration fee: <span className="font-bold text-ink">{registrationFee}/-</span>
               </p>
@@ -266,9 +260,7 @@ export default function CampBlogPostPage() {
               <h3 className="mt-2 text-xl font-bold text-ink">{site.name}</h3>
               <p className="mt-3 leading-relaxed text-muted">{fullAddress}</p>
               <p className="mt-2 leading-relaxed text-muted">{site.addressLine2}</p>
-              <ButtonLink href={site.directionsUrl} variant="ghost" className="mt-5 w-full">
-                Get Directions
-              </ButtonLink>
+              <AppointmentCtaPanel className="mt-5" layout="stacked" />
             </div>
           </aside>
         </div>

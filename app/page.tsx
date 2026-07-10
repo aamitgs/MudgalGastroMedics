@@ -1,18 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Activity, ArrowRight, Award, CalendarCheck, CheckCircle2, ClipboardList, FileText, GraduationCap, HeartPulse, Phone, ShieldCheck, Stethoscope } from "lucide-react";
-import { AppointmentForm } from "@/components/AppointmentForm";
+import { Activity, ArrowRight, Award, CalendarCheck, ClipboardList, FileText, GraduationCap, HeartPulse, Phone, ShieldCheck, Stethoscope } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
+import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
-import { GalleryGrid } from "@/components/GalleryGrid";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, Eyebrow } from "@/components/Section";
 import { Stats } from "@/components/Stats";
-import { getPublicGalleryItems, getPublicProcedures } from "@/lib/cms-public";
-import { doctor, equipment, patientFacilities, site, whyChoose } from "@/lib/site-data";
+import { getPublicProcedures } from "@/lib/cms-public";
+import { doctor, site, whyChoose } from "@/lib/site-data";
 
 export default async function Home() {
   const procedures = await getPublicProcedures();
-  const galleryItems = await getPublicGalleryItems();
   const treatmentGroups = [
     {
       title: "Diagnostic Endoscopy",
@@ -99,9 +98,7 @@ export default async function Home() {
         <div aria-hidden="true" className="pointer-events-none absolute right-8 top-24 hidden w-64 2xl:block">
           <div className="relative rounded border border-white/25 bg-white/12 px-5 py-5 shadow-[0_24px_70px_rgba(2,22,29,0.22)] backdrop-blur-md">
             <div className="absolute -left-8 top-6 h-40 w-px bg-gradient-to-b from-transparent via-cyan-200/60 to-transparent" />
-            <div className="mb-4 grid h-10 w-10 place-items-center rounded-full border border-cyan-200/35 bg-cyan-100/15 text-cyan-100">
-              <Activity size={20} />
-            </div>
+            <BrandIconTile className="mb-4 h-10 w-10 rounded-full border border-cyan-200/35 bg-cyan-100/15" />
             <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-cyan-100/90">Specialist Care</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] font-semibold uppercase leading-snug tracking-[0.1em] text-cyan-50/90">
               {["Liver Diseases", "Therapeutic Endoscopy", "Colonoscopy", "ERCP", "GI Cancer Screening", "Obesity Endoscopy", "Pancreatic Disorders"].map((item) => (
@@ -138,14 +135,7 @@ export default async function Home() {
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/86" data-hi lang="hi">
               आगरा में एंडोस्कोपी, लिवर केयर, ईआरसीपी, कोलोनोस्कोपी और उन्नत गैस्ट्रो उपचार के लिए सुपरस्पेशियलिटी सेंटर।
             </p>
-            <div className="mt-8 rounded-lg border border-white/16 bg-[rgba(255,255,255,0.10)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ButtonLink href="/portal#appointment" className="min-h-13 px-5 text-base shadow-[0_18px_46px_rgba(8,145,178,0.42)]">Book Appointment</ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 border-white/35 bg-white/95 px-5 text-base text-ink shadow-[0_18px_46px_rgba(2,22,29,0.24)]"><Phone size={18} /> Call Reception</ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-5 text-base shadow-[0_18px_46px_rgba(5,150,105,0.38)]">WhatsApp</ButtonLink>
-                <ButtonLink href={site.directionsUrl} variant="ghost" className="min-h-13 border-white/35 bg-white/95 px-5 text-base text-ink shadow-[0_18px_46px_rgba(2,22,29,0.24)]">Get Directions</ButtonLink>
-              </div>
-            </div>
+            <AppointmentCtaPanel className="mt-8" />
           </MotionReveal>
         </div>
       </section>
@@ -165,17 +155,7 @@ export default async function Home() {
                 पेट, आंत और लिवर परामर्श एवं जांच शिविर
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="min-h-12 px-6">
-                Call Now
-              </ButtonLink>
-              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-12 px-6">
-                WhatsApp
-              </ButtonLink>
-              <ButtonLink href="/blog/stomach-intestine-liver-consultation-check-up-camp" variant="ghost" className="min-h-12 px-6">
-                Read Blog Post
-              </ButtonLink>
-            </div>
+            <AppointmentCtaPanel className="lg:min-w-[520px]" />
           </div>
           <div className="overflow-hidden rounded border border-line/80 bg-white p-2 shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
             <Image
@@ -280,9 +260,7 @@ export default async function Home() {
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {doctor.interests.map((interest) => (
                   <div key={interest} className="group flex items-center gap-3 rounded-full border border-line/90 bg-white/75 px-4 py-3 shadow-sm backdrop-blur transition hover:border-brand hover:bg-white">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-soft text-teal transition group-hover:bg-brand group-hover:text-white">
-                      <ShieldCheck size={16} />
-                    </span>
+                    <BrandIconTile className="h-8 w-8 shrink-0 rounded-full transition group-hover:bg-white" />
                     <span className="font-semibold text-teal-dark">{interest}</span>
                   </div>
                 ))}
@@ -299,11 +277,9 @@ export default async function Home() {
                   <p className="font-medium leading-relaxed">{doctor.experience.join(" | ")}</p>
                 </div>
               </div>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8">
                 <ButtonLink href="/dr-deepak-kumar-sharma-gastroenterologist-agra" variant="ghost">Read Doctor Profile <ArrowRight size={18} /></ButtonLink>
-                <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost"><Phone size={18} /> Call Reception</ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
+                <AppointmentCtaPanel className="mt-4" />
               </div>
             </div>
           </MotionReveal>
@@ -351,15 +327,12 @@ export default async function Home() {
                   <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal opacity-75" />
                   <div aria-hidden="true" className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-soft transition duration-300 group-hover:scale-125" />
                   <div className="relative flex items-start justify-between gap-4">
-                    <span className="grid h-12 w-12 place-items-center rounded border border-line bg-soft text-brand shadow-sm transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
-                      <Stethoscope size={21} />
-                    </span>
+                    <BrandIconTile className="h-12 w-12 border border-line shadow-sm transition group-hover:border-brand group-hover:bg-white" />
                     <span className="rounded-full border border-line bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       {procedureBadges[index % procedureBadges.length]}
                     </span>
                   </div>
                   <div className="relative mt-8 flex flex-1 flex-col">
-                    <span className="mb-4 text-sm font-semibold text-brand">{String(index + 1).padStart(2, "0")}</span>
                     <h3 className="inline-lang text-2xl font-bold leading-tight text-ink">
                       <span data-en>{procedure.title}</span>
                       <span data-hi lang="hi">{procedure.hiTitle}</span>
@@ -426,10 +399,9 @@ export default async function Home() {
                   A focused centre for digestive, liver, pancreatic and biliary conditions, built around explanation, procedure readiness and practical follow-up.
                 </p>
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {["Consultation", "Preparation", "Procedure", "Follow-up"].map((step, index) => (
+                  {["Consultation", "Preparation", "Procedure", "Follow-up"].map((step) => (
                     <div key={step} className="rounded border border-white/16 bg-white/10 p-4 backdrop-blur">
-                      <span className="text-sm font-semibold text-cyan-100">{String(index + 1).padStart(2, "0")}</span>
-                      <p className="mt-2 font-semibold">{step}</p>
+                      <p className="font-semibold">{step}</p>
                     </div>
                   ))}
                 </div>
@@ -441,10 +413,7 @@ export default async function Home() {
               <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
                 <article className="group h-full rounded border border-line/80 bg-white/90 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
                   <div className="mb-6 flex items-center justify-between gap-4">
-                    <span className="grid h-12 w-12 place-items-center rounded border border-line bg-soft text-teal transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
-                      <Icon size={21} />
-                    </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{String(index + 1).padStart(2, "0")}</span>
+                    <BrandIconTile className="h-12 w-12 border border-line transition group-hover:border-brand group-hover:bg-white" />
                   </div>
                   <h3 className="text-xl font-bold leading-tight text-ink">{title}</h3>
                   <p className="mt-3 leading-relaxed text-muted">{text}</p>
@@ -460,115 +429,6 @@ export default async function Home() {
                 ))}
               </div>
             </MotionReveal>
-          </div>
-        </div>
-      </Section>
-
-      <Section className="overflow-hidden">
-        <div className="mb-9 grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-gold" />
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Facilities & Infrastructure</span>
-            </div>
-            <h2 className="max-w-4xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
-              A clean, accessible hospital environment for focused clinical care.
-            </h2>
-          </div>
-          <div className="max-w-xl lg:text-right">
-            <p className="mb-5 text-lg leading-relaxed text-muted">
-              Preview the entrance, reception, waiting areas and patient support spaces before your visit.
-            </p>
-            <ButtonLink href="/gallery" variant="ghost">View Gallery</ButtonLink>
-          </div>
-        </div>
-        <GalleryGrid items={galleryItems.slice(0, 6)} />
-        <div className="mt-7 rounded border border-line/80 bg-[linear-gradient(135deg,#ffffff,#f7fbfb)] p-4 shadow-sm">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-ink">Patient Comfort Supports</h3>
-            <span className="text-sm font-medium text-muted">Designed for patients and attendants</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-          {patientFacilities.map((item) => (
-            <span key={item} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-teal-dark shadow-sm">
-              <CheckCircle2 className="text-teal" size={16} />
-              {item}
-            </span>
-          ))}
-          </div>
-        </div>
-      </Section>
-
-      <Section muted className="overflow-hidden">
-        <div className="mb-9 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-gold" />
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Technology</span>
-            </div>
-            <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
-              Equipment selected for advanced endoscopy and liver care.
-            </h2>
-          </div>
-          <div className="rounded border border-line/80 bg-white/80 p-5 shadow-sm backdrop-blur">
-            <p className="text-lg leading-relaxed text-muted">
-              Clinical systems support diagnostic visualization, therapeutic endoscopy, fluoroscopy-guided care and non-invasive liver assessment.
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {["Endoscopy", "Fluoroscopy", "Liver Assessment"].map((item) => (
-                <span key={item} className="rounded-full border border-line bg-soft/70 px-3 py-2 text-center text-sm font-semibold text-teal-dark">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="grid gap-5 lg:grid-cols-[1.05fr_1fr]">
-          <MotionReveal className="h-full">
-            <article className="relative isolate flex h-full min-h-[520px] flex-col overflow-hidden rounded border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
-              <div className="relative flex-1 bg-[radial-gradient(circle_at_22%_18%,rgba(34,211,238,0.2),transparent_30%),linear-gradient(135deg,#ffffff,#e9fbfb)] p-7">
-                <div className="absolute right-5 top-5 z-10 rounded-full border border-brand/15 bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-sm">Featured</div>
-                <div className="relative h-full min-h-[330px]">
-                  <Image
-                    src={equipment[3]?.src ?? equipment[0].src}
-                    alt={`${equipment[3]?.name ?? equipment[0].name} at Mudgal Gastromedics Hospital`}
-                    fill
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-contain p-4"
-                  />
-                </div>
-              </div>
-              <div className="border-t border-line bg-white p-7">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Procedure Support System</p>
-                <h3 className="mt-3 text-3xl font-bold leading-tight text-ink">{equipment[3]?.name ?? equipment[0].name}</h3>
-                <p className="mt-3 leading-relaxed text-muted">{equipment[3]?.benefits ?? equipment[0].benefits}</p>
-              </div>
-            </article>
-          </MotionReveal>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {equipment.map((item, index) => (
-              <MotionReveal key={item.name} className="h-full" delay={Math.min(index * 0.03, 0.18)}>
-                <article className="group flex h-full flex-col rounded border border-line/80 bg-white/90 p-4 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
-                  <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded border border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)]">
-                    <Image
-                      src={item.src}
-                      alt={`${item.name} at Mudgal Gastromedics Hospital`}
-                      fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-contain p-4 transition duration-300 group-hover:scale-[1.03]"
-                    />
-                    <span className="absolute right-3 top-3 rounded-full border border-line bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand shadow-sm">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold leading-tight text-ink">{item.name}</h3>
-                  <div className="mt-4 grid gap-3 text-sm text-muted">
-                    <p><span className="font-semibold text-ink">Use:</span> {item.uses}</p>
-                    <p><span className="font-semibold text-ink">Benefit:</span> {item.benefits}</p>
-                  </div>
-                </article>
-              </MotionReveal>
-            ))}
           </div>
         </div>
       </Section>
@@ -593,12 +453,10 @@ export default async function Home() {
               {patientJourney.map(({ title, text, icon: Icon }, index) => (
                 <MotionReveal key={title} delay={Math.min(index * 0.04, 0.12)}>
                   <article className="relative grid gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_1fr] md:items-start md:pl-4">
-                    <span className="relative z-10 grid h-12 w-12 place-items-center rounded-full border border-line bg-soft text-brand shadow-sm">
-                      <Icon size={21} />
-                    </span>
+                    <BrandIconTile className="relative z-10 h-12 w-12 rounded-full border border-line shadow-sm" />
                     <div>
                       <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Step {String(index + 1).padStart(2, "0")}</span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Care step</span>
                         <span className="h-px w-10 bg-line" />
                       </div>
                       <h3 className="text-2xl font-bold leading-tight text-ink">{title}</h3>
@@ -612,34 +470,6 @@ export default async function Home() {
         </div>
       </Section>
 
-      <Section muted className="overflow-hidden">
-        <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-gold" />
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Appointment Request</span>
-            </div>
-            <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
-              Book a visit or reach reception directly.
-            </h2>
-          </div>
-          <div className="rounded border border-line/80 bg-white/85 p-4 text-muted shadow-sm">
-            <p className="font-semibold text-ink">OPD: Mon-Sat, 11 AM-6 PM</p>
-            <p className="mt-1 text-sm">Shaheed Nagar, Agra</p>
-          </div>
-        </div>
-        <div>
-          <div id="appointment" className="overflow-hidden rounded border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.12)]">
-            <div className="border-b border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)] p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Appointment Request</p>
-              <h3 className="mt-2 text-3xl font-bold text-ink">Share patient details</h3>
-            </div>
-            <div className="p-6">
-              <AppointmentForm />
-            </div>
-          </div>
-        </div>
-      </Section>
     </main>
   );
 }

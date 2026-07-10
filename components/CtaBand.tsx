@@ -1,3 +1,4 @@
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { fullAddress, site } from "@/lib/site-data";
 import { Clock, MapPin } from "lucide-react";
@@ -27,11 +28,7 @@ export function CtaBand() {
                   <p className="mt-1 text-sm text-white/62">Hospital operates 24/7. Call reception for urgent assistance.</p>
                 </div>
               </div>
-              <div className="mt-5 grid max-w-3xl gap-3 md:grid-cols-3">
-                <ButtonLink href="/portal#appointment" className="min-h-13 px-6">Book Appointment</ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-h-13 px-6">WhatsApp</ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-h-13 border-white/20 bg-white text-ink">Call Reception</ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-5 max-w-3xl" />
             </div>
             <div className="grid gap-4">
               <div className="overflow-hidden rounded border border-white/16 bg-white/10 shadow-[0_18px_48px_rgba(2,22,29,0.2)]">

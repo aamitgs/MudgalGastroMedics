@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { ContactForm } from "@/components/ContactForm";
 import { MotionReveal } from "@/components/MotionReveal";
@@ -134,11 +135,7 @@ export default function ContactPage() {
                   hiText="अस्पताल 24/7 खुला रहता है। आपातकालीन लक्षणों के लिए आने से पहले रिसेप्शन पर कॉल करें।"
                 />
               </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call</ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-                <ButtonLink href={site.directionsUrl} variant="ghost">Get Directions</ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-6" />
             </div>
           </MotionReveal>
           <MotionReveal delay={0.08}>

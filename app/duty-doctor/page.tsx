@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { CalendarCheck, Clock3, Languages, MessageCircle, Moon, Phone, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
@@ -30,11 +31,7 @@ export default function DutyDoctorPage() {
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-white/85">
               Duty Medical Officer supporting general medicine, gastroenterology care coordination and inpatient clinical needs.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} className="gap-2"><Phone size={18} /> Call Reception</ButtonLink>
-              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="gap-2"><MessageCircle size={18} /> WhatsApp</ButtonLink>
-              <ButtonLink href="/portal#appointment" variant="ghost" className="border-white/25 bg-white/95 text-ink">Book Appointment</ButtonLink>
-            </div>
+            <AppointmentCtaPanel className="mt-8 max-w-3xl" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {[
@@ -140,11 +137,7 @@ export default function DutyDoctorPage() {
             <h2 className="mt-2 text-3xl font-black">Call reception before visiting for duty availability.</h2>
             <p className="mt-2 max-w-2xl text-muted">Duty timing and immediate care needs should be confirmed with reception, especially for urgent symptoms or after-hours visits.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>Call Reception</ButtonLink>
-            <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-            <ButtonLink href="/portal#appointment" variant="ghost">Book Appointment</ButtonLink>
-          </div>
+          <AppointmentCtaPanel className="lg:min-w-[520px]" />
         </div>
       </Section>
 

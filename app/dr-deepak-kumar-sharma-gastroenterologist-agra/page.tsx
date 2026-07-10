@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
@@ -202,11 +203,7 @@ export default function DoctorProfilePage() {
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/86">
               Trusted DM Gastroenterologist in Agra for digestive disorders, liver disease, ERCP, colonoscopy, endoscopy, pancreatic care and pancreato-biliary diseases.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/portal#appointment">Book Consultation</ButtonLink>
-              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
-              <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-            </div>
+            <AppointmentCtaPanel className="mt-8 max-w-3xl" />
           </MotionReveal>
           <MotionReveal delay={0.08}>
             <div className="relative mx-auto max-w-sm rounded border border-white/25 bg-white p-2 shadow-[0_28px_90px_rgba(2,22,29,0.38)]">
@@ -237,10 +234,7 @@ export default function DoctorProfilePage() {
                 <InfoLine icon={<ShieldCheck size={18} />} text="Registration: MCI-57000" />
                 <InfoLine icon={<MapPin size={18} />} text={fullAddress} />
               </div>
-              <div className="mt-6 grid gap-3">
-                <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call {site.mobile}</ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-6" />
             </div>
           </MotionReveal>
           <MotionReveal delay={0.08}>
@@ -333,11 +327,7 @@ export default function DoctorProfilePage() {
           <p className="mt-3 max-w-4xl text-muted">
             Take the first step toward better digestive and liver health by scheduling a consultation with Dr. Deepak Kumar Sharma at Mudgal Gastromedics Hospital, Agra.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <ButtonLink href="/portal#appointment">Book Consultation</ButtonLink>
-            <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
-            <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-          </div>
+          <AppointmentCtaPanel className="mt-5 max-w-3xl" />
         </div>
       </Section>
 

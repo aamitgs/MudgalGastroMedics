@@ -45,7 +45,7 @@ export function Stats() {
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal" />
       <div aria-hidden="true" className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-100/60" />
       <div className="relative grid gap-3 lg:grid-cols-5">
-        {stats.map(({ target, label, detail, icon: Icon }, index) => (
+        {stats.map(({ target, label, detail, icon: Icon }) => (
           <div
             key={label}
             className="group relative overflow-hidden rounded border border-line/80 bg-white/82 p-5 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft"
@@ -54,7 +54,6 @@ export function Stats() {
               <span className="grid h-10 w-10 place-items-center rounded border border-line bg-soft text-brand transition group-hover:border-brand group-hover:bg-brand group-hover:text-white">
                 <Icon size={19} />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{String(index + 1).padStart(2, "0")}</span>
             </div>
             <strong className="block text-4xl font-bold leading-none text-brand md:text-5xl">
               <Counter target={target} />

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={cn("font-sans", geist.variable)}>
-      <body className={`${GeistSans.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body id="top" className={`${GeistSans.variable} font-sans antialiased`} suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}

@@ -1,7 +1,8 @@
 "use client";
 
-import { CalendarClock, HeartPulse, MessageCircle, Paperclip, Phone, Send, UserRound } from "lucide-react";
+import { MessageCircle, Paperclip, Phone, Send } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { BrandIconTile } from "@/components/BrandIconTile";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import { procedures, site } from "@/lib/site-data";
 
@@ -116,9 +117,7 @@ export function AppointmentForm() {
       <div className="overflow-hidden rounded-xl border border-line/80 bg-[linear-gradient(135deg,#ffffff,#f7fbfb)] shadow-[0_20px_55px_rgba(8,64,84,0.08)]">
         <div className="border-b border-line/70 px-5 py-4 md:px-6">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-soft text-brand">
-              <UserRound size={18} />
-            </span>
+            <BrandIconTile className="h-9 w-9 rounded-lg" />
             <div>
               <p className="font-bold text-ink"><span data-en>Patient details</span><span data-hi lang="hi">रोगी की जानकारी</span></p>
               <p className="text-sm text-muted">Basic details help reception prepare your appointment.</p>
@@ -197,9 +196,7 @@ export function AppointmentForm() {
       <div className="overflow-hidden rounded-xl border border-line/80 bg-white shadow-[0_20px_55px_rgba(8,64,84,0.07)]">
         <div className="border-b border-line/70 px-5 py-4 md:px-6">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-soft text-brand">
-              <CalendarClock size={18} />
-            </span>
+            <BrandIconTile className="h-9 w-9 rounded-lg" />
             <div>
               <p className="font-bold text-ink"><span data-en>Appointment preference</span><span data-hi lang="hi">अपॉइंटमेंट की पसंद</span></p>
               <p className="text-sm text-muted">Choose the care type and a convenient visit window.</p>
@@ -237,9 +234,7 @@ export function AppointmentForm() {
       <div className="overflow-hidden rounded-xl border border-line/80 bg-[linear-gradient(135deg,#ffffff,#f7fbfb)] shadow-[0_20px_55px_rgba(8,64,84,0.08)]">
         <div className="border-b border-line/70 px-5 py-4 md:px-6">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-soft text-brand">
-              <HeartPulse size={18} />
-            </span>
+            <BrandIconTile className="h-9 w-9 rounded-lg" />
             <div>
               <p className="font-bold text-ink"><span data-en>Symptoms and support</span><span data-hi lang="hi">लक्षण और सहायता</span></p>
               <p className="text-sm text-muted">Optional details help the team guide the right next step.</p>
@@ -311,7 +306,7 @@ export function AppointmentForm() {
           </label>
         </div>
       </div>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid items-start gap-3 md:grid-cols-3">
         <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(8,145,178,0.42),inset_0_1px_0_rgba(255,255,255,0.28)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <Send size={18} /> <span data-en>Submit Request</span><span data-hi lang="hi">अनुरोध भेजें</span>
         </button>

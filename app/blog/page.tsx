@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ChevronRight, Clock3, MessageCircle, Phone, Search, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Section } from "@/components/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
@@ -44,9 +45,8 @@ function blogHref(category?: string, page?: number) {
   return query ? `/blog?${query}` : "/blog";
 }
 
-function getBlogCoverImage(post: { slug: string; coverImage?: string }) {
-  if (post.coverImage) return post.coverImage;
-  return `/blog/${post.slug}/cover-image`;
+function getBlogCoverImage(post: { slug: string }) {
+  return `/images/blog/generated/${post.slug}-cover.svg`;
 }
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
@@ -100,11 +100,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   Read Latest Articles
                   <ArrowRight size={18} />
                 </Link>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="rounded-full">
-                  <Phone size={18} />
-                  Call Reception
-                </ButtonLink>
               </div>
+              <AppointmentCtaPanel className="mt-5 max-w-3xl" />
               <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm font-black text-white/58">
                 <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-200" /> {seoBlogPosts.length}+ patient guides</span>
                 <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-200" /> Agra-focused care advice</span>
@@ -142,11 +139,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       </section>
 
       <Section className="-mt-12 relative z-10 pt-0">
-        <Link
-          href={campPost.href}
-          className="group grid overflow-hidden rounded-lg border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.14)] transition duration-300 hover:-translate-y-1 hover:border-brand lg:grid-cols-[0.95fr_1.05fr]"
-        >
-          <div className="grid min-h-72 place-items-center bg-soft p-2 lg:min-h-full">
+        <div className="group grid overflow-hidden rounded-lg border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.14)] transition duration-300 hover:-translate-y-1 hover:border-brand lg:grid-cols-[0.95fr_1.05fr]">
+          <Link href={campPost.href} className="grid min-h-72 place-items-center bg-soft p-2 lg:min-h-full" aria-label={campPost.title}>
             <Image
               src="/images/hospital/campbanner.jpeg"
               alt="Mudgal Gastromedics consultation and check-up camp banner"
@@ -156,13 +150,15 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               className="h-auto w-full rounded object-contain"
               priority
             />
-          </div>
+          </Link>
           <article className="p-6 md:p-8">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-soft/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand">
               <span className="h-2 w-2 rounded-full bg-gold" />
               Consultation Camp
             </div>
-            <h2 className="text-3xl font-black leading-tight text-ink md:text-5xl">{campPost.title}</h2>
+            <Link href={campPost.href} className="block">
+              <h2 className="text-3xl font-black leading-tight text-ink transition group-hover:text-brand md:text-5xl">{campPost.title}</h2>
+            </Link>
             <p className="mt-4 text-2xl font-black leading-tight text-brand" lang="hi">{campPost.hiTitle}</p>
             <p className="mt-5 leading-relaxed text-muted">{campPost.summary}</p>
             <div className="mt-6 flex flex-wrap items-center gap-3 text-sm font-semibold text-muted">
@@ -170,12 +166,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <CalendarDays size={17} className="text-brand" />
                 {campPost.date}
               </span>
-              <span className="inline-flex items-center gap-2 text-brand">
+              <Link href={campPost.href} className="inline-flex items-center gap-2 text-brand">
                 Read post <ArrowRight size={16} className="transition group-hover:translate-x-1" />
-              </span>
+              </Link>
             </div>
+            <AppointmentCtaPanel className="mt-6" />
           </article>
-        </Link>
+        </div>
       </Section>
 
       <Section id="latest-guides" muted className="pt-8">
@@ -207,27 +204,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {featuredPost ? (
               <Link
                 href={`/blog/${featuredPost.slug}`}
-                className="group mb-6 grid overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift md:grid-cols-[0.82fr_1.18fr]"
+                className="group mb-6 block overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
               >
-                <div className="relative min-h-64 overflow-hidden bg-ink p-6 text-white">
-                  <Image
+                <div className="relative aspect-[2.1/1] overflow-hidden bg-ink">
+                  <img
                     src={getBlogCoverImage(featuredPost)}
                     alt={`${featuredPost.title} article cover`}
-                    fill
-                    sizes="(min-width: 1024px) 520px, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                    priority={currentPage === 1}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(7,43,52,0.52),rgba(8,145,178,0.16))]" />
-                  <div className="relative flex h-full min-h-52 flex-col justify-between">
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em]">
-                      Featured Guide
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold text-white/72">{featuredPost.category}</p>
-                      <p className="mt-2 text-3xl font-black leading-tight">{featuredPost.relatedLabel}</p>
-                    </div>
-                  </div>
                 </div>
                 <article className="p-6 md:p-7">
                   <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-bold text-muted">
@@ -254,23 +238,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="group grid overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]"
+                  className="group block overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
                 >
-                  <div className="relative min-h-56 overflow-hidden bg-ink md:min-h-full">
-                    <Image
+                  <div className="relative aspect-[2.1/1] overflow-hidden bg-ink">
+                    <img
                       src={getBlogCoverImage(post)}
                       alt={`${post.title} article cover`}
-                      fill
-                      sizes="(min-width: 1280px) 300px, (min-width: 768px) 260px, 100vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(7,43,52,0.88),rgba(8,145,178,0.3))]" />
-                    <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-white/12 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white backdrop-blur">
-                      {post.category}
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 rounded border border-white/14 bg-ink/55 p-3 text-sm font-black leading-tight text-white backdrop-blur">
-                      {post.relatedLabel}
-                    </div>
                   </div>
                   <article className="flex min-w-0 flex-col p-6 md:p-7">
                     <div className="mb-4 flex flex-wrap items-center gap-4 text-sm font-bold text-muted">
@@ -394,16 +369,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <p className="mt-3 text-sm leading-relaxed text-white/74">
                   For vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty, call reception first.
                 </p>
-                <div className="mt-5 grid gap-3">
-                  <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`}>
-                    <Phone size={18} />
-                    Call Reception
-                  </ButtonLink>
-                  <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">
-                    <MessageCircle size={18} />
-                    WhatsApp
-                  </ButtonLink>
-                </div>
+                <AppointmentCtaPanel className="mt-5" layout="stacked" />
               </div>
             </div>
           </aside>

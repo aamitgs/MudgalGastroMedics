@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Phone, ShieldCheck } from "lucide-react";
-import { LanguageToggle } from "@/components/LanguageToggle";
+import { FloatingActionHub } from "@/components/FloatingActionHub";
 import { site } from "@/lib/site-data";
 
 const companyLinks = [
@@ -105,12 +105,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="fixed bottom-5 right-4 z-40 grid gap-3 md:bottom-7 md:right-6">
-        <LanguageToggle compact className="ring-1 ring-black/10" />
-        <a href={`https://wa.me/${site.whatsapp}`} className="grid h-12 w-12 place-items-center rounded-full bg-[#191919] text-white shadow-[0_10px_30px_rgba(0,0,0,0.32)] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-teal" aria-label="WhatsApp MGM">
-          <MessageCircle size={20} />
-        </a>
-      </div>
+      <FloatingActionHub />
     </footer>
   );
 }

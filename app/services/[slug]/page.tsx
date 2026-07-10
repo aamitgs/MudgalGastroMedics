@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, CheckCircle2, ClipboardList, FileText, HeartPulse, MessageCircle, Phone, ShieldCheck, Stethoscope } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
+import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
@@ -208,26 +210,14 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </p>
               <h1 className="max-w-4xl text-4xl font-black leading-[0.98] md:text-6xl">{page.title}</h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82 md:text-xl">{page.hero}</p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/portal#appointment" className="min-w-[190px]">
-                  Book Appointment
-                </ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="min-w-[180px] gap-2">
-                  <Phone size={18} /> Call Reception
-                </ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="min-w-[160px] gap-2">
-                  <MessageCircle size={18} /> WhatsApp
-                </ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-8 max-w-3xl" />
             </div>
           </MotionReveal>
 
           <MotionReveal delay={0.1}>
             <div className="rounded border border-white/20 bg-white/12 p-6 shadow-[0_28px_80px_rgba(0,0,0,0.22)] backdrop-blur">
               <div className="mb-5 flex items-center gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded bg-cyan-100/15 text-cyan-100">
-                  <Stethoscope size={24} />
-                </span>
+                <BrandIconTile className="h-12 w-12 bg-cyan-100/15" />
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">Quick Focus</p>
                   <h2 className="text-2xl font-black">{page.shortTitle}</h2>
@@ -254,9 +244,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
           {page.sections.map((section) => (
             <MotionReveal key={section.title}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
-                <div className="mb-4 grid h-12 w-12 place-items-center rounded bg-soft text-brand">
-                  {section.items?.length ? <ClipboardList size={24} /> : <ShieldCheck size={24} />}
-                </div>
+                <BrandIconTile className="mb-4 h-12 w-12" />
                 <h2 className="text-2xl font-black text-ink">{section.title}</h2>
                 <p className="mt-3 leading-7 text-muted">{section.text}</p>
                 {section.items?.length ? (
@@ -348,9 +336,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             { title: "Follow-up", text: "Reports, medicine response, warning signs and long-term monitoring are discussed clearly.", icon: FileText }
           ].map(({ title, text, icon: Icon }) => (
             <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
-              <span className="mb-4 grid h-11 w-11 place-items-center rounded bg-soft text-brand">
-                <Icon size={21} />
-              </span>
+              <BrandIconTile className="mb-4 h-11 w-11" />
               <h3 className="text-xl font-black">{title}</h3>
               <p className="mt-2 text-muted">{text}</p>
             </div>
@@ -383,12 +369,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 Call reception at {site.mobile} or visit {fullAddress}. For urgent symptoms such as vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty, call before visiting.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 md:justify-end">
-              <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="gap-2 border-line bg-white text-ink">
-                <Phone size={18} /> Call Reception
-              </ButtonLink>
-              <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
-            </div>
+            <AppointmentCtaPanel className="md:min-w-[520px]" />
           </div>
         </div>
       </Section>

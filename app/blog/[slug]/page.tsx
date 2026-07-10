@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, BookOpenText, CalendarDays, Clock, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Section, SectionHead } from "@/components/Section";
 import { getSeoBlogPost, seoBlogPosts } from "@/lib/blog-posts";
@@ -16,9 +16,8 @@ export function generateStaticParams() {
   return seoBlogPosts.map((post) => ({ slug: post.slug }));
 }
 
-function getBlogCoverImage(post: { slug: string; coverImage?: string }) {
-  if (post.coverImage) return post.coverImage;
-  return `/blog/${post.slug}/cover-image`;
+function getBlogCoverImage(post: { slug: string }) {
+  return `/images/blog/generated/${post.slug}-cover.svg`;
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
@@ -166,14 +165,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section className="relative z-10 pt-8">
         <div className="mb-5 overflow-hidden rounded-lg border border-line/80 bg-white p-2 shadow-[0_24px_70px_rgba(8,64,84,0.14)]">
-          <Image
+          <img
             src={coverImage}
             alt={`${post.title} cover image`}
             width={1600}
             height={757}
             sizes="(min-width: 1180px) 1180px, calc(100vw - 32px)"
             className="aspect-[2.1/1] w-full rounded object-cover"
-            priority={Boolean(post.coverImage)}
           />
         </div>
         <div className="grid gap-3 rounded-lg border border-line bg-white p-4 shadow-[0_24px_70px_rgba(8,64,84,0.12)] md:grid-cols-3">
@@ -227,11 +225,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
             <div className="rounded border border-line bg-ink p-5 text-white shadow-soft">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Book / Call</p>
-              <div className="mt-4 grid gap-3">
-                <ButtonLink href="/portal#appointment" className="w-full">Book Appointment</ButtonLink>
-                <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost" className="w-full"><Phone size={18} /> Call Reception</ButtonLink>
-                <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary" className="w-full"><MessageCircle size={18} /> WhatsApp</ButtonLink>
-              </div>
+              <AppointmentCtaPanel className="mt-4" layout="stacked" />
             </div>
             <div className="rounded border border-line bg-white p-5 shadow-soft">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Topics</p>
@@ -328,11 +322,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               Share symptoms, current medicines and previous reports so the hospital team can guide appointment planning.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/portal#appointment">Book Appointment</ButtonLink>
-            <ButtonLink href={`tel:${site.mobile.replace(/\s/g, "")}`} variant="ghost">Call Reception</ButtonLink>
-            <ButtonLink href={`https://wa.me/${site.whatsapp}`} variant="secondary">WhatsApp</ButtonLink>
-          </div>
+          <AppointmentCtaPanel className="lg:min-w-[520px]" />
         </div>
       </Section>
     </main>

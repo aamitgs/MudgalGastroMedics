@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill -9)",
+      "Bash(npx eslint *)",
+      "Bash(rm -f /tmp/cover-test.png /tmp/og-blog-test.png /tmp/og-service-test.png /tmp/og-proc-test.png)",
+      "Bash(npx tsc *)",
+      "Bash(SMTP_URL=\"smtps://admin%40mudgalgastromedics.com:zasbsxuxcxkjpsjk@smtp.gmail.com:465\" nohup npm run dev)",
+      "Bash(disown)",
+      "Bash(time curl -s -X POST http://localhost:3000/api/appointment -H 'Content-Type: application/json' -d '{\"name\":\"Sequential Send Test\",\"phone\":\"9888800001\",\"email\":\"aamitgs@gmail.com\",\"service\":\"General Inquiry\",\"message\":\"Testing sequential email sending fix\"}' -w '\\\\nHTTP %{http_code}\\\\n')",
+      "Read(//tmp/**)",
+      "Bash(rm -f /tmp/dev-server-og-fix.log /tmp/dev-server-smtp-real-test.log)",
+      "Bash(npm run *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}
