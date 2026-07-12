@@ -24,6 +24,8 @@ export type InsuranceClaim = {
 
 export type AccountEntryType = "Income" | "Expense" | "Deposit" | "Refund" | "Adjustment";
 
+export type AccountEntryMethod = "Cash" | "UPI" | "Card" | "Bank" | "Insurance" | "Other";
+
 export type AccountEntry = {
   id: string;
   createdAt: string;
@@ -32,7 +34,7 @@ export type AccountEntry = {
   type: AccountEntryType;
   category: string;
   amount: number;
-  method: "Cash" | "UPI" | "Card" | "Bank" | "Insurance" | "Other";
+  method: AccountEntryMethod;
   reference?: string;
   party?: string;
   notes?: string;
@@ -40,3 +42,4 @@ export type AccountEntry = {
 
 export const insuranceClaimStatuses: InsuranceClaimStatus[] = ["Draft", "Preauth Sent", "Approved", "Rejected", "Submitted", "Settled"];
 export const accountEntryTypes: AccountEntryType[] = ["Income", "Expense", "Deposit", "Refund", "Adjustment"];
+export const accountEntryMethods: AccountEntryMethod[] = ["Cash", "UPI", "Card", "Bank", "Insurance", "Other"];

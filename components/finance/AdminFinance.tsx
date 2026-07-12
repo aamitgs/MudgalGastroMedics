@@ -4,7 +4,7 @@ import { BadgeIndianRupee, Download, FileCheck2 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
-import { accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
+import { accountEntryMethods, accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
 import type { AccountEntrySortField } from "@/lib/account-entry-query";
 import { queryAccountEntries } from "@/lib/account-entry-query";
 import type { InsuranceClaimSortField } from "@/lib/insurance-claim-query";
@@ -14,8 +14,11 @@ import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { accountEntryCreateSchema, type AccountEntryCreateInput } from "@/lib/validation/finance";
 
 const claimExportHeaders = ["Patient", "Phone", "Insurer", "Policy Number", "Claim Number", "Requested", "Approved", "Settled", "Status"];
 
@@ -159,23 +162,47 @@ export function AdminFinance() {
     event.currentTarget.reset();
   }
 
-  async function createEntry(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const response = await fetch("/api/finance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, mode: "entry" })
-    });
-    const data = (await response.json().catch(() => ({}))) as FinanceResponse;
-    if (!response.ok || !data.ok || !data.entry) {
-      notify.error(data.error || "Unable to create account entry.");
-      return;
+  const defaultEntryValues: AccountEntryCreateInput = {
+    date: new Date().toISOString().slice(0, 10),
+    type: "Expense",
+    category: "",
+    amount: 0,
+    method: "Cash",
+    reference: "",
+    party: "",
+    notes: ""
+  };
+
+  const {
+    register: registerEntry,
+    formState: { errors: entryErrors, isSubmitting: isEntrySubmitting },
+    reset: resetEntryForm,
+    submit: submitEntry
+  } = useAdvancedForm<AccountEntryCreateInput>({
+    schema: accountEntryCreateSchema,
+    defaultValues: defaultEntryValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/finance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, mode: "entry" })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitEntry());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as FinanceResponse;
+      if (!response.ok || !data.ok || !data.entry) {
+        notify.error(data.error || "Unable to create account entry.");
+        return;
+      }
+      setEntries((items) => [data.entry as AccountEntry, ...items]);
+      notify.success("Account entry saved");
+      resetEntryForm(defaultEntryValues);
     }
-    setEntries((items) => [data.entry as AccountEntry, ...items]);
-    notify.success("Account entry saved");
-    event.currentTarget.reset();
-  }
+  });
 
   async function updateClaim(id: string, updates: Partial<Pick<InsuranceClaim, "status" | "requestedAmount" | "approvedAmount" | "settledAmount" | "claimNumber" | "documents" | "notes">>) {
     const response = await fetch("/api/finance", {
@@ -400,34 +427,50 @@ export function AdminFinance() {
           </div>
         </form>
 
-        <form onSubmit={createEntry} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitEntry} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <BadgeIndianRupee size={19} /> Add account entry
           </p>
           <div className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
-              <input aria-label="Date" name="date" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-              <select aria-label="Type" name="type" className={fieldClass} defaultValue="Expense">
-                {accountEntryTypes.map((type) => (
-                  <option key={type}>{type}</option>
-                ))}
-              </select>
+              <FormField label="Date" htmlFor="entry-date" error={entryErrors.date?.message}>
+                <input id="entry-date" className={fieldClass} type="date" {...registerEntry("date")} />
+              </FormField>
+              <FormField label="Type" htmlFor="entry-type" error={entryErrors.type?.message}>
+                <select id="entry-type" className={fieldClass} {...registerEntry("type")}>
+                  {accountEntryTypes.map((type) => (
+                    <option key={type}>{type}</option>
+                  ))}
+                </select>
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="category" className={fieldClass} placeholder="Category" required />
-              <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" required />
+              <FormField label="Category" htmlFor="entry-category" error={entryErrors.category?.message}>
+                <input id="entry-category" className={fieldClass} placeholder="Category" {...registerEntry("category")} />
+              </FormField>
+              <FormField label="Amount" htmlFor="entry-amount" error={entryErrors.amount?.message}>
+                <input id="entry-amount" className={fieldClass} type="number" min="0" placeholder="Amount" {...registerEntry("amount")} />
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <select aria-label="Payment method" name="method" className={fieldClass} defaultValue="Cash">
-                {["Cash", "UPI", "Card", "Bank", "Insurance", "Other"].map((method) => (
-                  <option key={method}>{method}</option>
-                ))}
-              </select>
-              <input name="reference" className={fieldClass} placeholder="Reference / voucher" />
+              <FormField label="Payment method" htmlFor="entry-method" error={entryErrors.method?.message}>
+                <select id="entry-method" className={fieldClass} {...registerEntry("method")}>
+                  {accountEntryMethods.map((method) => (
+                    <option key={method}>{method}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Reference / voucher" htmlFor="entry-reference" error={entryErrors.reference?.message}>
+                <input id="entry-reference" className={fieldClass} placeholder="Reference / voucher" {...registerEntry("reference")} />
+              </FormField>
             </div>
-            <input name="party" className={fieldClass} placeholder="Party / vendor / patient" />
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Ledger notes" />
-            <ActionButton type="submit" variant="success">
+            <FormField label="Party / vendor / patient" htmlFor="entry-party" error={entryErrors.party?.message}>
+              <input id="entry-party" className={fieldClass} placeholder="Party / vendor / patient" {...registerEntry("party")} />
+            </FormField>
+            <FormField label="Notes" htmlFor="entry-notes" error={entryErrors.notes?.message}>
+              <textarea id="entry-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Ledger notes" {...registerEntry("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="success" loading={isEntrySubmitting} disabled={isEntrySubmitting}>
               Save Entry
             </ActionButton>
           </div>
