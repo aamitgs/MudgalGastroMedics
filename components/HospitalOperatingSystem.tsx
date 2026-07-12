@@ -97,7 +97,9 @@ import { AcceptancePanel } from "@/components/hospital-os/AcceptancePanel";
 import { AssignDoctorDialog } from "@/components/hospital-os/AssignDoctorDialog";
 import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
+import { DoctorWorkspace } from "@/components/hospital-os/DoctorWorkspace";
 import { HosFormField } from "@/components/hospital-os/HosFormField";
+import { PatientWorkspace } from "@/components/hospital-os/PatientWorkspace";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import {
   canAccessCommandEntity,
@@ -109,6 +111,7 @@ import {
   navItems,
   patientFlowRows,
   roleFallbackMessage,
+  statusTone,
   v1AiScope
 } from "@/lib/hospital-os-data";
 import type { AuditTrailItem, DashboardMetric, DoctorAssignment, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
@@ -139,20 +142,6 @@ import {
 } from "@/app/mudgalgastromedics-os/actions";
 
 type FlowErrorMap<T extends Record<string, unknown>> = Partial<Record<keyof T, string>>;
-
-const statusTone: Record<string, string> = {
-  "In Consultation": "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  "Vitals Pending": "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",
-  "Lab Review": "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  Scheduled: "border-[var(--hos-border)] bg-[var(--hos-muted)] text-[var(--hos-text)]",
-  "Billing Hold": "border-[var(--hos-danger)]/20 bg-[var(--hos-danger)]/10 text-[var(--hos-danger)]",
-  Discharged: "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  Open: "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",
-  Paid: "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  Insurance: "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  Preauth: "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  "Refund Review": "border-[var(--hos-danger)]/20 bg-[var(--hos-danger)]/10 text-[var(--hos-danger)]"
-};
 
 const metricIcons: Record<string, LucideIcon> = {
   "OPD Flow": Activity,
@@ -1102,259 +1091,6 @@ function DashboardOverview({
         </CardContent>
       </Card>
     </>
-  );
-}
-
-function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
-  const activePatientId = useHospitalOsStore((state) => state.activePatientId);
-  const activePatient = rows.find((patient) => patient.id === activePatientId) ?? rows[0];
-
-  if (!activePatient) {
-    return (
-      <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-        <CardContent className="p-6 text-sm text-[var(--hos-muted-text)]">
-          No patients in today&rsquo;s flow yet. Registrations and OPD visits appear here automatically.
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader className="border-b border-[var(--hos-border)]">
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Patient workspace</p>
-        <CardTitle className="text-2xl font-semibold">{activePatient.patient} <span className="text-base font-medium text-[var(--hos-muted-text)]">{activePatient.uhid}</span></CardTitle>
-      </CardHeader>
-      <CardContent className="p-5">
-        <Tabs defaultValue="summary" className="grid gap-5">
-          <TabsList className="h-auto flex-wrap justify-start bg-[var(--hos-muted)] p-1">
-            {["summary", "timeline", "vitals", "prescriptions", "reports", "billing", "insurance", "appointments", "notes", "ai"].map((tab) => (
-              <TabsTrigger key={tab} value={tab} className="capitalize">{tab === "ai" ? "AI Summary" : tab}</TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value="summary" className="mt-0 grid gap-4">
-            <PatientClinicalSnapshot activePatient={activePatient} />
-          </TabsContent>
-          <TabsContent value="timeline" className="mt-0">
-            <PatientTimelinePanel phone={activePatient.phone} patientName={activePatient.patient} />
-          </TabsContent>
-          {["vitals", "prescriptions", "reports", "billing", "insurance", "appointments", "notes", "ai"].map((tab) => (
-            <TabsContent key={tab} value={tab} className="mt-0">
-              <EmptyState
-                icon={tab === "ai" ? Sparkles : FileText}
-                title={`${tab === "ai" ? "AI Summary" : tab[0].toUpperCase() + tab.slice(1)} workspace ready`}
-                description="This panel loads inside the unified patient workspace without forcing a page navigation."
-                action={`Add ${tab === "ai" ? "AI" : tab} record`}
-              />
-            </TabsContent>
-          ))}
-        </Tabs>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DoctorWorkspace({
-  rows,
-  onAuditEvent
-}: {
-  rows: PatientFlowRow[];
-  onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void;
-}) {
-  const activePatientId = useHospitalOsStore((state) => state.activePatientId);
-  const setActivePatient = useHospitalOsStore((state) => state.setActivePatient);
-  const queueRows = rows;
-  const activePatient = queueRows.find((row) => row.id === activePatientId) ?? queueRows[0];
-
-  function onQueueKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, patientId: string) {
-    const queueButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-doctor-queue-item]"));
-    const currentIndex = queueButtons.indexOf(event.currentTarget);
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      queueButtons[Math.min(currentIndex + 1, queueButtons.length - 1)]?.focus();
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      queueButtons[Math.max(currentIndex - 1, 0)]?.focus();
-    }
-
-    if (event.key === "Enter") {
-      event.preventDefault();
-      setActivePatient(patientId);
-    }
-  }
-
-  return (
-    <Card id="doctor-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Doctor workspace</p>
-            <CardTitle className="mt-1 text-xl">Single-screen consultation</CardTitle>
-          </div>
-          <Badge variant="outline" className="border-[var(--hos-border)] text-[var(--hos-muted-text)]">{rows.length} active</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        {queueRows.slice(0, 4).map((row) => (
-          <button
-            key={row.uhid}
-            type="button"
-            data-doctor-queue-item
-            aria-pressed={row.id === activePatient?.id}
-            aria-label={`Select ${row.patient} consultation`}
-            onClick={() => setActivePatient(row.id)}
-            onKeyDown={(event) => onQueueKeyDown(event, row.id)}
-            className={`rounded-lg border p-4 text-left transition hover:border-[var(--hos-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hos-primary)] ${row.id === activePatient?.id ? "border-[var(--hos-primary)] bg-[var(--hos-primary)]/5" : "border-[var(--hos-border)]"}`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">{row.patient}</p>
-                <p className="mt-1 text-xs font-medium text-[var(--hos-muted-text)]">{row.uhid} · wait {row.waitMinutes}m</p>
-              </div>
-              <Badge variant="outline" className={statusTone[row.status]}>{row.status}</Badge>
-            </div>
-          </button>
-        ))}
-        {activePatient ? (
-          <>
-            <ClinicalNotesEditor key={`notes-${activePatient.id}`} activePatient={activePatient} onAuditEvent={onAuditEvent} />
-            <AiPrescriptionAssistant key={`rx-${activePatient.id}`} activePatient={activePatient} onAuditEvent={onAuditEvent} />
-          </>
-        ) : (
-          <p className="rounded-lg border border-dashed border-[var(--hos-border)] p-4 text-sm text-[var(--hos-muted-text)]">
-            No patients in the queue yet. New OPD visits appear here automatically.
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function AiPrescriptionAssistant({
-  activePatient,
-  onAuditEvent
-}: {
-  activePatient: PatientFlowRow;
-  onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void;
-}) {
-  const [status, setStatus] = useState<"idle" | "confirmed" | "error">("idle");
-  const [isPending, startTransition] = useTransition();
-  const suggestion = `Continue PPI therapy, add hydration advice, and schedule follow-up review for ${activePatient.risk.toLowerCase()} risk profile.`;
-
-  function confirmSuggestion() {
-    setStatus("idle");
-    startTransition(async () => {
-      const result = await confirmAiPrescriptionSuggestion({
-        patientId: activePatient.uhid,
-        suggestion
-      });
-      if (!result.ok) {
-        setStatus("error");
-        return;
-      }
-      if (result.auditId) {
-        onAuditEvent({
-          id: result.auditId,
-          action: "hospital_os.ai_prescription.confirmed",
-          entityType: "patient",
-          entityId: activePatient.uhid
-        });
-      }
-      setStatus("confirmed");
-    });
-  }
-
-  return (
-    <div className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold">AI prescription assistance</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--hos-muted-text)]">{suggestion}</p>
-          <p className="mt-2 text-xs font-semibold text-[var(--hos-warning)]">Suggestion only. Doctor confirmation is required before saving.</p>
-        </div>
-        <Sparkles size={18} className="shrink-0 text-[var(--hos-primary)]" />
-      </div>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button type="button" disabled={isPending || status === "confirmed"} onClick={confirmSuggestion} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90">
-          {isPending ? "Confirming..." : status === "confirmed" ? "Confirmed" : "Confirm Suggestion"}
-        </Button>
-        {status === "confirmed" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Doctor confirmed AI suggestion.</p> : null}
-        {status === "error" ? <p role="alert" className="text-sm font-semibold text-[var(--hos-danger)]">Suggestion could not be confirmed.</p> : null}
-      </div>
-    </div>
-  );
-}
-
-function ClinicalNotesEditor({
-  activePatient,
-  onAuditEvent
-}: {
-  activePatient: PatientFlowRow;
-  onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void;
-}) {
-  const [clinicalNotes, setClinicalNotes] = useState(`Focused consultation for ${activePatient.patient}. Review vitals, history, prescriptions, investigations, and follow-up plan.`);
-  const [noteSaveStatus, setNoteSaveStatus] = useState("Autosaved");
-  const notesEdited = useRef(false);
-  const noteSaveRequest = useRef(0);
-
-  useEffect(() => {
-    if (!notesEdited.current) return;
-
-    const requestId = noteSaveRequest.current + 1;
-    noteSaveRequest.current = requestId;
-
-    const savingTimer = window.setTimeout(() => {
-      setNoteSaveStatus("Autosaving...");
-    }, 350);
-
-    const autosaveTimer = window.setTimeout(async () => {
-      const result = await autosaveClinicalNotes({
-        patientId: activePatient.uhid,
-        notes: clinicalNotes
-      });
-      if (noteSaveRequest.current !== requestId) return;
-      if (!result.ok) {
-        setNoteSaveStatus("Autosave failed");
-        return;
-      }
-      if (result.auditId) {
-        onAuditEvent({
-          id: result.auditId,
-          action: "hospital_os.clinical_notes.autosaved",
-          entityType: "patient",
-          entityId: activePatient.uhid
-        });
-      }
-      setNoteSaveStatus(`Autosaved at ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`);
-    }, 900);
-
-    return () => {
-      window.clearTimeout(savingTimer);
-      window.clearTimeout(autosaveTimer);
-    };
-  }, [activePatient.uhid, clinicalNotes, onAuditEvent]);
-
-  return (
-    <div className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={`clinical-notes-${activePatient.id}`} className="text-sm font-semibold">Clinical notes for {activePatient.patient}</Label>
-        <p role="status" className="text-xs font-semibold text-[var(--hos-muted-text)]">{noteSaveStatus}</p>
-      </div>
-      <Textarea
-        id={`clinical-notes-${activePatient.id}`}
-        aria-label={`Clinical notes for ${activePatient.patient}`}
-        value={clinicalNotes}
-        onChange={(event) => {
-          notesEdited.current = true;
-          setClinicalNotes(event.target.value);
-          setNoteSaveStatus("Unsaved changes");
-        }}
-        className="mt-3 min-h-28"
-      />
-    </div>
   );
 }
 
