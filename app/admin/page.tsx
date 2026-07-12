@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { AdminLogin } from "@/components/AdminLogin";
 import { AdminModuleNav } from "@/components/AdminModuleNav";
 import { Section } from "@/components/Section";
+import { WorkspaceLauncher } from "@/components/WorkspaceLauncher";
 import { LazyModuleSection } from "@/components/hospital-os/LazyModuleSection";
 import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
 import { visibleAdminModules } from "@/lib/access/admin-modules";
@@ -49,7 +49,7 @@ export default async function AdminPage() {
               ))}
             </div>
           ) : (
-            <AdminLogin />
+            <WorkspaceLauncher />
           )}
         </Section>
     </main>

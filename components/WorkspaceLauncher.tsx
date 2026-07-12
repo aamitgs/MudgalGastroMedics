@@ -4,6 +4,7 @@ import Image from "next/image";
 import { BadgeIndianRupee, FlaskConical, HeartPulse, Pill, Settings, Stethoscope, UserRound, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AccessLogin } from "@/components/AccessLogin";
+import { AdminLogin } from "@/components/AdminLogin";
 import type { AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
 
@@ -37,6 +38,7 @@ export function WorkspaceLauncher() {
   const [signedIn, setSignedIn] = useState(false);
   const [lastTile, setLastTile] = useState<WorkspaceTile | null>(null);
   const [system, setSystem] = useState<SystemStatus | null>(null);
+  const [showLegacy, setShowLegacy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -122,18 +124,13 @@ export function WorkspaceLauncher() {
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-3 gap-x-4 gap-y-8 sm:grid-cols-4 lg:grid-cols-5">
         {tiles.map((tile) => {
           const Icon = tile.icon;
           return (
-            <button
-              key={tile.key}
-              type="button"
-              onClick={() => openTile(tile)}
-              className="group flex flex-col items-start gap-3 rounded-xl border border-line bg-surface p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
-                <Icon size={19} />
+            <button key={tile.key} type="button" onClick={() => openTile(tile)} className="group flex flex-col items-center gap-3 text-center">
+              <span className="grid h-16 w-16 place-items-center rounded-full border border-line bg-surface text-ink transition group-hover:-translate-y-0.5 group-hover:border-brand group-hover:text-brand group-hover:shadow-md">
+                <Icon size={24} />
               </span>
               <span>
                 <span className="block text-sm font-bold text-ink">{tile.label}</span>
@@ -143,12 +140,9 @@ export function WorkspaceLauncher() {
           );
         })}
 
-        <a
-          href="/portal"
-          className="group flex flex-col items-start gap-3 rounded-xl border border-dashed border-line bg-soft/50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand"
-        >
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-surface text-teal-dark transition group-hover:bg-teal group-hover:text-white">
-            <UserRound size={19} />
+        <a href="/portal" className="group flex flex-col items-center gap-3 text-center">
+          <span className="grid h-16 w-16 place-items-center rounded-full border border-dashed border-line bg-surface text-teal-dark transition group-hover:-translate-y-0.5 group-hover:border-teal group-hover:shadow-md">
+            <UserRound size={24} />
           </span>
           <span>
             <span className="block text-sm font-bold text-ink">Patient Portal</span>
@@ -158,11 +152,11 @@ export function WorkspaceLauncher() {
       </div>
 
       {signedIn ? (
-        <p className="mt-6 text-center text-xs font-semibold text-muted">
+        <p className="mt-8 text-center text-xs font-semibold text-muted">
           You are signed in — choosing a workspace opens it directly.
         </p>
       ) : (
-        <p className="mt-6 text-center text-xs leading-relaxed text-muted">
+        <p className="mt-8 text-center text-xs leading-relaxed text-muted">
           Staff access only. Your account determines what each workspace shows.
         </p>
       )}
@@ -177,6 +171,19 @@ export function WorkspaceLauncher() {
           <span className="rounded bg-gold/15 px-1.5 py-0.5 uppercase tracking-wide text-gold">{system.environment}</span>
         ) : null}
       </div>
+
+      {!signedIn ? (
+        <div className="mt-6 text-center">
+          <button type="button" onClick={() => setShowLegacy((value) => !value)} className="text-xs font-semibold text-muted underline-offset-2 transition hover:text-brand hover:underline">
+            Trouble signing in?
+          </button>
+          {showLegacy ? (
+            <div className="mt-4">
+              <AdminLogin />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

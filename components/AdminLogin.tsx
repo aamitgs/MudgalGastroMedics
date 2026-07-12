@@ -37,10 +37,10 @@ export function AdminLogin() {
       <span className="grid h-14 w-14 place-items-center rounded bg-soft text-brand">
         <LockKeyhole size={24} />
       </span>
-      <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-brand">Admin Login</p>
-      <h2 className="mt-2 text-2xl font-bold leading-tight text-ink">Reception access</h2>
+      <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-brand">Legacy Sign-In</p>
+      <h2 className="mt-2 text-2xl font-bold leading-tight text-ink">Admin credentials</h2>
       <p className="mt-3 leading-relaxed text-muted">
-        Sign in with a named staff account to view appointment requests and manage hospital workflows.
+        For the original operator account or local passcode, if you can&apos;t use your named staff account above.
       </p>
       <form onSubmit={onSubmit} className="mt-6 grid gap-4">
         <label>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { AdminLogin } from "@/components/AdminLogin";
 import { HospitalOsDynamic } from "@/components/HospitalOsDynamic";
+import { WorkspaceLauncher } from "@/components/WorkspaceLauncher";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {
@@ -18,9 +18,7 @@ export default async function HospitalOsPage() {
   if (!isAuthenticated) {
     return (
       <main className="hospital-os-theme grid min-h-screen place-items-center bg-[var(--hos-bg)] p-6">
-        <div className="w-full max-w-xl">
-          <AdminLogin />
-        </div>
+        <WorkspaceLauncher />
       </main>
     );
   }
