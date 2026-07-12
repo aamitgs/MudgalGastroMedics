@@ -85,11 +85,6 @@ export const financeClaimUpdateSchema = z.looseObject({
   notes: z.string().optional()
 });
 
-export const inventoryCreateSchema = z.looseObject({
-  category: z.string().optional(),
-  name: z.unknown().optional()
-});
-
 export const inventoryAdjustSchema = z.looseObject({
   id: z.string().default(""),
   delta: z.unknown().optional()

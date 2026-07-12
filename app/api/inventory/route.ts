@@ -4,7 +4,9 @@ import { queryInventoryItems, type InventorySortField, type SortDirection } from
 import { adjustInventoryQuantity, listInventoryItems, upsertInventoryItem } from "@/lib/inventory-store";
 import { inventoryCategories, inventoryExpiryStatus } from "@/lib/inventory-types";
 import type { InventoryCategory } from "@/lib/inventory-types";
-import { inventoryAdjustSchema, inventoryCreateSchema } from "@/lib/validation/operations";
+import { inventoryAdjustSchema } from "@/lib/validation/operations";
+import { inventoryItemCreateSchema } from "@/lib/validation/inventory";
+import { firstZodIssueMessage } from "@/lib/validation/http";
 
 const sortFields: InventorySortField[] = ["name", "category", "quantity", "expiryDate", "lastUpdatedAt"];
 
@@ -52,19 +54,12 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "pharmacy-inventory", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const parsed = inventoryCreateSchema.safeParse(await request.json().catch(() => ({})));
-  const body = parsed.success ? parsed.data : {};
-  const category = typeof body.category === "string" ? body.category : "";
-
-  if (!String(body.name || "").trim()) {
-    return NextResponse.json({ ok: false, error: "Item name is required." }, { status: 400 });
+  const parsed = inventoryItemCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
 
-  if (category && !inventoryCategories.includes(category as InventoryCategory)) {
-    return NextResponse.json({ ok: false, error: "Invalid inventory category." }, { status: 400 });
-  }
-
-  const item = (await upsertInventoryItem(body));
+  const item = (await upsertInventoryItem(parsed.data));
   return NextResponse.json({ ok: true, item });
 }
 

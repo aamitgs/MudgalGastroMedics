@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, CalendarClock, CalendarX, Download, PackageCheck, Plus } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { InventoryCategory, InventoryItem } from "@/lib/inventory-types";
 import { inventoryCategories, inventoryExpirySoonDays, inventoryExpiryStatus } from "@/lib/inventory-types";
@@ -9,8 +9,12 @@ import type { InventorySortField } from "@/lib/inventory-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
+import { FormSection } from "@/components/design-system/FormSection";
 import { AdminPurchaseOrders } from "@/components/inventory/AdminPurchaseOrders";
 import { notify } from "@/lib/notify";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { inventoryItemCreateSchema, type InventoryItemCreateInput } from "@/lib/validation/inventory";
 
 const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Batch", "Lot", "Expiry", "Last Updated"];
 
@@ -122,25 +126,39 @@ export function AdminInventory() {
     setItems((entries) => entries.map((entry) => (entry.id === id ? updated : entry)));
   }
 
-  async function addItem(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
-    const response = await fetch("/api/inventory", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = (await response.json().catch(() => ({}))) as InventoryListResponse;
-    if (!response.ok || !data.ok || !data.item) {
-      notify.error(data.error || "Unable to add inventory item.");
-      return;
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    reset: resetItemForm,
+    submit: submitItem
+  } = useAdvancedForm<InventoryItemCreateInput>({
+    schema: inventoryItemCreateSchema,
+    defaultValues: { name: "", category: "Consumable", quantity: 0, reorderLevel: 0, unit: "pcs" },
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/inventory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values)
+        });
+      } catch {
+        // Network failure, not a server response — the form still holds
+        // every field typed (reset() only runs below, on success), and
+        // Retry re-submits current form state, not a stale captured copy.
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitItem());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as InventoryListResponse;
+      if (!response.ok || !data.ok || !data.item) {
+        notify.error(data.error || "Unable to add inventory item.");
+        return;
+      }
+      notify.success("Stock item saved");
+      resetItemForm({ name: "", category: "Consumable", quantity: 0, reorderLevel: 0, unit: "pcs" });
+      void loadItems();
     }
-    notify.success("Stock item saved");
-    form.reset();
-    void loadItems();
-  }
+  });
 
   const statTiles = useMemo(
     () => [
@@ -256,29 +274,53 @@ export function AdminInventory() {
       </div>
 
       <div className="grid gap-5 p-4 lg:grid-cols-[0.8fr_1.2fr]">
-        <form onSubmit={addItem} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitItem} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Plus size={19} /> Add / update stock item
           </p>
           <div className="grid gap-3">
-            <input name="name" className={fieldClass} placeholder="Item name" required />
-            <select aria-label="Category" name="category" className={fieldClass} defaultValue="Consumable">
-              {inventoryCategories.map((category) => (
-                <option key={category}>{category}</option>
-              ))}
-            </select>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <input name="quantity" type="number" min="0" className={fieldClass} placeholder="Qty" required />
-              <input name="reorderLevel" type="number" min="0" className={fieldClass} placeholder="Reorder" required />
-              <input name="unit" className={fieldClass} placeholder="Unit" defaultValue="pcs" />
-            </div>
-            <input name="vendor" className={fieldClass} placeholder="Vendor / supplier" />
-            <div className="grid gap-3 sm:grid-cols-3">
-              <input name="batchNumber" className={fieldClass} placeholder="Batch no." />
-              <input name="lotNumber" className={fieldClass} placeholder="Lot no." />
-              <input name="expiryDate" type="date" aria-label="Expiry date" className={fieldClass} />
-            </div>
-            <ActionButton type="submit" variant="primary">
+            <FormSection title="Item">
+              <FormField label="Item name" htmlFor="inventory-name" error={errors.name?.message}>
+                <input id="inventory-name" className={fieldClass} placeholder="Item name" {...register("name")} />
+              </FormField>
+              <FormField label="Category" htmlFor="inventory-category" error={errors.category?.message}>
+                <select id="inventory-category" className={fieldClass} {...register("category")}>
+                  {inventoryCategories.map((category) => (
+                    <option key={category}>{category}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Vendor / supplier" htmlFor="inventory-vendor" error={errors.vendor?.message}>
+                <input id="inventory-vendor" className={fieldClass} placeholder="Vendor / supplier" {...register("vendor")} />
+              </FormField>
+            </FormSection>
+
+            <FormSection title="Stock & tracking">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <FormField label="Quantity" htmlFor="inventory-quantity" error={errors.quantity?.message}>
+                  <input id="inventory-quantity" type="number" min="0" className={fieldClass} placeholder="Qty" {...register("quantity")} />
+                </FormField>
+                <FormField label="Reorder level" htmlFor="inventory-reorder" error={errors.reorderLevel?.message}>
+                  <input id="inventory-reorder" type="number" min="0" className={fieldClass} placeholder="Reorder" {...register("reorderLevel")} />
+                </FormField>
+                <FormField label="Unit" htmlFor="inventory-unit" error={errors.unit?.message}>
+                  <input id="inventory-unit" className={fieldClass} placeholder="Unit" {...register("unit")} />
+                </FormField>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormField label="Batch no." htmlFor="inventory-batch" error={errors.batchNumber?.message}>
+                  <input id="inventory-batch" className={fieldClass} placeholder="Batch no." {...register("batchNumber")} />
+                </FormField>
+                <FormField label="Lot no." htmlFor="inventory-lot" error={errors.lotNumber?.message}>
+                  <input id="inventory-lot" className={fieldClass} placeholder="Lot no." {...register("lotNumber")} />
+                </FormField>
+              </div>
+              <FormField label="Expiry date" htmlFor="inventory-expiry" error={errors.expiryDate?.message}>
+                <input id="inventory-expiry" type="date" className={fieldClass} {...register("expiryDate")} />
+              </FormField>
+            </FormSection>
+
+            <ActionButton type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
               Save Stock Item
             </ActionButton>
           </div>
