@@ -3,15 +3,18 @@
 import { AlertTriangle, Download, Edit3, FlaskConical, TestTube2 } from "lucide-react";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormField } from "@/components/design-system/FormField";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
-import { commonLabTests, labOrderStatuses } from "@/lib/lab-types";
+import { commonLabTests, labOrderPriorities, labOrderStatuses, labPaymentStatuses } from "@/lib/lab-types";
 import type { LabSortField } from "@/lib/lab-query";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { labOrderCreateSchema, type LabOrderCreateInput } from "@/lib/validation/lab";
 
 const labExportHeaders = ["Token", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created"];
 
@@ -41,7 +44,6 @@ export function AdminLab() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
   const [orders, setOrders] = useState<LabOrder[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
-  const [selectedVisitId, setSelectedVisitId] = useState("");
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [customTests, setCustomTests] = useState("");
 
@@ -58,6 +60,54 @@ export function AdminLab() {
 
   const sortField = (sorting[0]?.id as LabSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
+
+  const defaultLabOrderValues: LabOrderCreateInput = {
+    visitId: "",
+    priority: "Routine",
+    sampleType: "",
+    amount: undefined,
+    paymentStatus: "Unpaid",
+    notes: ""
+  };
+
+  const {
+    register: registerLabOrder,
+    getValues: getOrderValues,
+    setValue: setOrderValue,
+    formState: { errors: labOrderErrors, isSubmitting: isLabOrderSubmitting },
+    reset: resetLabOrderForm,
+    submit: submitLabOrder
+  } = useAdvancedForm<LabOrderCreateInput>({
+    schema: labOrderCreateSchema,
+    defaultValues: defaultLabOrderValues,
+    async onValid(values) {
+      // tests is combined from the chip toggles + comma-separated custom text
+      // (local component state, not a registered field — see lib/validation/lab.ts).
+      const custom = customTests.split(",").map((test) => test.trim()).filter(Boolean);
+      let response: Response;
+      try {
+        response = await fetch("/api/lab", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, tests: [...selectedTests, ...custom] })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitLabOrder());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as LabListResponse;
+      if (!response.ok || !data.ok || !data.order) {
+        // Mutation failures are transient/non-blocking (toast), never the
+        // table's load-error state — a failed create must not blank the list.
+        notify.error(data.error || "Unable to create lab order.");
+        return;
+      }
+      setSelectedTests([]);
+      setCustomTests("");
+      resetLabOrderForm(defaultLabOrderValues);
+      void loadLab();
+    }
+  });
 
   async function loadLab() {
     setLoading(true);
@@ -76,7 +126,6 @@ export function AdminLab() {
     }
     setOrders(data.orders ?? []);
     setVisits(data.visits ?? []);
-    setSelectedVisitId((current) => current || data.visits?.[0]?.id || "");
     setPageCount(data.pageCount ?? 1);
     if (data.stats) setStats(data.stats);
     setLoading(false);
@@ -91,6 +140,14 @@ export function AdminLab() {
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, sortField, sortDir, globalFilter, statusFilter, criticalOnly]);
+
+  // Runs after the <option> elements for `visits` actually commit to the DOM
+  // (unlike calling setValue directly inside loadLab, which fired before the
+  // matching option existed, so the uncontrolled select had nothing to select).
+  useEffect(() => {
+    if (!getOrderValues("visitId") && visits[0]?.id) setOrderValue("visitId", visits[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visits]);
 
   function updateGlobalFilter(value: string) {
     setGlobalFilter(value);
@@ -109,36 +166,6 @@ export function AdminLab() {
 
   function toggleTest(test: string) {
     setSelectedTests((items) => (items.includes(test) ? items.filter((item) => item !== test) : [...items, test]));
-  }
-
-  async function createOrder(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const custom = customTests.split(",").map((test) => test.trim()).filter(Boolean);
-    const response = await fetch("/api/lab", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        visitId: selectedVisitId,
-        tests: [...selectedTests, ...custom],
-        priority: formData.get("priority"),
-        sampleType: formData.get("sampleType"),
-        amount: formData.get("amount"),
-        paymentStatus: formData.get("paymentStatus"),
-        notes: formData.get("notes")
-      })
-    });
-    const data = (await response.json().catch(() => ({}))) as LabListResponse;
-    if (!response.ok || !data.ok || !data.order) {
-      // Mutation failures are transient/non-blocking (toast), never the
-      // table's load-error state — a failed create must not blank the list.
-      notify.error(data.error || "Unable to create lab order.");
-      return;
-    }
-    setSelectedTests([]);
-    setCustomTests("");
-    event.currentTarget.reset();
-    void loadLab();
   }
 
   async function updateOrder(id: string, updates: Partial<Pick<LabOrder, "status" | "resultSummary" | "reportReference" | "paymentStatus" | "amount" | "notes">> & { criticalManual?: boolean; acknowledgeCritical?: boolean }) {
@@ -309,20 +336,22 @@ export function AdminLab() {
       </div>
 
       <div className="grid gap-5 p-4 xl:grid-cols-[0.85fr_1.15fr]">
-        <form onSubmit={createOrder} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitLabOrder} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <FlaskConical size={19} /> Create lab order
           </p>
           <div className="grid gap-3">
-            <select aria-label="Selected visit id" value={selectedVisitId} onChange={(event) => setSelectedVisitId(event.target.value)} className={fieldClass} required>
-              <option value="">Select OPD visit</option>
-              {visits.map((visit) => (
-                <option key={visit.id} value={visit.id}>
-                  {visit.token} | {visit.patientName}
-                  {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
-                </option>
-              ))}
-            </select>
+            <FormField label="OPD visit" htmlFor="lab-visitId" error={labOrderErrors.visitId?.message}>
+              <select id="lab-visitId" className={fieldClass} {...registerLabOrder("visitId")}>
+                <option value="">Select OPD visit</option>
+                {visits.map((visit) => (
+                  <option key={visit.id} value={visit.id}>
+                    {visit.token} | {visit.patientName}
+                    {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
+                  </option>
+                ))}
+              </select>
+            </FormField>
             <div className="rounded border border-line bg-surface p-3">
               <p className="mb-2 text-sm font-bold text-ink">Common tests</p>
               <div className="flex flex-wrap gap-2">
@@ -341,19 +370,31 @@ export function AdminLab() {
             </div>
             <input value={customTests} onChange={(event) => setCustomTests(event.target.value)} className={fieldClass} placeholder="Other tests, comma separated" />
             <div className="grid gap-3 md:grid-cols-3">
-              <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine">
-                <option>Routine</option>
-                <option>Urgent</option>
-              </select>
-              <input name="sampleType" className={fieldClass} placeholder="Sample type" />
-              <input name="amount" className={fieldClass} type="number" min="0" placeholder="Amount" />
+              <FormField label="Priority" htmlFor="lab-priority" error={labOrderErrors.priority?.message}>
+                <select id="lab-priority" className={fieldClass} {...registerLabOrder("priority")}>
+                  {labOrderPriorities.map((priority) => (
+                    <option key={priority}>{priority}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Sample type" htmlFor="lab-sampleType" error={labOrderErrors.sampleType?.message}>
+                <input id="lab-sampleType" className={fieldClass} placeholder="Sample type" {...registerLabOrder("sampleType")} />
+              </FormField>
+              <FormField label="Amount" htmlFor="lab-amount" error={labOrderErrors.amount?.message}>
+                <input id="lab-amount" className={fieldClass} type="number" min="0" placeholder="Amount" {...registerLabOrder("amount")} />
+              </FormField>
             </div>
-            <select aria-label="Payment status" name="paymentStatus" className={fieldClass} defaultValue="Unpaid">
-              <option>Unpaid</option>
-              <option>Paid</option>
-            </select>
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Lab notes, fasting status, sample remarks" />
-            <ActionButton type="submit" variant="primary">
+            <FormField label="Payment status" htmlFor="lab-paymentStatus" error={labOrderErrors.paymentStatus?.message}>
+              <select id="lab-paymentStatus" className={fieldClass} {...registerLabOrder("paymentStatus")}>
+                {labPaymentStatuses.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Notes" htmlFor="lab-notes" error={labOrderErrors.notes?.message}>
+              <textarea id="lab-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Lab notes, fasting status, sample remarks" {...registerLabOrder("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="primary" loading={isLabOrderSubmitting} disabled={isLabOrderSubmitting}>
               <TestTube2 size={17} /> Save Lab Order
             </ActionButton>
           </div>

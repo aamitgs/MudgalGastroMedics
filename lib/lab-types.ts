@@ -1,5 +1,9 @@
 export type LabOrderStatus = "Ordered" | "Sample Collected" | "Processing" | "Result Ready" | "Delivered" | "Cancelled";
 
+export type LabOrderPriority = "Routine" | "Urgent";
+
+export type LabPaymentStatus = "Unpaid" | "Paid";
+
 export type LabOrder = {
   id: string;
   createdAt: string;
@@ -12,13 +16,13 @@ export type LabOrder = {
   phone: string;
   service: string;
   tests: string[];
-  priority: "Routine" | "Urgent";
+  priority: LabOrderPriority;
   status: LabOrderStatus;
   sampleType?: string;
   resultSummary?: string;
   reportReference?: string;
   amount?: number;
-  paymentStatus: "Unpaid" | "Paid";
+  paymentStatus: LabPaymentStatus;
   notes?: string;
   /** Critical (panic) result flag — Track 0.2. Set by threshold rules or laboratory judgment. */
   criticalFlag?: boolean;
@@ -31,6 +35,8 @@ export type LabOrder = {
 };
 
 export const labOrderStatuses: LabOrderStatus[] = ["Ordered", "Sample Collected", "Processing", "Result Ready", "Delivered", "Cancelled"];
+export const labOrderPriorities: LabOrderPriority[] = ["Routine", "Urgent"];
+export const labPaymentStatuses: LabPaymentStatus[] = ["Unpaid", "Paid"];
 
 export const commonLabTests = [
   "CBC",
