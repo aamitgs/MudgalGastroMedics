@@ -2,6 +2,7 @@
 
 import { CalendarCheck, KeyRound, LogOut, MessageCircle, Phone, ShieldCheck, Smartphone } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
+import { LiveClockWeather } from "@/components/LiveClockWeather";
 import {
   PatientHealthDashboard,
   type PatientAppointmentSummary,
@@ -435,6 +436,9 @@ export function PatientPortalAccess() {
               <CalendarCheck className="mx-auto text-brand" size={34} />
               <p className="mt-4 text-xl font-bold text-ink"><span data-en>Your health dashboard will appear here.</span><span data-hi lang="hi">आपका हेल्थ डैशबोर्ड यहाँ दिखेगा।</span></p>
               <p className="mt-2 text-muted"><span data-en>Sign in with your mobile number to see your timeline, prescriptions, bills and more.</span><span data-hi lang="hi">अपनी टाइमलाइन, पर्चे और बिल देखने के लिए मोबाइल नंबर से साइन इन करें।</span></p>
+              <div className="mt-6 border-t border-line/70 pt-6">
+                <LiveClockWeather variant="launcher" />
+              </div>
             </div>
           </div>
         ) : null}

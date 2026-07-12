@@ -128,6 +128,7 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launch
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${open ? "bg-emerald-400" : "bg-red-400"}`} />
             {open ? "OPD open now" : "OPD closed"}
+            <span className="text-muted/80">· 11 AM–6 PM, Mon–Sat</span>
           </span>
           {weather && WeatherIcon ? (
             <span className="inline-flex items-center gap-1.5">
