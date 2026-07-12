@@ -62,11 +62,11 @@ test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
   assert.match(read("components/HospitalOperatingSystem.tsx"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
   assert.match(read("components/HospitalOperatingSystem.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
   assert.match(read("components/HospitalOperatingSystem.tsx"), /useQuery/);
-  assert.match(read("components/HospitalOperatingSystem.tsx"), /registerHospitalPatient/);
   assert.match(read("components/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
   // Track 4.10: extracted to their own files, no longer inline in the monolith.
   assert.match(read("components/hospital-os/AuditTrailPanel.tsx"), /Session audit trail/);
   assert.match(read("components/hospital-os/PatientPortalPanel.tsx"), /AI symptom checker/);
+  assert.match(read("components/hospital-os/PatientRegistrationForm.tsx"), /registerHospitalPatient/);
   assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient\.registered/);
   assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.appointment\.booked/);
   assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.billing\.posted/);

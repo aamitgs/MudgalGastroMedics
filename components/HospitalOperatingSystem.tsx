@@ -7,11 +7,9 @@ import {
   AlertTriangle,
   Bed,
   Building2,
-  CalendarClock,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
-  CreditCard,
   Download,
   FileText,
   HeartPulse,
@@ -19,12 +17,9 @@ import {
   LogOut,
   Search,
   ShieldCheck,
-  UserRoundPlus,
   X
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import type { ZodIssue } from "zod";
 import {
   QueryClient,
   QueryClientProvider,
@@ -54,16 +49,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { AcceptancePanel } from "@/components/hospital-os/AcceptancePanel";
+import { AppointmentBookingForm } from "@/components/hospital-os/AppointmentBookingForm";
 import { AssignDoctorDialog } from "@/components/hospital-os/AssignDoctorDialog";
 import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
+import { BillingForm } from "@/components/hospital-os/BillingForm";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
 import { DashboardOverview } from "@/components/hospital-os/DashboardOverview";
 import { DoctorWorkspace } from "@/components/hospital-os/DoctorWorkspace";
-import { HosFormField } from "@/components/hospital-os/HosFormField";
 import { PatientPortalPanel } from "@/components/hospital-os/PatientPortalPanel";
+import { PatientRegistrationForm } from "@/components/hospital-os/PatientRegistrationForm";
 import { PatientWorkspace } from "@/components/hospital-os/PatientWorkspace";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import { TopNav } from "@/components/hospital-os/TopNav";
@@ -81,22 +77,11 @@ import type { AuditTrailItem, DashboardMetric, DoctorAssignment, HospitalRealtim
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { downloadCsv } from "@/lib/table-export";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
-import {
-  appointmentSchema,
-  billingSchema,
-  patientRegistrationSchema
-} from "@/lib/validation/hospital-os";
-import type { AppointmentInput, BillingInput, PatientRegistrationInput } from "@/lib/validation/hospital-os";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import {
   assignHospitalDoctor,
-  bulkUpdatePatientFlow,
-  bookHospitalAppointment,
-  postHospitalBilling,
-  registerHospitalPatient
+  bulkUpdatePatientFlow
 } from "@/app/mudgalgastromedics-os/actions";
-
-type FlowErrorMap<T extends Record<string, unknown>> = Partial<Record<keyof T, string>>;
 
 const commandFuse = new Fuse(commandRecords, {
   includeScore: true,
@@ -208,15 +193,6 @@ async function fetchOsSession(): Promise<OsSession | null> {
 function openPatientWorkspace(patientId: string) {
   useHospitalOsStore.getState().setActivePatient(patientId);
   document.querySelector("#patient-workspace")?.scrollIntoView({ block: "start" });
-}
-
-
-function applyIssues<T extends Record<string, unknown>>(issues: ZodIssue[]) {
-  return issues.reduce<FlowErrorMap<T>>((errors, issue) => {
-    const key = issue.path[0] as keyof T | undefined;
-    if (key) errors[key] = issue.message;
-    return errors;
-  }, {});
 }
 
 function HospitalOsProviders() {
@@ -859,202 +835,6 @@ function HospitalOsApp() {
         onSave={saveDoctorAssignment}
       />
     </main>
-  );
-}
-
-function PatientRegistrationForm({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void }) {
-  const markPatientRegistered = useHospitalOsStore((state) => state.markPatientRegistered);
-  const flowStatus = useHospitalOsStore((state) => state.flowStatus.patientRegistration);
-  const [isPending, startTransition] = useTransition();
-  const [auditId, setAuditId] = useState("");
-  const { register, handleSubmit, formState: { errors }, setError, reset } = useForm<PatientRegistrationInput>({
-    defaultValues: { firstName: "", lastName: "", mobile: "", age: 42, sex: "Male", concern: "" }
-  });
-
-  function onSubmit(values: PatientRegistrationInput) {
-    const parsed = patientRegistrationSchema.safeParse(values);
-    if (!parsed.success) {
-      const issueMap = applyIssues<PatientRegistrationInput>(parsed.error.issues);
-      Object.entries(issueMap).forEach(([name, message]) => setError(name as keyof PatientRegistrationInput, { message }));
-      return;
-    }
-    startTransition(async () => {
-      const result = await registerHospitalPatient(parsed.data);
-      if (!result.ok) {
-        Object.entries(result.fieldErrors ?? {}).forEach(([name, message]) => setError(name as keyof PatientRegistrationInput, { message }));
-        return;
-      }
-      markPatientRegistered({ uhid: "MGM-NEW", patient: `${parsed.data.firstName} ${parsed.data.lastName}` });
-      setAuditId(result.auditId ?? "");
-      if (result.auditId) {
-        onAuditEvent({
-          id: result.auditId,
-          action: "hospital_os.patient.registered",
-          entityType: "patient",
-          entityId: `registration-${parsed.data.mobile.slice(-4)}`
-        });
-      }
-      reset(parsed.data);
-    });
-  }
-
-  return (
-    <Card id="patient-registration" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Vercel-style form</p>
-        <CardTitle className="text-xl">Patient registration</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <HosFormField label="First name" error={errors.firstName?.message}><Input {...register("firstName")} aria-label="First name" /></HosFormField>
-            <HosFormField label="Last name" error={errors.lastName?.message}><Input {...register("lastName")} aria-label="Last name" /></HosFormField>
-          </div>
-          <HosFormField label="Mobile" error={errors.mobile?.message}><Input {...register("mobile")} aria-label="Mobile" inputMode="numeric" /></HosFormField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <HosFormField label="Age" error={errors.age?.message}><Input {...register("age")} aria-label="Age" type="number" /></HosFormField>
-            <HosFormField label="Sex" error={errors.sex?.message}>
-              <select {...register("sex")} aria-label="Sex" className="min-h-10 rounded-md border border-input bg-background px-3 text-sm">
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </select>
-            </HosFormField>
-          </div>
-          <HosFormField label="Concern" error={errors.concern?.message}><Textarea {...register("concern")} aria-label="Concern" /></HosFormField>
-          <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><UserRoundPlus size={16} /> {isPending ? "Saving..." : "Register Patient"}</Button>
-          {flowStatus === "saved" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Patient registration saved. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-function AppointmentBookingForm({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void }) {
-  const markAppointmentBooked = useHospitalOsStore((state) => state.markAppointmentBooked);
-  const flowStatus = useHospitalOsStore((state) => state.flowStatus.appointment);
-  const [isPending, startTransition] = useTransition();
-  const [auditId, setAuditId] = useState("");
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<AppointmentInput>({
-    defaultValues: {
-      patientUhid: "MGM-24018",
-      doctor: "Dr. Deepak Sharma",
-      department: "Gastroenterology",
-      appointmentDate: "2026-07-01",
-      appointmentTime: "15:20",
-      reason: "ERCP follow-up"
-    }
-  });
-
-  function onSubmit(values: AppointmentInput) {
-    const parsed = appointmentSchema.safeParse(values);
-    if (!parsed.success) {
-      const issueMap = applyIssues<AppointmentInput>(parsed.error.issues);
-      Object.entries(issueMap).forEach(([name, message]) => setError(name as keyof AppointmentInput, { message }));
-      return;
-    }
-    startTransition(async () => {
-      const result = await bookHospitalAppointment(parsed.data);
-      if (!result.ok) {
-        Object.entries(result.fieldErrors ?? {}).forEach(([name, message]) => setError(name as keyof AppointmentInput, { message }));
-        return;
-      }
-      markAppointmentBooked();
-      setAuditId(result.auditId ?? "");
-      if (result.auditId) {
-        onAuditEvent({
-          id: result.auditId,
-          action: "hospital_os.appointment.booked",
-          entityType: "appointment",
-          entityId: parsed.data.patientUhid
-        });
-      }
-    });
-  }
-
-  return (
-    <Card className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Scheduling</p>
-        <CardTitle className="text-xl">Appointment booking</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <HosFormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Patient UHID" /></HosFormField>
-          <HosFormField label="Doctor" error={errors.doctor?.message}><Input {...register("doctor")} aria-label="Doctor" /></HosFormField>
-          <HosFormField label="Department" error={errors.department?.message}><Input {...register("department")} aria-label="Department" /></HosFormField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <HosFormField label="Date" error={errors.appointmentDate?.message}><Input {...register("appointmentDate")} aria-label="Appointment date" type="date" /></HosFormField>
-            <HosFormField label="Time" error={errors.appointmentTime?.message}><Input {...register("appointmentTime")} aria-label="Appointment time" type="time" /></HosFormField>
-          </div>
-          <HosFormField label="Reason" error={errors.reason?.message}><Textarea {...register("reason")} aria-label="Appointment reason" /></HosFormField>
-          <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><CalendarClock size={16} /> {isPending ? "Booking..." : "Book Appointment"}</Button>
-          {flowStatus === "booked" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Appointment booked. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BillingForm({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditTrailItem, "recordedAt">) => void }) {
-  const markBillingPosted = useHospitalOsStore((state) => state.markBillingPosted);
-  const flowStatus = useHospitalOsStore((state) => state.flowStatus.billing);
-  const [isPending, startTransition] = useTransition();
-  const [auditId, setAuditId] = useState("");
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<BillingInput>({
-    defaultValues: { invoiceId: "INV-5821", patientUhid: "MGM-24018", amount: 18450, payerType: "Insurance", notes: "Insurance review for procedure billing." }
-  });
-
-  function onSubmit(values: BillingInput) {
-    const parsed = billingSchema.safeParse(values);
-    if (!parsed.success) {
-      const issueMap = applyIssues<BillingInput>(parsed.error.issues);
-      Object.entries(issueMap).forEach(([name, message]) => setError(name as keyof BillingInput, { message }));
-      return;
-    }
-    startTransition(async () => {
-      const result = await postHospitalBilling(parsed.data);
-      if (!result.ok) {
-        Object.entries(result.fieldErrors ?? {}).forEach(([name, message]) => setError(name as keyof BillingInput, { message }));
-        return;
-      }
-      markBillingPosted();
-      setAuditId(result.auditId ?? "");
-      if (result.auditId) {
-        onAuditEvent({
-          id: result.auditId,
-          action: "hospital_os.billing.posted",
-          entityType: "invoice",
-          entityId: parsed.data.invoiceId
-        });
-      }
-    });
-  }
-
-  return (
-    <Card id="billing" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader>
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Stripe-style billing</p>
-        <CardTitle className="text-xl">Billing workflow</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <HosFormField label="Invoice ID" error={errors.invoiceId?.message}><Input {...register("invoiceId")} aria-label="Invoice ID" /></HosFormField>
-          <HosFormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Billing patient UHID" /></HosFormField>
-          <HosFormField label="Amount" error={errors.amount?.message}><Input {...register("amount")} aria-label="Amount" type="number" /></HosFormField>
-          <HosFormField label="Payer" error={errors.payerType?.message}>
-            <select {...register("payerType")} aria-label="Payer type" className="min-h-10 rounded-md border border-input bg-background px-3 text-sm">
-              <option>Self pay</option>
-              <option>Insurance</option>
-              <option>Corporate</option>
-            </select>
-          </HosFormField>
-          <HosFormField label="Notes" error={errors.notes?.message}><Textarea {...register("notes")} aria-label="Billing notes" /></HosFormField>
-          <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><CreditCard size={16} /> {isPending ? "Posting..." : "Post Billing"}</Button>
-          {flowStatus === "posted" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Billing posted. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
-        </form>
-      </CardContent>
-    </Card>
   );
 }
 
