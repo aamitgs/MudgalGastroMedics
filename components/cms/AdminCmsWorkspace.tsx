@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, Eye, FileText, History, ImageIcon, Plus, RefreshCw, SearchCheck } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
@@ -10,7 +10,10 @@ import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { cmsContentCreateSchema, type CmsContentCreateInput } from "@/lib/validation/cms";
 
 const cmsExportHeaders = ["Title", "Type", "Status", "Slug", "Owner", "Published At", "Updated"];
 
@@ -119,23 +122,48 @@ export function AdminCmsWorkspace() {
     setCurrentUser((current) => data.currentUser ?? current);
   }
 
-  async function saveItem(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/cms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = (await response.json().catch(() => ({}))) as CmsResponse;
-    if (!response.ok || !data.ok || !data.item) {
-      notify.error(data.error || "Unable to save CMS content.");
-      return;
+  const defaultCmsValues: CmsContentCreateInput = {
+    type: "Page",
+    status: "Draft",
+    title: "",
+    slug: "",
+    summary: "",
+    seoTitle: "",
+    seoDescription: "",
+    mediaUrl: "",
+    owner: "Admin",
+    notes: ""
+  };
+
+  const {
+    register: registerCms,
+    formState: { errors: cmsErrors, isSubmitting: isCmsSubmitting },
+    reset: resetCmsForm,
+    submit: submitCms
+  } = useAdvancedForm<CmsContentCreateInput>({
+    schema: cmsContentCreateSchema,
+    defaultValues: defaultCmsValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/cms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values)
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitCms());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as CmsResponse;
+      if (!response.ok || !data.ok || !data.item) {
+        notify.error(data.error || "Unable to save CMS content.");
+        return;
+      }
+      resetCmsForm(defaultCmsValues);
+      void loadItems();
     }
-    form.reset();
-    void loadItems();
-  }
+  });
 
   async function updateStatus(id: string, status: CmsContentStatus) {
     const response = await fetch("/api/cms", {
@@ -240,34 +268,54 @@ export function AdminCmsWorkspace() {
 
       <div className="grid gap-5 p-4 xl:grid-cols-[0.8fr_1.2fr]">
         <div className="grid gap-5">
-          <form onSubmit={saveItem} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+          <form onSubmit={submitCms} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
               <Plus size={19} /> Add content item
             </p>
             <div className="grid gap-3">
               <div className="grid gap-3 md:grid-cols-2">
-                <select aria-label="Type" name="type" className={fieldClass} defaultValue="Page">
-                  {cmsContentTypes.map((type) => (
-                    <option key={type}>{type}</option>
-                  ))}
-                </select>
-                <select aria-label="Status" name="status" className={fieldClass} defaultValue="Draft">
-                  {cmsContentStatuses.map((status) => (
-                    <option key={status}>{status}</option>
-                  ))}
-                </select>
+                <FormField label="Type" htmlFor="cms-type" error={cmsErrors.type?.message}>
+                  <select id="cms-type" className={fieldClass} {...registerCms("type")}>
+                    {cmsContentTypes.map((type) => (
+                      <option key={type}>{type}</option>
+                    ))}
+                  </select>
+                </FormField>
+                <FormField label="Status" htmlFor="cms-status" error={cmsErrors.status?.message}>
+                  <select id="cms-status" className={fieldClass} {...registerCms("status")}>
+                    {cmsContentStatuses.map((status) => (
+                      <option key={status}>{status}</option>
+                    ))}
+                  </select>
+                </FormField>
               </div>
-              <input name="title" className={fieldClass} placeholder="Content title" required />
-              <input name="slug" className={fieldClass} placeholder="/procedures/example or /gallery#item" required />
-              <textarea name="summary" className={`${fieldClass} min-h-24 py-3`} placeholder="Patient-facing summary or internal draft note" />
-              <input name="seoTitle" className={fieldClass} placeholder="SEO title" />
-              <textarea name="seoDescription" className={`${fieldClass} min-h-20 py-3`} placeholder="SEO description" />
-              <input name="mediaUrl" className={fieldClass} placeholder="Media URL, if applicable" />
+              <FormField label="Content title" htmlFor="cms-title" error={cmsErrors.title?.message}>
+                <input id="cms-title" className={fieldClass} placeholder="Content title" {...registerCms("title")} />
+              </FormField>
+              <FormField label="Slug" htmlFor="cms-slug" error={cmsErrors.slug?.message}>
+                <input id="cms-slug" className={fieldClass} placeholder="/procedures/example or /gallery#item" {...registerCms("slug")} />
+              </FormField>
+              <FormField label="Summary" htmlFor="cms-summary" error={cmsErrors.summary?.message}>
+                <textarea id="cms-summary" className={`${fieldClass} min-h-24 py-3`} placeholder="Patient-facing summary or internal draft note" {...registerCms("summary")} />
+              </FormField>
+              <FormField label="SEO title" htmlFor="cms-seoTitle" error={cmsErrors.seoTitle?.message}>
+                <input id="cms-seoTitle" className={fieldClass} placeholder="SEO title" {...registerCms("seoTitle")} />
+              </FormField>
+              <FormField label="SEO description" htmlFor="cms-seoDescription" error={cmsErrors.seoDescription?.message}>
+                <textarea id="cms-seoDescription" className={`${fieldClass} min-h-20 py-3`} placeholder="SEO description" {...registerCms("seoDescription")} />
+              </FormField>
+              <FormField label="Media URL" htmlFor="cms-mediaUrl" error={cmsErrors.mediaUrl?.message}>
+                <input id="cms-mediaUrl" className={fieldClass} placeholder="Media URL, if applicable" {...registerCms("mediaUrl")} />
+              </FormField>
               <div className="grid gap-3 md:grid-cols-2">
-                <input name="owner" className={fieldClass} placeholder="Owner" defaultValue="Admin" />
-                <input name="notes" className={fieldClass} placeholder="Approval notes" />
+                <FormField label="Owner" htmlFor="cms-owner" error={cmsErrors.owner?.message}>
+                  <input id="cms-owner" className={fieldClass} placeholder="Owner" {...registerCms("owner")} />
+                </FormField>
+                <FormField label="Approval notes" htmlFor="cms-notes" error={cmsErrors.notes?.message}>
+                  <input id="cms-notes" className={fieldClass} placeholder="Approval notes" {...registerCms("notes")} />
+                </FormField>
               </div>
-              <ActionButton type="submit" variant="primary">
+              <ActionButton type="submit" variant="primary" loading={isCmsSubmitting} disabled={isCmsSubmitting}>
                 Save CMS Item
               </ActionButton>
             </div>
