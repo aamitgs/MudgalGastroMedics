@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { roleHasPermission, type AccessAction, type AccessResource, type AccessRole } from "@/lib/access/matrix";
+import { downloadCsv } from "@/lib/table-export";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 
 export type HospitalRole = "Admin" | "Doctor" | "Nurse" | "Front Desk" | "Pharmacist" | "Lab Tech" | "Accountant" | "HR";
 export type CommandEntity = "Patient" | "Doctor" | "Invoice" | "Medicine" | "Appointment" | "Department" | "Employee" | "Insurance" | "Report" | "Bed" | "Room" | "Procedure";
@@ -358,3 +360,31 @@ export const statusTone: Record<string, string> = {
   Preauth: "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
   "Refund Review": "border-[var(--hos-danger)]/20 bg-[var(--hos-danger)]/10 text-[var(--hos-danger)]"
 };
+
+export const patientFlowExportHeaders = ["UHID", "Patient", "Age", "Status", "Doctor", "Department", "Billing", "Insurance", "Wait Minutes", "Risk", "Last Activity"];
+
+export function patientFlowExportRow(patient: PatientFlowRow) {
+  return [
+    patient.uhid,
+    patient.patient,
+    String(patient.age),
+    patient.status,
+    patient.doctor,
+    patient.department,
+    patient.billing,
+    patient.insurance,
+    String(patient.waitMinutes),
+    patient.risk,
+    patient.lastActivity
+  ];
+}
+
+export function downloadCsvFile(rows: string[][], filename: string) {
+  downloadCsv(patientFlowExportHeaders, rows, filename);
+}
+
+/** Shared by the monolith's column actions and the extracted OperationsTable's keyboard "Enter" handler. */
+export function openPatientWorkspace(patientId: string) {
+  useHospitalOsStore.getState().setActivePatient(patientId);
+  document.querySelector("#patient-workspace")?.scrollIntoView({ block: "start" });
+}
