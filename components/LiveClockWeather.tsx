@@ -43,6 +43,15 @@ function isHospitalOpen(now: Date) {
   return weekday !== "Sun" && hour >= 11 && hour < 18;
 }
 
+function greetingFor(now: Date) {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" }).format(now)
+  );
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 /**
  * Digital IST clock + Agra weather chip. The clock is timezone-pinned so it
  * shows hospital time on any device; the weather chip hides itself entirely
@@ -112,16 +121,22 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launch
 
   if (variant === "launcher") {
     return (
-      <div className="flex items-center justify-center gap-2 text-sm font-semibold text-muted" aria-label="Current time and weather in Agra">
-        <span className="tabular-nums whitespace-nowrap">{istDayFormat.format(now)} {istTimeFormat.format(now)} IST</span>
-        {weather && WeatherIcon ? (
-          <>
-            <span aria-hidden="true" className="text-line">|</span>
-            <WeatherIcon size={16} className="text-brand" aria-hidden="true" />
-            <span className="tabular-nums">{weather.tempC}°C</span>
-            <span className="hidden text-muted/80 sm:inline">{weather.label} in Agra</span>
-          </>
-        ) : null}
+      <div className="flex flex-col items-center gap-1.5">
+        <p className="text-base font-bold text-ink">{greetingFor(now)}</p>
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-semibold text-muted" aria-label="Current time, OPD status and weather in Agra">
+          <span className="tabular-nums whitespace-nowrap">{istDayFormat.format(now)} {istTimeFormat.format(now)} IST</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${open ? "bg-emerald-400" : "bg-red-400"}`} />
+            {open ? "OPD open now" : "OPD closed"}
+          </span>
+          {weather && WeatherIcon ? (
+            <span className="inline-flex items-center gap-1.5">
+              <WeatherIcon size={16} className="text-brand" aria-hidden="true" />
+              <span className="tabular-nums">{weather.tempC}°C</span>
+              <span className="hidden text-muted/80 sm:inline">{weather.label} in Agra</span>
+            </span>
+          ) : null}
+        </div>
       </div>
     );
   }
