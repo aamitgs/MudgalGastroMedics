@@ -6,6 +6,7 @@ const optionalText = z.string().trim().optional();
 export const purchaseOrderCreateSchema = z.object({
   vendor: z.string().trim().min(1, "Vendor is required."),
   notes: optionalText,
+  expectedDeliveryDate: optionalText,
   items: z
     .array(
       z.object({

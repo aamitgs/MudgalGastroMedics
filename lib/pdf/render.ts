@@ -9,6 +9,8 @@ import { InvoiceDocument } from "@/lib/pdf/invoice-document";
 import { MedicalCertificateDocument } from "@/lib/pdf/medical-certificate-document";
 import { buildDischargeSummaryFooterTemplate, buildDischargeSummaryHeaderTemplate, buildDischargeSummaryHtml } from "@/lib/pdf/discharge-summary-html";
 import { renderHtmlToPdf } from "@/lib/pdf/chromium";
+import { PurchaseOrderDocument } from "@/lib/pdf/purchase-order-document";
+import { listPurchaseOrders } from "@/lib/purchase-order-store";
 
 export type PdfRenderResult =
   | { ok: true; buffer: Buffer; filename: string }
@@ -54,6 +56,15 @@ export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult
   const buffer = await renderToBuffer(InvoiceDocument({ visit }));
   const prefix = visit.billingStatus === "Paid" ? "receipt" : "invoice";
   return { ok: true, buffer, filename: `${prefix}-${slugify(visit.patientName)}-${visit.receiptId || visit.token}.pdf` };
+}
+
+export async function renderPurchaseOrderPdf(orderId: string): Promise<PdfRenderResult> {
+  const order = (await listPurchaseOrders()).find((item) => item.id === orderId);
+  if (!order) return { ok: false, error: "Purchase order not found.", status: 404 };
+
+  registerPdfFonts();
+  const buffer = await renderToBuffer(PurchaseOrderDocument({ order }));
+  return { ok: true, buffer, filename: `purchase-order-${slugify(order.vendor)}-${order.id}.pdf` };
 }
 
 export async function renderDischargeSummaryPdf(admissionId: string): Promise<PdfRenderResult> {

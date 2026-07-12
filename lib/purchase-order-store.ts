@@ -20,6 +20,7 @@ export async function createPurchaseOrder(input: {
   vendor: string;
   notes?: string;
   createdByRole?: string;
+  expectedDeliveryDate?: string;
   items: { inventoryItemId: string; quantityOrdered: number; unitCost?: number }[];
 }) {
   const inventory = await listInventoryItems();
@@ -49,7 +50,8 @@ export async function createPurchaseOrder(input: {
     vendor: input.vendor.trim(),
     items,
     notes: input.notes?.trim(),
-    createdByRole: input.createdByRole
+    createdByRole: input.createdByRole,
+    expectedDeliveryDate: input.expectedDeliveryDate?.trim() || undefined
   };
 
   const doc = await store.load();

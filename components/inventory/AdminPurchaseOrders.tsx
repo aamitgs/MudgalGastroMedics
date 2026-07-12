@@ -1,11 +1,13 @@
 "use client";
 
-import { AlertTriangle, PackagePlus, PlusCircle, Trash2, Truck } from "lucide-react";
+import { AlertTriangle, Download, FileDown, PackagePlus, PlusCircle, Trash2, Truck } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/lib/inventory-types";
+import { isPurchaseOrderOverdue, purchaseOrderStatuses } from "@/lib/purchase-order-types";
 import type { PurchaseOrderRecord, PurchaseOrderStatus } from "@/lib/purchase-order-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
@@ -22,6 +24,19 @@ const statusTone: Record<PurchaseOrderStatus, string> = {
   Cancelled: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
 };
 
+const purchaseOrderExportHeaders = ["Order ID", "Vendor", "Status", "Items", "Expected Delivery", "Created"];
+
+function purchaseOrderExportRow(order: PurchaseOrderRecord) {
+  return [
+    order.id,
+    order.vendor,
+    order.status,
+    order.items.map((item) => `${item.name} x${item.quantityOrdered} ${item.unit}`).join("; "),
+    order.expectedDeliveryDate ?? "",
+    order.createdAt
+  ];
+}
+
 /** Restock target: bring stock up to twice the reorder level, never less than the reorder level itself. */
 function suggestedReorderQty(item: InventoryItem) {
   return Math.max(item.reorderLevel * 2 - item.quantity, item.reorderLevel);
@@ -33,10 +48,12 @@ export function AdminPurchaseOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [vendor, setVendor] = useState("");
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [pendingItemId, setPendingItemId] = useState("");
   const [pendingQty, setPendingQty] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<PurchaseOrderStatus | "">("");
 
   async function loadAll() {
     setLoading(true);
@@ -61,6 +78,9 @@ export function AdminPurchaseOrders() {
     const timer = window.setTimeout(() => void loadAll(), 0);
     return () => window.clearTimeout(timer);
   }, []);
+
+  const overdueOrders = useMemo(() => orders.filter((order) => isPurchaseOrderOverdue(order)), [orders]);
+  const visibleOrders = useMemo(() => (statusFilter ? orders.filter((order) => order.status === statusFilter) : orders), [orders, statusFilter]);
 
   const lowStockByVendor = useMemo(() => {
     const groups = new Map<string, InventoryItem[]>();
@@ -110,6 +130,7 @@ export function AdminPurchaseOrders() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         vendor,
+        expectedDeliveryDate: expectedDeliveryDate || undefined,
         items: lines.map((line) => ({ inventoryItemId: line.inventoryItemId, quantityOrdered: line.quantityOrdered, unitCost: line.unitCost || undefined }))
       })
     });
@@ -121,6 +142,7 @@ export function AdminPurchaseOrders() {
     }
     setOrders((current) => [data.order as PurchaseOrderRecord, ...current]);
     setVendor("");
+    setExpectedDeliveryDate("");
     setLines([]);
     notify.success("Purchase order created.");
   }
@@ -173,6 +195,14 @@ export function AdminPurchaseOrders() {
         </div>
       ) : null}
 
+      {overdueOrders.length ? (
+        <div className="border-b border-line bg-amber-50 p-4 dark:bg-amber-950">
+          <p className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
+            <AlertTriangle size={16} /> {overdueOrders.length} order{overdueOrders.length === 1 ? "" : "s"} past expected delivery: {overdueOrders.map((order) => `${order.vendor} (${order.expectedDeliveryDate})`).join(", ")}
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid gap-5 p-4 lg:grid-cols-[0.85fr_1.15fr]">
         <form onSubmit={submitOrder} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
@@ -180,6 +210,16 @@ export function AdminPurchaseOrders() {
           </p>
           <div className="grid gap-3">
             <input value={vendor} onChange={(event) => setVendor(event.target.value)} className={fieldClass} placeholder="Vendor / supplier" required />
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-muted">Expected delivery (optional)</span>
+              <input
+                value={expectedDeliveryDate}
+                onChange={(event) => setExpectedDeliveryDate(event.target.value)}
+                type="date"
+                aria-label="Expected delivery date"
+                className={fieldClass}
+              />
+            </label>
 
             <div className="rounded border border-line bg-surface p-3">
               <p className="mb-2 text-sm font-bold text-ink">Order lines</p>
@@ -219,22 +259,66 @@ export function AdminPurchaseOrders() {
         </form>
 
         <div className="grid gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <select
+              aria-label="Filter by status"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as PurchaseOrderStatus | "")}
+              className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+            >
+              <option value="">All statuses</option>
+              {purchaseOrderStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => downloadCsv(purchaseOrderExportHeaders, visibleOrders.map(purchaseOrderExportRow), "purchase-orders.csv")}
+            >
+              <Download size={13} /> Export CSV
+            </ActionButton>
+          </div>
           {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
-          {!loading && orders.length === 0 ? (
-            <ModuleEmptyState icon={Truck} title="No purchase orders yet" description="Start one from a low-stock vendor group above, or build a custom order with the form." />
+          {!loading && visibleOrders.length === 0 ? (
+            <ModuleEmptyState
+              icon={Truck}
+              title={statusFilter ? "No orders with this status" : "No purchase orders yet"}
+              description={statusFilter ? "Try a different status filter." : "Start one from a low-stock vendor group above, or build a custom order with the form."}
+            />
           ) : null}
           <div className="grid max-h-[640px] gap-2 overflow-auto">
-            {orders.map((order) => (
+            {visibleOrders.map((order) => {
+              const overdue = isPurchaseOrderOverdue(order);
+              return (
               <div key={order.id} className="rounded border border-line bg-white p-3 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{order.id}</p>
                     <h3 className="mt-1 text-base font-bold text-ink">{order.vendor}</h3>
                   </div>
-                  <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase ${statusTone[order.status]}`}>{order.status}</span>
+                  <div className="flex items-center gap-1.5">
+                    {overdue ? (
+                      <span className="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[11px] font-bold uppercase text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+                        Overdue
+                      </span>
+                    ) : null}
+                    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase ${statusTone[order.status]}`}>{order.status}</span>
+                  </div>
                 </div>
                 <p className="mt-2 text-xs text-muted">{order.items.map((item) => `${item.name} × ${item.quantityOrdered} ${item.unit}`).join(", ")}</p>
+                {order.expectedDeliveryDate ? (
+                  <p className="mt-1 text-[11px] text-muted">Expected delivery: {order.expectedDeliveryDate}</p>
+                ) : null}
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href={`/api/pdf/purchase-order?orderId=${encodeURIComponent(order.id)}`}
+                    className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded border border-line bg-surface px-2 text-xs font-bold text-ink transition hover:border-brand hover:text-brand"
+                  >
+                    <FileDown size={13} /> PDF
+                  </a>
                   {order.status === "Draft" ? (
                     <ActionButton variant="secondary" size="sm" onClick={() => void setStatus(order.id, "Ordered")}>
                       Mark Ordered
@@ -252,7 +336,8 @@ export function AdminPurchaseOrders() {
                   ) : null}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
