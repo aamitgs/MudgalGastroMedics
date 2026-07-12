@@ -3,6 +3,7 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { hashPassword, validatePassword } from "@/lib/access/password";
 import { getPatientIdentityByEmail, getPatientIdentityById, updatePatientIdentity } from "@/lib/patient-access/identity-store";
 import { getPatientSessionFromRequest } from "@/lib/patient-access/session-store";
+import { patientProfileUpdateSchema } from "@/lib/validation/patient-auth";
 
 /** Lets a signed-in patient attach an email + password, enabling email login and magic links. */
 export async function POST(request: Request) {
@@ -15,9 +16,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const password = typeof body.password === "string" ? body.password : "";
+  const parsed = patientProfileUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const { email, password } = parsed.success ? parsed.data : { email: "", password: "" };
 
   if (!email.includes("@")) {
     return NextResponse.json({ ok: false, error: "Enter a valid email address." }, { status: 400 });

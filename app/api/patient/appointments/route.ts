@@ -4,6 +4,7 @@ import { listPatientAppointments } from "@/lib/appointment-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { listPatientIpdAdmissions, listVitals } from "@/lib/ipd-store";
 import { listPatientInsuranceClaims } from "@/lib/finance-store";
+import { patientRecordsLookupSchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
   // Records are scoped to the verified patient session — the phone number is
@@ -14,9 +15,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Sign in with your mobile number to view your records." }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
+  const parsed = patientRecordsLookupSchema.safeParse(await request.json().catch(() => ({})));
   const phone = session.phone;
-  const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
+  const requestId = parsed.success ? parsed.data.requestId : "";
 
   const appointments = (await listPatientAppointments(phone, requestId || undefined)).map((appointment) => ({
     id: appointment.id,

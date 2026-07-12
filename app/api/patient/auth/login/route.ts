@@ -9,6 +9,7 @@ import {
   recordPatientLoginSuccess
 } from "@/lib/patient-access/identity-store";
 import { buildPatientSessionCookie, createPatientSession } from "@/lib/patient-access/session-store";
+import { patientLoginSchema } from "@/lib/validation/patient-auth";
 
 const genericError = "Invalid email or password.";
 
@@ -18,12 +19,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Wait a few minutes and try again." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const email = typeof body.email === "string" ? body.email.trim() : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  if (!email || !password) {
+  const parsed = patientLoginSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
+  const { email, password } = parsed.data;
 
   const identity = await getPatientIdentityByEmail(email);
   if (!identity?.passwordHash || isPatientLockedOut(identity)) {

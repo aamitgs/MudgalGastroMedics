@@ -4,11 +4,12 @@ import { rateLimit, requestIp } from "@/lib/access/rate-limit";
 import { verifyOtpChallenge } from "@/lib/patient-access/challenge-store";
 import { ensurePatientIdentity, normalizePatientPhone, recordPatientLoginSuccess } from "@/lib/patient-access/identity-store";
 import { buildPatientSessionCookie, createPatientSession } from "@/lib/patient-access/session-store";
+import { otpVerifySchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const phone = normalizePatientPhone(typeof body.phone === "string" ? body.phone : "");
-  const code = typeof body.code === "string" ? body.code : "";
+  const parsed = otpVerifySchema.safeParse(await request.json().catch(() => ({})));
+  const { phone: rawPhone, code } = parsed.success ? parsed.data : { phone: "", code: "" };
+  const phone = normalizePatientPhone(rawPhone);
   if (phone.length !== 10 || !code) {
     return NextResponse.json({ ok: false, error: "Phone number and code are required." }, { status: 400 });
   }

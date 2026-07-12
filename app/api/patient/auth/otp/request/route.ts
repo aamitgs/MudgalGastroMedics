@@ -4,10 +4,11 @@ import { rateLimit, requestIp } from "@/lib/access/rate-limit";
 import { createOtpChallenge } from "@/lib/patient-access/challenge-store";
 import { isSmsDeliveryConfigured, sendOtpSms } from "@/lib/patient-access/delivery";
 import { normalizePatientPhone } from "@/lib/patient-access/identity-store";
+import { otpRequestSchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const phone = normalizePatientPhone(typeof body.phone === "string" ? body.phone : "");
+  const parsed = otpRequestSchema.safeParse(await request.json().catch(() => ({})));
+  const phone = normalizePatientPhone(parsed.success ? parsed.data.phone : "");
   if (phone.length !== 10) {
     return NextResponse.json({ ok: false, error: "Enter a valid 10-digit mobile number." }, { status: 400 });
   }

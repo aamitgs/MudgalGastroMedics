@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPatientSessionFromRequest } from "@/lib/patient-access/session-store";
 import { addFamilyMember, listFamilyMembers, removeFamilyMember } from "@/lib/family-store";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { familyMemberCreateSchema, familyMemberDeleteSchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
   const session = await getPatientSessionFromRequest(request);
@@ -17,8 +19,11 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: false, error: "Sign in with your mobile number first." }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const result = (await addFamilyMember({ ...body, ownerPhone: session.phone }));
+  const parsed = familyMemberCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const result = (await addFamilyMember({ ...parsed.data, ownerPhone: session.phone }));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
@@ -32,8 +37,8 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: false, error: "Sign in with your mobile number first." }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
+  const parsed = familyMemberDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  const id = parsed.success ? parsed.data.id : "";
 
   const removed = (await removeFamilyMember(id, session.phone));
   if (!removed) {

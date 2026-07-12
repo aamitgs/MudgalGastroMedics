@@ -4,6 +4,7 @@ import { rateLimit, requestIp } from "@/lib/access/rate-limit";
 import { verifyMagicLinkChallenge } from "@/lib/patient-access/challenge-store";
 import { ensurePatientIdentity, recordPatientLoginSuccess } from "@/lib/patient-access/identity-store";
 import { buildPatientSessionCookie, createPatientSession } from "@/lib/patient-access/session-store";
+import { magicLinkVerifySchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
   const limit = rateLimit("patient-magic-verify", requestIp(request), 10, 10 * 60 * 1000);
@@ -11,11 +12,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Wait a few minutes and try again." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const token = typeof body.token === "string" ? body.token : "";
-  if (!token) {
+  const parsed = magicLinkVerifySchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Sign-in token is required." }, { status: 400 });
   }
+  const { token } = parsed.data;
 
   const result = await verifyMagicLinkChallenge(token);
   if (!result.ok) {
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     action: "patient.magic_link.used",
     entityType: "patient_login",
     entityId: identity.phone,
-    metadata: meta
+    device: meta
   });
 
   const response = NextResponse.json({ ok: true, phone: identity.phone, hasEmail: Boolean(identity.email) });
