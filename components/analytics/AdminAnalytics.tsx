@@ -45,6 +45,7 @@ type AnalyticsSnapshot = {
   paymentMix: Array<{ label: string; value: number }>;
   doctorProductivity: Array<{ label: string; value: number }>;
   avgWaitMinutes: number | null;
+  patientSatisfaction: { averageRating: number | null; totalResponses: number; distribution: Array<{ rating: number; count: number }> };
   workload: Array<{ label: string; value: number }>;
   risks: Record<string, number>;
 };
@@ -189,7 +190,7 @@ export function AdminAnalytics() {
 
       {analytics ? (
         <>
-          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-7">
+          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-8">
             {executiveCards.map(([label, value]) => (
               <div key={String(label)} className="rounded border border-line bg-soft/60 p-4">
                 <p className="text-xl font-bold text-ink">{value}%</p>
@@ -199,6 +200,14 @@ export function AdminAnalytics() {
             <div className="rounded border border-line bg-soft/60 p-4">
               <p className="text-xl font-bold text-ink">{analytics.avgWaitMinutes === null ? "No data yet" : `${analytics.avgWaitMinutes} min`}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Avg Wait Time</p>
+            </div>
+            <div className="rounded border border-line bg-soft/60 p-4">
+              <p className="text-xl font-bold text-ink">
+                {analytics.patientSatisfaction.averageRating === null ? "No ratings yet" : `${analytics.patientSatisfaction.averageRating.toFixed(1)} / 5`}
+              </p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                Patient Satisfaction{analytics.patientSatisfaction.totalResponses ? ` (${analytics.patientSatisfaction.totalResponses})` : ""}
+              </p>
             </div>
           </div>
 
@@ -240,7 +249,7 @@ export function AdminAnalytics() {
             </div>
           </div>
 
-          <div className="grid gap-5 p-4 xl:grid-cols-4">
+          <div className="grid gap-5 p-4 xl:grid-cols-5">
             <div className="rounded border border-line bg-surface p-4">
               <p className="mb-4 text-lg font-bold text-ink">Service mix</p>
               <BarList items={analytics.serviceMix} tone="brand" />
@@ -257,6 +266,17 @@ export function AdminAnalytics() {
               <p className="mb-4 text-lg font-bold text-ink">Doctor productivity</p>
               <p className="-mt-3 mb-3 text-xs text-muted">Completed consultations attributed to each doctor.</p>
               <BarList items={analytics.doctorProductivity} tone="brand" />
+            </div>
+            <div className="rounded border border-line bg-surface p-4">
+              <p className="mb-4 text-lg font-bold text-ink">Patient satisfaction</p>
+              {analytics.patientSatisfaction.totalResponses === 0 ? (
+                <p className="text-sm text-muted">No feedback submitted yet.</p>
+              ) : (
+                <BarList
+                  items={analytics.patientSatisfaction.distribution.map((entry) => ({ label: `${entry.rating} star${entry.rating === 1 ? "" : "s"}`, value: entry.count }))}
+                  tone="amber"
+                />
+              )}
             </div>
           </div>
 

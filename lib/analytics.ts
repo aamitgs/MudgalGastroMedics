@@ -3,6 +3,7 @@ import { listAppointments } from "@/lib/appointment-store";
 import { listAiReviews } from "@/lib/ai-review-store";
 import { listCommunicationLogs } from "@/lib/communication-store";
 import { listAccountEntries } from "@/lib/finance-store";
+import { listFeedback } from "@/lib/feedback-store";
 import { listAttendance, listStaff } from "@/lib/hr-store";
 import type { DashboardMetric, NavBadgeCounts } from "@/lib/hospital-os-data";
 import { listInventoryItems } from "@/lib/inventory-store";
@@ -58,6 +59,17 @@ function averageWaitMinutes(visits: { createdAt: string; consultationStartedAt?:
   return Math.round(waits.reduce((sum, minutes) => sum + minutes, 0) / waits.length);
 }
 
+/** Patient-submitted ratings only — averageRating is null (not 0) until at least one real submission exists. */
+function patientSatisfactionFrom(entries: { rating: number }[]) {
+  const distribution = [1, 2, 3, 4, 5].map((rating) => ({
+    rating,
+    count: entries.filter((entry) => entry.rating === rating).length
+  }));
+  const totalResponses = entries.length;
+  const averageRating = totalResponses ? Math.round((entries.reduce((sum, entry) => sum + entry.rating, 0) / totalResponses) * 10) / 10 : null;
+  return { averageRating, totalResponses, distribution };
+}
+
 export async function createAnalyticsSnapshot(windowDays = 14) {
   const days = daysBack(windowDays);
   const appointments = (await listAppointments());
@@ -74,6 +86,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
   const patients = (await listPatients());
   const dispenses = (await listPharmacyDispenses());
   const procedures = (await listProcedureSchedules());
+  const feedbackEntries = (await listFeedback());
   const paidVisits = opdVisits.filter((visit) => visit.billingStatus === "Paid");
   const activeAdmissions = admissions.filter((admission) => admission.status === "Admitted");
 
@@ -147,6 +160,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
     // null (not 0) until at least one visit has a real consultationStartedAt
     // timestamp — never fabricate a wait time from no data.
     avgWaitMinutes: averageWaitMinutes(opdVisits),
+    patientSatisfaction: patientSatisfactionFrom(feedbackEntries),
     queues: {
       opdInFlight: opdVisits.filter((visit) => visit.status === "Waiting" || visit.status === "In Consultation").length,
       labPending: labOrders.filter((order) => !["Result Ready", "Delivered", "Cancelled"].includes(order.status)).length,

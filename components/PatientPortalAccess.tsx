@@ -3,6 +3,7 @@
 import { CalendarCheck, KeyRound, LogOut, MessageCircle, Phone, ShieldCheck, Smartphone } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { PatientFeedbackWidget } from "@/components/PatientFeedbackWidget";
 import {
   PatientHealthDashboard,
   type PatientAppointmentSummary,
@@ -451,18 +452,21 @@ export function PatientPortalAccess() {
           </div>
         ) : null}
         {signedIn && hasResults ? (
-          <PatientHealthDashboard
-            phone={authedPhone}
-            appointments={appointments}
-            visits={visits}
-            ipdAdmissions={ipdAdmissions}
-            vitals={vitals}
-            insuranceClaims={insuranceClaims}
-            familyMembers={familyMembers}
-            onAddFamilyMember={addFamilyMember}
-            onRemoveFamilyMember={removeFamilyMember}
-            onPrintVisit={printVisit}
-          />
+          <>
+            <PatientFeedbackWidget visits={visits} />
+            <PatientHealthDashboard
+              phone={authedPhone}
+              appointments={appointments}
+              visits={visits}
+              ipdAdmissions={ipdAdmissions}
+              vitals={vitals}
+              insuranceClaims={insuranceClaims}
+              familyMembers={familyMembers}
+              onAddFamilyMember={addFamilyMember}
+              onRemoveFamilyMember={removeFamilyMember}
+              onPrintVisit={printVisit}
+            />
+          </>
         ) : null}
       </div>
     </div>
