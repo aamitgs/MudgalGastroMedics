@@ -6,6 +6,7 @@ import { createLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
 import { labOrderStatuses } from "@/lib/lab-types";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { listOpdVisits } from "@/lib/opd-store";
+import { labOrderUpdateSchema } from "@/lib/validation/operations";
 
 const sortFields: LabSortField[] = ["patientName", "token", "status", "priority", "createdAt"];
 
@@ -68,10 +69,11 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "lab-orders", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" ? body.status : undefined;
-  const paymentStatus = typeof body.paymentStatus === "string" && ["Paid", "Unpaid"].includes(body.paymentStatus) ? body.paymentStatus as LabOrder["paymentStatus"] : undefined;
+  const parsed = labOrderUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { id: "" };
+  const id = body.id;
+  const status = body.status;
+  const paymentStatus = body.paymentStatus && ["Paid", "Unpaid"].includes(body.paymentStatus) ? (body.paymentStatus as LabOrder["paymentStatus"]) : undefined;
   const amount = body.amount === undefined ? undefined : Number(body.amount);
 
   if (!id) {
@@ -87,11 +89,11 @@ export async function PATCH(request: Request) {
   const order = (await updateLabOrder({
     id,
     status: status as LabOrderStatus | undefined,
-    resultSummary: typeof body.resultSummary === "string" ? body.resultSummary : undefined,
-    reportReference: typeof body.reportReference === "string" ? body.reportReference : undefined,
+    resultSummary: body.resultSummary,
+    reportReference: body.reportReference,
     paymentStatus,
     amount,
-    notes: typeof body.notes === "string" ? body.notes : undefined,
+    notes: body.notes,
     criticalManual: typeof body.criticalManual === "boolean" ? body.criticalManual : undefined,
     acknowledgeCriticalBy: acknowledgeCritical ? auth.context.userName || auth.context.activeRole : undefined
   }));

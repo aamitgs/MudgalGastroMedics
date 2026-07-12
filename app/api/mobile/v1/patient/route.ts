@@ -2,6 +2,7 @@ import { listPatientAppointments } from "@/lib/appointment-store";
 import { hasMobileToken, mobileOk, mobileUnauthorized } from "@/lib/mobile-api";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { findPatientByPhone } from "@/lib/patient-store";
+import { mobilePatientLookupSchema } from "@/lib/validation/operations";
 
 async function publicAppointment(phone: string, requestId?: string) {
   return (await listPatientAppointments(phone, requestId)).map((appointment) => ({
@@ -51,9 +52,8 @@ async function publicVisit(phone: string) {
 export async function POST(request: Request) {
   if (!hasMobileToken(request)) return mobileUnauthorized();
 
-  const body = await request.json().catch(() => ({}));
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
+  const parsed = mobilePatientLookupSchema.safeParse(await request.json().catch(() => ({})));
+  const { phone, requestId } = parsed.success ? parsed.data : { phone: "", requestId: "" };
 
   if (phone.replace(/\D/g, "").length < 6) {
     return Response.json({ ok: false, version: "v1", error: "Enter a valid phone number." }, { status: 400 });

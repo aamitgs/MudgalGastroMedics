@@ -4,6 +4,7 @@ import { queryInventoryItems, type InventorySortField, type SortDirection } from
 import { adjustInventoryQuantity, listInventoryItems, upsertInventoryItem } from "@/lib/inventory-store";
 import { inventoryCategories, inventoryExpiryStatus } from "@/lib/inventory-types";
 import type { InventoryCategory } from "@/lib/inventory-types";
+import { inventoryAdjustSchema, inventoryCreateSchema } from "@/lib/validation/operations";
 
 const sortFields: InventorySortField[] = ["name", "category", "quantity", "expiryDate", "lastUpdatedAt"];
 
@@ -51,7 +52,8 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "pharmacy-inventory", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
+  const parsed = inventoryCreateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : {};
   const category = typeof body.category === "string" ? body.category : "";
 
   if (!String(body.name || "").trim()) {
@@ -70,8 +72,9 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "pharmacy-inventory", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
+  const parsed = inventoryAdjustSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { id: "", delta: undefined };
+  const id = body.id;
   const delta = Number(body.delta);
 
   if (!id || !Number.isFinite(delta)) {

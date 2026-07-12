@@ -7,6 +7,7 @@ import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-typ
 import { queryAppointments, type AppointmentSortField, type SortDirection } from "@/lib/appointment-query";
 import { sendEmail } from "@/lib/email";
 import { site } from "@/lib/site-data";
+import { appointmentCreateSchema, appointmentStatusUpdateSchema } from "@/lib/validation/operations";
 
 async function sendPatientConfirmation(appointment: AppointmentRecord) {
   if (!appointment.email?.includes("@")) return;
@@ -91,15 +92,18 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const required = ["name", "phone", "service"];
-  const missing = required.filter((field) => !String(body[field] ?? "").trim());
+  const parsed = appointmentCreateSchema.safeParse(await request.json().catch(() => ({})));
+  // A public, unauthenticated endpoint: a malformed-but-valid-JSON body (e.g.
+  // a bare array) should read as "nothing filled in", never throw a 500.
+  const data = parsed.success ? parsed.data : { name: "", phone: "", service: "" };
+  const required = ["name", "phone", "service"] as const;
+  const missing = required.filter((field) => !data[field]);
 
   if (missing.length) {
     return NextResponse.json({ ok: false, error: `Missing: ${missing.join(", ")}` }, { status: 400 });
   }
 
-  const appointment = (await createAppointment(body));
+  const appointment = (await createAppointment(data));
 
   await recordAuditEvent({
     actorRole: "patient",
@@ -126,9 +130,8 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "appointments", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" ? body.status : "";
+  const parsed = appointmentStatusUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const { id, status } = parsed.success ? parsed.data : { id: "", status: "" };
 
   if (!id || !appointmentStatuses.includes(status as AppointmentStatus)) {
     return NextResponse.json({ ok: false, error: "Valid id and status are required." }, { status: 400 });
@@ -140,7 +143,8 @@ export async function PATCH(request: Request) {
   }
 
   await recordAuditEvent({
-    actorRole: "admin",
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
     action: "appointment.status.updated",
     entityType: "appointment",
     entityId: appointment.id,

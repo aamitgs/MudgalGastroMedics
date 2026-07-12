@@ -9,6 +9,7 @@ import {
 } from "@/lib/notification-store";
 import { canViewNotificationCategory } from "@/lib/notification-types";
 import type { StaffNotification } from "@/lib/notification-types";
+import { notificationActionSchema } from "@/lib/validation/operations";
 
 /**
  * The inbox is available to every authenticated staff role (like the dashboard
@@ -39,8 +40,9 @@ export async function PATCH(request: Request) {
   const context = await requireStaff(request);
   if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
-  const body = await request.json().catch(() => ({}));
-  const action = typeof body.action === "string" ? body.action : "";
+  const parsed = notificationActionSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { action: "", id: "" };
+  const { action } = body;
 
   if (action === "read-all") {
     const changed = await markAllNotificationsRead();
@@ -55,7 +57,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: true, changed });
   }
 
-  const id = typeof body.id === "string" ? body.id : "";
+  const { id } = body;
   const statusByAction: Record<string, StaffNotification["status"]> = {
     read: "Read",
     resolve: "Resolved",

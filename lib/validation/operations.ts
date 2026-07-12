@@ -1,0 +1,118 @@
+import { z } from "zod";
+
+// These routes all delegate real validation/normalization to their store
+// functions (createX(input: Record<string, unknown>) already does its own
+// normalizeText/normalizeNumber per field and returns { error } on failure) —
+// Zod's job here is only to converge the couple of fields each ROUTE itself
+// inspects (mode/action/type/status discriminators, required-id checks) onto
+// one shared culture, never to re-validate what the store already owns.
+// z.looseObject (not z.object) so every other field passes through to the
+// store completely untouched — nothing gets silently stripped.
+
+// .optional() matters here beyond typing: a bare (non-optional) z.unknown()
+// still rejects an entirely-absent key in Zod v4, which would fail the whole
+// parse — silently discarding every OTHER field the caller did send, not
+// just defaulting this one to "". .optional() lets an absent key through so
+// the transform still runs and yields "".
+const coercedRequiredText = z.unknown().optional().transform((value) => String(value ?? "").trim());
+
+export const appointmentCreateSchema = z.looseObject({
+  name: coercedRequiredText,
+  phone: coercedRequiredText,
+  service: coercedRequiredText
+});
+
+export const appointmentStatusUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().default("")
+});
+
+export const automationActionSchema = z.looseObject({
+  action: z.string().default("create"),
+  type: z.string().optional(),
+  priority: z.string().optional()
+});
+
+export const automationUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().optional(),
+  priority: z.string().optional(),
+  dueAt: z.string().optional(),
+  owner: z.string().optional(),
+  ownerStaffId: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const cmsUpsertSchema = z.looseObject({
+  type: z.string().optional(),
+  status: z.string().optional()
+});
+
+export const cmsStatusUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().optional()
+});
+
+export const communicationCreateSchema = z.looseObject({
+  channel: z.string().optional(),
+  status: z.string().optional()
+});
+
+export const communicationUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().optional(),
+  channel: z.string().optional(),
+  subject: z.string().optional(),
+  message: z.string().optional(),
+  scheduledFor: z.string().optional(),
+  owner: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const financeCreateSchema = z.looseObject({
+  mode: z.string().default("entry"),
+  type: z.string().optional()
+});
+
+export const financeClaimUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().optional(),
+  requestedAmount: z.unknown().optional(),
+  approvedAmount: z.unknown().optional(),
+  settledAmount: z.unknown().optional(),
+  claimNumber: z.string().optional(),
+  documents: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const inventoryCreateSchema = z.looseObject({
+  category: z.string().optional(),
+  name: z.unknown().optional()
+});
+
+export const inventoryAdjustSchema = z.looseObject({
+  id: z.string().default(""),
+  delta: z.unknown().optional()
+});
+
+export const labOrderUpdateSchema = z.looseObject({
+  id: z.string().default(""),
+  status: z.string().optional(),
+  paymentStatus: z.string().optional(),
+  amount: z.unknown().optional(),
+  resultSummary: z.string().optional(),
+  reportReference: z.string().optional(),
+  notes: z.string().optional(),
+  criticalManual: z.unknown().optional(),
+  acknowledgeCritical: z.unknown().optional()
+});
+
+export const notificationActionSchema = z.looseObject({
+  action: z.string().default(""),
+  id: z.string().default("")
+});
+
+export const mobilePatientLookupSchema = z.object({
+  phone: z.string().trim().default(""),
+  requestId: z.string().trim().default("")
+});

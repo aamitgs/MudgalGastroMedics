@@ -5,6 +5,7 @@ import type { AccountEntryType, InsuranceClaimStatus } from "@/lib/finance-types
 import { createAccountEntry, createInsuranceClaim, listAccountEntries, listInsuranceClaims, updateInsuranceClaim } from "@/lib/finance-store";
 import { listIpdAdmissions } from "@/lib/ipd-store";
 import { listOpdVisits } from "@/lib/opd-store";
+import { financeClaimUpdateSchema, financeCreateSchema } from "@/lib/validation/operations";
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "billing", "view");
@@ -23,8 +24,9 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "billing", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const mode = typeof body.mode === "string" ? body.mode : "entry";
+  const parsed = financeCreateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { mode: "entry", type: undefined };
+  const { mode } = body;
 
   if (mode === "claim") {
     const result = (await createInsuranceClaim(body));
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, claim: result.claim });
   }
 
-  const type = typeof body.type === "string" && accountEntryTypes.includes(body.type as AccountEntryType) ? body.type : "Expense";
+  const type = body.type && accountEntryTypes.includes(body.type as AccountEntryType) ? body.type : "Expense";
   const result = (await createAccountEntry({ ...body, type }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   return NextResponse.json({ ok: true, entry: result.entry });
@@ -42,9 +44,10 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "billing", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" && insuranceClaimStatuses.includes(body.status as InsuranceClaimStatus) ? body.status as InsuranceClaimStatus : undefined;
+  const parsed = financeClaimUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { id: "" };
+  const { id } = body;
+  const status = body.status && insuranceClaimStatuses.includes(body.status as InsuranceClaimStatus) ? (body.status as InsuranceClaimStatus) : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "Claim id is required." }, { status: 400 });
 
   const claim = (await updateInsuranceClaim({
@@ -53,9 +56,9 @@ export async function PATCH(request: Request) {
     requestedAmount: body.requestedAmount === undefined ? undefined : Number(body.requestedAmount),
     approvedAmount: body.approvedAmount === undefined ? undefined : Number(body.approvedAmount),
     settledAmount: body.settledAmount === undefined ? undefined : Number(body.settledAmount),
-    claimNumber: typeof body.claimNumber === "string" ? body.claimNumber : undefined,
-    documents: typeof body.documents === "string" ? body.documents : undefined,
-    notes: typeof body.notes === "string" ? body.notes : undefined
+    claimNumber: body.claimNumber,
+    documents: body.documents,
+    notes: body.notes
   }));
 
   if (!claim) return NextResponse.json({ ok: false, error: "Claim not found." }, { status: 404 });

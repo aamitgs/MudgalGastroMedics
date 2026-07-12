@@ -4,6 +4,7 @@ import { communicationChannels, communicationStatuses, communicationTemplates } 
 import type { CommunicationChannel, CommunicationStatus } from "@/lib/communication-types";
 import { createCommunicationLog, getCommunicationRecipients, listCommunicationLogs, updateCommunicationLog } from "@/lib/communication-store";
 import { queryCommunicationLogs, type CommunicationLogSortField, type SortDirection } from "@/lib/communication-log-query";
+import { communicationCreateSchema, communicationUpdateSchema } from "@/lib/validation/operations";
 
 const sortFields: CommunicationLogSortField[] = ["patientName", "channel", "status", "subject", "createdAt"];
 
@@ -44,9 +45,10 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "liaison-notes", "create");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const channel = typeof body.channel === "string" && communicationChannels.includes(body.channel as CommunicationChannel) ? body.channel : "WhatsApp";
-  const status = typeof body.status === "string" && communicationStatuses.includes(body.status as CommunicationStatus) ? body.status : "Draft";
+  const parsed = communicationCreateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : {};
+  const channel = body.channel && communicationChannels.includes(body.channel as CommunicationChannel) ? body.channel : "WhatsApp";
+  const status = body.status && communicationStatuses.includes(body.status as CommunicationStatus) ? body.status : "Draft";
   const result = (await createCommunicationLog({ ...body, channel, status }));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   return NextResponse.json({ ok: true, log: result.log });
@@ -56,21 +58,22 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "liaison-notes", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
+  const parsed = communicationUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { id: "" };
+  const { id } = body;
   if (!id) return NextResponse.json({ ok: false, error: "Communication log id is required." }, { status: 400 });
 
-  const status = typeof body.status === "string" && communicationStatuses.includes(body.status as CommunicationStatus) ? body.status as CommunicationStatus : undefined;
-  const channel = typeof body.channel === "string" && communicationChannels.includes(body.channel as CommunicationChannel) ? body.channel as CommunicationChannel : undefined;
+  const status = body.status && communicationStatuses.includes(body.status as CommunicationStatus) ? (body.status as CommunicationStatus) : undefined;
+  const channel = body.channel && communicationChannels.includes(body.channel as CommunicationChannel) ? (body.channel as CommunicationChannel) : undefined;
   const log = (await updateCommunicationLog({
     id,
     status,
     channel,
-    subject: typeof body.subject === "string" ? body.subject : undefined,
-    message: typeof body.message === "string" ? body.message : undefined,
-    scheduledFor: typeof body.scheduledFor === "string" ? body.scheduledFor : undefined,
-    owner: typeof body.owner === "string" ? body.owner : undefined,
-    notes: typeof body.notes === "string" ? body.notes : undefined
+    subject: body.subject,
+    message: body.message,
+    scheduledFor: body.scheduledFor,
+    owner: body.owner,
+    notes: body.notes
   }));
 
   if (!log) return NextResponse.json({ ok: false, error: "Communication log not found." }, { status: 404 });

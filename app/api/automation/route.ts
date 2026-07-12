@@ -6,6 +6,7 @@ import type { AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType }
 import { createAutomationTask, generateAutomationTasks, listAutomationTasks, updateAutomationTask } from "@/lib/automation-store";
 import { queryAutomationTasks, type AutomationTaskSortField, type SortDirection } from "@/lib/automation-task-query";
 import { listStaff } from "@/lib/hr-store";
+import { automationActionSchema, automationUpdateSchema } from "@/lib/validation/operations";
 
 const sortFields: AutomationTaskSortField[] = ["title", "type", "priority", "status", "dueAt", "createdAt"];
 
@@ -65,8 +66,9 @@ export async function POST(request: Request) {
   const context = await requireStaff(request);
   if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
-  const body = await request.json().catch(() => ({}));
-  const action = typeof body.action === "string" ? body.action : "create";
+  const parsed = automationActionSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { action: "create", type: undefined, priority: undefined };
+  const action = body.action;
 
   if (action === "generate") {
     if (!canEditAutomationTask(context.activeRole, "Appointment Follow-up") && context.activeRole !== "super-admin") {
@@ -108,10 +110,11 @@ export async function PATCH(request: Request) {
   const context = await requireStaff(request);
   if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" && automationTaskStatuses.includes(body.status as AutomationTaskStatus) ? body.status as AutomationTaskStatus : undefined;
-  const priority = typeof body.priority === "string" && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? body.priority as AutomationTaskPriority : undefined;
+  const parsed = automationUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : { id: "", status: undefined, priority: undefined, dueAt: undefined, owner: undefined, ownerStaffId: undefined, notes: undefined };
+  const { id } = body;
+  const status = body.status && automationTaskStatuses.includes(body.status as AutomationTaskStatus) ? (body.status as AutomationTaskStatus) : undefined;
+  const priority = body.priority && automationTaskPriorities.includes(body.priority as AutomationTaskPriority) ? (body.priority as AutomationTaskPriority) : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "Automation task id is required." }, { status: 400 });
 
   const existing = (await listAutomationTasks()).find((item) => item.id === id);
@@ -126,10 +129,10 @@ export async function PATCH(request: Request) {
     id,
     status,
     priority,
-    dueAt: typeof body.dueAt === "string" ? body.dueAt : undefined,
-    owner: typeof body.owner === "string" ? body.owner : undefined,
-    ownerStaffId: typeof body.ownerStaffId === "string" ? body.ownerStaffId : undefined,
-    notes: typeof body.notes === "string" ? body.notes : undefined
+    dueAt: body.dueAt,
+    owner: body.owner,
+    ownerStaffId: body.ownerStaffId,
+    notes: body.notes
   }));
 
   if (!result) return NextResponse.json({ ok: false, error: "Automation task not found." }, { status: 404 });

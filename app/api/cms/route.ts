@@ -5,6 +5,7 @@ import type { CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } from "@/lib/cms-store";
 import { queryCmsContent, type CmsContentSortField, type SortDirection } from "@/lib/cms-content-query";
 import { getAdminAuthContext, requirePermission } from "@/lib/rbac";
+import { cmsStatusUpdateSchema, cmsUpsertSchema } from "@/lib/validation/operations";
 
 const sortFields: CmsContentSortField[] = ["title", "type", "status", "owner", "createdAt"];
 
@@ -57,9 +58,10 @@ export async function POST(request: Request) {
   const writeAllowed = requirePermission(context, "cms:write");
   if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
 
-  const body = await request.json().catch(() => ({}));
-  const type = typeof body.type === "string" && cmsContentTypes.includes(body.type as CmsContentType) ? body.type as CmsContentType : "Page";
-  const status = typeof body.status === "string" && cmsContentStatuses.includes(body.status as CmsContentStatus) ? body.status as CmsContentStatus : "Draft";
+  const parsed = cmsUpsertSchema.safeParse(await request.json().catch(() => ({})));
+  const body = parsed.success ? parsed.data : {};
+  const type = body.type && cmsContentTypes.includes(body.type as CmsContentType) ? (body.type as CmsContentType) : "Page";
+  const status = body.status && cmsContentStatuses.includes(body.status as CmsContentStatus) ? (body.status as CmsContentStatus) : "Draft";
 
   if (status === "Published" || status === "Archived") {
     const publishAllowed = requirePermission(context, "cms:publish");
@@ -88,9 +90,9 @@ export async function PATCH(request: Request) {
   const writeAllowed = requirePermission(context, "cms:write");
   if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" && cmsContentStatuses.includes(body.status as CmsContentStatus) ? body.status as CmsContentStatus : undefined;
+  const parsed = cmsStatusUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const { id, status: rawStatus } = parsed.success ? parsed.data : { id: "", status: undefined };
+  const status = rawStatus && cmsContentStatuses.includes(rawStatus as CmsContentStatus) ? (rawStatus as CmsContentStatus) : undefined;
 
   if (!id || !status) return NextResponse.json({ ok: false, error: "Valid id and status are required." }, { status: 400 });
 
