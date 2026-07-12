@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { allergyAcknowledgedSchema } from "@/lib/validation/clinical";
 
 /**
  * Records that a prescriber actively reviewed a patient's recorded allergies
@@ -12,10 +13,8 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "prescriptions", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const visitId = typeof body.visitId === "string" ? body.visitId.trim() : "";
-  const allergies = typeof body.allergies === "string" ? body.allergies.trim() : "";
-  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  const parsed = allergyAcknowledgedSchema.safeParse(await request.json().catch(() => ({})));
+  const { visitId, allergies, reason } = parsed.success ? parsed.data : { visitId: "", allergies: "", reason: "" };
   if (!visitId || !allergies) {
     return NextResponse.json({ ok: false, error: "visitId and allergies are required." }, { status: 400 });
   }

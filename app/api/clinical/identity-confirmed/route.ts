@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { identityConfirmedSchema } from "@/lib/validation/clinical";
 
 /**
  * Records that a prescriber positively identified the patient (name + phone)
@@ -13,10 +14,8 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "prescriptions", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const visitId = typeof body.visitId === "string" ? body.visitId.trim() : "";
-  const patientName = typeof body.patientName === "string" ? body.patientName.trim() : "";
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  const parsed = identityConfirmedSchema.safeParse(await request.json().catch(() => ({})));
+  const { visitId, patientName, phone } = parsed.success ? parsed.data : { visitId: "", patientName: "", phone: "" };
   if (!visitId || !patientName || !phone) {
     return NextResponse.json({ ok: false, error: "visitId, patientName and phone are required." }, { status: 400 });
   }

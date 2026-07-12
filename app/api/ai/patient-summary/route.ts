@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { generatePatientSummary } from "@/lib/ai-summary";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { patientSummaryRequestSchema } from "@/lib/validation/clinical";
 
 export async function POST(request: Request) {
   const auth = await authorize(request, "patients", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  const parsed = patientSummaryRequestSchema.safeParse(await request.json().catch(() => ({})));
+  const phone = parsed.success ? parsed.data.phone : "";
   if (phone.replace(/\D/g, "").length < 6) {
     return NextResponse.json({ ok: false, error: "A valid patient phone number is required." }, { status: 400 });
   }

@@ -5,6 +5,7 @@ import { generateAiReview, getAiSources, listAiReviews, seedMissingAiReviews, up
 import { queryAiReviews, type AiReviewSortField, type SortDirection } from "@/lib/ai-review-query";
 import { aiReviewStatuses } from "@/lib/ai-types";
 import type { AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
+import { aiReviewGenerateSchema, aiReviewUpdateSchema } from "@/lib/validation/clinical";
 
 const sortFields: AiReviewSortField[] = ["patientName", "source", "urgency", "status", "createdAt"];
 const sources: AiCaseSource[] = ["Appointment", "OPD"];
@@ -46,13 +47,14 @@ export async function POST(request: Request) {
   const auth = await authorize(request, "cms", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const action = typeof body.action === "string" ? body.action : "generate";
+  const parsed = aiReviewGenerateSchema.safeParse(await request.json().catch(() => ({})));
+  const { action, source: rawSource, sourceId } = parsed.success ? parsed.data : { action: "generate", source: "Appointment", sourceId: "" };
 
   if (action === "seed") {
     const created = (await seedMissingAiReviews());
     await recordAuditEvent({
-      actorRole: "admin",
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
       action: "ai.reviews.seeded",
       entityType: "ai_case_review",
       entityId: "seeded-batch",
@@ -62,14 +64,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, created, reviews: (await listAiReviews()) });
   }
 
-  const source = body.source === "OPD" ? "OPD" : "Appointment";
-  const sourceId = typeof body.sourceId === "string" ? body.sourceId : "";
+  const source = rawSource === "OPD" ? "OPD" : "Appointment";
   if (!sourceId) return NextResponse.json({ ok: false, error: "Source record is required." }, { status: 400 });
 
   const result = (await generateAiReview(source as AiCaseSource, sourceId));
   if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   await recordAuditEvent({
-    actorRole: "admin",
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
     action: "ai.review.generated",
     entityType: "ai_case_review",
     entityId: result.review.id,
@@ -83,21 +85,19 @@ export async function PATCH(request: Request) {
   const auth = await authorize(request, "cms", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const status = typeof body.status === "string" && aiReviewStatuses.includes(body.status as AiReviewStatus) ? body.status as AiReviewStatus : undefined;
+  const parsed = aiReviewUpdateSchema.safeParse(await request.json().catch(() => ({})));
+  const { id, status: rawStatus, doctorReviewNote, reviewedBy } = parsed.success
+    ? parsed.data
+    : { id: "", status: undefined, doctorReviewNote: undefined, reviewedBy: undefined };
+  const status = rawStatus && aiReviewStatuses.includes(rawStatus as AiReviewStatus) ? (rawStatus as AiReviewStatus) : undefined;
   if (!id) return NextResponse.json({ ok: false, error: "AI review id is required." }, { status: 400 });
 
-  const review = (await updateAiReview({
-    id,
-    status,
-    doctorReviewNote: typeof body.doctorReviewNote === "string" ? body.doctorReviewNote : undefined,
-    reviewedBy: typeof body.reviewedBy === "string" ? body.reviewedBy : undefined
-  }));
+  const review = (await updateAiReview({ id, status, doctorReviewNote, reviewedBy }));
 
   if (!review) return NextResponse.json({ ok: false, error: "AI review not found." }, { status: 404 });
   await recordAuditEvent({
-    actorRole: "admin",
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
     action: "ai.review.updated",
     entityType: "ai_case_review",
     entityId: review.id,
