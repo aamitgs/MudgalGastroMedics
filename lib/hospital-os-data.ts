@@ -61,6 +61,14 @@ export type PatientFlowRow = {
   phone?: string;
 };
 
+export type DoctorAssignment = {
+  patientId: string;
+  patientName: string;
+  doctor: string;
+};
+
+export const assignableDoctors = ["Dr. Deepak Sharma", "Duty Doctor", "Dr. Neha Bansal", "Dr. Arvind Rao"];
+
 export type CommandRecord = {
   id: string;
   entity: CommandEntity;

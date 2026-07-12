@@ -94,8 +94,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { MetricCard } from "@/components/design-system/MetricCard";
 import { AcceptancePanel } from "@/components/hospital-os/AcceptancePanel";
+import { AssignDoctorDialog } from "@/components/hospital-os/AssignDoctorDialog";
 import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
+import { HosFormField } from "@/components/hospital-os/HosFormField";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import {
   canAccessCommandEntity,
@@ -109,7 +111,7 @@ import {
   roleFallbackMessage,
   v1AiScope
 } from "@/lib/hospital-os-data";
-import type { AuditTrailItem, DashboardMetric, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
+import type { AuditTrailItem, DashboardMetric, DoctorAssignment, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { downloadCsv } from "@/lib/table-export";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
@@ -138,18 +140,6 @@ import {
 
 type FlowErrorMap<T extends Record<string, unknown>> = Partial<Record<keyof T, string>>;
 
-type FormFieldProps = {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-};
-
-type DoctorAssignment = {
-  patientId: string;
-  patientName: string;
-  doctor: string;
-};
-
 const statusTone: Record<string, string> = {
   "In Consultation": "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
   "Vitals Pending": "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",
@@ -170,8 +160,6 @@ const metricIcons: Record<string, LucideIcon> = {
   "Revenue Today": CircleDollarSign,
   "Critical Alerts": AlertTriangle
 };
-
-const assignableDoctors = ["Dr. Deepak Sharma", "Duty Doctor", "Dr. Neha Bansal", "Dr. Arvind Rao"];
 
 const commandFuse = new Fuse(commandRecords, {
   includeScore: true,
@@ -289,15 +277,6 @@ function openPatientWorkspace(patientId: string) {
   document.querySelector("#patient-workspace")?.scrollIntoView({ block: "start" });
 }
 
-function FormField({ label, error, children }: FormFieldProps) {
-  return (
-    <div className="grid gap-2">
-      <Label className="text-xs font-semibold text-[var(--hos-muted-text)]">{label}</Label>
-      {children}
-      {error ? <p className="text-xs font-semibold text-[var(--hos-danger)]">{error}</p> : null}
-    </div>
-  );
-}
 
 function applyIssues<T extends Record<string, unknown>>(issues: ZodIssue[]) {
   return issues.reduce<FlowErrorMap<T>>((errors, issue) => {
@@ -1519,9 +1498,9 @@ function PatientPortalPanel({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditT
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <FormField label="Symptom note">
+            <HosFormField label="Symptom note">
               <Textarea aria-label="Teleconsultation symptom note" value={symptoms} readOnly className="min-h-24" />
-            </FormField>
+            </HosFormField>
             {teleconsultError ? <p role="alert" className="text-sm font-semibold text-[var(--hos-danger)]">{teleconsultError}</p> : null}
             <Button
               type="button"
@@ -1584,21 +1563,21 @@ function PatientRegistrationForm({ onAuditEvent }: { onAuditEvent: (item: Omit<A
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="First name" error={errors.firstName?.message}><Input {...register("firstName")} aria-label="First name" /></FormField>
-            <FormField label="Last name" error={errors.lastName?.message}><Input {...register("lastName")} aria-label="Last name" /></FormField>
+            <HosFormField label="First name" error={errors.firstName?.message}><Input {...register("firstName")} aria-label="First name" /></HosFormField>
+            <HosFormField label="Last name" error={errors.lastName?.message}><Input {...register("lastName")} aria-label="Last name" /></HosFormField>
           </div>
-          <FormField label="Mobile" error={errors.mobile?.message}><Input {...register("mobile")} aria-label="Mobile" inputMode="numeric" /></FormField>
+          <HosFormField label="Mobile" error={errors.mobile?.message}><Input {...register("mobile")} aria-label="Mobile" inputMode="numeric" /></HosFormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Age" error={errors.age?.message}><Input {...register("age")} aria-label="Age" type="number" /></FormField>
-            <FormField label="Sex" error={errors.sex?.message}>
+            <HosFormField label="Age" error={errors.age?.message}><Input {...register("age")} aria-label="Age" type="number" /></HosFormField>
+            <HosFormField label="Sex" error={errors.sex?.message}>
               <select {...register("sex")} aria-label="Sex" className="min-h-10 rounded-md border border-input bg-background px-3 text-sm">
                 <option>Male</option>
                 <option>Female</option>
                 <option>Other</option>
               </select>
-            </FormField>
+            </HosFormField>
           </div>
-          <FormField label="Concern" error={errors.concern?.message}><Textarea {...register("concern")} aria-label="Concern" /></FormField>
+          <HosFormField label="Concern" error={errors.concern?.message}><Textarea {...register("concern")} aria-label="Concern" /></HosFormField>
           <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><UserRoundPlus size={16} /> {isPending ? "Saving..." : "Register Patient"}</Button>
           {flowStatus === "saved" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Patient registration saved. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
         </form>
@@ -1657,14 +1636,14 @@ function AppointmentBookingForm({ onAuditEvent }: { onAuditEvent: (item: Omit<Au
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <FormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Patient UHID" /></FormField>
-          <FormField label="Doctor" error={errors.doctor?.message}><Input {...register("doctor")} aria-label="Doctor" /></FormField>
-          <FormField label="Department" error={errors.department?.message}><Input {...register("department")} aria-label="Department" /></FormField>
+          <HosFormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Patient UHID" /></HosFormField>
+          <HosFormField label="Doctor" error={errors.doctor?.message}><Input {...register("doctor")} aria-label="Doctor" /></HosFormField>
+          <HosFormField label="Department" error={errors.department?.message}><Input {...register("department")} aria-label="Department" /></HosFormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Date" error={errors.appointmentDate?.message}><Input {...register("appointmentDate")} aria-label="Appointment date" type="date" /></FormField>
-            <FormField label="Time" error={errors.appointmentTime?.message}><Input {...register("appointmentTime")} aria-label="Appointment time" type="time" /></FormField>
+            <HosFormField label="Date" error={errors.appointmentDate?.message}><Input {...register("appointmentDate")} aria-label="Appointment date" type="date" /></HosFormField>
+            <HosFormField label="Time" error={errors.appointmentTime?.message}><Input {...register("appointmentTime")} aria-label="Appointment time" type="time" /></HosFormField>
           </div>
-          <FormField label="Reason" error={errors.reason?.message}><Textarea {...register("reason")} aria-label="Appointment reason" /></FormField>
+          <HosFormField label="Reason" error={errors.reason?.message}><Textarea {...register("reason")} aria-label="Appointment reason" /></HosFormField>
           <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><CalendarClock size={16} /> {isPending ? "Booking..." : "Book Appointment"}</Button>
           {flowStatus === "booked" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Appointment booked. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
         </form>
@@ -1716,17 +1695,17 @@ function BillingForm({ onAuditEvent }: { onAuditEvent: (item: Omit<AuditTrailIte
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <FormField label="Invoice ID" error={errors.invoiceId?.message}><Input {...register("invoiceId")} aria-label="Invoice ID" /></FormField>
-          <FormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Billing patient UHID" /></FormField>
-          <FormField label="Amount" error={errors.amount?.message}><Input {...register("amount")} aria-label="Amount" type="number" /></FormField>
-          <FormField label="Payer" error={errors.payerType?.message}>
+          <HosFormField label="Invoice ID" error={errors.invoiceId?.message}><Input {...register("invoiceId")} aria-label="Invoice ID" /></HosFormField>
+          <HosFormField label="Patient UHID" error={errors.patientUhid?.message}><Input {...register("patientUhid")} aria-label="Billing patient UHID" /></HosFormField>
+          <HosFormField label="Amount" error={errors.amount?.message}><Input {...register("amount")} aria-label="Amount" type="number" /></HosFormField>
+          <HosFormField label="Payer" error={errors.payerType?.message}>
             <select {...register("payerType")} aria-label="Payer type" className="min-h-10 rounded-md border border-input bg-background px-3 text-sm">
               <option>Self pay</option>
               <option>Insurance</option>
               <option>Corporate</option>
             </select>
-          </FormField>
-          <FormField label="Notes" error={errors.notes?.message}><Textarea {...register("notes")} aria-label="Billing notes" /></FormField>
+          </HosFormField>
+          <HosFormField label="Notes" error={errors.notes?.message}><Textarea {...register("notes")} aria-label="Billing notes" /></HosFormField>
           <Button type="submit" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><CreditCard size={16} /> {isPending ? "Posting..." : "Post Billing"}</Button>
           {flowStatus === "posted" ? <p role="status" className="text-sm font-semibold text-[var(--hos-success)]">Billing posted. {auditId ? `Audit ${auditId}.` : ""}</p> : null}
         </form>
@@ -1938,53 +1917,3 @@ function OperationsTable({
   );
 }
 
-function AssignDoctorDialog({
-  assignment,
-  setAssignment,
-  error,
-  isPending,
-  onSave
-}: {
-  assignment: DoctorAssignment | null;
-  setAssignment: (assignment: DoctorAssignment | null) => void;
-  error: string;
-  isPending: boolean;
-  onSave: (assignment: DoctorAssignment) => void;
-}) {
-  return (
-    <Dialog open={Boolean(assignment)} onOpenChange={(open) => {
-      if (!open) setAssignment(null);
-    }}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Assign doctor</DialogTitle>
-          <DialogDescription>
-            {assignment ? `Update responsible doctor for ${assignment.patientName}.` : "Update responsible doctor."}
-          </DialogDescription>
-        </DialogHeader>
-        {assignment ? (
-          <div className="grid gap-4">
-            <FormField label="Doctor">
-              <select
-                aria-label="Assigned doctor"
-                value={assignment.doctor}
-                disabled={isPending}
-                onChange={(event) => setAssignment({ ...assignment, doctor: event.target.value })}
-                className="min-h-10 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                {assignableDoctors.map((doctor) => <option key={doctor}>{doctor}</option>)}
-              </select>
-            </FormField>
-            {error ? <p role="alert" className="text-sm font-semibold text-[var(--hos-danger)]">{error}</p> : null}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" disabled={isPending} onClick={() => setAssignment(null)}>Cancel</Button>
-              <Button type="button" disabled={isPending} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90" onClick={() => onSave(assignment)}>
-                {isPending ? "Saving..." : "Save Assignment"}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </DialogContent>
-    </Dialog>
-  );
-}
