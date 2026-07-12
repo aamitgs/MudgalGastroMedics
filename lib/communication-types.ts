@@ -63,3 +63,5 @@ export const communicationTemplates: Array<{
     message: "Dear patient, Mudgal Gastromedics Hospital reception has an update for you. Please call or WhatsApp us when convenient."
   }
 ];
+
+export const communicationTemplateKeys: CommunicationTemplateKey[] = communicationTemplates.map((template) => template.key);

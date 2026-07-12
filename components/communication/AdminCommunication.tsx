@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, MessageCircle, Phone, Send, UsersRound } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
 import { communicationChannels, communicationStatuses } from "@/lib/communication-types";
@@ -9,8 +9,11 @@ import type { CommunicationLogSortField } from "@/lib/communication-log-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { communicationLogCreateSchema, type CommunicationLogCreateInput } from "@/lib/validation/communication";
 
 const communicationExportHeaders = ["Patient", "Phone", "Channel", "Subject", "Status", "Scheduled For", "Sent At", "Owner"];
 
@@ -66,8 +69,6 @@ export function AdminCommunication() {
   const [logs, setLogs] = useState<CommunicationLog[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [selectedPatientId, setSelectedPatientId] = useState("");
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState<CommunicationTemplateKey>("Appointment Confirmation");
   const [customMessage, setCustomMessage] = useState("");
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -81,6 +82,72 @@ export function AdminCommunication() {
 
   const sortField = (sorting[0]?.id as CommunicationLogSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
+
+  const defaultCommLogValues: CommunicationLogCreateInput = {
+    patientId: "",
+    patientName: "",
+    phone: "",
+    channel: "WhatsApp",
+    template: "Appointment Confirmation",
+    status: "Draft",
+    scheduledFor: "",
+    owner: "",
+    subject: "",
+    notes: ""
+  };
+
+  const {
+    register: registerCommLog,
+    watch: watchCommLog,
+    getValues: getCommLogValues,
+    setValue: setCommLogValue,
+    formState: { errors: commLogErrors, isSubmitting: isCommLogSubmitting },
+    reset: resetCommLogForm,
+    submit: submitCommLog
+  } = useAdvancedForm<CommunicationLogCreateInput>({
+    schema: communicationLogCreateSchema,
+    defaultValues: defaultCommLogValues,
+    async onValid(values) {
+      const submittedTemplate = templates.find((item) => item.key === values.template) ?? templates[0];
+      let response: Response;
+      try {
+        response = await fetch("/api/communication", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, message: customMessage || submittedTemplate?.message || "" })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitCommLog());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as CommunicationResponse;
+      if (!response.ok || !data.ok || !data.log) {
+        notify.error(data.error || "Unable to create communication log.");
+        return;
+      }
+      setCustomMessage("");
+      resetCommLogForm(defaultCommLogValues);
+      void loadCommunication();
+    }
+  });
+
+  const watchedPatientId = watchCommLog("patientId");
+  const watchedTemplateKey = watchCommLog("template");
+  const selectedTemplate = useMemo(() => templates.find((template) => template.key === watchedTemplateKey) ?? templates[0], [watchedTemplateKey, templates]);
+  const selectedRecipient = useMemo(() => recipients.find((recipient) => recipient.id === watchedPatientId), [recipients, watchedPatientId]);
+  const messagePreview = customMessage || selectedTemplate?.message || "";
+
+  function applyRecipient(id: string) {
+    const recipient = recipients.find((item) => item.id === id);
+    setCommLogValue("patientName", recipient?.name ?? "");
+    setCommLogValue("phone", recipient?.phone ?? "");
+  }
+
+  function selectTemplate(key: CommunicationTemplateKey) {
+    setCommLogValue("template", key);
+    const template = templates.find((item) => item.key === key) ?? templates[0];
+    if (template) setCommLogValue("subject", template.subject);
+  }
 
   async function loadCommunication() {
     setLoading(true);
@@ -100,6 +167,12 @@ export function AdminCommunication() {
     setLogs(data.logs ?? []);
     setRecipients(data.recipients ?? []);
     setTemplates(data.templates ?? []);
+    // Once templates load, sync subject to the still-default template's
+    // subject if the user hasn't touched it yet — subject is a plain text
+    // field, so unlike a <select> depending on freshly-loaded options
+    // (see Track 3.2's Lab migration notes), there's no DOM-matching race here.
+    const loadedTemplate = data.templates?.find((item) => item.key === getCommLogValues("template")) ?? data.templates?.[0];
+    if (loadedTemplate && !getCommLogValues("subject")) setCommLogValue("subject", loadedTemplate.subject);
     setPageCount(data.pageCount ?? 1);
     setLoading(false);
   }
@@ -125,10 +198,6 @@ export function AdminCommunication() {
     setPageIndex(0);
   }
 
-  const selectedTemplate = useMemo(() => templates.find((template) => template.key === selectedTemplateKey) ?? templates[0], [selectedTemplateKey, templates]);
-  const selectedRecipient = useMemo(() => recipients.find((recipient) => recipient.id === selectedPatientId), [recipients, selectedPatientId]);
-  const messagePreview = customMessage || selectedTemplate?.message || "";
-
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     return [
@@ -138,26 +207,6 @@ export function AdminCommunication() {
       { label: "Queued", value: logs.filter((log) => log.status === "Queued").length }
     ];
   }, [logs]);
-
-  async function createLog(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/communication", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = (await response.json().catch(() => ({}))) as CommunicationResponse;
-    if (!response.ok || !data.ok || !data.log) {
-      notify.error(data.error || "Unable to create communication log.");
-      return;
-    }
-    setSelectedPatientId("");
-    setCustomMessage("");
-    form.reset();
-    void loadCommunication();
-  }
 
   async function updateStatus(id: string, status: CommunicationStatus) {
     const response = await fetch("/api/communication", {
@@ -275,75 +324,85 @@ export function AdminCommunication() {
       </div>
 
       <div className="grid gap-5 p-4 xl:grid-cols-[1fr_0.85fr]">
-        <form onSubmit={createLog} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitCommLog} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Send size={19} /> Prepare patient message
           </p>
           <div className="grid gap-3">
-            <select aria-label="Patient" name="patientId" value={selectedPatientId} onChange={(event) => setSelectedPatientId(event.target.value)} className={fieldClass}>
-              <option value="">Select patient from UHID list</option>
-              {recipients.map((recipient) => (
-                <option key={recipient.id} value={recipient.id}>
-                  {recipient.uhid} | {recipient.name} | {recipient.phone}
-                </option>
-              ))}
-            </select>
+            <FormField label="Patient" htmlFor="comm-patientId" error={commLogErrors.patientId?.message}>
+              <select
+                id="comm-patientId"
+                className={fieldClass}
+                {...registerCommLog("patientId", { onChange: (event) => applyRecipient(event.target.value) })}
+              >
+                <option value="">Select patient from UHID list</option>
+                {recipients.map((recipient) => (
+                  <option key={recipient.id} value={recipient.id}>
+                    {recipient.uhid} | {recipient.name} | {recipient.phone}
+                  </option>
+                ))}
+              </select>
+            </FormField>
             <div className="grid gap-3 md:grid-cols-2">
-              <input
-                name="patientName"
-                className={fieldClass}
-                placeholder="Patient name"
-                defaultValue={selectedRecipient?.name ?? ""}
-                key={selectedRecipient?.id ?? "patientName"}
-                required={!selectedRecipient}
-              />
-              <input
-                name="phone"
-                className={fieldClass}
-                placeholder="Phone"
-                defaultValue={selectedRecipient?.phone ?? ""}
-                key={`${selectedRecipient?.id ?? "phone"}-phone`}
-                required={!selectedRecipient}
-              />
+              <FormField label="Patient name" htmlFor="comm-patientName" error={commLogErrors.patientName?.message}>
+                <input id="comm-patientName" className={fieldClass} placeholder="Patient name" {...registerCommLog("patientName")} />
+              </FormField>
+              <FormField label="Phone" htmlFor="comm-phone" error={commLogErrors.phone?.message}>
+                <input id="comm-phone" className={fieldClass} placeholder="Phone" {...registerCommLog("phone")} />
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <select aria-label="Channel" name="channel" className={fieldClass} defaultValue="WhatsApp">
-                {communicationChannels.map((channel) => (
-                  <option key={channel}>{channel}</option>
-                ))}
-              </select>
-              <select
-                aria-label="Template"
-                name="template"
-                value={selectedTemplateKey}
-                onChange={(event) => setSelectedTemplateKey(event.target.value as CommunicationTemplateKey)}
-                className={fieldClass}
-              >
-                {templates.map((template) => (
-                  <option key={template.key}>{template.key}</option>
-                ))}
-              </select>
-              <select aria-label="Status" name="status" className={fieldClass} defaultValue="Draft">
-                {communicationStatuses.map((status) => (
-                  <option key={status}>{status}</option>
-                ))}
-              </select>
+              <FormField label="Channel" htmlFor="comm-channel" error={commLogErrors.channel?.message}>
+                <select id="comm-channel" className={fieldClass} {...registerCommLog("channel")}>
+                  {communicationChannels.map((channel) => (
+                    <option key={channel}>{channel}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Template" htmlFor="comm-template" error={commLogErrors.template?.message}>
+                <select
+                  id="comm-template"
+                  className={fieldClass}
+                  {...registerCommLog("template", { onChange: (event) => selectTemplate(event.target.value as CommunicationTemplateKey) })}
+                >
+                  {templates.map((template) => (
+                    <option key={template.key}>{template.key}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Status" htmlFor="comm-status" error={commLogErrors.status?.message}>
+                <select id="comm-status" className={fieldClass} {...registerCommLog("status")}>
+                  {communicationStatuses.map((status) => (
+                    <option key={status}>{status}</option>
+                  ))}
+                </select>
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input aria-label="Scheduled for" name="scheduledFor" className={fieldClass} type="datetime-local" />
-              <input name="owner" className={fieldClass} placeholder="Owner / staff" />
+              <FormField label="Scheduled for" htmlFor="comm-scheduledFor" error={commLogErrors.scheduledFor?.message}>
+                <input id="comm-scheduledFor" className={fieldClass} type="datetime-local" {...registerCommLog("scheduledFor")} />
+              </FormField>
+              <FormField label="Owner / staff" htmlFor="comm-owner" error={commLogErrors.owner?.message}>
+                <input id="comm-owner" className={fieldClass} placeholder="Owner / staff" {...registerCommLog("owner")} />
+              </FormField>
             </div>
-            <input name="subject" className={fieldClass} placeholder="Subject" defaultValue={selectedTemplate?.subject ?? ""} key={`${selectedTemplate?.key ?? "subject"}-subject`} />
-            <textarea
-              name="message"
-              value={customMessage || selectedTemplate?.message || ""}
-              onChange={(event) => setCustomMessage(event.target.value)}
-              className={`${fieldClass} min-h-28 py-3`}
-              placeholder="Message text"
-            />
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes for reception" />
+            <FormField label="Subject" htmlFor="comm-subject" error={commLogErrors.subject?.message}>
+              <input id="comm-subject" className={fieldClass} placeholder="Subject" {...registerCommLog("subject")} />
+            </FormField>
+            <FormField label="Message text" htmlFor="comm-message">
+              <textarea
+                id="comm-message"
+                value={customMessage || selectedTemplate?.message || ""}
+                onChange={(event) => setCustomMessage(event.target.value)}
+                className={`${fieldClass} min-h-28 py-3`}
+                placeholder="Message text"
+              />
+            </FormField>
+            <FormField label="Internal notes" htmlFor="comm-notes" error={commLogErrors.notes?.message}>
+              <textarea id="comm-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes for reception" {...registerCommLog("notes")} />
+            </FormField>
             <div className="flex flex-wrap gap-3">
-              <ActionButton type="submit" variant="primary">
+              <ActionButton type="submit" variant="primary" loading={isCommLogSubmitting} disabled={isCommLogSubmitting}>
                 Save Log
               </ActionButton>
               {selectedRecipient ? (
@@ -369,9 +428,9 @@ export function AdminCommunication() {
               <button
                 key={template.key}
                 type="button"
-                onClick={() => setSelectedTemplateKey(template.key)}
-                aria-pressed={selectedTemplateKey === template.key}
-                className={`rounded border p-4 text-left transition ${selectedTemplateKey === template.key ? "border-brand bg-cyan-50 dark:bg-cyan-950" : "border-line bg-surface hover:border-brand/60"}`}
+                onClick={() => selectTemplate(template.key)}
+                aria-pressed={watchedTemplateKey === template.key}
+                className={`rounded border p-4 text-left transition ${watchedTemplateKey === template.key ? "border-brand bg-cyan-50 dark:bg-cyan-950" : "border-line bg-surface hover:border-brand/60"}`}
               >
                 <p className="font-bold text-ink">{template.key}</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted">{template.message}</p>
