@@ -1,10 +1,12 @@
 import {
   Activity,
+  AlertTriangle,
   BarChart3,
   Bed,
   Bell,
   Building2,
   CalendarClock,
+  CircleDollarSign,
   ClipboardList,
   CreditCard,
   FileText,
@@ -105,6 +107,17 @@ export type DashboardMetric = {
   tone: "primary" | "success" | "warning" | "danger";
   dataKey: "opd" | "beds" | "revenue" | "alerts";
 };
+
+export const metricIcons: Record<string, LucideIcon> = {
+  "OPD Flow": Activity,
+  "Bed Occupancy": Bed,
+  "Revenue Today": CircleDollarSign,
+  "Critical Alerts": AlertTriangle
+};
+
+export type HospitalTrendPoint = { time: string; opd: number; revenue: number };
+
+export type RealtimeMessage = { id: string; text: string };
 
 export type HospitalRealtimeEvent =
   | { type: "queue.updated"; payload: { uhid: string; status: string; waitMinutes: number } }

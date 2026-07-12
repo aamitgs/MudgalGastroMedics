@@ -8,30 +8,21 @@ import {
   Bed,
   Building2,
   CalendarClock,
-  Check,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
-  CircleDollarSign,
   ClipboardList,
-  Command,
   CreditCard,
   Download,
   FileText,
   HeartPulse,
   LineChart,
-  Menu,
-  MessageSquare,
-  Moon,
   MoreHorizontal,
-  Plus,
-  QrCode,
   LogOut,
   Search,
   ShieldCheck,
   Sparkles,
   Stethoscope,
-  Sun,
   UserRoundPlus,
   X
 } from "lucide-react";
@@ -40,8 +31,6 @@ import { useForm } from "react-hook-form";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -65,7 +54,6 @@ import {
 } from "@tanstack/react-table";
 import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from "@tanstack/react-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,22 +73,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/design-system/EmptyState";
-import { MetricCard } from "@/components/design-system/MetricCard";
 import { AcceptancePanel } from "@/components/hospital-os/AcceptancePanel";
 import { AssignDoctorDialog } from "@/components/hospital-os/AssignDoctorDialog";
 import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
+import { DashboardOverview } from "@/components/hospital-os/DashboardOverview";
 import { DoctorWorkspace } from "@/components/hospital-os/DoctorWorkspace";
 import { HosFormField } from "@/components/hospital-os/HosFormField";
 import { PatientWorkspace } from "@/components/hospital-os/PatientWorkspace";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
+import { TopNav } from "@/components/hospital-os/TopNav";
 import {
   canAccessCommandEntity,
   accessRoleToHospitalRole,
@@ -114,7 +102,7 @@ import {
   statusTone,
   v1AiScope
 } from "@/lib/hospital-os-data";
-import type { AuditTrailItem, DashboardMetric, DoctorAssignment, HospitalRealtimeEvent, HospitalRole, NavBadgeCounts, PatientFlowRow } from "@/lib/hospital-os-data";
+import type { AuditTrailItem, DashboardMetric, DoctorAssignment, HospitalRealtimeEvent, HospitalRole, HospitalTrendPoint, NavBadgeCounts, PatientFlowRow, RealtimeMessage } from "@/lib/hospital-os-data";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { downloadCsv } from "@/lib/table-export";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
@@ -124,12 +112,7 @@ import {
   patientRegistrationSchema
 } from "@/lib/validation/hospital-os";
 import type { AppointmentInput, BillingInput, PatientRegistrationInput } from "@/lib/validation/hospital-os";
-import { LiveClockWeather } from "@/components/LiveClockWeather";
-import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
-import { PatientClinicalSnapshot } from "@/components/hospital-os/PatientClinicalSnapshot";
-import { PatientTimelinePanel } from "@/components/hospital-os/PatientTimelinePanel";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
-import type { LucideIcon } from "lucide-react";
 import {
   assignHospitalDoctor,
   autosaveClinicalNotes,
@@ -143,13 +126,6 @@ import {
 
 type FlowErrorMap<T extends Record<string, unknown>> = Partial<Record<keyof T, string>>;
 
-const metricIcons: Record<string, LucideIcon> = {
-  "OPD Flow": Activity,
-  "Bed Occupancy": Bed,
-  "Revenue Today": CircleDollarSign,
-  "Critical Alerts": AlertTriangle
-};
-
 const commandFuse = new Fuse(commandRecords, {
   includeScore: true,
   threshold: 0.35,
@@ -160,10 +136,6 @@ const commandFuse = new Fuse(commandRecords, {
     { name: "keywords", weight: 0.1 }
   ]
 });
-
-type HospitalTrendPoint = { time: string; opd: number; revenue: number };
-
-type RealtimeMessage = { id: string; text: string };
 
 type HospitalSnapshotResponse = {
   ok: boolean;
@@ -915,182 +887,6 @@ function HospitalOsApp() {
         onSave={saveDoctorAssignment}
       />
     </main>
-  );
-}
-
-function TopNav({
-  onOpenSidebar,
-  onOpenPalette,
-  onOpenShortcuts,
-  darkMode,
-  onToggleTheme,
-  realtimeStatus
-}: {
-  onOpenSidebar: () => void;
-  onOpenPalette: () => void;
-  onOpenShortcuts: () => void;
-  darkMode: boolean;
-  onToggleTheme: () => void;
-  realtimeStatus: string;
-}) {
-  return (
-    <header className="sticky top-0 z-30 border-b border-[var(--hos-border)] bg-[var(--hos-surface)]/92 backdrop-blur-xl">
-      <div className="flex min-h-16 items-center gap-3 px-4 lg:px-6">
-        <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)] lg:hidden" onClick={onOpenSidebar} aria-label="Open navigation">
-          <Menu size={18} />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onOpenPalette}
-          className="min-h-10 flex-1 justify-start gap-3 border-[var(--hos-border)] bg-[var(--hos-bg)] px-3 text-left text-sm font-normal text-[var(--hos-muted-text)] hover:bg-[var(--hos-bg)]"
-        >
-          <Search size={17} />
-          <span className="truncate">Search patients, UHID, doctor, invoice, medicine, bed, room, procedure...</span>
-          <span className="ml-auto hidden rounded-md border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 py-1 text-[11px] font-semibold sm:block">Ctrl K</span>
-        </Button>
-        <LiveClockWeather variant="os" />
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="outline" className="hidden min-h-10 gap-2 border-[var(--hos-border)] bg-[var(--hos-surface)] md:inline-flex">
-              <Building2 size={17} /> Agra Main
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-72">
-            <p className="text-sm font-semibold">Branch switcher</p>
-            <p className="mt-2 text-sm text-[var(--hos-muted-text)]">Multi-branch switching is stubbed for v1 and not connected to a backend.</p>
-          </PopoverContent>
-        </Popover>
-        <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" aria-label="Messages">
-          <MessageSquare size={18} />
-        </Button>
-        <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" onClick={onOpenShortcuts} aria-label="Keyboard shortcuts">
-          <Command size={18} />
-        </Button>
-        <NotificationCenter />
-        <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" onClick={onToggleTheme} aria-label="Toggle theme">
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-        </Button>
-        <Avatar className="h-10 w-10 border border-[var(--hos-border)]">
-          <AvatarFallback className="bg-[var(--hos-muted)] text-xs font-semibold text-[var(--hos-text)]">MG</AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="border-t border-[var(--hos-border)] px-4 py-2 text-xs font-medium text-[var(--hos-muted-text)] lg:px-6">
-        Realtime: <span className="capitalize text-[var(--hos-primary)]">{realtimeStatus}</span> · AI v1 scope excludes AI Receptionist automation.
-      </div>
-    </header>
-  );
-}
-
-
-function DashboardOverview({
-  realtimeMessages,
-  metrics,
-  series,
-  isLoading
-}: {
-  realtimeMessages: RealtimeMessage[];
-  metrics: DashboardMetric[];
-  series: HospitalTrendPoint[];
-  isLoading: boolean;
-}) {
-  return (
-    <>
-      <Card className="rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)] shadow-[0_18px_45px_rgba(17,24,39,0.06)]">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Stripe-style command center</p>
-              <h1 className="mt-2 max-w-3xl text-2xl font-semibold leading-tight md:text-[32px]">
-                Clean operating telemetry for clinical, financial, and capacity decisions.
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--hos-muted-text)]">
-                Live KPIs use Recharts consistently across dashboards. Color is reserved for status, action, and alerts.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" className="gap-2 bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><Plus size={16} /> Create Appointment</Button>
-              <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]"><QrCode size={16} /> Wristband QR</Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="status" aria-busy={isLoading} aria-label={isLoading ? "Loading metrics" : undefined}>
-            {isLoading
-              ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-[94px] rounded-lg border border-[var(--hos-border)]" aria-hidden="true" />)
-              : metrics.map((metric) => {
-                  const Icon = metricIcons[metric.label];
-                  return <MetricCard key={metric.label} {...metric} icon={Icon} />;
-                })}
-          </div>
-          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            {isLoading ? (
-              <>
-                <Skeleton className="h-[260px] rounded-lg border border-[var(--hos-border)]" role="status" aria-label="Loading revenue trend" />
-                <Skeleton className="h-[260px] rounded-lg border border-[var(--hos-border)]" role="status" aria-label="Loading OPD trend" />
-              </>
-            ) : (
-              <>
-                <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={series}>
-                      <defs>
-                        <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#2563EB" stopOpacity={0.24} />
-                          <stop offset="95%" stopColor="#2563EB" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid stroke="var(--hos-border)" vertical={false} />
-                      <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="revenue" stroke="#2563EB" fill="url(#revenueFill)" strokeWidth={2} name="Revenue in lakh" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="h-[260px] rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={series}>
-                      <CartesianGrid stroke="var(--hos-border)" vertical={false} />
-                      <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                      <Tooltip />
-                      <Bar dataKey="opd" fill="#16A34A" radius={[6, 6, 0, 0]} name="OPD patients" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card id="realtime-feed" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Realtime feed</p>
-              <CardTitle className="mt-1 text-lg">WebSocket with polling fallback</CardTitle>
-            </div>
-            <Badge variant="outline" className="border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]">Live</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          {realtimeMessages.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-[var(--hos-border)] p-3 text-sm text-[var(--hos-muted-text)]">
-              {isLoading ? "Connecting to live activity…" : "No recent activity yet. New actions across the hospital appear here as they happen."}
-            </p>
-          ) : (
-            realtimeMessages.map((item) => (
-              <div key={item.id} className="flex items-start gap-3 rounded-lg border border-[var(--hos-border)] p-3">
-                <Check size={17} className="mt-0.5 text-[var(--hos-success)]" />
-                <p className="text-sm leading-5 text-[var(--hos-text)]">{item.text}</p>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    </>
   );
 }
 
