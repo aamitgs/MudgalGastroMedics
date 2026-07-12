@@ -1,7 +1,16 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { getOpdVisitById } from "@/lib/opd-store";
-import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
+import type {
+  BedStatus,
+  BedTransfer,
+  HospitalBed,
+  IpdAdmission,
+  IpdAdmissionStatus,
+  MedicationAdministration,
+  MedicationOrder,
+  VitalsReading
+} from "@/lib/ipd-types";
 import { turnoverOverdueMinutes } from "@/lib/ipd-types";
 
 type IpdStore = {
@@ -9,6 +18,8 @@ type IpdStore = {
   admissions: IpdAdmission[];
   vitals: VitalsReading[];
   transfers: BedTransfer[];
+  medicationOrders: MedicationOrder[];
+  medicationAdministrations: MedicationAdministration[];
 };
 
 const starterBeds: HospitalBed[] = [
@@ -26,7 +37,9 @@ const store = createDocumentStore<IpdStore>("ipd-beds", (parsed) => {
     beds: Array.isArray(doc?.beds) ? (doc.beds as HospitalBed[]) : starterBeds,
     admissions: Array.isArray(doc?.admissions) ? (doc.admissions as IpdAdmission[]) : [],
     vitals: Array.isArray(doc?.vitals) ? (doc.vitals as VitalsReading[]) : [],
-    transfers: Array.isArray(doc?.transfers) ? (doc.transfers as BedTransfer[]) : []
+    transfers: Array.isArray(doc?.transfers) ? (doc.transfers as BedTransfer[]) : [],
+    medicationOrders: Array.isArray(doc?.medicationOrders) ? (doc.medicationOrders as MedicationOrder[]) : [],
+    medicationAdministrations: Array.isArray(doc?.medicationAdministrations) ? (doc.medicationAdministrations as MedicationAdministration[]) : []
   };
 });
 
@@ -94,6 +107,75 @@ export async function recordVitals(input: Record<string, unknown>) {
   doc.vitals.unshift(reading);
   await store.save(doc);
   return { reading };
+}
+
+export async function listMedicationOrders(admissionId?: string) {
+  const orders = (await store.load()).medicationOrders;
+  return admissionId ? orders.filter((item) => item.admissionId === admissionId) : orders;
+}
+
+export async function listMedicationAdministrations(admissionId?: string) {
+  const records = (await store.load()).medicationAdministrations;
+  return admissionId ? records.filter((item) => item.admissionId === admissionId) : records;
+}
+
+export async function createMedicationOrder(input: Record<string, unknown>) {
+  const doc = await store.load();
+  const admissionId = normalizeText(input.admissionId);
+  const admission = doc.admissions.find((item) => item.id === admissionId && item.status === "Admitted");
+  if (!admission) return { error: "Active admission not found." };
+
+  const drugName = normalizeText(input.drugName);
+  if (!drugName) return { error: "Drug name is required." };
+
+  const order: MedicationOrder = {
+    id: `MED-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    admissionId,
+    drugName,
+    dose: normalizeText(input.dose),
+    route: normalizeText(input.route) || "Oral",
+    frequency: normalizeText(input.frequency),
+    notes: normalizeText(input.notes) || undefined,
+    status: "Active",
+    createdAt: new Date().toISOString(),
+    createdBy: normalizeText(input.createdBy) || "Doctor"
+  };
+
+  doc.medicationOrders.unshift(order);
+  await store.save(doc);
+  return { order };
+}
+
+export async function discontinueMedicationOrder(id: string) {
+  const doc = await store.load();
+  const order = doc.medicationOrders.find((item) => item.id === id);
+  if (!order) return null;
+  order.status = "Discontinued";
+  order.discontinuedAt = new Date().toISOString();
+  await store.save(doc);
+  return order;
+}
+
+export async function recordMedicationAdministration(input: Record<string, unknown>) {
+  const doc = await store.load();
+  const medicationOrderId = normalizeText(input.medicationOrderId);
+  const order = doc.medicationOrders.find((item) => item.id === medicationOrderId);
+  if (!order) return { error: "Medication order not found." };
+
+  const status = normalizeText(input.status);
+  const record: MedicationAdministration = {
+    id: `MAR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    admissionId: order.admissionId,
+    medicationOrderId,
+    administeredAt: new Date().toISOString(),
+    administeredBy: normalizeText(input.administeredBy) || "Duty nurse",
+    status: (status === "Missed" || status === "Refused" ? status : "Given"),
+    notes: normalizeText(input.notes) || undefined
+  };
+
+  doc.medicationAdministrations.unshift(record);
+  await store.save(doc);
+  return { record };
 }
 
 export async function setEscalation(input: { id: string; escalated: boolean; reason?: string }) {

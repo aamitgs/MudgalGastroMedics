@@ -9,6 +9,7 @@ import type { InventorySortField } from "@/lib/inventory-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { AdminPurchaseOrders } from "@/components/inventory/AdminPurchaseOrders";
 import { notify } from "@/lib/notify";
 
 const inventoryExportHeaders = ["Name", "Category", "Quantity", "Reorder Level", "Unit", "Vendor", "Batch", "Lot", "Expiry", "Last Updated"];
@@ -236,6 +237,7 @@ export function AdminInventory() {
   );
 
   return (
+    <div className="grid gap-6">
     <div className="rounded border border-line/80 bg-surface shadow-sm">
       <div className="flex flex-col justify-between gap-4 border-b border-line p-4 md:flex-row md:items-center">
         <div>
@@ -356,6 +358,9 @@ export function AdminInventory() {
           )}
         />
       </div>
+    </div>
+
+    <AdminPurchaseOrders />
     </div>
   );
 }

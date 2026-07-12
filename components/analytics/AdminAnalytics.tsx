@@ -43,6 +43,8 @@ type AnalyticsSnapshot = {
   serviceMix: Array<{ label: string; value: number }>;
   symptomMix: Array<{ label: string; value: number }>;
   paymentMix: Array<{ label: string; value: number }>;
+  doctorProductivity: Array<{ label: string; value: number }>;
+  avgWaitMinutes: number | null;
   workload: Array<{ label: string; value: number }>;
   risks: Record<string, number>;
 };
@@ -187,13 +189,17 @@ export function AdminAnalytics() {
 
       {analytics ? (
         <>
-          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-6">
+          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-7">
             {executiveCards.map(([label, value]) => (
               <div key={String(label)} className="rounded border border-line bg-soft/60 p-4">
                 <p className="text-xl font-bold text-ink">{value}%</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{label}</p>
               </div>
             ))}
+            <div className="rounded border border-line bg-soft/60 p-4">
+              <p className="text-xl font-bold text-ink">{analytics.avgWaitMinutes === null ? "No data yet" : `${analytics.avgWaitMinutes} min`}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Avg Wait Time</p>
+            </div>
           </div>
 
           <div className="grid gap-5 border-b border-line p-4 xl:grid-cols-[1fr_0.85fr]">
@@ -234,7 +240,7 @@ export function AdminAnalytics() {
             </div>
           </div>
 
-          <div className="grid gap-5 p-4 xl:grid-cols-3">
+          <div className="grid gap-5 p-4 xl:grid-cols-4">
             <div className="rounded border border-line bg-surface p-4">
               <p className="mb-4 text-lg font-bold text-ink">Service mix</p>
               <BarList items={analytics.serviceMix} tone="brand" />
@@ -246,6 +252,11 @@ export function AdminAnalytics() {
             <div className="rounded border border-line bg-surface p-4">
               <p className="mb-4 text-lg font-bold text-ink">Payment mix</p>
               <BarList items={analytics.paymentMix} tone="green" />
+            </div>
+            <div className="rounded border border-line bg-surface p-4">
+              <p className="mb-4 text-lg font-bold text-ink">Doctor productivity</p>
+              <p className="-mt-3 mb-3 text-xs text-muted">Completed consultations attributed to each doctor.</p>
+              <BarList items={analytics.doctorProductivity} tone="brand" />
             </div>
           </div>
 

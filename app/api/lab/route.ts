@@ -40,7 +40,9 @@ export async function GET(request: Request) {
 
   const stats = {
     total: allOrders.length,
-    processing: allOrders.filter((order) => order.status === "Processing" || order.status === "Sample Collected").length,
+    pendingSamples: allOrders.filter((order) => order.status === "Ordered").length,
+    collectedSamples: allOrders.filter((order) => order.status === "Sample Collected").length,
+    processing: allOrders.filter((order) => order.status === "Processing").length,
     resultReady: allOrders.filter((order) => order.status === "Result Ready").length,
     criticalUnacked: allOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length,
     paidAmount: allOrders.filter((order) => order.paymentStatus === "Paid").reduce((sum, order) => sum + Number(order.amount || 0), 0)

@@ -1,7 +1,7 @@
 "use client";
 
-import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stamp, Stethoscope, UserRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stamp, Stethoscope, UserPlus, UserRound } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { detectDrugInteractions, type DrugInteractionMatch } from "@/lib/clinical/drug-interactions";
@@ -9,6 +9,7 @@ import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DoctorRecentActivity } from "@/components/DoctorRecentActivity";
 import { notify } from "@/lib/notify";
 
 type AiSummaryResponse = {
@@ -297,15 +298,66 @@ function IdentityGuard({
  * both checks are free-text heuristics, so they warn and never block. Saving
  * is unchanged (onBlur).
  */
+function FavouriteChips({ favourites, onPick }: { favourites: string[]; onPick: (value: string) => void }) {
+  if (!favourites.length) return null;
+  return (
+    <div className="mb-2 flex flex-wrap gap-1.5">
+      {favourites.map((value) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => onPick(value)}
+          title={value}
+          className="max-w-[220px] truncate rounded-full border border-line bg-soft/60 px-2.5 py-1 text-xs font-semibold text-muted transition hover:border-brand hover:text-brand"
+        >
+          <Sparkles size={11} className="mr-1 inline -mt-0.5" />
+          {value}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DiagnosisField({
+  visit,
+  disabled,
+  favourites,
+  onSave
+}: {
+  visit: OpdVisit;
+  disabled?: boolean;
+  favourites: string[];
+  onSave: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState(visit.diagnosis ?? "");
+
+  return (
+    <label>
+      <span className="mb-2 block text-sm font-bold text-ink">Diagnosis</span>
+      {!draft.trim() ? <FavouriteChips favourites={favourites} onPick={(value) => { setDraft(value); onSave(value); }} /> : null}
+      <input
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={(event) => onSave(event.target.value)}
+        disabled={disabled}
+        className={inputClass}
+        placeholder="Short working diagnosis / impression"
+      />
+    </label>
+  );
+}
+
 function PrescriptionField({
   visit,
   currentMedicines,
   disabled,
+  favourites,
   onSave
 }: {
   visit: OpdVisit;
   currentMedicines?: string;
   disabled?: boolean;
+  favourites: string[];
   onSave: (value: string) => void;
 }) {
   const [draft, setDraft] = useState(visit.prescription ?? "");
@@ -323,8 +375,17 @@ function PrescriptionField({
   return (
     <label>
       <span className="mb-2 block text-sm font-bold text-ink">Prescription</span>
+      {!draft.trim() ? (
+        <FavouriteChips
+          favourites={favourites}
+          onPick={(value) => {
+            setDraft(value);
+            onSave(value);
+          }}
+        />
+      ) : null}
       <textarea
-        defaultValue={visit.prescription}
+        value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={(event) => onSave(event.target.value)}
         disabled={disabled}
@@ -381,6 +442,21 @@ type PrintableDoctorSummary = {
 const textareaClass = "min-h-28 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
 const inputClass = "min-h-9 w-full rounded border border-line bg-white px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
 
+/** Distinct values used at least twice, most-frequent first — a single past entry isn't a "favourite". */
+function topFrequent(values: (string | undefined)[], limit = 6) {
+  const counts = new Map<string, number>();
+  for (const raw of values) {
+    const value = raw?.trim();
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([value]) => value);
+}
+
 export function DoctorPortalWorkspace() {
   const [visits, setVisits] = useState<OpdVisit[]>([]);
   const [patients, setPatients] = useState<PatientRecord[]>([]);
@@ -389,6 +465,8 @@ export function DoctorPortalWorkspace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [printable, setPrintable] = useState<PrintableDoctorSummary | null>(null);
+  const [showNewConsultation, setShowNewConsultation] = useState(false);
+  const [creatingConsultation, setCreatingConsultation] = useState(false);
 
   async function loadWorkspace() {
     setLoading(true);
@@ -418,7 +496,7 @@ export function DoctorPortalWorkspace() {
     setLoading(false);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "prescription" | "advice" | "followUpDate">>) {
+  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate">>) {
     const response = await fetch("/api/opd", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -431,6 +509,38 @@ export function DoctorPortalWorkspace() {
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
     notify.saved("Saved", { id: "doctor-autosave" });
+  }
+
+  async function createWalkInConsultation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const patientName = String(formData.get("patientName") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    if (!patientName || !phone) {
+      notify.error("Patient name and phone are required.");
+      return;
+    }
+    setCreatingConsultation(true);
+    const symptoms = String(formData.get("symptoms") || "")
+      .split(",")
+      .map((symptom) => symptom.trim())
+      .filter(Boolean);
+    const response = await fetch("/api/opd", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority: formData.get("priority") })
+    });
+    const data = (await response.json().catch(() => ({}))) as OpdResponse;
+    setCreatingConsultation(false);
+    if (!response.ok || !data.ok || !data.visit) {
+      notify.error(data.error || "Unable to start consultation.");
+      return;
+    }
+    setVisits((items) => [data.visit as OpdVisit, ...items]);
+    setSelectedVisitId(data.visit.id);
+    setShowNewConsultation(false);
+    event.currentTarget.reset();
+    notify.success(`Consultation started for ${data.visit.patientName}.`);
   }
 
   useEffect(() => {
@@ -498,6 +608,11 @@ export function DoctorPortalWorkspace() {
     ];
   }, [visits]);
 
+  // Favourites need real repeats, not a single past entry, so a one-off note
+  // never gets surfaced as if it were a habitual choice.
+  const favouriteDiagnoses = useMemo(() => topFrequent(visits.map((visit) => visit.diagnosis)), [visits]);
+  const favouritePrescriptions = useMemo(() => topFrequent(visits.map((visit) => visit.prescription)), [visits]);
+
   async function copySummary(visit: OpdVisit, patient?: PatientRecord) {
     await navigator.clipboard.writeText(createDoctorSummaryText(visit, patient));
   }
@@ -524,6 +639,8 @@ export function DoctorPortalWorkspace() {
           ))}
         </div>
 
+        <DoctorRecentActivity />
+
         <div className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
           <aside className="rounded border border-line/80 bg-white shadow-sm">
             <div className="border-b border-line p-4">
@@ -532,10 +649,37 @@ export function DoctorPortalWorkspace() {
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Doctor Queue</p>
                   <h2 className="mt-1 text-xl font-bold text-ink">Consultations</h2>
                 </div>
-                <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
-                  <RefreshCw size={17} />
-                </ActionButton>
+                <div className="flex items-center gap-2">
+                  <ActionButton variant="primary" onClick={() => setShowNewConsultation((value) => !value)} aria-expanded={showNewConsultation}>
+                    <UserPlus size={16} /> New Consultation
+                  </ActionButton>
+                  <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
+                    <RefreshCw size={17} />
+                  </ActionButton>
+                </div>
               </div>
+              {showNewConsultation ? (
+                <form onSubmit={createWalkInConsultation} className="mt-4 grid gap-2 rounded border border-line bg-soft/60 p-3">
+                  <p className="text-xs font-bold text-ink">Start a walk-in consultation (no appointment needed)</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input name="patientName" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                    <input name="phone" required type="tel" placeholder="Phone number" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                  </div>
+                  <input name="symptoms" placeholder="Symptoms, comma separated (optional)" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select name="priority" defaultValue="Routine" className="min-h-9 rounded border border-line bg-white px-2 text-sm font-semibold text-ink">
+                      <option>Routine</option>
+                      <option>Urgent</option>
+                    </select>
+                    <ActionButton type="submit" variant="primary" size="sm" disabled={creatingConsultation}>
+                      {creatingConsultation ? "Starting…" : "Start Consultation"}
+                    </ActionButton>
+                    <ActionButton type="button" variant="ghost" size="sm" onClick={() => setShowNewConsultation(false)}>
+                      Cancel
+                    </ActionButton>
+                  </div>
+                </form>
+              ) : null}
               <label className="relative mt-4 block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                 <input
@@ -584,6 +728,8 @@ export function DoctorPortalWorkspace() {
                 updateVisit={updateVisit}
                 copySummary={copySummary}
                 printSummary={printSummary}
+                favouriteDiagnoses={favouriteDiagnoses}
+                favouritePrescriptions={favouritePrescriptions}
               />
             ) : (
               <div className="rounded border border-dashed border-line bg-white p-10 text-center shadow-sm">
@@ -624,13 +770,17 @@ function DoctorConsultationCard({
   patient,
   updateVisit,
   copySummary,
-  printSummary
+  printSummary,
+  favouriteDiagnoses,
+  favouritePrescriptions
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
-  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "prescription" | "advice" | "followUpDate">>) => Promise<void>;
+  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate">>) => Promise<void>;
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
+  favouriteDiagnoses: string[];
+  favouritePrescriptions: string[];
 }) {
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
 
@@ -698,21 +848,31 @@ function DoctorConsultationCard({
         />
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <label>
-            <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
-            <textarea
-              defaultValue={visit.clinicalNote}
-              onBlur={(event) => void updateVisit(visit.id, { clinicalNote: event.target.value })}
+          <div className="grid gap-4">
+            <DiagnosisField
+              key={`${visit.id}-diagnosis`}
+              visit={visit}
               disabled={!identityConfirmed}
-              className={textareaClass}
-              placeholder="History, examination, impression, procedure note"
+              favourites={favouriteDiagnoses}
+              onSave={(value) => void updateVisit(visit.id, { diagnosis: value })}
             />
-          </label>
+            <label>
+              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
+              <textarea
+                defaultValue={visit.clinicalNote}
+                onBlur={(event) => void updateVisit(visit.id, { clinicalNote: event.target.value })}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+                placeholder="History, examination, impression, procedure note"
+              />
+            </label>
+          </div>
           <PrescriptionField
             key={visit.id}
             visit={visit}
             currentMedicines={patient?.currentMedicines}
             disabled={!identityConfirmed}
+            favourites={favouritePrescriptions}
             onSave={(value) => void updateVisit(visit.id, { prescription: value })}
           />
           <label>

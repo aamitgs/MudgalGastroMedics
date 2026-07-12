@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { bedStatuses, ipdAdmissionStatuses } from "@/lib/ipd-types";
+import { bedStatuses, ipdAdmissionStatuses, medicationAdministrationStatuses } from "@/lib/ipd-types";
 
 const optionalText = z.string().trim().optional();
 
@@ -66,6 +66,25 @@ export const ipdAdmissionUpdateSchema = z.object({
   markedForDischarge: z.boolean().optional(),
   depositAmount: z.coerce.number().optional(),
   dischargeSummary: optionalText
+});
+
+export const ipdMedicationOrderCreateSchema = z.object({
+  admissionId: z.string().trim().min(1, "Admission id is required."),
+  drugName: z.string().trim().min(1, "Drug name is required."),
+  dose: optionalText,
+  route: optionalText,
+  frequency: optionalText,
+  notes: optionalText
+});
+
+export const ipdMedicationOrderDiscontinueSchema = z.object({
+  id: z.string().trim().min(1, "Medication order id is required.")
+});
+
+export const ipdMedicationAdministrationSchema = z.object({
+  medicationOrderId: z.string().trim().min(1, "Medication order id is required."),
+  status: z.enum(medicationAdministrationStatuses as [string, ...string[]], { error: "Invalid administration status." }).default("Given"),
+  notes: optionalText
 });
 
 export type IpdAdmissionCreateInput = z.infer<typeof ipdAdmissionCreateSchema>;

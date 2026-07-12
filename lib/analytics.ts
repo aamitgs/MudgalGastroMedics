@@ -48,6 +48,16 @@ function topCounts(items: string[], fallback = "Uncategorized") {
     .slice(0, 8);
 }
 
+/** Minutes between visit creation and consultationStartedAt — real, not fabricated: only computed where that timestamp actually exists. */
+function averageWaitMinutes(visits: { createdAt: string; consultationStartedAt?: string }[]) {
+  const waits = visits
+    .filter((visit): visit is typeof visit & { consultationStartedAt: string } => Boolean(visit.consultationStartedAt))
+    .map((visit) => (new Date(visit.consultationStartedAt).getTime() - new Date(visit.createdAt).getTime()) / 60000)
+    .filter((minutes) => minutes >= 0);
+  if (!waits.length) return null;
+  return Math.round(waits.reduce((sum, minutes) => sum + minutes, 0) / waits.length);
+}
+
 export async function createAnalyticsSnapshot(windowDays = 14) {
   const days = daysBack(windowDays);
   const appointments = (await listAppointments());
@@ -127,6 +137,16 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
     serviceMix: topCounts([...appointments.map((appointment) => appointment.service), ...opdVisits.map((visit) => visit.service)]),
     symptomMix: topCounts(appointments.flatMap((appointment) => appointment.symptoms).concat(opdVisits.flatMap((visit) => visit.symptoms)), "Not specified"),
     paymentMix: topCounts(paidVisits.map((visit) => visit.paymentMethod || "Cash")),
+    // Real doctor attribution (opd-store sets doctorName automatically when a
+    // clinical field is first written) — "Unassigned" until multiple named
+    // doctors are actually using the system day to day.
+    doctorProductivity: topCounts(
+      opdVisits.filter((visit) => visit.status === "Completed").map((visit) => visit.doctorName ?? ""),
+      "Unassigned"
+    ),
+    // null (not 0) until at least one visit has a real consultationStartedAt
+    // timestamp — never fabricate a wait time from no data.
+    avgWaitMinutes: averageWaitMinutes(opdVisits),
     queues: {
       opdInFlight: opdVisits.filter((visit) => visit.status === "Waiting" || visit.status === "In Consultation").length,
       labPending: labOrders.filter((order) => !["Result Ready", "Delivered", "Cancelled"].includes(order.status)).length,

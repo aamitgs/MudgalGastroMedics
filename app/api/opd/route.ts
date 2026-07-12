@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
-import { getAppointmentById } from "@/lib/appointment-store";
+import { createAppointment, getAppointmentById } from "@/lib/appointment-store";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
 import { createOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
@@ -59,7 +59,32 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
-  const appointment = (await getAppointmentById(parsed.data.appointmentId));
+
+  let appointment = parsed.data.appointmentId ? await getAppointmentById(parsed.data.appointmentId) : null;
+
+  if (!appointment && !parsed.data.appointmentId) {
+    // Walk-in consultation started directly by clinical/reception staff — an
+    // internal Appointment record still backs the OPD visit (frozen data
+    // model), but skips the public "request received" emails: nobody is
+    // waiting to hear back, the patient is already in front of the doctor.
+    appointment = await createAppointment({
+      name: parsed.data.patientName,
+      phone: parsed.data.phone,
+      service: parsed.data.service,
+      symptoms: parsed.data.symptoms ?? [],
+      priority: parsed.data.priority || "Routine"
+    });
+
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "appointment.walkin.created",
+      entityType: "appointment",
+      entityId: appointment.id,
+      after: appointment,
+      device: auditRequestMetadata(request)
+    });
+  }
 
   if (!appointment) {
     return NextResponse.json({ ok: false, error: "Appointment not found." }, { status: 404 });
@@ -85,13 +110,13 @@ export async function PATCH(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
-  const { id, status, billingStatus, estimatedAmount, paymentMethod, notes, clinicalNote, prescription, advice, followUpDate } = parsed.data;
+  const { id, status, billingStatus, estimatedAmount, paymentMethod, notes, clinicalNote, diagnosis, prescription, advice, followUpDate, refundAction, refundReason, refundAmount } = parsed.data;
 
   // Field-level enforcement: clinical fields need prescription rights, billing
   // fields need billing rights, and plain queue/status changes only need
   // appointment rights — so a nurse can move the queue but not write an Rx.
-  const touchesClinical = [clinicalNote, prescription, advice, followUpDate].some((value) => value !== undefined);
-  const touchesBilling = [billingStatus, estimatedAmount, paymentMethod].some((value) => value !== undefined);
+  const touchesClinical = [clinicalNote, diagnosis, prescription, advice, followUpDate].some((value) => value !== undefined);
+  const touchesBilling = [billingStatus, estimatedAmount, paymentMethod].some((value) => value !== undefined) || Boolean(refundAction);
   const auth = await authorize(
     request,
     touchesClinical ? "prescriptions" : touchesBilling ? "billing" : "appointments",
@@ -111,9 +136,15 @@ export async function PATCH(request: Request) {
     paymentMethod,
     notes,
     clinicalNote,
+    diagnosis,
     prescription,
     advice,
-    followUpDate
+    followUpDate,
+    actingDoctorName: touchesClinical ? auth.context.userName : undefined,
+    refundAction,
+    refundReason,
+    refundAmount,
+    actingStaffName: refundAction ? auth.context.userName || auth.context.activeRole : undefined
   }));
 
   if (!visit) {
@@ -126,10 +157,18 @@ export async function PATCH(request: Request) {
   await recordAuditEvent({
     actorRole: auth.context.activeRole,
     actorId: auth.context.userId,
-    action: touchesClinical ? "opd.prescription.updated" : touchesBilling ? "opd.billing.updated" : "opd.visit.updated",
+    action: touchesClinical
+      ? "opd.prescription.updated"
+      : refundAction === "request"
+        ? "opd.refund.requested"
+        : refundAction === "complete"
+          ? "opd.refund.completed"
+          : touchesBilling
+            ? "opd.billing.updated"
+            : "opd.visit.updated",
     entityType: "opd_visit",
     entityId: visit.id,
-    severity: touchesClinical ? "warning" : "info",
+    severity: touchesClinical || refundAction ? "warning" : "info",
     before,
     after: visit,
     device: auditRequestMetadata(request)

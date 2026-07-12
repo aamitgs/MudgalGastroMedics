@@ -10,6 +10,7 @@ import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admiss
 import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { AdminMedicationRecord } from "@/components/ipd/AdminMedicationRecord";
 import { AiDischargeSummaryDraft } from "@/components/ipd/AiDischargeSummaryDraft";
 import { notify } from "@/lib/notify";
 import { downloadCsv } from "@/lib/table-export";
@@ -595,6 +596,7 @@ export function AdminIpdBeds() {
                 className={`${fieldClass} mt-3 min-h-16 py-3`}
                 placeholder="Diet advice"
               />
+              <AdminMedicationRecord key={editingAdmission.id} admissionId={editingAdmission.id} />
               <textarea
                 key={editingAdmission.dischargeSummary}
                 defaultValue={editingAdmission.dischargeSummary}

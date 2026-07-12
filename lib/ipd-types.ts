@@ -76,6 +76,39 @@ export type BedTransfer = {
   movedAt: string;
 };
 
+export type MedicationOrderStatus = "Active" | "Discontinued";
+
+/** The doctor's order — what to give. Nurses record actual doses against this via MedicationAdministration. */
+export type MedicationOrder = {
+  id: string;
+  admissionId: string;
+  drugName: string;
+  dose: string;
+  route: string;
+  frequency: string;
+  notes?: string;
+  status: MedicationOrderStatus;
+  createdAt: string;
+  createdBy: string;
+  discontinuedAt?: string;
+};
+
+export type MedicationAdministrationStatus = "Given" | "Missed" | "Refused";
+
+/** The nurse's record — that a dose was (or wasn't) actually given, and by whom. */
+export type MedicationAdministration = {
+  id: string;
+  admissionId: string;
+  medicationOrderId: string;
+  administeredAt: string;
+  administeredBy: string;
+  status: MedicationAdministrationStatus;
+  notes?: string;
+};
+
+export const medicationRoutes = ["Oral", "IV", "IM", "Subcutaneous", "Topical", "Other"];
+export const medicationAdministrationStatuses: MedicationAdministrationStatus[] = ["Given", "Missed", "Refused"];
+
 export const bedStatuses: BedStatus[] = ["Vacant", "Occupied", "Reserved", "Cleaning", "Maintenance", "Isolation"];
 export const ipdAdmissionStatuses: IpdAdmissionStatus[] = ["Admitted", "Discharged", "Cancelled"];
 export const hospitalWards: HospitalWard[] = ["HDU", "Private Room", "General", "Recovery"];

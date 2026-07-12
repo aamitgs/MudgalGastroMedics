@@ -5,9 +5,22 @@ const optionalText = z.string().trim().optional();
 const billingStatuses = ["Not Started", "Estimate Shared", "Paid"] as const;
 const paymentMethods = ["Cash", "UPI", "Card", "Insurance", "Other"] as const;
 
-export const opdVisitCreateSchema = z.object({
-  appointmentId: z.string().trim().min(1, "Appointment id is required.")
-});
+export const opdVisitCreateSchema = z
+  .object({
+    appointmentId: optionalText,
+    // Walk-in path: no appointment exists yet — clinical/reception staff are
+    // starting a consultation directly for a patient in front of them.
+    patientName: optionalText,
+    phone: optionalText,
+    service: optionalText,
+    symptoms: z.array(z.string()).optional(),
+    priority: optionalText
+  })
+  .refine((data) => Boolean(data.appointmentId) || Boolean(data.patientName && data.phone && data.service), {
+    message: "Provide an appointment id, or a patient name, phone and service for a walk-in visit."
+  });
+
+const refundActions = ["request", "complete"] as const;
 
 export const opdVisitUpdateSchema = z.object({
   id: z.string().trim().min(1, "Visit id is required."),
@@ -17,9 +30,13 @@ export const opdVisitUpdateSchema = z.object({
   paymentMethod: z.enum(paymentMethods, { error: "Invalid payment method." }).optional(),
   notes: optionalText,
   clinicalNote: optionalText,
+  diagnosis: optionalText,
   prescription: optionalText,
   advice: optionalText,
-  followUpDate: optionalText
+  followUpDate: optionalText,
+  refundAction: z.enum(refundActions, { error: "Invalid refund action." }).optional(),
+  refundReason: optionalText,
+  refundAmount: optionalText
 });
 
 export type OpdVisitCreateInput = z.infer<typeof opdVisitCreateSchema>;

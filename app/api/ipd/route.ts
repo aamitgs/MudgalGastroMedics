@@ -4,11 +4,16 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import type { BedStatus, IpdAdmissionStatus } from "@/lib/ipd-types";
 import {
   createIpdAdmission,
+  createMedicationOrder,
+  discontinueMedicationOrder,
   getOccupancyStats,
   listBeds,
   listIpdAdmissions,
+  listMedicationAdministrations,
+  listMedicationOrders,
   listTransfers,
   listVitals,
+  recordMedicationAdministration,
   recordVitals,
   setEscalation,
   transferBed,
@@ -22,6 +27,9 @@ import {
   ipdAdmissionUpdateSchema,
   ipdBedUpdateSchema,
   ipdEscalateSchema,
+  ipdMedicationAdministrationSchema,
+  ipdMedicationOrderCreateSchema,
+  ipdMedicationOrderDiscontinueSchema,
   ipdTransferSchema,
   ipdVitalsSchema
 } from "@/lib/validation/ipd";
@@ -37,6 +45,8 @@ export async function GET(request: Request) {
     visits: (await listOpdVisits()),
     vitals: (await listVitals()),
     transfers: (await listTransfers()),
+    medicationOrders: (await listMedicationOrders()),
+    medicationAdministrations: (await listMedicationAdministrations()),
     occupancy: (await getOccupancyStats())
   });
 }
@@ -136,6 +146,86 @@ export async function PATCH(request: Request) {
     const result = (await recordVitals({ ...parsed.data, recordedBy: staffId }));
     if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true, reading: result.reading });
+  }
+
+  if (type === "medication-order") {
+    const parsed = ipdMedicationOrderCreateSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    // The order itself is a prescribing decision (what to give) — nurses hold
+    // only prescriptions:view, matching Track 0's "doctors prescribe, nurses
+    // administer" split; recording that a dose was actually given is the
+    // separate medication-administration action below, gated on beds:edit.
+    const auth = await authorize(request, "prescriptions", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+    const result = await createMedicationOrder({ ...parsed.data, createdBy: auth.context.userName || auth.context.activeRole });
+    if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "ipd.medication_order.created",
+      entityType: "medication_order",
+      entityId: result.order.id,
+      severity: "warning",
+      after: result.order,
+      device: auditRequestMetadata(request)
+    });
+
+    return NextResponse.json({ ok: true, order: result.order });
+  }
+
+  if (type === "medication-order-discontinue") {
+    const parsed = ipdMedicationOrderDiscontinueSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    const auth = await authorize(request, "prescriptions", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+    const order = await discontinueMedicationOrder(parsed.data.id);
+    if (!order) return NextResponse.json({ ok: false, error: "Medication order not found." }, { status: 404 });
+
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "ipd.medication_order.discontinued",
+      entityType: "medication_order",
+      entityId: order.id,
+      severity: "warning",
+      after: order,
+      device: auditRequestMetadata(request)
+    });
+
+    return NextResponse.json({ ok: true, order });
+  }
+
+  if (type === "medication-administration") {
+    const parsed = ipdMedicationAdministrationSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    // Bedside nursing action against an existing order — same permission as
+    // vitals/ward-round entries, not a fresh prescribing decision.
+    const auth = await authorize(request, "beds", "edit");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    const staffName = auth.context.userName || auth.context.activeRole;
+
+    const result = await recordMedicationAdministration({ ...parsed.data, administeredBy: staffName });
+    if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+    // Missed/refused doses are clinically significant deviations from the
+    // order — audited distinctly from a routine "given as scheduled" entry.
+    if (result.record.status !== "Given") {
+      await recordAuditEvent({
+        actorRole: auth.context.activeRole,
+        actorId: auth.context.userId,
+        action: "ipd.medication_administration.exception",
+        entityType: "medication_administration",
+        entityId: result.record.id,
+        severity: "warning",
+        metadata: { status: result.record.status },
+        device: auditRequestMetadata(request)
+      });
+    }
+
+    return NextResponse.json({ ok: true, record: result.record });
   }
 
   if (type === "escalate") {

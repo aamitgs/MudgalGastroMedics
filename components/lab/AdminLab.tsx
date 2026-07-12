@@ -25,7 +25,7 @@ type LabListResponse = {
   order?: LabOrder;
   visits?: OpdVisit[];
   pageCount?: number;
-  stats?: { total: number; processing: number; resultReady: number; criticalUnacked: number; paidAmount: number };
+  stats?: { total: number; pendingSamples: number; collectedSamples: number; processing: number; resultReady: number; criticalUnacked: number; paidAmount: number };
   error?: string;
 };
 
@@ -47,7 +47,7 @@ export function AdminLab() {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCount, setPageCount] = useState(1);
-  const [stats, setStats] = useState({ total: 0, processing: 0, resultReady: 0, criticalUnacked: 0, paidAmount: 0 });
+  const [stats, setStats] = useState({ total: 0, pendingSamples: 0, collectedSamples: 0, processing: 0, resultReady: 0, criticalUnacked: 0, paidAmount: 0 });
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<LabOrderStatus | "">("");
   const [criticalOnly, setCriticalOnly] = useState(false);
@@ -160,6 +160,8 @@ export function AdminLab() {
   const statTiles = useMemo(
     () => [
       { label: "Lab Orders", value: stats.total },
+      { label: "Pending Samples", value: stats.pendingSamples },
+      { label: "Collected", value: stats.collectedSamples },
       { label: "Processing", value: stats.processing },
       { label: "Result Ready", value: stats.resultReady },
       { label: "Critical Unacked", value: stats.criticalUnacked },
@@ -297,7 +299,7 @@ export function AdminLab() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
+      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>

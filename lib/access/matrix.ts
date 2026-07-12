@@ -199,7 +199,10 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
   },
   "duty-doctor": {
     patients: ["view", "edit"],
-    appointments: ["view", "edit"],
+    // Shares the Doctor Portal's "New Consultation" walk-in action with Main
+    // Doctor — view/edit-only left an on-call doctor unable to start a
+    // consultation for a walk-in with no reception-booked appointment.
+    appointments: ["view", "create", "edit"],
     beds: ["view", "edit"],
     prescriptions: readWrite,
     "lab-orders": ["view", "create"],
@@ -215,7 +218,11 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
   reception: {
     patients: readWrite,
     appointments: readWriteExport,
-    beds: ["view"],
+    // Reception's own role description ("bed assignment requests") and the
+    // Admit Patient action already present in the IPD module both assume
+    // reception can actually admit — view-only left them unable to use a
+    // button that was already visible to them.
+    beds: readWrite,
     // "Basic billing": registration/consultation fees at the front desk.
     // Voids/refunds and financial reporting stay with Billing / Accounts.
     billing: ["view", "create", "edit"],

@@ -57,6 +57,7 @@ export async function createOpdVisit(appointment: AppointmentRecord) {
     paidAt: "",
     notes: appointment.message,
     clinicalNote: "",
+    diagnosis: "",
     prescription: "",
     advice: "",
     followUpDate: ""
@@ -82,15 +83,28 @@ export async function updateOpdVisit(input: {
   paymentMethod?: OpdVisit["paymentMethod"];
   notes?: string;
   clinicalNote?: string;
+  diagnosis?: string;
   prescription?: string;
   advice?: string;
   followUpDate?: string;
+  /** Name of the authenticated doctor making this update, if it touches a clinical field. */
+  actingDoctorName?: string;
+  refundAction?: "request" | "complete";
+  refundReason?: string;
+  refundAmount?: string;
+  /** Name of the authenticated staff member making a refund request/completion. */
+  actingStaffName?: string;
 }) {
   const doc = await store.load();
   const visit = doc.visits.find((item) => item.id === input.id);
   if (!visit) return null;
 
-  if (input.status) visit.status = input.status;
+  if (input.status) {
+    visit.status = input.status;
+    if (input.status === "In Consultation") visit.consultationStartedAt ||= new Date().toISOString();
+  }
+  const touchesClinical = [input.clinicalNote, input.diagnosis, input.prescription, input.advice, input.followUpDate].some((value) => value !== undefined);
+  if (touchesClinical && input.actingDoctorName) visit.doctorName ||= input.actingDoctorName;
   if (input.billingStatus) {
     visit.billingStatus = input.billingStatus;
     if (input.billingStatus === "Paid") {
@@ -106,9 +120,23 @@ export async function updateOpdVisit(input: {
   if (input.paymentMethod) visit.paymentMethod = input.paymentMethod;
   if (typeof input.notes === "string") visit.notes = input.notes.trim();
   if (typeof input.clinicalNote === "string") visit.clinicalNote = input.clinicalNote.trim();
+  if (typeof input.diagnosis === "string") visit.diagnosis = input.diagnosis.trim();
   if (typeof input.prescription === "string") visit.prescription = input.prescription.trim();
   if (typeof input.advice === "string") visit.advice = input.advice.trim();
   if (typeof input.followUpDate === "string") visit.followUpDate = input.followUpDate.trim();
+
+  if (input.refundAction === "request" && visit.billingStatus === "Paid" && !visit.refundStatus) {
+    visit.refundStatus = "Requested";
+    visit.refundReason = input.refundReason?.trim() || "";
+    visit.refundAmount = input.refundAmount?.trim() || visit.estimatedAmount;
+    visit.refundRequestedAt = new Date().toISOString();
+    visit.refundRequestedBy = input.actingStaffName || "";
+  }
+  if (input.refundAction === "complete" && visit.refundStatus === "Requested") {
+    visit.refundStatus = "Refunded";
+    visit.refundedAt = new Date().toISOString();
+    visit.refundedBy = input.actingStaffName || "";
+  }
 
   await store.save(doc);
   return visit;
