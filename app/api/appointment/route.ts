@@ -22,7 +22,11 @@ async function sendHospitalNotification(appointment: AppointmentRecord) {
   const detailLines: [string, string | undefined][] = [
     ["Phone", appointment.phone],
     ["Email", appointment.email],
-    ["Service", appointment.service],
+    ["Appointment for", appointment.service],
+    ["Admission reason", appointment.admissionReason],
+    ["Insurance / TPA", appointment.insuranceTpa],
+    ["Room preference", appointment.roomPreference],
+    ["Referred by", appointment.hasReferral ? appointment.referredBy || "Yes, name not provided" : undefined],
     ["Preferred date", appointment.date],
     ["Preferred time", appointment.timeSlot],
     ["Priority", appointment.priority],

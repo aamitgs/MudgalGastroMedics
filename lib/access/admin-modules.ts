@@ -13,7 +13,8 @@ import { roleHasPermission, type AccessResource, type AccessRole } from "@/lib/a
 export type AdminModuleDef = {
   id: string;
   label: string;
-  resource: AccessResource;
+  /** null means visible to every authenticated staff role (e.g. cross-department tools with no single owning resource) — matches canViewNotificationCategory's convention. */
+  resource: AccessResource | null;
 };
 
 export const adminModules: AdminModuleDef[] = [
@@ -45,13 +46,19 @@ export const adminModules: AdminModuleDef[] = [
   { id: "module-inventory", label: "Inventory", resource: "pharmacy-inventory" },
   // Patient communication (confirmations, reminders) is front-desk messaging.
   { id: "module-communication", label: "Comms", resource: "appointments" },
-  { id: "module-settings", label: "Settings", resource: "system-settings" }
+  { id: "module-settings", label: "Settings", resource: "system-settings" },
+  // Cross-department notes/handover: no single resource covers every role
+  // that needs to send or receive one (e.g. pharmacist has no "patients"
+  // permission), so this is visible to every staff role by design; per-note
+  // read/write is still gated department-by-department (staff-notes-types.ts).
+  { id: "module-staff-notes", label: "Staff Notes", resource: null }
 ];
 
 export function canViewAdminModule(role: AccessRole, moduleId: string): boolean {
   if (role === "super-admin") return true;
   const definition = adminModules.find((module) => module.id === moduleId);
   if (!definition) return false;
+  if (!definition.resource) return true;
   return roleHasPermission(role, definition.resource, "view");
 }
 

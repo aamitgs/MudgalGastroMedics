@@ -34,7 +34,8 @@ const moduleLoaders: Record<string, () => Promise<{ default: ComponentType }>> =
   "module-hr": () => import("@/components/hr/AdminHR").then((m) => ({ default: m.AdminHR })),
   "module-inventory": () => import("@/components/inventory/AdminInventory").then((m) => ({ default: m.AdminInventory })),
   "module-communication": () => import("@/components/communication/AdminCommunication").then((m) => ({ default: m.AdminCommunication })),
-  "module-settings": () => import("@/components/settings/AdminSettings").then((m) => ({ default: m.AdminSettings }))
+  "module-settings": () => import("@/components/settings/AdminSettings").then((m) => ({ default: m.AdminSettings })),
+  "module-staff-notes": () => import("@/components/staff-notes/AdminStaffNotes").then((m) => ({ default: m.AdminStaffNotes }))
 };
 
 /** Fired by AdminModuleNav on a jump-nav click; see the mount-on-jump note below. */

@@ -244,20 +244,20 @@ export function Header() {
       </section>
 
       <header className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
-        <div className="mx-auto flex min-h-[96px] w-[min(1620px,calc(100%-40px))] items-center gap-5 2xl:gap-7">
+        <div className="mx-auto flex min-h-[88px] w-[min(1620px,calc(100%-40px))] items-center gap-4 2xl:gap-5">
           <Link href="/" className="shrink-0 rounded bg-white p-1.5" aria-label="Mudgal Gastromedics Hospital home">
             <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "168px", height: "auto" }} />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-5 2xl:gap-7">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 font-semibold tracking-normal text-ink min-[1280px]:flex xl:gap-4 2xl:gap-5">
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1.5 whitespace-nowrap py-9 text-[15px] font-semibold transition hover:text-[#19c7f3] xl:text-[16px] 2xl:text-[17px] ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
+                  className={`flex items-center gap-1 whitespace-nowrap py-8 text-[13px] font-semibold transition hover:text-[#19c7f3] xl:text-[14px] 2xl:text-[15px] ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
                 >
                   <NavLabel label={item.label} />
-                  {item.children?.length ? <ChevronDown size={17} strokeWidth={3} /> : null}
+                  {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
                 </Link>
                 {item.children?.length ? (
                   <div className="invisible absolute left-0 top-full max-h-[70vh] min-w-64 translate-y-2 overflow-y-auto rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
@@ -273,7 +273,7 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <ButtonLink href="/portal#appointment" className="hidden min-w-[154px] whitespace-nowrap border-coral bg-coral px-4 text-sm hover:bg-brand-dark md:inline-flex xl:min-w-[166px] xl:text-[15px]">
+            <ButtonLink href="/portal#appointment" className="hidden min-w-[144px] whitespace-nowrap border-coral bg-coral px-3.5 text-[13px] hover:bg-brand-dark md:inline-flex xl:min-w-[156px] xl:text-sm">
               <span data-en>Book Appointment</span>
               <span data-hi lang="hi">बुक करें</span>
             </ButtonLink>

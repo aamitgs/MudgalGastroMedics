@@ -16,7 +16,7 @@ const campPost = {
   hiTitle: "पेट, आंत और लिवर परामर्श एवं जांच शिविर",
   date: "July 11, 2026",
   summary:
-    "Consultation camp at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra, with gastro and liver specialist care guidance."
+    "Archived consultation camp at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra, with gastro and liver specialist care guidance."
 };
 
 type BlogPageProps = {
@@ -154,7 +154,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <article className="p-6 md:p-8">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-soft/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand">
               <span className="h-2 w-2 rounded-full bg-gold" />
-              Consultation Camp
+              Archived Camp
             </div>
             <Link href={campPost.href} className="block">
               <h2 className="text-3xl font-black leading-tight text-ink transition group-hover:text-brand md:text-5xl">{campPost.title}</h2>
@@ -167,10 +167,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 {campPost.date}
               </span>
               <Link href={campPost.href} className="inline-flex items-center gap-2 text-brand">
-                Read post <ArrowRight size={16} className="transition group-hover:translate-x-1" />
+                View archived post <ArrowRight size={16} className="transition group-hover:translate-x-1" />
               </Link>
             </div>
-            <AppointmentCtaPanel className="mt-6" />
           </article>
         </div>
       </Section>

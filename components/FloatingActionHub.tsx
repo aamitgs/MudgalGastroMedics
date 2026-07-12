@@ -36,20 +36,15 @@ const hubActions = [
 export function FloatingActionHub() {
   return (
     <div className="fixed bottom-5 right-4 z-40 grid items-start justify-items-end gap-3 md:bottom-7 md:right-6">
-      <LanguageToggle compact className="ring-1 ring-black/10" />
-      <a
-        href="#top"
-        className="grid h-12 w-12 place-items-center rounded-full border border-white/60 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-[0_16px_42px_rgba(8,64,84,0.2),inset_0_1px_0_rgba(255,255,255,0.95)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60"
-        aria-label="Back to top"
-      >
-        <ArrowUp size={20} />
-      </a>
+      <LanguageToggle compact className="ring-1 ring-cyan-100/80" />
       <details className="group/hub relative">
         <summary
-          className="grid h-14 w-14 cursor-pointer list-none place-items-center rounded-full border border-white/15 bg-[#151515] text-white shadow-[0_18px_46px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:bg-[#0f3f45] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 [&::-webkit-details-marker]:hidden"
+          className="group grid h-16 w-16 cursor-pointer list-none place-items-center rounded-full border border-white/20 bg-[radial-gradient(circle_at_35%_25%,#303030,#151515_58%,#050505)] text-white shadow-[0_22px_54px_rgba(0,0,0,0.36),0_0_0_6px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-black/20 transition duration-300 hover:-translate-y-1 hover:border-cyan-100/40 hover:shadow-[0_26px_64px_rgba(8,64,84,0.3),0_0_0_7px_rgba(8,145,178,0.12),inset_0_1px_0_rgba(255,255,255,0.16)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 [&::-webkit-details-marker]:hidden"
           aria-label="Open contact actions"
         >
-          <MessageCircle size={23} />
+          <span className="grid h-11 w-11 place-items-center rounded-full border border-white/18 bg-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:border-cyan-100/35 group-hover:bg-cyan-100/10">
+            <MessageCircle size={25} strokeWidth={2.25} />
+          </span>
         </summary>
         <div className="absolute bottom-16 right-0 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-cyan-100/20 bg-[#082f36]/96 p-4 text-white shadow-[0_28px_80px_rgba(0,0,0,0.36),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur">
           <div className="mb-3">
@@ -71,6 +66,15 @@ export function FloatingActionHub() {
           </div>
         </div>
       </details>
+      <a
+        href="#top"
+        className="group grid h-14 w-14 place-items-center rounded-full border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f6fbfc)] text-ink shadow-[0_18px_46px_rgba(8,64,84,0.18),0_0_0_5px_rgba(255,255,255,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-cyan-100/70 transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand hover:shadow-[0_22px_58px_rgba(8,145,178,0.22),0_0_0_6px_rgba(8,145,178,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60"
+        aria-label="Back to top"
+      >
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-[linear-gradient(180deg,#ffffff,#eef8fa)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] transition group-hover:bg-soft">
+          <ArrowUp size={22} strokeWidth={2.3} />
+        </span>
+      </a>
     </div>
   );
 }

@@ -77,7 +77,7 @@ const campFaqs = [
 export const metadata: Metadata = {
   title,
   description:
-    "Mudgal Gastromedics Hospital, Agra is organizing a stomach, intestine and liver consultation and check-up camp on July 11, 2026.",
+    "Archived details for the stomach, intestine and liver consultation and check-up camp held at Mudgal Gastromedics Hospital, Agra on July 11, 2026.",
   alternates: { canonical: slug },
   openGraph: {
     title,
@@ -120,7 +120,7 @@ export default function CampBlogPostPage() {
           <div>
             <Link href="/blog" className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-100/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-gold" />
-              Consultation Camp
+              Archived Camp
             </Link>
             <h1 className="max-w-5xl text-5xl font-black leading-tight md:text-7xl">{title}</h1>
             <p className="mt-5 max-w-4xl text-3xl font-bold leading-tight text-cyan-100 md:text-5xl" lang="hi">
@@ -151,7 +151,7 @@ export default function CampBlogPostPage() {
 
       <Section>
         <SectionHead eyebrow="Camp Patient Guide" title="Who should attend and what to prepare">
-          <p>Use this quick guide before coming for registration and consultation.</p>
+          <p>This camp has been completed. These archived details are kept for reference.</p>
         </SectionHead>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {campGuide.map((block) => (
@@ -248,11 +248,11 @@ export default function CampBlogPostPage() {
 
           <aside className="grid gap-5">
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Register / Contact</p>
-              <AppointmentCtaPanel className="mt-5" layout="stacked" />
-              <p className="mt-4 text-sm leading-relaxed text-muted">
-                Registration fee: <span className="font-bold text-ink">{registrationFee}/-</span>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Camp Completed</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                This camp is archived. For current consultation, appointment or future camp information, contact reception.
               </p>
+              <AppointmentCtaPanel className="mt-5" layout="stacked" />
             </div>
 
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">

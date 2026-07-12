@@ -18,6 +18,12 @@ export type AppointmentRecord = {
   patientType?: string;
   contactMethod?: string;
   service: string;
+  countryCode?: string;
+  admissionReason?: string;
+  insuranceTpa?: string;
+  roomPreference?: string;
+  hasReferral?: string;
+  referredBy?: string;
   date?: string;
   timeSlot?: string;
   priority?: string;
