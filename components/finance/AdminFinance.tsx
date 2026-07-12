@@ -235,11 +235,17 @@ export function AdminFinance() {
   });
 
   async function updateClaim(id: string, updates: Partial<Pick<InsuranceClaim, "status" | "requestedAmount" | "approvedAmount" | "settledAmount" | "claimNumber" | "documents" | "notes">>) {
-    const response = await fetch("/api/finance", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/finance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateClaim(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as FinanceResponse;
     if (!response.ok || !data.ok || !data.claim) {
       notify.error(data.error || "Unable to update claim.");
@@ -352,6 +358,8 @@ export function AdminFinance() {
         )
       }
     ],
+    // updateClaim only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer]
   );
 

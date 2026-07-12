@@ -98,11 +98,17 @@ export function AdminAutomation() {
   }
 
   async function generateTasks() {
-    const response = await fetch("/api/automation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "generate" })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/automation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "generate" })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void generateTasks());
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AutomationResponse;
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Unable to generate automation tasks.");
@@ -155,11 +161,17 @@ export function AdminAutomation() {
   });
 
   async function updateTask(id: string, updates: Partial<Pick<AutomationTask, "status" | "priority" | "dueAt" | "owner" | "ownerStaffId" | "notes">>) {
-    const response = await fetch("/api/automation", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/automation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateTask(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AutomationResponse;
     if (!response.ok || !data.ok || !data.task) {
       notify.error(data.error || "Unable to update automation task.");
@@ -279,6 +291,8 @@ export function AdminAutomation() {
           ) : null
       }
     ],
+    // updateTask only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, staff]
   );
 

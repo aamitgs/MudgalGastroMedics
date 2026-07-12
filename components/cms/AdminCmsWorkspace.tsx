@@ -166,11 +166,17 @@ export function AdminCmsWorkspace() {
   });
 
   async function updateStatus(id: string, status: CmsContentStatus) {
-    const response = await fetch("/api/cms", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/cms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as CmsResponse;
     if (!response.ok || !data.ok || !data.item) {
       notify.error(data.error || "Unable to update CMS status.");
@@ -234,6 +240,8 @@ export function AdminCmsWorkspace() {
         )
       }
     ],
+    // updateStatus only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [previewItem]
   );
 

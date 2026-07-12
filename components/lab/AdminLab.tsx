@@ -169,11 +169,17 @@ export function AdminLab() {
   }
 
   async function updateOrder(id: string, updates: Partial<Pick<LabOrder, "status" | "resultSummary" | "reportReference" | "paymentStatus" | "amount" | "notes">> & { criticalManual?: boolean; acknowledgeCritical?: boolean }) {
-    const response = await fetch("/api/lab", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/lab", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateOrder(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as LabListResponse;
     if (!response.ok || !data.ok || !data.order) {
       notify.error(data.error || "Unable to update lab order.");
@@ -313,6 +319,8 @@ export function AdminLab() {
         )
       }
     ],
+    // updateOrder only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, editingOrder]
   );
 

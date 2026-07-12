@@ -110,11 +110,17 @@ export function AdminInventory() {
   }
 
   async function adjustQuantity(id: string, delta: number) {
-    const response = await fetch("/api/inventory", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, delta })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/inventory", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, delta })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void adjustQuantity(id, delta));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as InventoryListResponse;
     if (!response.ok || !data.ok || !data.item) {
       // Mutation failures are transient/non-blocking (toast), never the
@@ -251,6 +257,8 @@ export function AdminInventory() {
         cell: ({ row }) => new Date(row.original.lastUpdatedAt).toLocaleDateString("en-IN")
       }
     ],
+    // adjustQuantity only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

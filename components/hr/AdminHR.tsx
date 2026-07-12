@@ -206,11 +206,17 @@ export function AdminHR() {
   });
 
   async function updateStaffStatus(id: string, status: StaffStatus) {
-    const response = await fetch("/api/hr", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, mode: "staff", status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/hr", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, mode: "staff", status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateStaffStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as HrResponse;
     if (!response.ok || !data.ok || !data.staffMember) {
       notify.error(data.error || "Unable to update staff.");
@@ -222,11 +228,17 @@ export function AdminHR() {
 
   async function togglePermission(member: StaffMember, permission: StaffPermission) {
     const permissions = member.permissions.includes(permission) ? member.permissions.filter((item) => item !== permission) : [...member.permissions, permission];
-    const response = await fetch("/api/hr", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: member.id, mode: "staff", permissions })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/hr", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: member.id, mode: "staff", permissions })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void togglePermission(member, permission));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as HrResponse;
     if (!response.ok || !data.ok || !data.staffMember) {
       notify.error(data.error || "Unable to update staff permissions.");
@@ -238,11 +250,17 @@ export function AdminHR() {
   }
 
   async function updateAttendanceStatus(id: string, status: AttendanceStatus) {
-    const response = await fetch("/api/hr", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, mode: "attendance", status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/hr", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, mode: "attendance", status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateAttendanceStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as HrResponse;
     const record = Array.isArray(data.attendance) ? null : data.attendance;
     if (!response.ok || !data.ok || !record) {
@@ -372,6 +390,8 @@ export function AdminHR() {
         )
       }
     ],
+    // updateStaffStatus only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [permissionsMember]
   );
 
@@ -413,6 +433,8 @@ export function AdminHR() {
           )
       }
     ],
+    // updateAttendanceStatus only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

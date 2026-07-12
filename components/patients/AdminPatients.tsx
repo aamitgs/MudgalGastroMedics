@@ -194,11 +194,17 @@ export function AdminPatients() {
   }
 
   async function updateStatus(id: string, status: PatientStatus) {
-    const response = await fetch("/api/patients", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/patients", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as PatientResponse;
     if (!response.ok || !data.ok || !data.patient) {
       notify.error(data.error || "Unable to update patient.");
@@ -315,6 +321,8 @@ export function AdminPatients() {
         )
       }
     ],
+    // updateStatus only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer]
   );
 
