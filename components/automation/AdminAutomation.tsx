@@ -1,7 +1,7 @@
 "use client";
 
 import { Bot, Download, WandSparkles } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus } from "@/lib/automation-types";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
@@ -10,8 +10,11 @@ import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { automationTaskCreateSchema, type AutomationTaskCreateInput } from "@/lib/validation/automation";
 
 const automationExportHeaders = ["Title", "Type", "Priority", "Status", "Patient", "Due At", "Created"];
 
@@ -109,23 +112,47 @@ export function AdminAutomation() {
     void loadAutomation();
   }
 
-  async function createTask(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/automation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = (await response.json().catch(() => ({}))) as AutomationResponse;
-    if (!response.ok || !data.ok || !data.task) {
-      notify.error(data.error || "Unable to create automation task.");
-      return;
+  const defaultTaskValues: AutomationTaskCreateInput = {
+    title: "",
+    type: "Appointment Follow-up",
+    priority: "Normal",
+    dueAt: new Date().toISOString().slice(0, 10),
+    ownerStaffId: "",
+    patientName: "",
+    phone: "",
+    description: "",
+    notes: ""
+  };
+
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    reset: resetTaskForm,
+    submit: submitTask
+  } = useAdvancedForm<AutomationTaskCreateInput>({
+    schema: automationTaskCreateSchema,
+    defaultValues: defaultTaskValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/automation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values)
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitTask());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as AutomationResponse;
+      if (!response.ok || !data.ok || !data.task) {
+        notify.error(data.error || "Unable to create automation task.");
+        return;
+      }
+      resetTaskForm(defaultTaskValues);
+      void loadAutomation();
     }
-    form.reset();
-    void loadAutomation();
-  }
+  });
 
   async function updateTask(id: string, updates: Partial<Pick<AutomationTask, "status" | "priority" | "dueAt" | "owner" | "ownerStaffId" | "notes">>) {
     const response = await fetch("/api/automation", {
@@ -283,36 +310,54 @@ export function AdminAutomation() {
       </div>
 
       <div className="grid gap-5 p-4 xl:grid-cols-[0.35fr_1.65fr]">
-        <form onSubmit={createTask} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitTask} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Bot size={19} /> Add manual task
           </p>
           <div className="grid gap-3">
-            <input name="title" className={fieldClass} placeholder="Task title" required />
-            <select aria-label="Type" name="type" className={fieldClass} defaultValue="Appointment Follow-up">
-              {automationTaskTypes.map((type) => (
-                <option key={type}>{type}</option>
-              ))}
-            </select>
-            <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Normal">
-              {automationTaskPriorities.map((priority) => (
-                <option key={priority}>{priority}</option>
-              ))}
-            </select>
-            <input aria-label="Due at" name="dueAt" className={fieldClass} type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-            <select aria-label="Assign to" name="ownerStaffId" className={fieldClass} defaultValue="">
-              <option value="">Unassigned</option>
-              {staff.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name} ({member.role})
-                </option>
-              ))}
-            </select>
-            <input name="patientName" className={fieldClass} placeholder="Patient name" />
-            <input name="phone" className={fieldClass} placeholder="Phone" />
-            <textarea name="description" className={`${fieldClass} min-h-24 py-3`} placeholder="Task description" />
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes" />
-            <ActionButton type="submit" variant="success">
+            <FormField label="Task title" htmlFor="automation-title" error={errors.title?.message}>
+              <input id="automation-title" className={fieldClass} placeholder="Task title" {...register("title")} />
+            </FormField>
+            <FormField label="Type" htmlFor="automation-type" error={errors.type?.message}>
+              <select id="automation-type" className={fieldClass} {...register("type")}>
+                {automationTaskTypes.map((type) => (
+                  <option key={type}>{type}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Priority" htmlFor="automation-priority" error={errors.priority?.message}>
+              <select id="automation-priority" className={fieldClass} {...register("priority")}>
+                {automationTaskPriorities.map((priority) => (
+                  <option key={priority}>{priority}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Due at" htmlFor="automation-dueAt" error={errors.dueAt?.message}>
+              <input id="automation-dueAt" className={fieldClass} type="date" {...register("dueAt")} />
+            </FormField>
+            <FormField label="Assign to" htmlFor="automation-owner" error={errors.ownerStaffId?.message}>
+              <select id="automation-owner" className={fieldClass} {...register("ownerStaffId")}>
+                <option value="">Unassigned</option>
+                {staff.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} ({member.role})
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Patient name" htmlFor="automation-patientName" error={errors.patientName?.message}>
+              <input id="automation-patientName" className={fieldClass} placeholder="Patient name" {...register("patientName")} />
+            </FormField>
+            <FormField label="Phone" htmlFor="automation-phone" error={errors.phone?.message}>
+              <input id="automation-phone" className={fieldClass} placeholder="Phone" {...register("phone")} />
+            </FormField>
+            <FormField label="Description" htmlFor="automation-description" error={errors.description?.message}>
+              <textarea id="automation-description" className={`${fieldClass} min-h-24 py-3`} placeholder="Task description" {...register("description")} />
+            </FormField>
+            <FormField label="Notes" htmlFor="automation-notes" error={errors.notes?.message}>
+              <textarea id="automation-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Internal notes" {...register("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="success" loading={isSubmitting} disabled={isSubmitting}>
               Save Task
             </ActionButton>
           </div>
