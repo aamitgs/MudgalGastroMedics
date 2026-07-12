@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarCheck2, Download, Phone, ShieldCheck, UserRoundPlus, UsersRound } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffStatus } from "@/lib/hr-types";
 import { attendanceStatuses, staffPermissions, staffRoles, staffStatuses } from "@/lib/hr-types";
@@ -12,7 +12,10 @@ import { queryStaffDirectory } from "@/lib/staff-directory-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { attendanceCreateSchema, staffCreateSchema, type AttendanceCreateInput, type StaffCreateInput } from "@/lib/validation/hr";
 
 const staffExportHeaders = ["Name", "Phone", "Email", "Role", "Department", "Shift", "Status", "Joining Date"];
 
@@ -117,44 +120,90 @@ export function AdminHR() {
     ];
   }, [attendance, staff]);
 
-  async function createStaffMember(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/hr", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, mode: "staff" })
-    });
-    const data = (await response.json().catch(() => ({}))) as HrResponse;
-    if (!response.ok || !data.ok || !data.staffMember) {
-      notify.error(data.error || "Unable to add staff member.");
-      return;
-    }
-    setStaff((items) => [data.staffMember as StaffMember, ...items]);
-    notify.success("Staff member saved");
-    form.reset();
-  }
+  const defaultStaffValues: StaffCreateInput = {
+    name: "",
+    phone: "",
+    department: "",
+    email: "",
+    role: "Admin",
+    shift: "General",
+    joiningDate: "",
+    salary: "",
+    emergencyContact: "",
+    notes: ""
+  };
 
-  async function markAttendance(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    const response = await fetch("/api/hr", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, mode: "attendance" })
-    });
-    const data = (await response.json().catch(() => ({}))) as HrResponse;
-    const record = Array.isArray(data.attendance) ? null : data.attendance;
-    if (!response.ok || !data.ok || !record) {
-      notify.error(data.error || "Unable to mark attendance.");
-      return;
+  const {
+    register: registerStaff,
+    formState: { errors: staffErrors, isSubmitting: isStaffSubmitting },
+    reset: resetStaffForm,
+    submit: submitStaff
+  } = useAdvancedForm<StaffCreateInput>({
+    schema: staffCreateSchema,
+    defaultValues: defaultStaffValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/hr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, mode: "staff" })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitStaff());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as HrResponse;
+      if (!response.ok || !data.ok || !data.staffMember) {
+        notify.error(data.error || "Unable to add staff member.");
+        return;
+      }
+      setStaff((items) => [data.staffMember as StaffMember, ...items]);
+      notify.success("Staff member saved");
+      resetStaffForm(defaultStaffValues);
     }
-    setAttendance((items) => [record, ...items.filter((item) => item.id !== record.id)]);
-    notify.success("Attendance recorded");
-    form.reset();
-  }
+  });
+
+  const defaultAttendanceValues: AttendanceCreateInput = {
+    staffId: "",
+    date: todayKey(),
+    status: "Present",
+    checkIn: "",
+    checkOut: "",
+    notes: ""
+  };
+
+  const {
+    register: registerAttendance,
+    formState: { errors: attendanceErrors, isSubmitting: isAttendanceSubmitting },
+    reset: resetAttendanceForm,
+    submit: submitAttendance
+  } = useAdvancedForm<AttendanceCreateInput>({
+    schema: attendanceCreateSchema,
+    defaultValues: defaultAttendanceValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/hr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, mode: "attendance" })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitAttendance());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as HrResponse;
+      const record = Array.isArray(data.attendance) ? null : data.attendance;
+      if (!response.ok || !data.ok || !record) {
+        notify.error(data.error || "Unable to mark attendance.");
+        return;
+      }
+      setAttendance((items) => [record, ...items.filter((item) => item.id !== record.id)]);
+      notify.success("Attendance recorded");
+      resetAttendanceForm({ ...defaultAttendanceValues, date: todayKey() });
+    }
+  });
 
   async function updateStaffStatus(id: string, status: StaffStatus) {
     const response = await fetch("/api/hr", {
@@ -387,71 +436,103 @@ export function AdminHR() {
       </div>
 
       <div className="grid gap-5 p-4 xl:grid-cols-2">
-        <form onSubmit={createStaffMember} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitStaff} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <UserRoundPlus size={19} /> Add staff member
           </p>
           <div className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="name" className={fieldClass} placeholder="Full name" required />
-              <input name="phone" className={fieldClass} placeholder="Phone" required />
+              <FormField label="Full name" htmlFor="staff-name" error={staffErrors.name?.message}>
+                <input id="staff-name" className={fieldClass} placeholder="Full name" {...registerStaff("name")} />
+              </FormField>
+              <FormField label="Phone" htmlFor="staff-phone" error={staffErrors.phone?.message}>
+                <input id="staff-phone" className={fieldClass} placeholder="Phone" {...registerStaff("phone")} />
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <select aria-label="Role" name="role" className={fieldClass} defaultValue="Admin">
-                {staffRoles.map((role) => (
-                  <option key={role}>{role}</option>
-                ))}
-              </select>
-              <input name="department" className={fieldClass} placeholder="Department" required />
-              <select aria-label="Shift" name="shift" className={fieldClass} defaultValue="General">
-                {shifts.map((shift) => (
-                  <option key={shift}>{shift}</option>
-                ))}
-              </select>
+              <FormField label="Role" htmlFor="staff-role" error={staffErrors.role?.message}>
+                <select id="staff-role" className={fieldClass} {...registerStaff("role")}>
+                  {staffRoles.map((role) => (
+                    <option key={role}>{role}</option>
+                  ))}
+                </select>
+              </FormField>
+              <FormField label="Department" htmlFor="staff-department" error={staffErrors.department?.message}>
+                <input id="staff-department" className={fieldClass} placeholder="Department" {...registerStaff("department")} />
+              </FormField>
+              <FormField label="Shift" htmlFor="staff-shift" error={staffErrors.shift?.message}>
+                <select id="staff-shift" className={fieldClass} {...registerStaff("shift")}>
+                  {shifts.map((shift) => (
+                    <option key={shift}>{shift}</option>
+                  ))}
+                </select>
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <input name="email" className={fieldClass} placeholder="Email" />
-              <input aria-label="Joining date" name="joiningDate" className={fieldClass} type="date" />
-              <input name="salary" className={fieldClass} type="number" min="0" placeholder="Monthly salary" />
+              <FormField label="Email" htmlFor="staff-email" error={staffErrors.email?.message}>
+                <input id="staff-email" className={fieldClass} placeholder="Email" {...registerStaff("email")} />
+              </FormField>
+              <FormField label="Joining date" htmlFor="staff-joiningDate" error={staffErrors.joiningDate?.message}>
+                <input id="staff-joiningDate" className={fieldClass} type="date" {...registerStaff("joiningDate")} />
+              </FormField>
+              <FormField label="Monthly salary" htmlFor="staff-salary" error={staffErrors.salary?.message}>
+                <input id="staff-salary" className={fieldClass} type="number" min="0" placeholder="Monthly salary" {...registerStaff("salary")} />
+              </FormField>
             </div>
-            <input name="emergencyContact" className={fieldClass} placeholder="Emergency contact" />
+            <FormField label="Emergency contact" htmlFor="staff-emergencyContact" error={staffErrors.emergencyContact?.message}>
+              <input id="staff-emergencyContact" className={fieldClass} placeholder="Emergency contact" {...registerStaff("emergencyContact")} />
+            </FormField>
             <p className="rounded border border-line bg-soft/60 p-3 text-xs font-semibold text-muted">
               Permissions are assigned from the selected role. Admin can adjust permissions after saving the staff member.
             </p>
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Role notes, documents or duty instructions" />
-            <ActionButton type="submit" variant="primary">
+            <FormField label="Notes" htmlFor="staff-notes" error={staffErrors.notes?.message}>
+              <textarea id="staff-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Role notes, documents or duty instructions" {...registerStaff("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="primary" loading={isStaffSubmitting} disabled={isStaffSubmitting}>
               Save Staff
             </ActionButton>
           </div>
         </form>
 
-        <form onSubmit={markAttendance} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitAttendance} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <CalendarCheck2 size={19} /> Mark attendance
           </p>
           <div className="grid gap-3">
-            <select aria-label="Staff member" name="staffId" className={fieldClass} required>
-              <option value="">Select staff member</option>
-              {staff.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name} | {member.role}
-                </option>
-              ))}
-            </select>
-            <div className="grid gap-3 md:grid-cols-2">
-              <input aria-label="Date" name="date" className={fieldClass} type="date" defaultValue={todayKey()} />
-              <select aria-label="Status" name="status" className={fieldClass} defaultValue="Present">
-                {attendanceStatuses.map((status) => (
-                  <option key={status}>{status}</option>
+            <FormField label="Staff member" htmlFor="attendance-staffId" error={attendanceErrors.staffId?.message}>
+              <select id="attendance-staffId" className={fieldClass} {...registerAttendance("staffId")}>
+                <option value="">Select staff member</option>
+                {staff.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} | {member.role}
+                  </option>
                 ))}
               </select>
+            </FormField>
+            <div className="grid gap-3 md:grid-cols-2">
+              <FormField label="Date" htmlFor="attendance-date" error={attendanceErrors.date?.message}>
+                <input id="attendance-date" className={fieldClass} type="date" {...registerAttendance("date")} />
+              </FormField>
+              <FormField label="Status" htmlFor="attendance-status" error={attendanceErrors.status?.message}>
+                <select id="attendance-status" className={fieldClass} {...registerAttendance("status")}>
+                  {attendanceStatuses.map((status) => (
+                    <option key={status}>{status}</option>
+                  ))}
+                </select>
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input aria-label="Check in" name="checkIn" className={fieldClass} type="time" />
-              <input aria-label="Check out" name="checkOut" className={fieldClass} type="time" />
+              <FormField label="Check in" htmlFor="attendance-checkIn" error={attendanceErrors.checkIn?.message}>
+                <input id="attendance-checkIn" className={fieldClass} type="time" {...registerAttendance("checkIn")} />
+              </FormField>
+              <FormField label="Check out" htmlFor="attendance-checkOut" error={attendanceErrors.checkOut?.message}>
+                <input id="attendance-checkOut" className={fieldClass} type="time" {...registerAttendance("checkOut")} />
+              </FormField>
             </div>
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Leave reason, late arrival or handover notes" />
-            <ActionButton type="submit" variant="success">
+            <FormField label="Notes" htmlFor="attendance-notes" error={attendanceErrors.notes?.message}>
+              <textarea id="attendance-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Leave reason, late arrival or handover notes" {...registerAttendance("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="success" loading={isAttendanceSubmitting} disabled={isAttendanceSubmitting}>
               Save Attendance
             </ActionButton>
           </div>
