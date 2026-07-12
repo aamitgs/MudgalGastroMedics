@@ -128,8 +128,8 @@ export const hospitalRoleToAccessRole: Record<HospitalRole, AccessRole> = {
 
 /**
  * Reverse mapping: which OS workspace a logged-in access role lands in.
- * PRO approximates to Front Desk for UI purposes only — the server still
- * enforces PRO's narrower matrix on every API call.
+ * PRO and Dietitian approximate to Front Desk for UI purposes only — the
+ * server still enforces each role's own narrower matrix on every API call.
  */
 export const accessRoleToHospitalRole: Record<AccessRole, HospitalRole> = {
   "super-admin": "Admin",
@@ -143,6 +143,7 @@ export const accessRoleToHospitalRole: Record<AccessRole, HospitalRole> = {
   "billing-accounts": "Accountant",
   hr: "HR",
   pro: "Front Desk",
+  dietitian: "Front Desk",
   patient: "Front Desk"
 };
 

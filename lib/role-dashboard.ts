@@ -191,6 +191,18 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
         ],
         actions: [{ label: "HR & attendance", href: "#module-hr" }]
       };
+    case "dietitian":
+      return {
+        heading: "Nutrition today",
+        tiles: [
+          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "#module-ipd" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-opd" }
+        ],
+        actions: [
+          { label: "Patients", href: "#module-patients" },
+          { label: "Diet plans", href: "#module-diet-plans" }
+        ]
+      };
     case "patient":
       return null;
   }

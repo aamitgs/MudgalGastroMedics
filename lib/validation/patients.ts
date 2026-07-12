@@ -44,7 +44,8 @@ export const patientUpdateSchema = z.object({
   allergies: optionalText,
   chronicConditions: optionalText,
   currentMedicines: optionalText,
-  notes: optionalText
+  notes: optionalText,
+  dietPlan: optionalText
 });
 
 export type PatientCreateInput = z.infer<typeof patientCreateSchema>;

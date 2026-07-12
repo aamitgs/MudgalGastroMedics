@@ -20,6 +20,7 @@ const moduleLoaders: Record<string, () => Promise<{ default: ComponentType }>> =
   "module-automation": () => import("@/components/automation/AdminAutomation").then((m) => ({ default: m.AdminAutomation })),
   "module-ai-reviews": () => import("@/components/ai-reviews/AdminAiReviews").then((m) => ({ default: m.AdminAiReviews })),
   "module-patients": () => import("@/components/patients/AdminPatients").then((m) => ({ default: m.AdminPatients })),
+  "module-diet-plans": () => import("@/components/patients/AdminDietPlans").then((m) => ({ default: m.AdminDietPlans })),
   "module-appointments": () => import("@/components/appointments/AdminAppointments").then((m) => ({ default: m.AdminAppointments })),
   "module-opd": () => import("@/components/opd/AdminOpdQueue").then((m) => ({ default: m.AdminOpdQueue })),
   "module-procedures": () => import("@/components/procedures/AdminProcedures").then((m) => ({ default: m.AdminProcedures })),

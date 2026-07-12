@@ -30,6 +30,7 @@ export const adminModules: AdminModuleDef[] = [
   // AI case reviews contain clinical content: gate like patient records.
   { id: "module-ai-reviews", label: "AI Reviews", resource: "patients" },
   { id: "module-patients", label: "Patients", resource: "patients" },
+  { id: "module-diet-plans", label: "Diet Plans", resource: "diet-plans" },
   { id: "module-appointments", label: "Appointments", resource: "appointments" },
   { id: "module-opd", label: "OPD", resource: "appointments" },
   { id: "module-procedures", label: "Procedures", resource: "appointments" },

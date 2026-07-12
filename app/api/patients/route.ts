@@ -96,13 +96,35 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const auth = await authorize(request, "patients", "edit");
-  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
-
   const parsed = patientUpdateSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
+
+  // Diet plan writes are gated on their own narrow resource (the Dietitian
+  // role holds diet-plans:edit but not patients:edit) — everything else on
+  // this record needs the broader patients:edit a Dietitian never has.
+  const touchesOtherFields = [
+    parsed.data.status,
+    parsed.data.name,
+    parsed.data.phone,
+    parsed.data.alternatePhone,
+    parsed.data.email,
+    parsed.data.age,
+    parsed.data.gender,
+    parsed.data.bloodGroup,
+    parsed.data.address,
+    parsed.data.city,
+    parsed.data.emergencyContact,
+    parsed.data.allergies,
+    parsed.data.chronicConditions,
+    parsed.data.currentMedicines,
+    parsed.data.notes
+  ].some((value) => value !== undefined);
+  const touchesDietPlanOnly = parsed.data.dietPlan !== undefined && !touchesOtherFields;
+  const auth = await authorize(request, touchesDietPlanOnly ? "diet-plans" : "patients", "edit");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
   const { id, status } = parsed.data;
 
   // Snapshot must be cloned: the document store caches records in memory and

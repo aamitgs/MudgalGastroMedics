@@ -257,13 +257,14 @@ export async function PATCH(request: Request) {
   const parsed = ipdAdmissionUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
 
-  // Clinical narrative fields (diagnosis, care plan, discharge summary, diet
-  // advice) need patient-record edit rights; plain admission/bed/discharge
-  // changes are ward operations that nurses hold via beds:edit.
-  const touchesClinical = [parsed.data.diagnosis, parsed.data.carePlan, parsed.data.dischargeSummary, parsed.data.dietAdvice].some(
-    (value) => value !== undefined
-  );
-  const auth = await authorize(request, touchesClinical ? "patients" : "beds", "edit");
+  // Clinical narrative fields (diagnosis, care plan, discharge summary) need
+  // patient-record edit rights; diet advice is gated on its own narrow
+  // resource so a Dietitian can write it without gaining broader
+  // patients:edit; plain admission/bed/discharge changes are ward operations
+  // that nurses hold via beds:edit.
+  const touchesClinical = [parsed.data.diagnosis, parsed.data.carePlan, parsed.data.dischargeSummary].some((value) => value !== undefined);
+  const touchesDietAdvice = parsed.data.dietAdvice !== undefined;
+  const auth = await authorize(request, touchesClinical ? "patients" : touchesDietAdvice ? "diet-plans" : "beds", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const { status } = parsed.data;

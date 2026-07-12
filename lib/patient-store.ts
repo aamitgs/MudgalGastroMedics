@@ -151,6 +151,7 @@ export async function updatePatient(input: Record<string, unknown>) {
   if (typeof input.chronicConditions === "string") patient.chronicConditions = normalizeText(input.chronicConditions);
   if (typeof input.currentMedicines === "string") patient.currentMedicines = normalizeText(input.currentMedicines);
   if (typeof input.notes === "string") patient.notes = normalizeText(input.notes);
+  if (typeof input.dietPlan === "string") patient.dietPlan = normalizeText(input.dietPlan);
   patient.updatedAt = new Date().toISOString();
 
   await store.save(doc);

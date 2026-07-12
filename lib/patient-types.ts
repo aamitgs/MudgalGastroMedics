@@ -21,6 +21,8 @@ export type PatientRecord = {
   currentMedicines?: string;
   notes?: string;
   lastVisitAt?: string;
+  /** Persistent nutrition guidance, gated separately from general patient editing — see the "diet-plans" RBAC resource. */
+  dietPlan?: string;
 };
 
 export const patientStatuses: PatientStatus[] = ["Active", "Inactive", "Flagged"];

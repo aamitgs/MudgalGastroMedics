@@ -22,6 +22,7 @@ export type AccessRole =
   | "billing-accounts"
   | "hr"
   | "pro"
+  | "dietitian"
   | "patient";
 
 export type AccessResource =
@@ -39,7 +40,8 @@ export type AccessResource =
   | "user-management"
   | "audit-logs"
   | "liaison-notes"
-  | "cms";
+  | "cms"
+  | "diet-plans";
 
 export type AccessAction = "view" | "create" | "edit" | "delete" | "export";
 
@@ -60,7 +62,8 @@ export const accessResources: AccessResource[] = [
   "user-management",
   "audit-logs",
   "liaison-notes",
-  "cms"
+  "cms",
+  "diet-plans"
 ];
 
 export type RoleMeta = {
@@ -139,6 +142,12 @@ export const roleMeta: Record<AccessRole, RoleMeta> = {
     landing: "/admin",
     staffLogin: true
   },
+  dietitian: {
+    label: "Dietitian",
+    description: "Reviews patient nutrition/medical history and manages diet plans for OPD and admitted patients.",
+    landing: "/admin",
+    staffLogin: true
+  },
   patient: {
     label: "Patient",
     description: "Self-service portal: own appointments, reports, prescriptions, bills.",
@@ -186,7 +195,8 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     "system-settings": ["view", "edit"],
     "user-management": ["view"],
     "liaison-notes": readWriteExport,
-    cms: readWriteExport
+    cms: readWriteExport,
+    "diet-plans": readWriteExport
   },
   "main-doctor": {
     patients: readWriteExport,
@@ -195,7 +205,8 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     prescriptions: readWriteExport,
     "lab-orders": readWrite,
     reports: ["view", "export"],
-    "liaison-notes": ["view"]
+    "liaison-notes": ["view"],
+    "diet-plans": readWrite
   },
   "duty-doctor": {
     patients: ["view", "edit"],
@@ -206,7 +217,8 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     beds: ["view", "edit"],
     prescriptions: readWrite,
     "lab-orders": ["view", "create"],
-    reports: ["view"]
+    reports: ["view"],
+    "diet-plans": readWrite
   },
   nurse: {
     patients: ["view"],
@@ -252,6 +264,16 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     appointments: ["view"],
     insurance: ["view"],
     "liaison-notes": readWriteExport
+  },
+  dietitian: {
+    // View-only on the patient record itself (name/history/allergies) —
+    // writes are scoped narrowly to diet-plans, not general patient editing.
+    patients: ["view"],
+    // View-only on beds/admissions too — needed to see who's currently
+    // admitted (the Diet Plans module's "Currently admitted" panel reads
+    // GET /api/ipd, which is gated on beds:view), not to manage bed status.
+    beds: ["view"],
+    "diet-plans": readWrite
   },
   patient: {}
 };
