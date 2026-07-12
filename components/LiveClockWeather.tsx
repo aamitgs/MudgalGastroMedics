@@ -48,7 +48,7 @@ function isHospitalOpen(now: Date) {
  * shows hospital time on any device; the weather chip hides itself entirely
  * if the (cached, server-side) weather API is unavailable.
  */
-export function LiveClockWeather({ variant }: { variant: "site" | "os" }) {
+export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launcher" }) {
   const [now, setNow] = useState<Date | null>(null);
   const [weather, setWeather] = useState<Weather | null>(null);
 
@@ -104,6 +104,22 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" }) {
             <WeatherIcon size={16} className="text-[var(--hos-primary)]" aria-hidden="true" />
             <span className="tabular-nums">{weather.tempC}°C</span>
             <span className="hidden text-[var(--hos-muted-text)] 2xl:inline">{weather.label}</span>
+          </>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (variant === "launcher") {
+    return (
+      <div className="flex items-center justify-center gap-2 text-sm font-semibold text-muted" aria-label="Current time and weather in Agra">
+        <span className="tabular-nums whitespace-nowrap">{istDayFormat.format(now)} {istTimeFormat.format(now)} IST</span>
+        {weather && WeatherIcon ? (
+          <>
+            <span aria-hidden="true" className="text-line">|</span>
+            <WeatherIcon size={16} className="text-brand" aria-hidden="true" />
+            <span className="tabular-nums">{weather.tempC}°C</span>
+            <span className="hidden text-muted/80 sm:inline">{weather.label} in Agra</span>
           </>
         ) : null}
       </div>
