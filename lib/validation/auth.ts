@@ -5,9 +5,12 @@ const genericLoginError = "Invalid username or password.";
 // username is trimmed (matches original `.trim()`); password/role are left
 // exactly as typed — trimming a password or role token would be a silent,
 // surprising behavior change for callers that never asked for it.
+// The { error } option on the base z.string() call (not just the chained
+// .min() message) matters: it's what covers an entirely-absent key, since
+// .min() alone only fires once the type check already passed.
 export const authLoginSchema = z.object({
-  username: z.string().trim().min(1, genericLoginError),
-  password: z.string().min(1, genericLoginError),
+  username: z.string({ error: genericLoginError }).trim().min(1, genericLoginError),
+  password: z.string({ error: genericLoginError }).min(1, genericLoginError),
   role: z.string().optional()
 });
 
@@ -25,8 +28,10 @@ export const authRoleSwitchSchema = z.object({
   password: z.string().default("")
 });
 
+const breakGlassReasonError = "A specific reason (at least 10 characters) is required — it will be reviewed.";
+
 export const breakGlassRequestSchema = z.object({
-  reason: z.string().trim().min(10, "A specific reason (at least 10 characters) is required — it will be reviewed.")
+  reason: z.string({ error: breakGlassReasonError }).trim().min(10, breakGlassReasonError)
 });
 
 export const adminSessionLoginSchema = z.object({
@@ -43,8 +48,8 @@ export const doctorSessionLoginSchema = z.object({
 const accessRequiredFieldsError = "name, username and at least one role are required.";
 
 export const accessUserCreateSchema = z.object({
-  name: z.string().trim().min(1, accessRequiredFieldsError),
-  username: z.string().min(1, accessRequiredFieldsError),
+  name: z.string({ error: accessRequiredFieldsError }).trim().min(1, accessRequiredFieldsError),
+  username: z.string({ error: accessRequiredFieldsError }).min(1, accessRequiredFieldsError),
   email: z.string().trim().optional(),
   roles: z.array(z.string()).default([]),
   defaultRole: z.string().optional()
@@ -61,7 +66,9 @@ export const accessUserPatchSchema = z.object({
   defaultRole: z.string().optional()
 });
 
+const approvalDecisionError = "id and decision (approved|rejected) are required.";
+
 export const approvalDecisionSchema = z.object({
-  id: z.string().trim().min(1, "id and decision (approved|rejected) are required."),
-  decision: z.enum(["approved", "rejected"], { error: "id and decision (approved|rejected) are required." })
+  id: z.string({ error: approvalDecisionError }).trim().min(1, approvalDecisionError),
+  decision: z.enum(["approved", "rejected"], { error: approvalDecisionError })
 });
