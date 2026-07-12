@@ -18,3 +18,34 @@ export const accountEntryCreateSchema = z.object({
 });
 
 export type AccountEntryCreateInput = z.infer<typeof accountEntryCreateSchema>;
+
+// sourceType drives which of admissionId/visitId the form renders (only one
+// at a time) — superRefine attaches the "select a source" error to whichever
+// field is currently visible, so it never points at the hidden one.
+export const insuranceClaimCreateSchema = z
+  .object({
+    sourceType: z.enum(["ipd", "opd"]),
+    admissionId: z.string().trim().optional(),
+    visitId: z.string().trim().optional(),
+    insurer: z.string({ error: "Insurer is required." }).trim().min(1, "Insurer is required."),
+    tpa: z.string().trim().optional(),
+    policyNumber: z.string().trim().optional(),
+    claimNumber: z.string().trim().optional(),
+    requestedAmount: z.coerce.number().optional(),
+    approvedAmount: z.coerce.number().optional(),
+    settledAmount: z.coerce.number().optional(),
+    documents: z.string().trim().optional(),
+    notes: z.string().trim().optional()
+  })
+  .superRefine((data, ctx) => {
+    const hasSource = data.sourceType === "ipd" ? Boolean(data.admissionId) : Boolean(data.visitId);
+    if (!hasSource) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Select an IPD admission or OPD visit.",
+        path: [data.sourceType === "ipd" ? "admissionId" : "visitId"]
+      });
+    }
+  });
+
+export type InsuranceClaimCreateInput = z.infer<typeof insuranceClaimCreateSchema>;

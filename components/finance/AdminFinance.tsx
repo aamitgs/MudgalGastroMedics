@@ -1,7 +1,7 @@
 "use client";
 
 import { BadgeIndianRupee, Download, FileCheck2 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
 import { accountEntryMethods, accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
@@ -18,7 +18,7 @@ import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
-import { accountEntryCreateSchema, type AccountEntryCreateInput } from "@/lib/validation/finance";
+import { accountEntryCreateSchema, insuranceClaimCreateSchema, type AccountEntryCreateInput, type InsuranceClaimCreateInput } from "@/lib/validation/finance";
 
 const claimExportHeaders = ["Patient", "Phone", "Insurer", "Policy Number", "Claim Number", "Requested", "Approved", "Settled", "Status"];
 
@@ -74,7 +74,6 @@ export function AdminFinance() {
   const [entries, setEntries] = useState<AccountEntry[]>([]);
   const [admissions, setAdmissions] = useState<IpdAdmission[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
-  const [sourceType, setSourceType] = useState<"ipd" | "opd">("ipd");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -144,23 +143,54 @@ export function AdminFinance() {
     ];
   }, [claims, entries]);
 
-  async function createClaim(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const response = await fetch("/api/finance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, mode: "claim" })
-    });
-    const data = (await response.json().catch(() => ({}))) as FinanceResponse;
-    if (!response.ok || !data.ok || !data.claim) {
-      notify.error(data.error || "Unable to create insurance claim.");
-      return;
+  const defaultClaimValues: InsuranceClaimCreateInput = {
+    sourceType: "ipd",
+    admissionId: "",
+    visitId: "",
+    insurer: "",
+    tpa: "",
+    policyNumber: "",
+    claimNumber: "",
+    requestedAmount: undefined,
+    approvedAmount: undefined,
+    settledAmount: undefined,
+    documents: "",
+    notes: ""
+  };
+
+  const {
+    register: registerClaim,
+    watch: watchClaim,
+    setValue: setClaimValue,
+    formState: { errors: claimErrors, isSubmitting: isClaimSubmitting },
+    reset: resetClaimForm,
+    submit: submitClaim
+  } = useAdvancedForm<InsuranceClaimCreateInput>({
+    schema: insuranceClaimCreateSchema,
+    defaultValues: defaultClaimValues,
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/finance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, mode: "claim" })
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitClaim());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as FinanceResponse;
+      if (!response.ok || !data.ok || !data.claim) {
+        notify.error(data.error || "Unable to create insurance claim.");
+        return;
+      }
+      setClaims((items) => [data.claim as InsuranceClaim, ...items]);
+      notify.success("Insurance claim saved");
+      resetClaimForm(defaultClaimValues);
     }
-    setClaims((items) => [data.claim as InsuranceClaim, ...items]);
-    notify.success("Insurance claim saved");
-    event.currentTarget.reset();
-  }
+  });
+  const claimSourceType = watchClaim("sourceType");
 
   const defaultEntryValues: AccountEntryCreateInput = {
     date: new Date().toISOString().slice(0, 10),
@@ -376,52 +406,85 @@ export function AdminFinance() {
       </div>
 
       <div className="grid gap-5 p-4 xl:grid-cols-2">
-        <form onSubmit={createClaim} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+        <form onSubmit={submitClaim} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <FileCheck2 size={19} /> Create insurance claim
           </p>
           <div className="grid gap-3">
-            <select aria-label="Source type" value={sourceType} onChange={(event) => setSourceType(event.target.value as "ipd" | "opd")} className={fieldClass}>
+            <select
+              aria-label="Source type"
+              className={fieldClass}
+              {...registerClaim("sourceType", {
+                onChange: (event) => {
+                  // Only one of admissionId/visitId is ever rendered — clear
+                  // the one that's about to hide so a stale selection from
+                  // before the switch can't be submitted alongside the new one.
+                  setClaimValue(event.target.value === "ipd" ? "visitId" : "admissionId", "");
+                }
+              })}
+            >
               <option value="ipd">IPD Admission</option>
               <option value="opd">OPD Visit</option>
             </select>
-            {sourceType === "ipd" ? (
-              <select aria-label="Admission" name="admissionId" className={fieldClass} required>
-                <option value="">Select admission</option>
-                {admissions.map((admission) => (
-                  <option key={admission.id} value={admission.id}>
-                    {admission.id} | {admission.patientName}
-                    {admission.uhid ? ` | ${admission.uhid}` : ""}
-                  </option>
-                ))}
-              </select>
+            {claimSourceType === "ipd" ? (
+              <FormField label="Admission" htmlFor="claim-admissionId" error={claimErrors.admissionId?.message}>
+                <select id="claim-admissionId" className={fieldClass} {...registerClaim("admissionId")}>
+                  <option value="">Select admission</option>
+                  {admissions.map((admission) => (
+                    <option key={admission.id} value={admission.id}>
+                      {admission.id} | {admission.patientName}
+                      {admission.uhid ? ` | ${admission.uhid}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
             ) : (
-              <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
-                <option value="">Select OPD visit</option>
-                {visits.map((visit) => (
-                  <option key={visit.id} value={visit.id}>
-                    {visit.token} | {visit.patientName}
-                    {visit.uhid ? ` | ${visit.uhid}` : ""}
-                  </option>
-                ))}
-              </select>
+              <FormField label="OPD visit" htmlFor="claim-visitId" error={claimErrors.visitId?.message}>
+                <select id="claim-visitId" className={fieldClass} {...registerClaim("visitId")}>
+                  <option value="">Select OPD visit</option>
+                  {visits.map((visit) => (
+                    <option key={visit.id} value={visit.id}>
+                      {visit.token} | {visit.patientName}
+                      {visit.uhid ? ` | ${visit.uhid}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
             )}
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="insurer" className={fieldClass} placeholder="Insurer" required />
-              <input name="tpa" className={fieldClass} placeholder="TPA" />
+              <FormField label="Insurer" htmlFor="claim-insurer" error={claimErrors.insurer?.message}>
+                <input id="claim-insurer" className={fieldClass} placeholder="Insurer" {...registerClaim("insurer")} />
+              </FormField>
+              <FormField label="TPA" htmlFor="claim-tpa" error={claimErrors.tpa?.message}>
+                <input id="claim-tpa" className={fieldClass} placeholder="TPA" {...registerClaim("tpa")} />
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <input name="policyNumber" className={fieldClass} placeholder="Policy number" />
-              <input name="claimNumber" className={fieldClass} placeholder="Claim number" />
+              <FormField label="Policy number" htmlFor="claim-policyNumber" error={claimErrors.policyNumber?.message}>
+                <input id="claim-policyNumber" className={fieldClass} placeholder="Policy number" {...registerClaim("policyNumber")} />
+              </FormField>
+              <FormField label="Claim number" htmlFor="claim-claimNumber" error={claimErrors.claimNumber?.message}>
+                <input id="claim-claimNumber" className={fieldClass} placeholder="Claim number" {...registerClaim("claimNumber")} />
+              </FormField>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <input name="requestedAmount" className={fieldClass} type="number" min="0" placeholder="Requested" />
-              <input name="approvedAmount" className={fieldClass} type="number" min="0" placeholder="Approved" />
-              <input name="settledAmount" className={fieldClass} type="number" min="0" placeholder="Settled" />
+              <FormField label="Requested" htmlFor="claim-requestedAmount" error={claimErrors.requestedAmount?.message}>
+                <input id="claim-requestedAmount" className={fieldClass} type="number" min="0" placeholder="Requested" {...registerClaim("requestedAmount")} />
+              </FormField>
+              <FormField label="Approved" htmlFor="claim-approvedAmount" error={claimErrors.approvedAmount?.message}>
+                <input id="claim-approvedAmount" className={fieldClass} type="number" min="0" placeholder="Approved" {...registerClaim("approvedAmount")} />
+              </FormField>
+              <FormField label="Settled" htmlFor="claim-settledAmount" error={claimErrors.settledAmount?.message}>
+                <input id="claim-settledAmount" className={fieldClass} type="number" min="0" placeholder="Settled" {...registerClaim("settledAmount")} />
+              </FormField>
             </div>
-            <input name="documents" className={fieldClass} placeholder="Documents / file references" />
-            <textarea name="notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Claim notes" />
-            <ActionButton type="submit" variant="primary">
+            <FormField label="Documents / file references" htmlFor="claim-documents" error={claimErrors.documents?.message}>
+              <input id="claim-documents" className={fieldClass} placeholder="Documents / file references" {...registerClaim("documents")} />
+            </FormField>
+            <FormField label="Claim notes" htmlFor="claim-notes" error={claimErrors.notes?.message}>
+              <textarea id="claim-notes" className={`${fieldClass} min-h-20 py-3`} placeholder="Claim notes" {...registerClaim("notes")} />
+            </FormField>
+            <ActionButton type="submit" variant="primary" loading={isClaimSubmitting} disabled={isClaimSubmitting}>
               Save Claim
             </ActionButton>
           </div>
