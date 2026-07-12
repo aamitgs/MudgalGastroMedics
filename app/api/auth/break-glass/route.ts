@@ -3,6 +3,8 @@ import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { getSessionAndUser } from "@/lib/access/guard";
 import { breakGlassRoles } from "@/lib/access/matrix";
 import { createBreakGlassGrant, getActiveBreakGlassGrant } from "@/lib/access/break-glass-store";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { breakGlassRequestSchema } from "@/lib/validation/auth";
 
 /**
  * Break-glass emergency access: a doctor asserts a genuine emergency and gains
@@ -18,14 +20,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Break-glass access is limited to doctors." }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (reason.length < 10) {
-    return NextResponse.json(
-      { ok: false, error: "A specific reason (at least 10 characters) is required — it will be reviewed." },
-      { status: 400 }
-    );
+  const parsed = breakGlassRequestSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
+  const { reason } = parsed.data;
 
   const existing = await getActiveBreakGlassGrant(user.id);
   if (existing) {

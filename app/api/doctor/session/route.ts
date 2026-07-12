@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { clearDoctorSessionCookie, createDoctorSessionCookie, isValidDoctorPasscode } from "@/lib/doctor-auth";
+import { doctorSessionLoginSchema } from "@/lib/validation/auth";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const passcode = typeof body.passcode === "string" ? body.passcode : "";
+  const parsed = doctorSessionLoginSchema.safeParse(await request.json().catch(() => ({})));
+  const passcode = parsed.success ? parsed.data.passcode : "";
 
   if (!isValidDoctorPasscode(passcode)) {
     await recordAuditEvent({

@@ -5,6 +5,7 @@ import { mfaRateLimit } from "@/lib/access/rate-limit";
 import { updateAccessSession } from "@/lib/access/session-store";
 import { buildTotpUri, createTotpSecret, verifyTotpCode } from "@/lib/access/totp";
 import { updateAccessUser } from "@/lib/access/user-store";
+import { mfaCodeSchema } from "@/lib/validation/auth";
 
 function canSetUp(status: string, totpEnabled: boolean) {
   return status === "mfa-setup-required" || (status === "active" && !totpEnabled);
@@ -40,8 +41,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const code = typeof body.code === "string" ? body.code : "";
+  const parsed = mfaCodeSchema.safeParse(await request.json().catch(() => ({})));
+  const code = parsed.success ? parsed.data.code : "";
   if (!(await verifyTotpCode(user.totpSecret, code))) {
     return NextResponse.json({ ok: false, error: "That code did not match. Check the app and try again." }, { status: 401 });
   }

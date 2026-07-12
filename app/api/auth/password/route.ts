@@ -6,6 +6,7 @@ import { hashPassword, validatePassword, verifyPassword } from "@/lib/access/pas
 import { accountMutationRateLimit } from "@/lib/access/rate-limit";
 import { revokeAllSessionsForUser, updateAccessSession, type AccessSessionStatus } from "@/lib/access/session-store";
 import { updateAccessUser } from "@/lib/access/user-store";
+import { authPasswordChangeSchema } from "@/lib/validation/auth";
 
 export async function POST(request: Request) {
   const resolved = await getSessionAndUser(request);
@@ -23,9 +24,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const currentPassword = typeof body.currentPassword === "string" ? body.currentPassword : "";
-  const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
+  const parsed = authPasswordChangeSchema.safeParse(await request.json().catch(() => ({})));
+  const { currentPassword, newPassword } = parsed.success ? parsed.data : { currentPassword: "", newPassword: "" };
 
   if (!verifyPassword(currentPassword, user.passwordHash)) {
     return NextResponse.json({ ok: false, error: "Current password is incorrect." }, { status: 401 });

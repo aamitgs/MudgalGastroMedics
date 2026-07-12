@@ -4,6 +4,8 @@ import { authorize } from "@/lib/access/guard";
 import { decideApproval, getApprovalById, listApprovals } from "@/lib/access/approvals-store";
 import { revokeAllSessionsForUser } from "@/lib/access/session-store";
 import { getAccessUserById, updateAccessUser } from "@/lib/access/user-store";
+import { firstZodIssueMessage } from "@/lib/validation/http";
+import { approvalDecisionSchema } from "@/lib/validation/auth";
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "user-management", "view");
@@ -27,12 +29,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Only a Super Admin can decide approvals." }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const decision = body.decision === "approved" || body.decision === "rejected" ? body.decision : null;
-  if (!id || !decision) {
-    return NextResponse.json({ ok: false, error: "id and decision (approved|rejected) are required." }, { status: 400 });
+  const parsed = approvalDecisionSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
+  const { id, decision } = parsed.data;
 
   const approval = await getApprovalById(id);
   if (!approval || approval.status !== "pending") {

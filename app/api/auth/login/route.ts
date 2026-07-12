@@ -12,6 +12,7 @@ import {
   type AccessUser
 } from "@/lib/access/user-store";
 import { buildSessionCookie, createAccessSession, type AccessSessionStatus } from "@/lib/access/session-store";
+import { authLoginSchema } from "@/lib/validation/auth";
 
 const genericError = "Invalid username or password.";
 
@@ -35,14 +36,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json().catch(() => ({}));
-  const username = typeof body.username === "string" ? body.username.trim() : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  const requestedRole = typeof body.role === "string" ? body.role : "";
-
-  if (!username || !password) {
+  const parsed = authLoginSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
     return NextResponse.json({ ok: false, error: genericError }, { status: 401 });
   }
+  const { username, password, role } = parsed.data;
+  const requestedRole = role ?? "";
 
   const user = await getAccessUserByUsername(username);
 

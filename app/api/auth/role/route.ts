@@ -5,6 +5,7 @@ import { isAccessRole } from "@/lib/access/matrix";
 import { verifyPassword } from "@/lib/access/password";
 import { accountMutationRateLimit } from "@/lib/access/rate-limit";
 import { dropElevation, grantElevation, updateAccessSession } from "@/lib/access/session-store";
+import { authRoleSwitchSchema } from "@/lib/validation/auth";
 
 /**
  * Switches the session's active role. Switching into Super Admin is the
@@ -26,9 +27,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const role = typeof body.role === "string" ? body.role : "";
-  const password = typeof body.password === "string" ? body.password : "";
+  const parsed = authRoleSwitchSchema.safeParse(await request.json().catch(() => ({})));
+  const { role, password } = parsed.success ? parsed.data : { role: "", password: "" };
 
   if (!isAccessRole(role) || !user.roles.includes(role)) {
     return NextResponse.json({ ok: false, error: "You do not hold that role." }, { status: 403 });

@@ -5,6 +5,7 @@ import { isAccessRole, type AccessRole } from "@/lib/access/matrix";
 import { generateTempPassword, hashPassword } from "@/lib/access/password";
 import { createRoleChangeApproval } from "@/lib/access/approvals-store";
 import { revokeAllSessionsForUser } from "@/lib/access/session-store";
+import { firstZodIssueMessage } from "@/lib/validation/http";
 import {
   createAccessUser,
   getAccessUserById,
@@ -12,6 +13,7 @@ import {
   updateAccessUser,
   type AccessUser
 } from "@/lib/access/user-store";
+import { accessUserCreateSchema, accessUserPatchSchema } from "@/lib/validation/auth";
 
 function publicUser(user: AccessUser) {
   return {
@@ -44,14 +46,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Only a Super Admin can create users." }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  const username = typeof body.username === "string" ? body.username : "";
-  const email = typeof body.email === "string" ? body.email : undefined;
-  const roles = Array.isArray(body.roles) ? body.roles.filter((role: string) => isAccessRole(role)) as AccessRole[] : [];
-  const defaultRole = typeof body.defaultRole === "string" && isAccessRole(body.defaultRole) ? body.defaultRole : roles[0];
+  const parsed = accessUserCreateSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+  }
+  const { name, username, email } = parsed.data;
+  const roles = parsed.data.roles.filter((role) => isAccessRole(role)) as AccessRole[];
+  const defaultRole = parsed.data.defaultRole && isAccessRole(parsed.data.defaultRole) ? parsed.data.defaultRole : roles[0];
 
-  if (!name || !username || !roles.length) {
+  if (!roles.length) {
     return NextResponse.json({ ok: false, error: "name, username and at least one role are required." }, { status: 400 });
   }
   if (roles.includes("super-admin")) {
@@ -97,9 +100,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Only a Super Admin can modify users." }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const id = typeof body.id === "string" ? body.id : "";
-  const operation = typeof body.operation === "string" ? body.operation : "";
+  const parsed = accessUserPatchSchema.safeParse(await request.json().catch(() => ({})));
+  const { id, operation } = parsed.success ? parsed.data : { id: "", operation: "" };
   const user = await getAccessUserById(id);
   if (!user) return NextResponse.json({ ok: false, error: "User not found." }, { status: 404 });
 
@@ -164,9 +166,11 @@ export async function PATCH(request: Request) {
   if (operation === "request-role-change") {
     // Two-person rule: role changes (including any Super Admin grant) are
     // queued for a second, different Super Admin to approve.
-    const roles = Array.isArray(body.roles) ? body.roles.filter((role: string) => isAccessRole(role)) as AccessRole[] : [];
-    const defaultRole = typeof body.defaultRole === "string" && isAccessRole(body.defaultRole) && roles.includes(body.defaultRole)
-      ? body.defaultRole as AccessRole
+    const requestedRoles = parsed.success ? parsed.data.roles : [];
+    const requestedDefaultRole = parsed.success ? parsed.data.defaultRole : undefined;
+    const roles = requestedRoles.filter((role) => isAccessRole(role)) as AccessRole[];
+    const defaultRole = requestedDefaultRole && isAccessRole(requestedDefaultRole) && roles.includes(requestedDefaultRole)
+      ? requestedDefaultRole
       : roles[0];
     if (!roles.length) return NextResponse.json({ ok: false, error: "At least one role is required." }, { status: 400 });
 

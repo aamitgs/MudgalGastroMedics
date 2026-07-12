@@ -3,13 +3,13 @@ import { clearAdminSessionCookie, clearAdminStaffCookie, createAdminSessionCooki
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { getStaffById } from "@/lib/hr-store";
 import { authenticateStaffUser } from "@/lib/staff-auth";
+import { adminSessionLoginSchema } from "@/lib/validation/auth";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const passcode = typeof body.passcode === "string" ? body.passcode : "";
-  const username = typeof body.username === "string" ? body.username : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  const requestedStaffId = typeof body.staffId === "string" ? body.staffId : "STF-ADMIN-001";
+  const parsed = adminSessionLoginSchema.safeParse(await request.json().catch(() => ({})));
+  const { passcode, username, password, staffId: requestedStaffId } = parsed.success
+    ? parsed.data
+    : { passcode: "", username: "", password: "", staffId: "STF-ADMIN-001" };
   const credentialStaff = username && password ? await authenticateStaffUser(username, password) : null;
   const passcodeStaff = !credentialStaff && passcode && isValidAdminPasscode(passcode) ? (await getStaffById(requestedStaffId)) ?? (await getStaffById("STF-ADMIN-001")) : null;
   const staff = credentialStaff ?? passcodeStaff;

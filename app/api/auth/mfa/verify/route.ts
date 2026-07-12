@@ -4,6 +4,7 @@ import { getSessionAndUser } from "@/lib/access/guard";
 import { mfaRateLimit } from "@/lib/access/rate-limit";
 import { updateAccessSession } from "@/lib/access/session-store";
 import { verifyTotpCode } from "@/lib/access/totp";
+import { mfaCodeSchema } from "@/lib/validation/auth";
 
 export async function POST(request: Request) {
   const resolved = await getSessionAndUser(request);
@@ -28,8 +29,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Too many attempts. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const code = typeof body.code === "string" ? body.code : "";
+  const parsed = mfaCodeSchema.safeParse(await request.json().catch(() => ({})));
+  const code = parsed.success ? parsed.data.code : "";
   if (!(await verifyTotpCode(user.totpSecret, code))) {
     return NextResponse.json({ ok: false, error: "That code did not match. Check the app and try again." }, { status: 401 });
   }
