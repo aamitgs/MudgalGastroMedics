@@ -11,6 +11,26 @@ const styles = StyleSheet.create({
   bodyCell: { flex: 1, padding: 6, overflow: "hidden", fontSize: 8.5, color: pdfColors.ink }
 });
 
+// Tabs/carriage returns have no glyph in a PDF text run — react-pdf silently
+// drops them rather than rendering whitespace, which can fuse two adjacent
+// words together with no visible gap. Newlines are left alone: react-pdf
+// renders those correctly as real line breaks.
+function sanitizeCell(value: string) {
+  return value.replace(/\r\n/g, "\n").replace(/\t/g, " ");
+}
+
+// flex:1 divides a row's width by that row's own cell count, so a row with
+// fewer/more cells than the header renders misaligned with every column
+// above it. Every DataTableExport.row() returns headers.length entries by
+// construction, but padding/truncating here is a cheap guard against any
+// module's export config drifting out of sync and silently producing a
+// garbled document.
+function normalizeRow(row: string[], columnCount: number) {
+  const cells = row.slice(0, columnCount);
+  while (cells.length < columnCount) cells.push("");
+  return cells;
+}
+
 /**
  * Generic "PDF of the current table view" document (Track 3.4) — one shared
  * component reused by every DataTable-consuming module instead of a
@@ -35,9 +55,9 @@ export function TableDocument({ title, headers, rows }: { title: string; headers
           </View>
           {rows.map((row, rowIndex) => (
             <View key={rowIndex} style={styles.tableRow} wrap={false}>
-              {row.map((cell, cellIndex) => (
+              {normalizeRow(row, headers.length).map((cell, cellIndex) => (
                 <Text key={cellIndex} style={styles.bodyCell}>
-                  {cell || "—"}
+                  {sanitizeCell(cell) || "—"}
                 </Text>
               ))}
             </View>
