@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileHeart, Plus, UserRoundCheck, UsersRound } from "lucide-react";
+import { CreditCard, Download, FileHeart, Plus, UserRoundCheck, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
@@ -12,6 +12,7 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
 import { RecentValueChips } from "@/components/design-system/RecentValueChips";
+import { PrintIdCardDialog } from "@/components/patients/PrintIdCardDialog";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
@@ -74,6 +75,7 @@ export function AdminPatients() {
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
   const [typedName, setTypedName] = useState("");
   const [confirmedNewPatient, setConfirmedNewPatient] = useState(false);
+  const [printPatient, setPrintPatient] = useState<PatientRecord | null>(null);
 
   const sortField = (sorting[0]?.id as PatientSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -306,18 +308,23 @@ export function AdminPatients() {
       {
         id: "actions",
         header: "Actions",
-        size: 90,
+        size: 150,
         enableSorting: false,
         enableHiding: false,
         cell: ({ row }) => (
-          <a
-            href={`https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
-          >
-            WhatsApp
-          </a>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <a
+              href={`https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
+            >
+              WhatsApp
+            </a>
+            <ActionButton variant="secondary" size="sm" onClick={() => setPrintPatient(row.original)} aria-label={`Print ID card for ${row.original.name}`}>
+              <CreditCard size={13} /> Print ID
+            </ActionButton>
+          </div>
         )
       }
     ],
@@ -544,6 +551,7 @@ export function AdminPatients() {
           />
         </div>
       </div>
+      <PrintIdCardDialog patient={printPatient} setPatient={setPrintPatient} />
     </div>
   );
 }

@@ -371,6 +371,201 @@ body.lang-hi .inline-lang [data-hi] {
   }
 }
 
+/*
+ * ID card / wristband print surface (Track 3.3) — deliberately separate from
+ * .patient-print above: that one is a full A4 clinical document, this is a
+ * small physical card/label. Same hide-everything-else mechanism. The
+ * component also only mounts .id-card-print into the DOM while a patient is
+ * actually selected, so it can't interfere with an unrelated window.print()
+ * elsewhere in the app while the dialog happens to still be mounted. @page
+ * size differs per mode (card vs wristband), and CSS named pages have
+ * inconsistent browser support, so the @page rule is injected as a <style>
+ * tag at print time (see components/patients/PrintIdCardDialog.tsx) rather
+ * than declared here.
+ */
+.id-card-print {
+  display: none;
+}
+
+@media print {
+  body:has(.id-card-print) * {
+    visibility: hidden !important;
+  }
+
+  .id-card-print,
+  .id-card-print * {
+    visibility: visible !important;
+  }
+
+  .id-card-print {
+    display: flex !important;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    color: #102f39;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+}
+
+.id-card {
+  width: 85.6mm;
+  height: 53.98mm;
+  border-radius: 3mm;
+  border: 0.4mm solid #0891b2;
+  padding: 4mm;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  background: linear-gradient(160deg, #ffffff 0%, #f0fbfd 100%);
+  box-sizing: border-box;
+}
+
+.id-card-header {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  border-bottom: 0.3mm solid #cdeef4;
+  padding-bottom: 1.5mm;
+}
+
+.id-card-header img {
+  width: 8mm;
+  height: 8mm;
+  object-fit: contain;
+}
+
+.id-card-header p {
+  margin: 0;
+  font-size: 6.5pt;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0891b2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.id-card-body {
+  display: flex;
+  flex: 1;
+  gap: 3mm;
+  min-height: 0;
+}
+
+.id-card-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2mm;
+  min-width: 0;
+}
+
+.id-card-fields .name {
+  font-size: 10pt;
+  font-weight: 800;
+  color: #102f39;
+  line-height: 1.15;
+}
+
+.id-card-fields .uhid {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: #0891b2;
+  letter-spacing: 0.02em;
+}
+
+.id-card-fields dl {
+  margin: 1mm 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4mm 1.5mm;
+}
+
+.id-card-fields dt {
+  font-size: 5.5pt;
+  font-weight: 700;
+  color: #4c6570;
+  text-transform: uppercase;
+}
+
+.id-card-fields dd {
+  margin: 0;
+  font-size: 6.5pt;
+  font-weight: 600;
+  color: #213f49;
+}
+
+.id-card-fields .allergy-flag {
+  margin-top: 1mm;
+  font-size: 6pt;
+  font-weight: 800;
+  color: #b91c1c;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.id-card-qr {
+  width: 20mm;
+  height: 20mm;
+  flex-shrink: 0;
+}
+
+.id-card-qr svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wristband {
+  width: 180mm;
+  height: 32mm;
+  border: 0.3mm dashed #94a3b8;
+  border-radius: 2mm;
+  padding: 3mm 6mm;
+  display: flex;
+  align-items: center;
+  gap: 6mm;
+  box-sizing: border-box;
+}
+
+.wristband-qr {
+  width: 24mm;
+  height: 24mm;
+  flex-shrink: 0;
+}
+
+.wristband-qr svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wristband-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  min-width: 0;
+}
+
+.wristband-fields .name {
+  font-size: 13pt;
+  font-weight: 800;
+  color: #102f39;
+}
+
+.wristband-fields .meta {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #0891b2;
+}
+
+.wristband-fields .allergy-flag {
+  font-size: 9pt;
+  font-weight: 800;
+  color: #b91c1c;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
