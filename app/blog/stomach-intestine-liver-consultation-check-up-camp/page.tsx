@@ -10,10 +10,10 @@ import { fullAddress, site } from "@/lib/site-data";
 const title = "Stomach, Intestine & Liver Consultation and Check-Up Camp";
 const hindiTitle = "पेट, आंत और लिवर परामर्श एवं जांच शिविर";
 const slug = "/blog/stomach-intestine-liver-consultation-check-up-camp";
-const campDate = "July 11, 2026";
+const campDate = "July 1, 2026";
 const campDay = "Saturday";
-const campDateDisplay = "11 July 2026, Saturday";
-const hindiCampDateDisplay = "11 जुलाई 2026, शनिवार";
+const campDateDisplay = "1 July 2026, Saturday";
+const hindiCampDateDisplay = "1 जुलाई 2026, शनिवार";
 const campTime = "11:00 AM to 5:00 PM";
 const hindiCampTime = "सुबह 11 बजे से शाम 5 बजे तक";
 const venue = "Mudgal Gastro Medics, 16 HIG, Behind Shaheed Nagar Police Chowki, Shaheed Nagar, Agra";
@@ -77,7 +77,7 @@ const campFaqs = [
 export const metadata: Metadata = {
   title,
   description:
-    "Archived details for the stomach, intestine and liver consultation and check-up camp held at Mudgal Gastromedics Hospital, Agra on July 11, 2026.",
+    "Archived details for the stomach, intestine and liver consultation and check-up camp held at Mudgal Gastromedics Hospital, Agra on July 1, 2026.",
   alternates: { canonical: slug },
   openGraph: {
     title,

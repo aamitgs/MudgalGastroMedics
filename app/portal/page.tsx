@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AppointmentForm } from "@/components/AppointmentForm";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { PatientPortalAccess } from "@/components/PatientPortalAccess";
 import { Section } from "@/components/Section";
 
@@ -32,6 +33,10 @@ export default function PortalPage() {
           </p>
         </div>
       </section>
+
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
 
       <Section id="appointment" className="pt-10 md:pt-14">
         <div className="mb-8 max-w-3xl">

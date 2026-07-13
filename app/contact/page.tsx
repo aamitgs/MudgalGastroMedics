@@ -3,6 +3,7 @@ import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-r
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
 import { ContactForm } from "@/components/ContactForm";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { site } from "@/lib/site-data";
@@ -74,7 +75,11 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <Section className="-mt-10 relative z-10 pt-0">
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
+
+      <Section className="relative z-10 pt-0">
         <MotionReveal>
           <div id="appointment" className="mx-auto max-w-2xl overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="border-b border-line bg-[linear-gradient(135deg,#ecfeff,#ffffff)] p-6">

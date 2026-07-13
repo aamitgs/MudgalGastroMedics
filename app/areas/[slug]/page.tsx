@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/BrandIconTile";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { Section, SectionHead } from "@/components/Section";
 import { getLocalSeoPage, localSeoPages } from "@/lib/local-seo-pages";
 import { breadcrumbSchema } from "@/lib/seo-schema";
@@ -12,6 +13,13 @@ import { fullAddress, site } from "@/lib/site-data";
 type LocalAreaPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+const opdTimingAreaSlugs = new Set([
+  "liver-specialist-in-agra",
+  "gastroenterologist-near-fatehabad-road-agra",
+  "liver-specialist-near-tajganj-agra",
+  "gastro-hospital-in-shaheed-nagar-agra"
+]);
 
 export function generateStaticParams() {
   return localSeoPages.map((page) => ({ slug: page.slug }));
@@ -51,6 +59,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
   const { slug } = await params;
   const page = getLocalSeoPage(slug);
   if (!page) notFound();
+  const showOpdTimingCard = opdTimingAreaSlugs.has(page.slug);
 
   const schema = {
     "@context": "https://schema.org",
@@ -120,6 +129,12 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
           </div>
         </div>
       </section>
+
+      {showOpdTimingCard ? (
+        <Section className="overflow-hidden">
+          <HeroOpdTimingCard />
+        </Section>
+      ) : null}
 
       <Section>
         <SectionHead eyebrow="Local SEO Care Page" title={`${page.shortTitle} near you`}>

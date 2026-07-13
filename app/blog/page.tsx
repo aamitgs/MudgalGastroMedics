@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ChevronRight, Clock3, MessageCircle, Phone, Search, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { Section } from "@/components/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
 import { site } from "@/lib/site-data";
 
 const POSTS_PER_PAGE = 12;
-
+const campPostSlug = "stomach-intestine-liver-consultation-check-up-camp";
 const campPost = {
-  href: "/blog/stomach-intestine-liver-consultation-check-up-camp",
+  slug: campPostSlug,
+  category: "Camp",
   title: "Stomach, Intestine & Liver Consultation and Check-Up Camp",
-  hiTitle: "पेट, आंत और लिवर परामर्श एवं जांच शिविर",
-  date: "July 11, 2026",
-  summary:
-    "Archived consultation camp at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra, with gastro and liver specialist care guidance."
+  description:
+    "Archived consultation camp at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra, with gastro and liver specialist care guidance.",
+  date: "July 1, 2026",
+  readTime: "2 min read",
+  accent: "#d39a2b"
 };
 
 type BlogPageProps = {
@@ -46,6 +48,7 @@ function blogHref(category?: string, page?: number) {
 }
 
 function getBlogCoverImage(post: { slug: string }) {
+  if (post.slug === campPostSlug) return "/images/hospital/campbanner.jpeg";
   return `/images/blog/generated/${post.slug}-cover.svg`;
 }
 
@@ -54,7 +57,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const selectedCategory = params?.category;
   const requestedPage = Number(params?.page ?? "1");
 
-  const sortedPosts = [...seoBlogPosts].sort((a, b) => parseDate(b.date) - parseDate(a.date));
+  const sortedPosts = [campPost, ...seoBlogPosts].sort((a, b) => parseDate(b.date) - parseDate(a.date));
   const categories = Array.from(
     sortedPosts.reduce((map, post) => {
       map.set(post.category, (map.get(post.category) ?? 0) + 1);
@@ -67,7 +70,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const currentPage = Number.isFinite(requestedPage) ? Math.min(Math.max(1, requestedPage), totalPages) : 1;
   const start = (currentPage - 1) * POSTS_PER_PAGE;
   const visiblePosts = filteredPosts.slice(start, start + POSTS_PER_PAGE);
-  const featuredPost = filteredPosts[0] ?? sortedPosts[0];
+  const featuredPost = filteredPosts.find((post) => post.slug !== campPostSlug) ?? filteredPosts[0] ?? sortedPosts[0];
   const listPosts = visiblePosts.filter((post) => !(currentPage === 1 && post.slug === featuredPost.slug));
   const popularPosts = sortedPosts.filter((post) => post.slug !== featuredPost.slug).slice(0, 5);
   const categoryTitle = selectedCategory ?? "All Patient Guides";
@@ -103,7 +106,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
               <AppointmentCtaPanel className="mt-5 max-w-3xl" />
               <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm font-black text-white/58">
-                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-200" /> {seoBlogPosts.length}+ patient guides</span>
+                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-200" /> {sortedPosts.length}+ patient guides</span>
                 <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-cyan-200" /> Agra-focused care advice</span>
               </div>
             </div>
@@ -138,40 +141,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       </section>
 
-      <Section className="-mt-12 relative z-10 pt-0">
-        <div className="group grid overflow-hidden rounded-lg border border-line/80 bg-white shadow-[0_28px_80px_rgba(8,64,84,0.14)] transition duration-300 hover:-translate-y-1 hover:border-brand lg:grid-cols-[0.95fr_1.05fr]">
-          <Link href={campPost.href} className="grid min-h-72 place-items-center bg-soft p-2 lg:min-h-full" aria-label={campPost.title}>
-            <Image
-              src="/images/hospital/campbanner.jpeg"
-              alt="Mudgal Gastromedics consultation and check-up camp banner"
-              width={1600}
-              height={810}
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="h-auto w-full rounded object-contain"
-              priority
-            />
-          </Link>
-          <article className="p-6 md:p-8">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-soft/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand">
-              <span className="h-2 w-2 rounded-full bg-gold" />
-              Archived Camp
-            </div>
-            <Link href={campPost.href} className="block">
-              <h2 className="text-3xl font-black leading-tight text-ink transition group-hover:text-brand md:text-5xl">{campPost.title}</h2>
-            </Link>
-            <p className="mt-4 text-2xl font-black leading-tight text-brand" lang="hi">{campPost.hiTitle}</p>
-            <p className="mt-5 leading-relaxed text-muted">{campPost.summary}</p>
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm font-semibold text-muted">
-              <span className="inline-flex items-center gap-2">
-                <CalendarDays size={17} className="text-brand" />
-                {campPost.date}
-              </span>
-              <Link href={campPost.href} className="inline-flex items-center gap-2 text-brand">
-                View archived post <ArrowRight size={16} className="transition group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </article>
-        </div>
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
       </Section>
 
       <Section id="latest-guides" muted className="pt-8">
@@ -195,7 +166,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </Link>
               ) : (
                 <div className="rounded-full border border-line bg-soft px-5 py-2 text-sm font-black text-brand">
-                  {seoBlogPosts.length} total guides
+                  {sortedPosts.length} total guides
                 </div>
               )}
             </div>
@@ -336,7 +307,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </div>
               </div>
               <div className="mt-5 space-y-2">
-                <CategoryLink href="/blog" label="All Guides" count={seoBlogPosts.length} active={!selectedCategory} />
+                <CategoryLink href="/blog" label="All Guides" count={sortedPosts.length} active={!selectedCategory} />
                 {categories.map(([category, count]) => (
                   <CategoryLink
                     key={category}

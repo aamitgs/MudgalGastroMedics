@@ -6,6 +6,7 @@ import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BlogArticleActions } from "@/components/BlogArticleActions";
 import { BlogConsultationForm } from "@/components/BlogConsultationForm";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { LocalCareLinks } from "@/components/LocalCareLinks";
 import { Section, SectionHead } from "@/components/Section";
 import { getSeoBlogPost, seoBlogPosts } from "@/lib/blog-posts";
@@ -15,6 +16,16 @@ import { agraLocalAreas, doctor, nearbyServiceCities, site } from "@/lib/site-da
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+const opdTimingBlogSlugs = new Set([
+  "vomiting-blood-causes-emergency-warning-signs-treatment",
+  "black-stool-causes-emergency",
+  "blood-in-stool-causes-when-to-consult",
+  "jaundice-with-fever-urgent-warning-signs",
+  "persistent-vomiting-gastro-causes-warning-signs",
+  "pancreatitis-symptoms-causes-treatment-agra",
+  "chronic-pancreatitis-pain-diabetes-digestion-problems"
+]);
 
 export function generateStaticParams() {
   return seoBlogPosts.map((post) => ({ slug: post.slug }));
@@ -97,6 +108,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const post = getSeoBlogPost(slug);
   if (!post) notFound();
+  const showOpdTimingCard = opdTimingBlogSlugs.has(post.slug);
   const coverImage = getBlogCoverImage(post);
   const articleUrl = `${site.url}/blog/${post.slug}`;
   const articleCta = getArticleCta(post);
@@ -268,6 +280,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </div>
       </Section>
+
+      {showOpdTimingCard ? (
+        <Section className="overflow-hidden">
+          <HeroOpdTimingCard />
+        </Section>
+      ) : null}
 
       <Section id="article">
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">

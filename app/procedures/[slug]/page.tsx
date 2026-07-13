@@ -6,6 +6,7 @@ import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartP
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { LocalCareLinks } from "@/components/LocalCareLinks";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
@@ -59,6 +60,15 @@ const diseaseSlugs = new Set([
   "chronic-constipation",
   "chronic-diarrhea",
   "ascites"
+]);
+
+const opdTimingProcedureSlugs = new Set([
+  "endoscopy",
+  "colonoscopy",
+  "ercp",
+  "fibroscan",
+  "variceal-banding",
+  "gastrointestinal-bleeding-management"
 ]);
 
 const pageCopyBySlug: Record<string, PageCopy> = {
@@ -719,6 +729,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const procedure = await getPublicProcedure(slug);
   if (!procedure) notFound();
   const isBleeding = procedure.slug === "gastrointestinal-bleeding-management";
+  const showOpdTimingCard = opdTimingProcedureSlugs.has(procedure.slug);
   const isDisease = diseaseSlugs.has(procedure.slug);
   const pageCopy = getPageCopy(procedure.slug, procedure.title, isDisease);
   const article = getProcedureArticle(procedure.slug, procedure.title, isDisease, pageCopy);
@@ -792,7 +803,13 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
         </div>
       </section>
 
-      <Section className="-mt-10 relative z-10 pt-0">
+      {showOpdTimingCard ? (
+        <Section className="overflow-hidden">
+          <HeroOpdTimingCard />
+        </Section>
+      ) : null}
+
+      <Section className={`${showOpdTimingCard ? "" : "-mt-10"} relative z-10 pt-0`}>
         <div className="grid items-start gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <MotionReveal>
           <article className="overflow-hidden rounded border border-line bg-white shadow-lift">

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { doctor, fullAddress, site } from "@/lib/site-data";
@@ -221,6 +222,10 @@ export default function DoctorProfilePage() {
           </MotionReveal>
         </div>
       </section>
+
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
 
       <Section>
         <div className="grid gap-10 lg:grid-cols-[0.72fr_1fr]">
