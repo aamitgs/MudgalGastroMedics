@@ -272,6 +272,8 @@ export function AdminProcedures() {
         )
       }
     ],
+    // updateSchedule only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, editingSchedule]
   );
 
