@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { Section, SectionHead } from "@/components/Section";
 import { fullAddress, site } from "@/lib/site-data";
 
@@ -147,6 +148,10 @@ export default function CampBlogPostPage() {
             priority
           />
         </div>
+      </Section>
+
+      <Section className="overflow-hidden pt-0">
+        <HeroOpdTimingCard />
       </Section>
 
       <Section>
