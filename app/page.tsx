@@ -16,10 +16,12 @@ export default async function Home() {
   const treatmentGroups = [
     {
       title: "Diagnostic Endoscopy",
+      titleHi: "डायग्नोस्टिक एंडोस्कोपी",
       links: procedures.filter((procedure) => ["endoscopy", "colonoscopy", "enteroscopy", "fibroscan", "endoscopic-biopsy"].includes(procedure.slug))
     },
     {
       title: "Therapeutic Procedures",
+      titleHi: "चिकित्सीय प्रक्रियाएं",
       links: procedures.filter((procedure) => [
         "polypectomy",
         "colon-polyp-removal",
@@ -33,10 +35,12 @@ export default async function Home() {
     },
     {
       title: "Pancreatic & Biliary Care",
+      titleHi: "अग्न्याशय और पित्त संबंधी देखभाल",
       links: procedures.filter((procedure) => ["ercp", "cbd-stone-removal", "bile-duct-stenting", "pancreatic-duct-stone-removal"].includes(procedure.slug))
     },
     {
       title: "Liver, Bowel & Support",
+      titleHi: "लिवर, आंत और सहायता",
       links: procedures.filter((procedure) => [
         "gastrointestinal-bleeding-management",
         "variceal-banding",
@@ -56,39 +60,53 @@ export default async function Home() {
   const trustReasons = [
     {
       title: "Specialist-led decisions",
+      titleHi: "विशेषज्ञ-नेतृत्व वाले निर्णय",
       text: "Consultation and procedure planning are guided by gastroenterology and hepatology expertise.",
+      textHi: "परामर्श और प्रक्रिया की योजना गैस्ट्रोएंटरोलॉजी और हेपेटोलॉजी विशेषज्ञता द्वारा निर्देशित होती है।",
       icon: Stethoscope
     },
     {
       title: "Advanced endoscopy focus",
+      titleHi: "उन्नत एंडोस्कोपी फोकस",
       text: "Upper GI, colonoscopy, ERCP and therapeutic endoscopy care are handled through a focused workflow.",
+      textHi: "अपर जीआई, कोलोनोस्कोपी, ईआरसीपी और चिकित्सीय एंडोस्कोपी देखभाल एक केंद्रित वर्कफ़्लो के माध्यम से संभाली जाती है।",
       icon: Activity
     },
     {
       title: "Clear patient pathway",
+      titleHi: "स्पष्ट मरीज़ पथ",
       text: "Preparation, procedure expectations, reports and follow-up steps are explained before discharge.",
+      textHi: "तैयारी, प्रक्रिया की अपेक्षाएं, रिपोर्ट और फॉलो-अप चरण डिस्चार्ज से पहले समझाए जाते हैं।",
       icon: FileText
     },
     {
       title: "Accessible hospital setup",
+      titleHi: "सुलभ अस्पताल व्यवस्था",
       text: "Lift, wheelchair access, pharmacy and waiting support help patients and attendants move comfortably.",
+      textHi: "लिफ्ट, व्हीलचेयर पहुंच, फार्मेसी और प्रतीक्षा सहायता मरीज़ों और परिजनों को आराम से आवागमन में मदद करती है।",
       icon: HeartPulse
     }
   ];
   const patientJourney = [
     {
       title: "Consultation",
+      titleHi: "परामर्श",
       text: "Symptoms, history and prior reports are reviewed before advising tests or procedures.",
+      textHi: "जांच या प्रक्रिया की सलाह देने से पहले लक्षण, इतिहास और पिछली रिपोर्ट की समीक्षा की जाती है।",
       icon: Stethoscope
     },
     {
       title: "Preparation",
+      titleHi: "तैयारी",
       text: "Fasting, medicines, attendant needs and recovery guidance are explained clearly.",
+      textHi: "उपवास, दवाएं, परिजन की आवश्यकताएं और रिकवरी मार्गदर्शन स्पष्ट रूप से समझाया जाता है।",
       icon: ClipboardList
     },
     {
       title: "Follow-up",
+      titleHi: "फॉलो-अप",
       text: "Reports, biopsy guidance and treatment planning are discussed after the procedure.",
+      textHi: "प्रक्रिया के बाद रिपोर्ट, बायोप्सी मार्गदर्शन और उपचार योजना पर चर्चा की जाती है।",
       icon: FileText
     }
   ];
@@ -225,13 +243,20 @@ export default async function Home() {
               <div aria-hidden="true" className="absolute -left-8 top-8 hidden h-32 w-1 rounded-full bg-gradient-to-b from-gold via-brand to-teal lg:block" />
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-4 py-2 shadow-sm backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-gold" />
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Doctor Profile</span>
+                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                  <span data-en>Doctor Profile</span>
+                  <span data-hi lang="hi">डॉक्टर प्रोफ़ाइल</span>
+                </span>
               </div>
-              <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-5xl">
-                Focused care for digestive, liver and pancreato-biliary diseases.
+              <h2 className="inline-lang max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-5xl">
+                <span data-en>Focused care for digestive, liver and pancreato-biliary diseases.</span>
+                <span data-hi lang="hi">पाचन, लिवर और पैंक्रियाटो-बिलियरी रोगों के लिए केंद्रित देखभाल।</span>
               </h2>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted" data-en>
                 Specialist consultation for complex gastro, liver, pancreatic and biliary concerns with clear procedure planning and follow-up guidance.
+              </p>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted" data-hi lang="hi">
+                स्पष्ट प्रक्रिया योजना और फॉलो-अप मार्गदर्शन के साथ जटिल गैस्ट्रो, लिवर, अग्न्याशय और पित्त संबंधी चिंताओं के लिए विशेषज्ञ परामर्श।
               </p>
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {doctor.interests.map((interest) => (
@@ -282,25 +307,35 @@ export default async function Home() {
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-gold" />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Treatments</span>
+                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+                  <span data-en>Treatments</span>
+                  <span data-hi lang="hi">उपचार</span>
+                </span>
               </div>
-              <h2 className="max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
-                Advanced procedures, organized around clear care decisions.
+              <h2 className="inline-lang max-w-3xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+                <span data-en>Advanced procedures, organized around clear care decisions.</span>
+                <span data-hi lang="hi">स्पष्ट देखभाल निर्णयों के आधार पर व्यवस्थित उन्नत प्रक्रियाएं।</span>
               </h2>
             </div>
             <div className="grid gap-4">
-              <p className="max-w-2xl text-lg leading-relaxed text-muted">
+              <p className="max-w-2xl text-lg leading-relaxed text-muted" data-en>
                 Focused gastroenterology, hepatology and therapeutic endoscopy services with dedicated patient information and appointment pathways.
+              </p>
+              <p className="max-w-2xl text-lg leading-relaxed text-muted" data-hi lang="hi">
+                समर्पित मरीज़ जानकारी और अपॉइंटमेंट प्रक्रियाओं के साथ केंद्रित गैस्ट्रोएंटरोलॉजी, हेपेटोलॉजी और चिकित्सीय एंडोस्कोपी सेवाएं।
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  [CalendarCheck, "Planned consult"],
-                  [Stethoscope, "Specialist procedure"],
-                  [FileText, "Report guidance"]
-                ].map(([Icon, label]) => (
+                  [CalendarCheck, "Planned consult", "नियोजित परामर्श"],
+                  [Stethoscope, "Specialist procedure", "विशेषज्ञ प्रक्रिया"],
+                  [FileText, "Report guidance", "रिपोर्ट मार्गदर्शन"]
+                ].map(([Icon, label, labelHi]) => (
                   <div key={label as string} className="flex items-center gap-3 rounded-full border border-line bg-white/85 px-4 py-3 text-sm font-semibold text-teal-dark shadow-sm">
                     <Icon className="text-brand" size={18} />
-                    <span>{label as string}</span>
+                    <span className="inline-lang">
+                      <span data-en>{label as string}</span>
+                      <span data-hi lang="hi">{labelHi as string}</span>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -339,7 +374,10 @@ export default async function Home() {
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {treatmentGroups.map((group) => (
               <div key={group.title} className="rounded border border-line/80 bg-[linear-gradient(180deg,#ffffff,#f7fbfb)] p-5 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink">{group.title}</h3>
+                <h3 className="inline-lang text-sm font-semibold uppercase tracking-[0.14em] text-ink">
+                  <span data-en>{group.title}</span>
+                  <span data-hi lang="hi">{group.titleHi}</span>
+                </h3>
                 <div className="mt-4 grid gap-2">
                   {group.links.slice(0, 4).map((procedure) => (
                     <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
@@ -379,18 +417,34 @@ export default async function Home() {
               <div aria-hidden="true" className="absolute -bottom-20 right-12 h-56 w-56 rounded-full bg-cyan-200/10" />
               <div className="relative">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-100 backdrop-blur">
-                  <ShieldCheck size={15} /> Why Choose MGM
+                  <ShieldCheck size={15} />
+                  <span className="inline-lang">
+                    <span data-en>Why Choose MGM</span>
+                    <span data-hi lang="hi">एमजीएम को क्यों चुनें</span>
+                  </span>
                 </div>
-                <h2 className="max-w-xl text-4xl font-bold leading-[1.07] md:text-5xl">
-                  Patient-first gastro and liver care with specialist attention.
+                <h2 className="inline-lang max-w-xl text-4xl font-bold leading-[1.07] md:text-5xl">
+                  <span data-en>Patient-first gastro and liver care with specialist attention.</span>
+                  <span data-hi lang="hi">विशेषज्ञ ध्यान के साथ मरीज़-प्रथम गैस्ट्रो और लिवर देखभाल।</span>
                 </h2>
-                <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/78">
+                <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/78" data-en>
                   A focused centre for digestive, liver, pancreatic and biliary conditions, built around explanation, procedure readiness and practical follow-up.
                 </p>
+                <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/78" data-hi lang="hi">
+                  पाचन, लिवर, अग्न्याशय और पित्त संबंधी स्थितियों के लिए एक केंद्रित केंद्र, जो स्पष्टीकरण, प्रक्रिया की तैयारी और व्यावहारिक फॉलो-अप पर आधारित है।
+                </p>
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {["Consultation", "Preparation", "Procedure", "Follow-up"].map((step) => (
+                  {[
+                    ["Consultation", "परामर्श"],
+                    ["Preparation", "तैयारी"],
+                    ["Procedure", "प्रक्रिया"],
+                    ["Follow-up", "फॉलो-अप"]
+                  ].map(([step, stepHi]) => (
                     <div key={step} className="rounded border border-white/16 bg-white/10 p-4 backdrop-blur">
-                      <p className="font-semibold">{step}</p>
+                      <p className="inline-lang font-semibold">
+                        <span data-en>{step}</span>
+                        <span data-hi lang="hi">{stepHi}</span>
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -398,14 +452,20 @@ export default async function Home() {
             </div>
           </MotionReveal>
           <div className="grid gap-4 sm:grid-cols-2">
-            {trustReasons.map(({ title, text, icon: Icon }, index) => (
+            {trustReasons.map(({ title, titleHi, text, textHi, icon: Icon }, index) => (
               <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
                 <article className="group h-full rounded border border-line/80 bg-white/90 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
                   <div className="mb-6 flex items-center justify-between gap-4">
                     <BrandIconTile className="h-12 w-12 border border-line transition group-hover:border-brand group-hover:bg-white" />
                   </div>
-                  <h3 className="text-xl font-bold leading-tight text-ink">{title}</h3>
-                  <p className="mt-3 leading-relaxed text-muted">{text}</p>
+                  <h3 className="inline-lang text-xl font-bold leading-tight text-ink">
+                    <span data-en>{title}</span>
+                    <span data-hi lang="hi">{titleHi}</span>
+                  </h3>
+                  <p className="mt-3 inline-lang leading-relaxed text-muted">
+                    <span data-en>{text}</span>
+                    <span data-hi lang="hi">{textHi}</span>
+                  </p>
                 </article>
               </MotionReveal>
             ))}
@@ -427,29 +487,45 @@ export default async function Home() {
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-gold" />
-              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Care Pathway</span>
+              <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+                <span data-en>Care Pathway</span>
+                <span data-hi lang="hi">देखभाल पथ</span>
+              </span>
             </div>
-            <h2 className="max-w-2xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
-              A clear journey from consult to recovery.
+            <h2 className="inline-lang max-w-2xl text-4xl font-bold leading-[1.06] text-ink md:text-6xl">
+              <span data-en>A clear journey from consult to recovery.</span>
+              <span data-hi lang="hi">परामर्श से रिकवरी तक की एक स्पष्ट यात्रा।</span>
             </h2>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted" data-en>
               Every visit is organized around explanation, preparation and follow-up so patients know what to expect at each stage.
+            </p>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted" data-hi lang="hi">
+              हर विज़िट स्पष्टीकरण, तैयारी और फॉलो-अप के आधार पर व्यवस्थित की जाती है ताकि मरीज़ों को हर चरण में पता हो कि क्या उम्मीद करनी है।
             </p>
           </div>
           <div className="relative">
             <div aria-hidden="true" className="absolute left-6 top-8 hidden h-[calc(100%-4rem)] w-px bg-gradient-to-b from-brand via-line to-teal md:block" />
             <div className="grid gap-4">
-              {patientJourney.map(({ title, text, icon: Icon }, index) => (
+              {patientJourney.map(({ title, titleHi, text, textHi, icon: Icon }, index) => (
                 <MotionReveal key={title} delay={Math.min(index * 0.04, 0.12)}>
                   <article className="relative grid gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_1fr] md:items-start md:pl-4">
                     <BrandIconTile className="relative z-10 h-12 w-12 rounded-full border border-line shadow-sm" />
                     <div>
                       <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Care step</span>
+                        <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                          <span data-en>Care step</span>
+                          <span data-hi lang="hi">देखभाल चरण</span>
+                        </span>
                         <span className="h-px w-10 bg-line" />
                       </div>
-                      <h3 className="text-2xl font-bold leading-tight text-ink">{title}</h3>
-                      <p className="mt-2 leading-relaxed text-muted">{text}</p>
+                      <h3 className="inline-lang text-2xl font-bold leading-tight text-ink">
+                        <span data-en>{title}</span>
+                        <span data-hi lang="hi">{titleHi}</span>
+                      </h3>
+                      <p className="mt-2 inline-lang leading-relaxed text-muted">
+                        <span data-en>{text}</span>
+                        <span data-hi lang="hi">{textHi}</span>
+                      </p>
                     </div>
                   </article>
                 </MotionReveal>

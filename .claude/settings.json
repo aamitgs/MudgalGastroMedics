@@ -52,7 +52,12 @@
       "Skill(update-config:*)",
       "Bash(curl -s -o /dev/null -w \"server check: %{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(qlmanage -t -s 1400 -o /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/referral-letter-test.pdf)",
-      "Bash(node /Users/amitsharma/Downloads/Developer/MudgalGastroMedics/.tmp-verify-doctor-filter.mjs)"
+      "Bash(node /Users/amitsharma/Downloads/Developer/MudgalGastroMedics/.tmp-verify-doctor-filter.mjs)",
+      "Bash(node -e \"import\\('playwright'\\).then\\(\\(\\)=>console.log\\('playwright OK'\\)\\).catch\\(e=>console.log\\('playwright FAIL', e.message\\)\\)\")",
+      "Bash(node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('@playwright/test OK'\\)\\).catch\\(e=>console.log\\('@playwright/test FAIL', e.message\\)\\)\")",
+      "Bash(node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('OK'\\)\\).catch\\(e=>console.log\\('FAIL', e.message\\)\\)\")",
+      "Bash(NODE_PATH=/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('OK via NODE_PATH'\\)\\).catch\\(e=>console.log\\('FAIL', e.message\\)\\)\" --experimental-modules)",
+      "Bash(NODE_PATH=/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-hindi.mjs)"
     ]
   }
 }

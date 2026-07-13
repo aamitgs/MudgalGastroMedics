@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/areas",
     "/blog",
     "/blog/stomach-intestine-liver-consultation-check-up-camp",
+    "/faqs",
     "/gallery",
     "/life-at-mgm",
     "/duty-doctor",

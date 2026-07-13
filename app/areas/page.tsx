@@ -76,26 +76,37 @@ export default function AreasHubPage() {
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1fr_0.82fr]">
           <div>
-            <p className="mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
-              Local Care Areas
+            <p className="inline-lang mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
+              <span data-en>Local Care Areas</span>
+              <span data-hi lang="hi">स्थानीय देखभाल क्षेत्र</span>
             </p>
-            <h1 className="max-w-4xl text-5xl font-black leading-[0.98] md:text-7xl">
-              Gastro, liver and endoscopy care around Agra.
+            <h1 className="inline-lang max-w-4xl text-5xl font-black leading-[0.98] md:text-7xl">
+              <span data-en>Gastro, liver and endoscopy care around Agra.</span>
+              <span data-hi lang="hi">आगरा के आसपास गैस्ट्रो, लिवर और एंडोस्कोपी देखभाल।</span>
             </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82 md:text-xl">
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82 md:text-xl" data-en>
               Browse local guides for common searches around Shaheed Nagar, Fatehabad Road, Tajganj, Agra Cantt and nearby care areas.
+            </p>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/82 md:text-xl" data-hi lang="hi">
+              शहीद नगर, फ़तेहाबाद रोड, ताजगंज, आगरा कैंट और आसपास के क्षेत्रों के लिए स्थानीय गाइड देखें।
             </p>
             <AppointmentCtaPanel className="mt-8 max-w-3xl" />
           </div>
 
           <div className="rounded border border-white/20 bg-white/12 p-6 shadow-[0_28px_80px_rgba(0,0,0,0.22)] backdrop-blur">
             <BrandIconTile className="mb-5 h-14 w-14 bg-cyan-100/15" />
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">Hospital Location</p>
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
+              <span data-en>Hospital Location</span>
+              <span data-hi lang="hi">अस्पताल का स्थान</span>
+            </p>
             <h2 className="mt-3 text-2xl font-black">{site.name}</h2>
             <p className="mt-3 leading-7 text-white/78">{fullAddress}</p>
             <div className="mt-5 flex items-start gap-3 rounded border border-white/14 bg-white/10 p-4 text-sm font-bold text-white/88">
               <MapPin className="mt-0.5 shrink-0 text-cyan-100" size={18} />
-              <span>Call reception before visiting for vomiting blood, black stools, severe pain, fever with jaundice or persistent vomiting.</span>
+              <span className="inline-lang">
+                <span data-en>Call reception before visiting for vomiting blood, black stools, severe pain, fever with jaundice or persistent vomiting.</span>
+                <span data-hi lang="hi">उल्टी में खून, काला मल, गंभीर दर्द, पीलिया के साथ बुखार या लगातार उल्टी होने पर आने से पहले रिसेप्शन को कॉल करें।</span>
+              </span>
             </div>
           </div>
         </div>
@@ -103,7 +114,8 @@ export default function AreasHubPage() {
 
       <Section>
         <SectionHead eyebrow="Browse Local Guides" title="Choose the care page closest to your search">
-          <p>Each guide explains the relevant symptoms, reports to bring, preparation notes and related care options.</p>
+          <p data-en>Each guide explains the relevant symptoms, reports to bring, preparation notes and related care options.</p>
+          <p data-hi lang="hi">प्रत्येक गाइड में संबंधित लक्षण, लाने योग्य रिपोर्ट, तैयारी संबंधी जानकारी और संबंधित देखभाल विकल्प बताए गए हैं।</p>
         </SectionHead>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {localSeoPages.map((page) => (
@@ -143,10 +155,19 @@ export default function AreasHubPage() {
       <Section muted>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Need Help Choosing?</p>
-            <h2 className="mt-2 text-3xl font-black text-ink">Share symptoms and reports with reception.</h2>
-            <p className="mt-3 max-w-3xl text-muted">
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+              <span data-en>Need Help Choosing?</span>
+              <span data-hi lang="hi">चुनने में मदद चाहिए?</span>
+            </p>
+            <h2 className="inline-lang mt-2 text-3xl font-black text-ink">
+              <span data-en>Share symptoms and reports with reception.</span>
+              <span data-hi lang="hi">लक्षण और रिपोर्ट रिसेप्शन के साथ साझा करें।</span>
+            </h2>
+            <p className="mt-3 max-w-3xl text-muted" data-en>
               The team can guide whether to book a gastroenterology consultation, liver review, endoscopy, colonoscopy, ERCP or FibroScan-related visit.
+            </p>
+            <p className="mt-3 max-w-3xl text-muted" data-hi lang="hi">
+              टीम आपको यह तय करने में मदद कर सकती है कि गैस्ट्रोएंटरोलॉजी परामर्श, लिवर जांच, एंडोस्कोपी, कोलोनोस्कोपी, ईआरसीपी या फाइब्रोस्कैन से संबंधित विज़िट बुक करनी चाहिए।
             </p>
           </div>
           <AppointmentCtaPanel className="lg:min-w-[520px]" />
