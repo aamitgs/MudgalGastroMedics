@@ -6,10 +6,12 @@ import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartP
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
+import { LocalCareLinks } from "@/components/LocalCareLinks";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
 import { getPublicProcedure, getPublicProcedures } from "@/lib/cms-public";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { site } from "@/lib/site-data";
 
 type ProcedurePageProps = {
@@ -749,7 +751,12 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
           name: faq.question,
           acceptedAnswer: { "@type": "Answer", text: faq.answer }
         }))
-      }
+      },
+      breadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: isDisease ? "GI Diseases" : "Special Procedures", url: "/#procedures" },
+        { name: `${procedure.title} in Agra`, url: `/procedures/${procedure.slug}` }
+      ])
     ]
   };
 
@@ -926,6 +933,10 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
           </div>
         </Section>
       ) : null}
+
+      <Section>
+        <LocalCareLinks />
+      </Section>
 
       <Section>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">

@@ -142,18 +142,24 @@ export function AdminPharmacy() {
 
   async function issueDispense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const response = await fetch("/api/pharmacy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        visitId: selectedVisitId,
-        items: draftItems,
-        discount,
-        paymentStatus,
-        paymentMethod,
-        notes
-      })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/pharmacy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitId: selectedVisitId,
+          items: draftItems,
+          discount,
+          paymentStatus,
+          paymentMethod,
+          notes
+        })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void issueDispense(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as PharmacyListResponse;
     if (!response.ok || !data.ok || !data.dispense) {
       // Mutation failures are transient/non-blocking (toast), never the

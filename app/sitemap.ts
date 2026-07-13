@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
+import { seoBlogPosts } from "@/lib/blog-posts";
 import { getPublicProcedures } from "@/lib/cms-public";
+import { localSeoPages } from "@/lib/local-seo-pages";
 import { servicePages } from "@/lib/service-pages";
 import { site } from "@/lib/site-data";
 
@@ -21,12 +23,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/refund-cancellation-policy",
     "/terms"
   ];
-  const serviceRoutes = servicePages.map((page) => `/services/${page.slug}`);
+  const staticEntries = staticRoutes.map((route) => ({ route, lastModified: new Date() }));
+  const serviceEntries = servicePages.map((page) => ({ route: `/services/${page.slug}`, lastModified: new Date() }));
   const procedures = await getPublicProcedures();
-  const procedureRoutes = procedures.map((procedure) => `/procedures/${procedure.slug}`);
+  const procedureEntries = procedures.map((procedure) => ({ route: `/procedures/${procedure.slug}`, lastModified: new Date() }));
+  const blogEntries = seoBlogPosts.map((post) => ({ route: `/blog/${post.slug}`, lastModified: new Date(post.date) }));
+  const localEntries = localSeoPages.map((page) => ({ route: `/areas/${page.slug}`, lastModified: new Date() }));
 
-  return [...staticRoutes, ...serviceRoutes, ...procedureRoutes].map((route) => ({
+  const entriesByRoute = new Map(
+    [...staticEntries, ...serviceEntries, ...procedureEntries, ...blogEntries, ...localEntries].map((entry) => [entry.route, entry])
+  );
+
+  return Array.from(entriesByRoute.values()).map(({ route, lastModified }) => ({
     url: `${site.url}${route}`,
-    lastModified: new Date()
+    lastModified
   }));
 }

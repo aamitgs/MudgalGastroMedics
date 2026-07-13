@@ -78,11 +78,17 @@ export function AdminDoctorWorkflow() {
   }
 
   async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "clinicalNote" | "prescription" | "advice" | "followUpDate">>) {
-    const response = await fetch("/api/opd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as OpdResponse;
     if (!response.ok || !data.ok || !data.visit) {
       notify.error(data.error || "Unable to save doctor workflow.");

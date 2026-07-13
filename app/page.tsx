@@ -4,6 +4,7 @@ import { Activity, ArrowRight, Award, CalendarCheck, ClipboardList, FileText, Gr
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, Eyebrow } from "@/components/Section";
 import { Stats } from "@/components/Stats";
@@ -140,7 +141,13 @@ export default async function Home() {
         </div>
       </section>
 
-      <Section className="relative z-10 pt-12 md:pt-14">
+      <Section className="relative z-10 !bg-white pt-8 md:pt-10">
+        <MotionReveal className="w-full">
+          <HeroOpdTimingCard />
+        </MotionReveal>
+      </Section>
+
+      <Section className="relative z-10 pt-8 md:pt-10">
         <Stats />
       </Section>
 
@@ -257,7 +264,20 @@ export default async function Home() {
 
       <Section id="procedures" className="overflow-hidden">
         <div className="relative">
-          <div aria-hidden="true" className="absolute -right-24 -top-16 hidden h-64 w-64 rounded-full border border-line/70 bg-soft/50 lg:block" />
+          <div
+            aria-hidden="true"
+            className="absolute -right-24 -top-16 hidden h-64 w-64 place-items-center rounded-full border border-line/70 bg-soft/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_22px_70px_rgba(8,64,84,0.06)] lg:grid"
+          >
+            <div className="grid h-28 w-28 place-items-center rounded-full border border-cyan-100/80 bg-white/90 shadow-[0_20px_55px_rgba(8,64,84,0.12),inset_0_1px_0_rgba(255,255,255,0.95)]">
+              <Image
+                src="/mgm-icon.png"
+                alt=""
+                width={112}
+                height={112}
+                className="h-20 w-20 object-contain"
+              />
+            </div>
+          </div>
           <div className="relative mb-10 grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-end">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">

@@ -49,19 +49,105 @@ export const doctor = {
   ]
 };
 
-export const localServiceAreas = [
+export const agraLocalAreas = [
+  "Shaheed Nagar",
+  "Rajpur Chungi",
+  "Kaveri Vihar",
+  "Panchvati",
+  "Fatehabad Road",
+  "Shamsabad Road",
+  "Tajganj",
+  "Agra Cantt",
+  "Civil Lines",
+  "Kamla Nagar",
+  "Dayal Bagh",
+  "Sikandra",
+  "New Agra",
+  "Sanjay Place",
+  "Lohamandi",
+  "Rakabganj",
+  "Khandari",
+  "Bhagwan Talkies",
+  "Bodla",
+  "Shahganj",
+  "Jaipur House",
+  "Pratap Pura",
+  "Sadar Bazar",
+  "Delhi Gate",
+  "Belanganj",
+  "Mantola",
+  "Hing Ki Mandi",
+  "Raja Ki Mandi",
+  "Jeoni Mandi",
+  "MG Road",
+  "Taj Nagari Phase 1",
+  "Taj Nagari Phase 2",
+  "Basai",
+  "Idgah",
+  "Namner",
+  "Madhu Nagar",
+  "Nehru Nagar",
+  "Vijay Nagar Colony",
+  "Gailana",
+  "Rohta",
+  "Shastripuram",
+  "Paschimpuri",
+  "Avas Vikas Colony",
+  "Arjun Nagar",
+  "Balkeshwar",
+  "Trans Yamuna Colony",
+  "Foundry Nagar",
+  "Nunhai",
+  "Yamuna Kinara Road",
+  "Etmadpur Road",
+  "Rambagh",
+  "Tedi Bagiya",
+  "Kalindi Vihar",
+  "Swamibagh",
+  "Surya Nagar",
+  "Kuberpur",
+  "Pathauli",
+  "Gwalior Road",
+  "Mathura Road (NH-19)",
+  "Inner Ring Road",
+  "Kargil Crossing",
+  "Bichpuri",
+  "Kheria Mod",
+  "Airport Area (Kheria)",
+  "Paliwal Park Area"
+];
+
+export const nearbyServiceCities = [
   "Agra",
-  "Fatehpur Sikri",
   "Mathura",
+  "Vrindavan",
   "Firozabad",
-  "Etmadpur",
-  "Tundla",
   "Bharatpur",
   "Dholpur",
-  "Mainpuri",
-  "Hathras",
-  "Aligarh"
+  "Morena",
+  "Fatehpur Sikri",
+  "Fatehabad",
+  "Bah",
+  "Etmadpur",
+  "Kheragarh",
+  "Achhnera",
+  "Pinahat",
+  "Tundla",
+  "Shikohabad",
+  "Jalesar",
+  "Sadabad",
+  "Deeg",
+  "Bayana",
+  "Kumher",
+  "Nadbai",
+  "Bari",
+  "Banmore",
+  "Ambah",
+  "Jaura",
+  "Hodal"
 ];
+
+export const localServiceAreas = Array.from(new Set(["Agra", ...agraLocalAreas, ...nearbyServiceCities]));
 
 export const patientFacilities = [
   "Wheelchair Accessible Entrance",
@@ -463,6 +549,12 @@ export function hospitalSchema() {
     image: `${site.url}/images/hospital/hospital-front-view.jpg`,
     telephone: [site.phone, site.mobile],
     email: [site.email, site.emailAlt],
+    sameAs: [
+      "https://www.facebook.com/MudgalGastromedics",
+      "https://www.youtube.com/@mudgalgastromedics9355",
+      "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d"
+    ],
+    priceRange: "₹₹",
     additionalType: ["Gastroenterology Hospital", "Liver Care Centre", "Endoscopy Centre"],
     medicalSpecialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
     address: {
@@ -475,11 +567,30 @@ export function hospitalSchema() {
     },
     areaServed: localServiceAreas,
     hasMap: site.directionsUrl,
+    availableService: [
+      { "@type": "MedicalTherapy", name: "Gastroenterology Consultation" },
+      { "@type": "MedicalTherapy", name: "Hepatology and Liver Care" },
+      { "@type": "MedicalProcedure", name: "Upper GI Endoscopy" },
+      { "@type": "MedicalProcedure", name: "Colonoscopy" },
+      { "@type": "MedicalProcedure", name: "ERCP" },
+      { "@type": "MedicalTest", name: "FibroScan" }
+    ],
+    department: [
+      { "@type": "MedicalClinic", name: "Advanced Endoscopy Centre" },
+      { "@type": "MedicalClinic", name: "Liver Care Clinic" },
+      { "@type": "MedicalClinic", name: "Diagnostic Services" }
+    ],
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
         opens: "11:00",
+        closes: "14:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        opens: "17:00",
         closes: "18:00"
       }
     ],

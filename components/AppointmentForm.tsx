@@ -386,8 +386,8 @@ export function AppointmentForm() {
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Time</span><span data-hi lang="hi">पसंदीदा समय</span></span>
             <select name="timeSlot" className={fieldClass}>
               <option>Flexible</option>
-              <option>11 AM-1 PM</option>
-              <option>1 PM-4 PM</option>
+              <option>Morning 11 AM-2 PM</option>
+              <option>Evening 5 PM-6 PM</option>
             </select>
           </label>
           {appointmentFor === "IPD" ? (

@@ -124,8 +124,8 @@ export default function ContactPage() {
                   icon={<Clock size={20} />}
                   title="OPD / Business Hours"
                   hiTitle="ओपीडी / कार्य समय"
-                  text="Mon-Sat, 11:00 AM-6:00 PM"
-                  hiText="सोम-शनि, सुबह 11:00 - शाम 6:00"
+                  text="Mon-Sat, Morning 11:00 AM-2:00 PM and Evening 5:00 PM-6:00 PM. Sunday closed."
+                  hiText="सोम-शनि, सुबह 11:00 - दोपहर 2:00 और शाम 5:00 - 6:00. रविवार बंद."
                 />
                 <InfoLine
                   icon={<ShieldCheck size={20} />}

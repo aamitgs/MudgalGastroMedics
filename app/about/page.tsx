@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
-import { site } from "@/lib/site-data";
+import { agraLocalAreas, nearbyServiceCities, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "About Mudgal Gastromedics Hospital",
@@ -165,27 +165,6 @@ const whyChoose = [
       "Our hospital follows stringent infection-control practices, quality assurance protocols, and accepted standards of patient safety."
   }
 ];
-
-const localAreas = [
-  "Shaheed Nagar",
-  "Rajpur Chungi",
-  "Kaveri Vihar",
-  "Panchvati",
-  "Fatehabad Road",
-  "Shamsabad Road",
-  "Tajganj",
-  "Agra Cantt",
-  "Civil Lines",
-  "Kamla Nagar",
-  "Dayal Bagh",
-  "Sikandra",
-  "New Agra",
-  "Sanjay Place",
-  "Lohamandi",
-  "Rakabganj"
-];
-
-const nearbyCities = ["Mathura", "Vrindavan", "Firozabad", "Bharatpur", "Dholpur", "Morena", "Gwalior", "Mainpuri", "Etah", "Kasganj", "Hathras", "Aligarh"];
 
 export default function AboutPage() {
   return (
@@ -434,20 +413,46 @@ export default function AboutPage() {
             <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <h2 className="text-2xl font-black text-ink">Agra local areas</h2>
               <div className="mt-5 flex flex-wrap gap-2">
-                {localAreas.map((area) => (
+                {agraLocalAreas.slice(0, 15).map((area) => (
                   <span key={area} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{area}</span>
                 ))}
               </div>
+              {agraLocalAreas.length > 15 ? (
+                <details className="group mt-3">
+                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                    <span className="group-open:hidden">Show more Agra areas</span>
+                    <span className="hidden group-open:inline">Show fewer Agra areas</span>
+                  </summary>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {agraLocalAreas.slice(15).map((area) => (
+                      <span key={area} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{area}</span>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
             </article>
           </MotionReveal>
           <MotionReveal delay={0.08}>
             <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <h2 className="text-2xl font-black text-ink">Nearby cities and districts</h2>
               <div className="mt-5 flex flex-wrap gap-2">
-                {nearbyCities.map((city) => (
+                {nearbyServiceCities.slice(0, 12).map((city) => (
                   <span key={city} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{city}</span>
                 ))}
               </div>
+              {nearbyServiceCities.length > 12 ? (
+                <details className="group mt-3">
+                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                    <span className="group-open:hidden">Show more nearby cities</span>
+                    <span className="hidden group-open:inline">Show fewer nearby cities</span>
+                  </summary>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {nearbyServiceCities.slice(12).map((city) => (
+                      <span key={city} className="rounded-full border border-line bg-soft px-3 py-2 text-sm font-bold text-teal-dark">{city}</span>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
             </article>
           </MotionReveal>
         </div>

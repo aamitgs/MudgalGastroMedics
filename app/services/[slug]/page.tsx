@@ -5,8 +5,10 @@ import { ArrowRight, CheckCircle2, ClipboardList, FileText, HeartPulse, MessageC
 import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/BrandIconTile";
 import { ButtonLink } from "@/components/ButtonLink";
+import { LocalCareLinks } from "@/components/LocalCareLinks";
 import { MotionReveal } from "@/components/MotionReveal";
 import { Section, SectionHead } from "@/components/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { getServicePage, servicePages } from "@/lib/service-pages";
 import { fullAddress, site } from "@/lib/site-data";
 
@@ -181,20 +183,30 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "MedicalBusiness",
-    name: `${site.name} - ${page.shortTitle}`,
-    url: `${site.url}/services/${page.slug}`,
-    description: page.description,
-    telephone: site.mobile,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: `${site.addressLine1}, ${site.addressLine2}`,
-      addressLocality: site.city,
-      addressRegion: site.region,
-      postalCode: site.postalCode,
-      addressCountry: site.country
-    },
-    medicalSpecialty: ["Gastroenterology", "Hepatology"]
+    "@graph": [
+      {
+        "@type": "MedicalBusiness",
+        name: `${site.name} - ${page.shortTitle}`,
+        url: `${site.url}/services/${page.slug}`,
+        description: page.description,
+        telephone: site.mobile,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: `${site.addressLine1}, ${site.addressLine2}`,
+          addressLocality: site.city,
+          addressRegion: site.region,
+          postalCode: site.postalCode,
+          addressCountry: site.country
+        },
+        areaServed: ["Agra", "Shaheed Nagar", "Fatehabad Road", "Tajganj", "Agra Cantt"],
+        medicalSpecialty: ["Gastroenterology", "Hepatology"]
+      },
+      breadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: "Services", url: "/services/gastroenterology" },
+        { name: page.shortTitle, url: `/services/${page.slug}` }
+      ])
+    ]
   };
 
   return (
@@ -356,6 +368,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </details>
           ))}
         </div>
+      </Section>
+
+      <Section>
+        <LocalCareLinks />
       </Section>
 
       <Section muted>

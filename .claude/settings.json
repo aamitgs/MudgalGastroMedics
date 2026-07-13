@@ -16,7 +16,22 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"port 3214\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(lsof -ti:3100)",
+      "Bash(npx playwright *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"started PID $!\")",
+      "Bash(pkill -f \"port 3215\")",
+      "Bash(node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/verify-claim-form.mjs)",
+      "Bash(node .tmp-verify-claim-form.mjs)",
+      "Bash(pkill -f \"port 3216\")",
+      "Bash(node .tmp-verify-lab-form.mjs)",
+      "Bash(pkill -f \"port 3217\")",
+      "Bash(node .tmp-verify-comm-form.mjs)",
+      "Bash(pkill -f \"port 3218\")"
     ]
   }
 }

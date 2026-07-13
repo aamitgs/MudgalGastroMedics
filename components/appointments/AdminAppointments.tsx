@@ -102,11 +102,17 @@ export function AdminAppointments() {
   }
 
   async function updateStatus(id: string, status: AppointmentStatus) {
-    const response = await fetch("/api/appointment", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/appointment", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as MutationResponse;
     if (!response.ok || !data.ok || !data.appointment) {
       // Mutation failures are transient/non-blocking (toast), never the
@@ -119,11 +125,17 @@ export function AdminAppointments() {
   }
 
   async function createOpdToken(appointmentId: string) {
-    const response = await fetch("/api/opd", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appointmentId })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appointmentId })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createOpdToken(appointmentId));
+      return;
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Unable to create OPD token.");
@@ -239,6 +251,8 @@ export function AdminAppointments() {
         )
       }
     ],
+    // updateStatus/createOpdToken only forward call-time arguments via functional setState, so they're safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, planAppointment]
   );
 

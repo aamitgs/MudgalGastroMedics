@@ -138,11 +138,17 @@ export function AdminProcedures() {
   async function createSchedule(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const response = await fetch("/api/procedures/schedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/procedures/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createSchedule(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
     if (!response.ok || !data.ok || !data.schedule) {
       notify.error(data.error || "Unable to create procedure schedule.");
@@ -158,11 +164,17 @@ export function AdminProcedures() {
       checklist?: Partial<ProcedureChecklist>;
     }
   ) {
-    const response = await fetch("/api/procedures/schedule", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/procedures/schedule", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateSchedule(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as ProcedureResponse;
     if (!response.ok || !data.ok || !data.schedule) {
       notify.error(data.error || "Unable to update procedure schedule.");

@@ -88,11 +88,17 @@ export function AdminOpdQueue() {
   }
 
   async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "billingStatus" | "estimatedAmount" | "paymentMethod" | "notes">>) {
-    const response = await fetch("/api/opd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as OpdListResponse;
     if (!response.ok || !data.ok || !data.visit) {
       // Mutation failures are transient/non-blocking (toast), never the

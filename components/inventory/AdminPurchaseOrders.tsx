@@ -125,15 +125,22 @@ export function AdminPurchaseOrders() {
       return;
     }
     setSubmitting(true);
-    const response = await fetch("/api/purchase-orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        vendor,
-        expectedDeliveryDate: expectedDeliveryDate || undefined,
-        items: lines.map((line) => ({ inventoryItemId: line.inventoryItemId, quantityOrdered: line.quantityOrdered, unitCost: line.unitCost || undefined }))
-      })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/purchase-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vendor,
+          expectedDeliveryDate: expectedDeliveryDate || undefined,
+          items: lines.map((line) => ({ inventoryItemId: line.inventoryItemId, quantityOrdered: line.quantityOrdered, unitCost: line.unitCost || undefined }))
+        })
+      });
+    } catch {
+      setSubmitting(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitOrder(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as PurchaseOrderListResponse;
     setSubmitting(false);
     if (!response.ok || !data.ok || !data.order) {
@@ -148,11 +155,17 @@ export function AdminPurchaseOrders() {
   }
 
   async function setStatus(id: string, status: PurchaseOrderStatus) {
-    const response = await fetch("/api/purchase-orders", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/purchase-orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void setStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as PurchaseOrderListResponse;
     if (!response.ok || !data.ok || !data.order) {
       notify.error(data.error || "Unable to update purchase order.");

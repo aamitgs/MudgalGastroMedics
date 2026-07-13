@@ -106,9 +106,10 @@ function wrapText(text, maxChars, maxLines) {
 }
 
 function titleFontSize(lines) {
-  if (lines.length >= 4) return 58;
-  if (lines.some((line) => line.length > 32)) return 64;
-  return 76;
+  if (lines.length >= 4) return 52;
+  if (lines.length === 3) return 58;
+  if (lines.some((line) => line.length > 28)) return 60;
+  return 64;
 }
 
 function textLines(lines, x, y, size, lineHeight, weight = 900, color = "#ffffff", extra = "") {
@@ -119,16 +120,16 @@ function textLines(lines, x, y, size, lineHeight, weight = 900, color = "#ffffff
 
 function brandMark() {
   return `
-    <g transform="translate(66 48)">
-      <rect x="-16" y="-12" width="530" height="156" rx="18" fill="#031f27" opacity=".46"/>
-      <image href="${logoDataUri}" x="0" y="0" width="490" height="200" preserveAspectRatio="xMinYMin meet"/>
+    <g transform="translate(66 34)">
+      <rect x="-14" y="-10" width="455" height="118" rx="18" fill="#031f27" opacity=".5"/>
+      <image href="${logoDataUri}" x="0" y="0" width="420" height="118" preserveAspectRatio="xMinYMid meet"/>
     </g>
   `;
 }
 
 function medicalDesk(config) {
   return `
-    <g transform="translate(910 75)">
+    <g transform="translate(1040 74)">
       <rect x="236" y="20" width="286" height="236" rx="32" fill="#d8e2e4" opacity=".95"/>
       <rect x="262" y="48" width="234" height="150" rx="12" fill="#0a2730" stroke="#4cc9d7" stroke-width="5"/>
       <rect x="282" y="72" width="194" height="102" rx="7" fill="#0e3b48"/>
@@ -140,7 +141,7 @@ function medicalDesk(config) {
       <path d="M329 252L344 266L374 234" fill="none" stroke="#19d3cf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M450 252L465 266L495 234" fill="none" stroke="#19d3cf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
-    <g transform="translate(802 420) rotate(-7)">
+    <g transform="translate(950 424) rotate(-7)">
       <rect width="370" height="235" rx="14" fill="#e9f0f1"/>
       <rect x="24" y="28" width="322" height="20" rx="10" fill="#b8d9df"/>
       <rect x="24" y="72" width="220" height="12" rx="6" fill="#9fc5cc"/>
@@ -160,12 +161,14 @@ function renderSvg(post) {
   const title = post.title
     .replace("Symptoms, Causes and Treatment", "Symptoms, Causes & Treatment")
     .replace("Difference, Preparation and Uses", "Difference, Prep & Uses");
-  const titleLines = wrapText(title, 25, 4);
-  const descriptionLines = wrapText(post.description, 55, 3);
+  const titleLines = wrapText(title, 20, 4);
+  const descriptionLines = wrapText(post.description, 42, 2);
   const fontSize = titleFontSize(titleLines);
   const titleLineHeight = Math.round(fontSize * 1.02);
-  const underlineY = Math.min(528, 321 + (titleLines.length - 1) * titleLineHeight + Math.round(fontSize * 0.5));
-  const descriptionY = underlineY + 54;
+  const titleY = 284;
+  const underlineY = Math.min(496, titleY + (titleLines.length - 1) * titleLineHeight + Math.round(fontSize * 0.64));
+  const descriptionY = underlineY + 48;
+  const relatedLabel = post.relatedLabel.length > 34 ? `${post.relatedLabel.slice(0, 31).trim()}...` : post.relatedLabel;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="757" viewBox="0 0 1600 757" role="img" aria-label="${escapeXml(post.title)} cover image">
@@ -199,30 +202,30 @@ function renderSvg(post) {
   <circle cx="1158" cy="306" r="238" fill="#0f766e" opacity=".18"/>
   <circle cx="1158" cy="306" r="308" fill="none" stroke="#d8fbff" stroke-opacity=".12" stroke-width="3"/>
   ${brandMark()}
-  <g transform="translate(72 194)">
+  <g transform="translate(72 164)">
     <rect width="${Math.max(190, config.chip.length * 17 + 95)}" height="58" rx="29" fill="#11353d" stroke="#67e8f9" stroke-opacity=".46" stroke-width="3"/>
     <path d="M36 30h19M45 20v20M62 25h15v18H31V25h13" fill="none" stroke="#67e8f9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     <text x="96" y="38" fill="#dffaff" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="900" letter-spacing="2">BLOG</text>
   </g>
-  ${textLines(titleLines, 72, 321, fontSize, titleLineHeight, 900, "#ffffff")}
+  ${textLines(titleLines, 72, titleY, fontSize, titleLineHeight, 900, "#ffffff")}
   <rect x="73" y="${underlineY}" width="105" height="5" rx="3" fill="${config.secondary}"/>
   <rect x="198" y="${underlineY}" width="105" height="5" rx="3" fill="${config.primary}"/>
-  ${textLines(descriptionLines, 72, descriptionY, 34, 44, 700, "#d9edf0")}
-  <text x="72" y="687" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="800">Agra</text>
-  <circle cx="153" cy="679" r="4" fill="#9bcdd5"/>
-  <text x="178" y="687" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="800">${escapeXml(post.relatedLabel)}</text>
-  <circle cx="575" cy="679" r="4" fill="#9bcdd5"/>
-  <text x="600" y="687" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="800">Call +91 9828912257</text>
-  <g transform="translate(855 145)" filter="url(#softShadow)">
+  ${textLines(descriptionLines, 72, descriptionY, 28, 36, 700, "#d9edf0")}
+  <text x="72" y="642" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">Agra</text>
+  <circle cx="135" cy="635" r="4" fill="#9bcdd5"/>
+  <text x="160" y="642" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(relatedLabel)}</text>
+  <circle cx="508" cy="635" r="4" fill="#9bcdd5"/>
+  <text x="533" y="642" fill="#cdeff4" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">Call +91 9828912257</text>
+  <g transform="translate(980 142)" filter="url(#softShadow)">
     <circle cx="320" cy="178" r="168" fill="#092e37" opacity=".42"/>
     ${config.icon(config)}
   </g>
   ${medicalDesk(config)}
-  <g transform="translate(82 708)">
-    <rect width="745" height="62" rx="18" fill="#e8fbff" opacity=".14" stroke="#d9fbff" stroke-opacity=".28"/>
-    <text x="54" y="39" fill="#dffaff" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900">Experienced Gastroenterology Team</text>
-    <line x1="334" y1="14" x2="334" y2="48" stroke="#dffaff" stroke-opacity=".34" stroke-width="2"/>
-    <text x="374" y="39" fill="#dffaff" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900">Advanced Endoscopy &amp; FibroScan</text>
+  <g transform="translate(72 674)">
+    <rect width="728" height="54" rx="17" fill="#e8fbff" opacity=".14" stroke="#d9fbff" stroke-opacity=".28"/>
+    <text x="44" y="35" fill="#dffaff" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">Experienced Gastroenterology Team</text>
+    <line x1="326" y1="12" x2="326" y2="42" stroke="#dffaff" stroke-opacity=".34" stroke-width="2"/>
+    <text x="362" y="35" fill="#dffaff" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">Advanced Endoscopy &amp; FibroScan</text>
   </g>
 </svg>`;
 }

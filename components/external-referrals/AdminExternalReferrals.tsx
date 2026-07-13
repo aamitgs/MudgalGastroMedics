@@ -132,20 +132,26 @@ export function AdminExternalReferrals() {
   async function createReferral(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/external-referrals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        visitId: selectedVisitId,
-        type: referralType,
-        testName,
-        facilityName: formData.get("facilityName"),
-        priority: formData.get("priority"),
-        amount: formData.get("amount"),
-        paymentStatus: formData.get("paymentStatus"),
-        notes: formData.get("notes")
-      })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/external-referrals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitId: selectedVisitId,
+          type: referralType,
+          testName,
+          facilityName: formData.get("facilityName"),
+          priority: formData.get("priority"),
+          amount: formData.get("amount"),
+          paymentStatus: formData.get("paymentStatus"),
+          notes: formData.get("notes")
+        })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createReferral(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as ReferralListResponse;
     if (!response.ok || !data.ok || !data.referral) {
       // Mutation failures are transient/non-blocking (toast), never the
@@ -165,11 +171,17 @@ export function AdminExternalReferrals() {
       acknowledgeCritical?: boolean;
     }
   ) {
-    const response = await fetch("/api/external-referrals", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/external-referrals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateReferral(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as ReferralListResponse;
     if (!response.ok || !data.ok || !data.referral) {
       notify.error(data.error || "Unable to update referral.");

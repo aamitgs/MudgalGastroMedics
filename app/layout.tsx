@@ -13,14 +13,24 @@ const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: "Mudgal Gastromedics Hospital | Gastroenterologist in Agra",
+    default: "Gastroenterologist, Liver Specialist & Endoscopy Centre in Agra",
     template: "%s | Mudgal Gastromedics Hospital"
   },
   description:
-    "Mudgal Gastromedics Hospital in Agra offers gastroenterology, liver care, endoscopy, colonoscopy, ERCP, Fibroscan and advanced GI procedures.",
+    "Mudgal Gastromedics Hospital in Shaheed Nagar, Agra offers gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan and advanced digestive disease treatment.",
+  keywords: [
+    "Gastroenterologist in Agra",
+    "Liver Specialist in Agra",
+    "Endoscopy Centre in Agra",
+    "Colonoscopy in Agra",
+    "ERCP Specialist in Agra",
+    "FibroScan in Agra",
+    "Gastro Hospital in Shaheed Nagar Agra"
+  ],
   openGraph: {
-    title: "Mudgal Gastromedics Hospital",
-    description: site.tagline,
+    title: "Gastroenterologist, Liver Specialist & Endoscopy Centre in Agra",
+    description:
+      "Mudgal Gastromedics Hospital in Shaheed Nagar, Agra offers gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan and advanced digestive disease treatment.",
     url: site.url,
     siteName: site.name,
     images: ["/mgm-logo.png"],

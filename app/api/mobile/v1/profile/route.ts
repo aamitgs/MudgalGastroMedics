@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       email: site.email,
       directionsUrl: site.directionsUrl,
       mapEmbed: site.mapEmbed,
-      businessHours: "OPD: Mon-Sat, 11 AM-6 PM. Hospital operates 24/7.",
+      businessHours: "OPD: Mon-Sat, Morning 11 AM-2 PM; Evening 5 PM-6 PM. Sunday closed. Hospital operates 24/7.",
       landmark: site.addressLine2,
       facilities: patientFacilities,
       highlights: whyChoose

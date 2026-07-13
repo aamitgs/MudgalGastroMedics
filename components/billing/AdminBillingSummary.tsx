@@ -95,11 +95,17 @@ export function AdminBillingSummary() {
       refundAmount?: string;
     }
   ) {
-    const response = await fetch("/api/opd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as { ok: boolean; visit?: OpdVisit; error?: string };
     if (!response.ok || !data.ok || !data.visit) {
       notify.error(data.error || "Unable to update billing record.");
