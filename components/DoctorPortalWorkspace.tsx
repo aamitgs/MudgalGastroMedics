@@ -84,12 +84,23 @@ function AllergyGuard({ visitId, allergies }: { visitId: string; allergies?: str
 
   async function acknowledge() {
     setSaving(true);
+    let response: Response;
     try {
-      const response = await fetch("/api/clinical/allergy-acknowledged", {
+      response = await fetch("/api/clinical/allergy-acknowledged", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ visitId, allergies: recorded, reason: reason.trim() })
       });
+    } catch {
+      // Previously unhandled: a thrown network error propagated past this
+      // try/finally as an unhandled rejection, resetting saving but giving
+      // zero explanation. This surfaces it instead of leaving the clinician
+      // to guess why "Acknowledge" silently did nothing.
+      setSaving(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void acknowledge());
+      return;
+    }
+    try {
       if (!response.ok) {
         notify.error("Could not record acknowledgement. Try again.");
         return;
@@ -158,8 +169,9 @@ function InteractionGuard({ visitId, matches }: { visitId: string; matches: Drug
 
   async function acknowledge() {
     setSaving(true);
+    let responses: Response[];
     try {
-      const responses = await Promise.all(
+      responses = await Promise.all(
         matches.map((match) =>
           fetch("/api/clinical/interaction-acknowledged", {
             method: "POST",
@@ -168,6 +180,16 @@ function InteractionGuard({ visitId, matches }: { visitId: string; matches: Drug
           })
         )
       );
+    } catch {
+      // Previously unhandled: Promise.all rejects the whole batch on the
+      // first thrown network error, propagating as an unhandled rejection.
+      // Retry resends every drug-pair acknowledgement in the batch again —
+      // idempotent (records review state), not a partial-batch resume.
+      setSaving(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void acknowledge());
+      return;
+    }
+    try {
       if (responses.some((response) => !response.ok)) {
         notify.error("Could not record acknowledgement. Try again.");
         return;
@@ -247,12 +269,19 @@ function IdentityGuard({
 
   async function confirm() {
     setSaving(true);
+    let response: Response;
     try {
-      const response = await fetch("/api/clinical/identity-confirmed", {
+      response = await fetch("/api/clinical/identity-confirmed", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ visitId, patientName: name, phone })
       });
+    } catch {
+      setSaving(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void confirm());
+      return;
+    }
+    try {
       if (!response.ok) {
         notify.error("Could not record identity confirmation. Try again.");
         return;
@@ -497,11 +526,21 @@ export function DoctorPortalWorkspace() {
   }
 
   async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate">>) {
-    const response = await fetch("/api/opd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      // The existing HTTP-error branch below deliberately stays on the
+      // persistent setError banner (not a toast) — leave that as-is. This
+      // only adds handling for the network-throw case, which previously had
+      // none at all (not even the banner).
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as OpdResponse;
     if (!response.ok || !data.ok || !data.visit) {
       setError(data.error || "Unable to save consultation.");
@@ -525,11 +564,18 @@ export function DoctorPortalWorkspace() {
       .split(",")
       .map((symptom) => symptom.trim())
       .filter(Boolean);
-    const response = await fetch("/api/opd", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority: formData.get("priority") })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/opd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority: formData.get("priority") })
+      });
+    } catch {
+      setCreatingConsultation(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createWalkInConsultation(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as OpdResponse;
     setCreatingConsultation(false);
     if (!response.ok || !data.ok || !data.visit) {

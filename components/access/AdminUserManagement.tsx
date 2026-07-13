@@ -135,11 +135,17 @@ export function AdminUserManagement() {
   );
 
   async function operate(id: string, operation: string, extra: Record<string, unknown> = {}) {
-    const response = await fetch("/api/access/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, operation, ...extra })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/access/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, operation, ...extra })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void operate(id, operation, extra));
+      return null;
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Operation failed.");
@@ -149,9 +155,17 @@ export function AdminUserManagement() {
     return data;
   }
 
+  // Idempotent server-side (skips accounts that already exist), so a retry
+  // after a network failure can never double-create — safe to retry blind.
   async function seedLaunchTeam() {
     setNotice("");
-    const response = await fetch("/api/access/seed", { method: "POST" });
+    let response: Response;
+    try {
+      response = await fetch("/api/access/seed", { method: "POST" });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void seedLaunchTeam());
+      return;
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Seeding failed.");
@@ -166,13 +180,24 @@ export function AdminUserManagement() {
     await load();
   }
 
+  // A network failure here means the temporary password (shown once) may be
+  // unrecoverable regardless of retry-or-not — the same is true if the admin
+  // just clicks "Create User" again by hand. If the first attempt actually
+  // reached the server, retrying surfaces a clear "username taken" error
+  // rather than silently duplicating anything.
   async function createUser(event: FormEvent) {
     event.preventDefault();
-    const response = await fetch("/api/access/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName, username: newUsername, roles: newRoles, defaultRole: newRoles[0] })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/access/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, username: newUsername, roles: newRoles, defaultRole: newRoles[0] })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createUser(event));
+      return;
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Could not create user.");
@@ -187,11 +212,17 @@ export function AdminUserManagement() {
   }
 
   async function decideApproval(id: string, decision: "approved" | "rejected") {
-    const response = await fetch("/api/access/approvals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, decision })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/access/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, decision })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void decideApproval(id, decision));
+      return;
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Decision failed.");

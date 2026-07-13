@@ -99,21 +99,38 @@ export function NotificationCenter() {
         return { ...item, status };
       })
     );
-    await fetch("/api/notifications", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(action === "read-all" ? { action } : { id, action })
-    }).catch(() => null);
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(action === "read-all" ? { action } : { id, action })
+      });
+    } catch {
+      // Previously a silent .catch(() => null): the optimistic update stayed
+      // on screen until the next poll silently reverted it, with no
+      // explanation. The poll (and this retry) still reconcile the true
+      // state either way — this just makes a network failure visible instead
+      // of a UI action that quietly un-does itself a few seconds later.
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void act(id, action));
+      return;
+    }
     void load();
   }
 
   async function postAnnouncement() {
     setPosting(true);
-    const response = await fetch("/api/announcements", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: announcementTitle, detail: announcementDetail, priority: announcementPriority })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: announcementTitle, detail: announcementDetail, priority: announcementPriority })
+      });
+    } catch {
+      setPosting(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void postAnnouncement());
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AnnouncementResponse;
     setPosting(false);
     if (!response.ok || !data.ok) {
