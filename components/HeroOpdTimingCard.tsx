@@ -2,14 +2,23 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { AlertTriangle, CalendarDays, Clock3, Moon, PhoneCall, SunMedium } from "lucide-react";
+import { AlertTriangle, CalendarDays, Clock3, CloudSun, Droplets, Moon, PhoneCall, SunMedium, Wind } from "lucide-react";
 import { site } from "@/lib/site-data";
 
 const timeZone = "Asia/Kolkata";
+const weatherEndpoint =
+  "https://api.open-meteo.com/v1/forecast?latitude=27.1767&longitude=78.0081&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FKolkata";
 const opdWindows = [
   { start: 11 * 60, end: 14 * 60 },
   { start: 17 * 60, end: 18 * 60 }
 ];
+type WeatherInfo = {
+  temperature: number;
+  humidity: number;
+  windSpeed: number;
+  code: number;
+};
+
 const clockNumbers = Array.from({ length: 12 }, (_, index) => {
   const value = index === 0 ? 12 : index;
   const angle = (value * 30 - 90) * (Math.PI / 180);
@@ -23,6 +32,27 @@ const glassPanelClass =
   "relative overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(236,254,255,0.62)_48%,rgba(255,255,255,0.78))] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-28px_70px_rgba(8,64,84,0.07),0_28px_78px_rgba(8,64,84,0.14)] backdrop-blur-2xl";
 const glassRowClass =
   "flex items-center justify-between gap-4 rounded-[20px] border border-cyan-100/70 bg-white/60 px-4 py-3 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_34px_rgba(8,64,84,0.08)] backdrop-blur-xl";
+
+function getWeatherSummary(code: number) {
+  if (code === 0) return "Clear";
+  if ([1, 2].includes(code)) return "Partly cloudy";
+  if (code === 3) return "Cloudy";
+  if ([45, 48].includes(code)) return "Fog";
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return "Rain possible";
+  if (code >= 95) return "Thunderstorm";
+  return "Agra weather";
+}
+
+function parseWeather(data: unknown): WeatherInfo | null {
+  const current = (data as { current?: Record<string, unknown> })?.current;
+  const temperature = Number(current?.temperature_2m);
+  const humidity = Number(current?.relative_humidity_2m);
+  const windSpeed = Number(current?.wind_speed_10m);
+  const code = Number(current?.weather_code);
+
+  if (![temperature, humidity, windSpeed, code].every(Number.isFinite)) return null;
+  return { temperature, humidity, windSpeed, code };
+}
 
 function getIndiaStatus(date: Date) {
   const parts = new Intl.DateTimeFormat("en-IN", {
@@ -53,12 +83,42 @@ function getIndiaStatus(date: Date) {
 
 export function HeroOpdTimingCard() {
   const [status, setStatus] = useState(() => getIndiaStatus(new Date()));
+  const [weather, setWeather] = useState<WeatherInfo | null>(null);
+  const [weatherError, setWeatherError] = useState(false);
 
   useEffect(() => {
     const update = () => setStatus(getIndiaStatus(new Date()));
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadWeather() {
+      try {
+        const response = await fetch(weatherEndpoint, { cache: "no-store" });
+        if (!response.ok) throw new Error("Weather request failed");
+        const nextWeather = parseWeather(await response.json());
+        if (!active) return;
+        if (nextWeather) {
+          setWeather(nextWeather);
+          setWeatherError(false);
+        } else {
+          setWeatherError(true);
+        }
+      } catch {
+        if (active) setWeatherError(true);
+      }
+    }
+
+    loadWeather();
+    const timer = window.setInterval(loadWeather, 30 * 60 * 1000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
   }, []);
 
   const open = status.isOpen;
@@ -174,6 +234,39 @@ export function HeroOpdTimingCard() {
             <p className="mt-4 text-center text-base font-semibold leading-6 text-muted">
               Current time at Shaheed Nagar, Agra
             </p>
+            <div className="mt-5 rounded-[24px] border border-cyan-100/80 bg-white/62 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_18px_42px_rgba(8,64,84,0.09)] backdrop-blur-xl">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[18px] border border-cyan-100/80 bg-cyan-50/70 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)]">
+                    <CloudSun size={24} />
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand">Agra Weather</p>
+                    <p className="mt-0.5 text-sm font-bold text-muted">
+                      {weather ? getWeatherSummary(weather.code) : weatherError ? "Weather unavailable" : "Updating weather"}
+                    </p>
+                  </div>
+                </div>
+                <p className="shrink-0 text-3xl font-black leading-none text-ink">
+                  {weather ? (
+                    <>
+                      {Math.round(weather.temperature)}
+                      <span className="text-xl">&deg;C</span>
+                    </>
+                  ) : (
+                    <span className="text-xl text-muted">--</span>
+                  )}
+                </p>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-center gap-2 rounded-[16px] border border-cyan-100/70 bg-white/60 px-3 py-2 text-xs font-black text-muted">
+                  <Droplets size={15} className="text-brand" /> {weather ? `${Math.round(weather.humidity)}% humidity` : "Humidity --"}
+                </div>
+                <div className="flex items-center justify-center gap-2 rounded-[16px] border border-cyan-100/70 bg-white/60 px-3 py-2 text-xs font-black text-muted">
+                  <Wind size={15} className="text-brand" /> {weather ? `${Math.round(weather.windSpeed)} km/h` : "Wind --"}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -235,18 +328,21 @@ export function HeroOpdTimingCard() {
               <p className="mt-1 font-black text-ink">Hospital Support</p>
             </div>
           </div>
-          <div className="mt-4 rounded-[22px] border border-red-100/90 bg-[linear-gradient(145deg,rgba(255,250,250,0.9),rgba(255,255,255,0.68))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_38px_rgba(127,29,29,0.07)] backdrop-blur-xl">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-red-600">
-                  <AlertTriangle size={15} /> Warning signs
+          <div className="mt-4 rounded-[20px] border border-red-100/90 bg-[linear-gradient(145deg,rgba(255,250,250,0.9),rgba(255,255,255,0.68))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_38px_rgba(127,29,29,0.07)] backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-600">
+                  <AlertTriangle size={14} /> Warning signs
+                </p>
+                <p className="mt-1 overflow-hidden text-sm font-bold leading-5 text-muted [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                  Call reception before visiting for vomiting blood, black stools, severe pain, fever with jaundice, breathing difficulty or persistent vomiting.
                 </p>
               </div>
               <a
                 href={`tel:${site.mobile.replace(/\s/g, "")}`}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[16px] bg-ink px-4 text-sm font-black text-white shadow-[0_16px_34px_rgba(8,64,84,0.18)] transition hover:-translate-y-0.5 hover:bg-brand"
+                className="hidden min-h-10 shrink-0 items-center justify-center gap-2 rounded-[14px] bg-ink px-4 text-xs font-black text-white shadow-[0_16px_34px_rgba(8,64,84,0.18)] transition hover:-translate-y-0.5 hover:bg-brand sm:inline-flex"
               >
-                <PhoneCall size={17} /> Call Reception
+                <PhoneCall size={15} /> Call
               </a>
             </div>
           </div>
