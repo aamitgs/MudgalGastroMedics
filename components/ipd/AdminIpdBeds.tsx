@@ -130,12 +130,21 @@ export function AdminIpdBeds() {
     };
   }, []);
 
-  async function patchIpd(payload: Record<string, unknown>) {
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  // onRetry re-invokes the specific caller (handleTransfer, handleLogVitals,
+  // etc.) with its original arguments, not patchIpd itself — only the caller
+  // knows how to apply the response (setAdmissions/setBeds/setTransfers/...).
+  async function patchIpd(payload: Record<string, unknown>, onRetry: () => void) {
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", onRetry);
+      return null;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok) {
       // Mutation failures are transient/non-blocking (toast), never the
@@ -149,7 +158,7 @@ export function AdminIpdBeds() {
   }
 
   async function handleTransfer(admissionId: string, toBedId: string, reason: string) {
-    const data = await patchIpd({ type: "transfer", admissionId, toBedId, reason });
+    const data = await patchIpd({ type: "transfer", admissionId, toBedId, reason }, () => void handleTransfer(admissionId, toBedId, reason));
     if (!data) return;
     if (data.admission) setAdmissions((items) => items.map((item) => (item.id === data.admission!.id ? data.admission! : item)));
     if (data.beds) setBeds(data.beds);
@@ -158,25 +167,25 @@ export function AdminIpdBeds() {
   }
 
   async function handleLogVitals(admissionId: string, payload: Partial<VitalsReading>) {
-    const data = await patchIpd({ type: "vitals", admissionId, ...payload });
+    const data = await patchIpd({ type: "vitals", admissionId, ...payload }, () => void handleLogVitals(admissionId, payload));
     if (!data) return;
     if (data.reading) setVitals((items) => [data.reading as VitalsReading, ...items]);
   }
 
   async function handleEscalate(admissionId: string, escalated: boolean, reason?: string) {
-    const data = await patchIpd({ type: "escalate", id: admissionId, escalated, reason });
+    const data = await patchIpd({ type: "escalate", id: admissionId, escalated, reason }, () => void handleEscalate(admissionId, escalated, reason));
     if (!data) return;
     if (data.admission) setAdmissions((items) => items.map((item) => (item.id === data.admission!.id ? data.admission! : item)));
   }
 
   async function handleBedStatus(bedId: string, status: BedStatus) {
-    const data = await patchIpd({ type: "bed", id: bedId, status });
+    const data = await patchIpd({ type: "bed", id: bedId, status }, () => void handleBedStatus(bedId, status));
     if (!data) return;
     if (data.bed) setBeds((items) => items.map((item) => (item.id === data.bed!.id ? data.bed! : item)));
   }
 
   async function handleMarkForDischarge(admissionId: string, markedForDischarge: boolean) {
-    const data = await patchIpd({ id: admissionId, markedForDischarge });
+    const data = await patchIpd({ id: admissionId, markedForDischarge }, () => void handleMarkForDischarge(admissionId, markedForDischarge));
     if (!data) return;
     if (data.admission) setAdmissions((items) => items.map((item) => (item.id === data.admission!.id ? data.admission! : item)));
   }
@@ -184,11 +193,17 @@ export function AdminIpdBeds() {
   async function createAdmission(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const response = await fetch("/api/ipd", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createAdmission(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.admission) {
       notify.error(data.error || "Unable to admit patient.");
@@ -204,11 +219,17 @@ export function AdminIpdBeds() {
     id: string,
     updates: Partial<Pick<IpdAdmission, "status" | "bedId" | "diagnosis" | "carePlan" | "nursingNotes" | "dietAdvice" | "depositAmount" | "dischargeSummary" | "assignedNurse" | "expectedDischargeDate">>
   ) {
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateAdmission(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.admission) {
       notify.error(data.error || "Unable to update admission.");
@@ -370,6 +391,8 @@ export function AdminIpdBeds() {
         )
       }
     ],
+    // updateAdmission only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, editingAdmission, escalatedIds]
   );
 

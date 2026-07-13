@@ -44,18 +44,24 @@ export function AdminMedicationRecord({ admissionId }: { admissionId: string }) 
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "medication-order",
-        admissionId,
-        drugName: formData.get("drugName"),
-        dose: formData.get("dose"),
-        route: formData.get("route"),
-        frequency: formData.get("frequency")
-      })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "medication-order",
+          admissionId,
+          drugName: formData.get("drugName"),
+          dose: formData.get("dose"),
+          route: formData.get("route"),
+          frequency: formData.get("frequency")
+        })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void addOrder(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.order) {
       notify.error(data.error || "Unable to add medication order.");
@@ -67,11 +73,17 @@ export function AdminMedicationRecord({ admissionId }: { admissionId: string }) 
   }
 
   async function discontinue(id: string) {
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "medication-order-discontinue", id })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "medication-order-discontinue", id })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void discontinue(id));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.order) {
       notify.error(data.error || "Unable to discontinue order.");
@@ -81,11 +93,17 @@ export function AdminMedicationRecord({ admissionId }: { admissionId: string }) 
   }
 
   async function recordDose(medicationOrderId: string, status: "Given" | "Missed" | "Refused") {
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "medication-administration", medicationOrderId, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "medication-administration", medicationOrderId, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void recordDose(medicationOrderId, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.record) {
       notify.error(data.error || "Unable to record dose.");

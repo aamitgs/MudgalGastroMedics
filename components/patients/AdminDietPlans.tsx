@@ -88,11 +88,17 @@ export function AdminDietPlans() {
   }, []);
 
   async function saveDietPlan(id: string, dietPlan: string) {
-    const response = await fetch("/api/patients", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, dietPlan })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/patients", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, dietPlan })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void saveDietPlan(id, dietPlan));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as PatientsResponse;
     if (!response.ok || !data.ok || !data.patient) {
       notify.error(data.error || "Unable to save diet plan.");
@@ -103,11 +109,17 @@ export function AdminDietPlans() {
   }
 
   async function saveDietAdvice(admissionId: string, dietAdvice: string) {
-    const response = await fetch("/api/ipd", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: admissionId, dietAdvice })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: admissionId, dietAdvice })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void saveDietAdvice(admissionId, dietAdvice));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as IpdResponse;
     if (!response.ok || !data.ok || !data.admission) {
       notify.error(data.error || "Unable to save diet advice.");

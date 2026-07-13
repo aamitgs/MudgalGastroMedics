@@ -86,7 +86,14 @@ export function EntityDocumentsSection({ entityType, entityId }: { entityType: "
     formData.append("entityId", entityId);
     if (groupId) formData.append("groupId", groupId);
     formData.append("file", file);
-    const response = await fetch("/api/documents", { method: "POST", body: formData });
+    let response: Response;
+    try {
+      response = await fetch("/api/documents", { method: "POST", body: formData });
+    } catch {
+      setUploading(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void upload(file, groupId));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as UploadResponse;
     setUploading(false);
     if (!response.ok || !data.ok) {

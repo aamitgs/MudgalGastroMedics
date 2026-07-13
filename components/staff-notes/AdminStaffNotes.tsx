@@ -61,11 +61,18 @@ export function AdminStaffNotes() {
     event.preventDefault();
     if (!message.trim()) return;
     setPosting(true);
-    const response = await fetch("/api/staff-notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category, toDepartment, priority, message })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/staff-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category, toDepartment, priority, message })
+      });
+    } catch {
+      setPosting(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitNote(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as StaffNotesResponse;
     setPosting(false);
     if (!response.ok || !data.ok) {
@@ -79,11 +86,17 @@ export function AdminStaffNotes() {
   }
 
   const setStatus = useCallback(async (id: string, status: StaffNoteStatus) => {
-    const response = await fetch("/api/staff-notes", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/staff-notes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void setStatus(id, status));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as StaffNotesResponse;
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Unable to update note.");

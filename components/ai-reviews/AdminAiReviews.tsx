@@ -122,11 +122,17 @@ export function AdminAiReviews() {
 
   async function generateReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const response = await fetch("/api/ai/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source, sourceId })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ai/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source, sourceId })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void generateReview(event));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok || !data.review) {
       notify.error(data.error || "Unable to generate AI review.");
@@ -137,11 +143,17 @@ export function AdminAiReviews() {
   }
 
   async function seedReviews() {
-    const response = await fetch("/api/ai/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "seed" })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ai/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "seed" })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void seedReviews());
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok) {
       notify.error(data.error || "Unable to seed AI reviews.");
@@ -151,11 +163,17 @@ export function AdminAiReviews() {
   }
 
   async function updateReview(id: string, updates: Partial<Pick<AiCaseReview, "status" | "doctorReviewNote" | "reviewedBy">>) {
-    const response = await fetch("/api/ai/reviews", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates })
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/ai/reviews", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateReview(id, updates));
+      return;
+    }
     const data = (await response.json().catch(() => ({}))) as AiReviewResponse;
     if (!response.ok || !data.ok || !data.review) {
       notify.error(data.error || "Unable to update AI review.");
@@ -224,6 +242,8 @@ export function AdminAiReviews() {
         )
       }
     ],
+    // updateReview only forwards call-time arguments via functional setState, so it's safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openDrawer, editingReview]
   );
 
