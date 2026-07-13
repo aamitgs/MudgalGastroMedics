@@ -341,13 +341,13 @@ export default async function Home() {
               <div key={group.title} className="rounded border border-line/80 bg-[linear-gradient(180deg,#ffffff,#f7fbfb)] p-5 shadow-sm">
                 <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink">{group.title}</h3>
                 <div className="mt-4 grid gap-2">
-                  {group.links.slice(0, 5).map((procedure) => (
+                  {group.links.slice(0, 4).map((procedure) => (
                     <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
                       <span>{procedure.title}</span>
                       <ArrowRight size={14} className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
                     </Link>
                   ))}
-                  {group.links.length > 5 ? (
+                  {group.links.length > 4 ? (
                     <details className="group/details">
                       <summary className="mt-1 flex cursor-pointer list-none items-center justify-between rounded border border-line bg-white px-3 py-2 text-sm font-bold text-brand transition hover:border-brand">
                         <span className="group-open/details:hidden">Show more</span>
@@ -355,7 +355,7 @@ export default async function Home() {
                         <ArrowRight size={14} className="transition group-open/details:rotate-90" />
                       </summary>
                       <div className="mt-2 grid gap-2">
-                        {group.links.slice(5).map((procedure) => (
+                        {group.links.slice(4).map((procedure) => (
                           <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
                             <span>{procedure.title}</span>
                             <ArrowRight size={14} className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />

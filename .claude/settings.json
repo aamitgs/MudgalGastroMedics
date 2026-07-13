@@ -31,7 +31,24 @@
       "Bash(node .tmp-verify-lab-form.mjs)",
       "Bash(pkill -f \"port 3217\")",
       "Bash(node .tmp-verify-comm-form.mjs)",
-      "Bash(pkill -f \"port 3218\")"
+      "Bash(pkill -f \"port 3218\")",
+      "Bash(node .tmp-verify-print-card.mjs)",
+      "Bash(echo \"TSC EXIT:$?\")",
+      "Bash(node .tmp-verify-wristband-flow.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/verify-pdf-export.mjs)",
+      "Bash(node .tmp-verify-pdf.mjs)",
+      "Bash(cp /tmp/edge-test.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/edge-test.pdf)",
+      "Bash(qlmanage -t -s 1400 -o /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/edge-test.pdf)",
+      "Bash(curl -s -b /tmp/pdf-verify2.txt -X POST http://localhost:3000/api/pdf/table -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -s -b /tmp/pdf-verify2.txt -X POST http://localhost:3000/api/pdf/table -H 'Content-Type: application/json' -d '{\"title\": \"Mismatch Test\", \"headers\": [\"A\", \"B\", \"C\"], \"rows\": [[\"only one\"], [\"two\", \"cells\"], [\"x\",\"y\",\"z\"]]}' -o /tmp/mismatch-test2.pdf -w 'HTTP %{http_code}\\\\n')",
+      "Bash(cp /tmp/edge-test2.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/edge-test2.pdf)",
+      "Bash(cp /tmp/mismatch-test2.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/mismatch-test2.pdf)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/*.pdf.png)",
+      "Bash(qlmanage -t -s 1400 -o /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/edge-test2.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/mismatch-test2.pdf)",
+      "Bash(lsof -i :3000 -sTCP:LISTEN -t)",
+      "Bash(xargs -r kill)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/*.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/*.png)",
+      "Bash(rm -f /tmp/edge-test.pdf /tmp/edge-test2.pdf /tmp/mismatch-test.pdf /tmp/mismatch-test2.pdf /tmp/pdf-verify2.txt)"
     ]
   }
 }

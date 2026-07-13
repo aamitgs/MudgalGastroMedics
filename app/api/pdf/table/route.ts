@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { getRequestAccessContext } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { registerPdfFonts } from "@/lib/pdf/branding";
-import { TableDocument } from "@/lib/pdf/table-document";
+import { renderTablePdf } from "@/lib/pdf/render";
 import { firstZodIssueMessage } from "@/lib/validation/http";
 import { tableExportSchema } from "@/lib/validation/reports";
-
-function slugify(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "export";
-}
 
 /**
  * Generic "PDF of the current table view" (Track 3.4). Not resource-scoped
@@ -31,17 +25,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
   const { title, headers, rows } = parsed.data;
-
-  registerPdfFonts();
-  const buffer = await renderToBuffer(TableDocument({ title, headers, rows }));
-  const filename = `${slugify(title)}.pdf`;
+  const { buffer, filename } = await renderTablePdf({ title, headers, rows });
 
   await recordAuditEvent({
     actorRole: context.activeRole,
     actorId: context.userId,
     action: "pdf.table.exported",
     entityType: "table_export",
-    entityId: slugify(title),
+    entityId: filename,
     severity: "info",
     metadata: { title, rowCount: rows.length },
     device: auditRequestMetadata(request)

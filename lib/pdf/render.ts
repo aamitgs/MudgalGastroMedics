@@ -11,6 +11,7 @@ import { buildDischargeSummaryFooterTemplate, buildDischargeSummaryHeaderTemplat
 import { renderHtmlToPdf } from "@/lib/pdf/chromium";
 import { PurchaseOrderDocument } from "@/lib/pdf/purchase-order-document";
 import { listPurchaseOrders } from "@/lib/purchase-order-store";
+import { TableDocument } from "@/lib/pdf/table-document";
 
 export type PdfRenderResult =
   | { ok: true; buffer: Buffer; filename: string }
@@ -65,6 +66,16 @@ export async function renderPurchaseOrderPdf(orderId: string): Promise<PdfRender
   registerPdfFonts();
   const buffer = await renderToBuffer(PurchaseOrderDocument({ order }));
   return { ok: true, buffer, filename: `purchase-order-${slugify(order.vendor)}-${order.id}.pdf` };
+}
+
+// Shared by the table-export download and email routes (Track 3.4) — unlike
+// the other renderX helpers, there's no store lookup to fail: the caller
+// already fetched this data itself via its own authorized GET, so this is a
+// pure format transform, not a data-access point.
+export async function renderTablePdf({ title, headers, rows }: { title: string; headers: string[]; rows: string[][] }) {
+  registerPdfFonts();
+  const buffer = await renderToBuffer(TableDocument({ title, headers, rows }));
+  return { buffer, filename: `${slugify(title)}.pdf` };
 }
 
 export async function renderDischargeSummaryPdf(admissionId: string): Promise<PdfRenderResult> {

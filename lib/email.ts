@@ -29,7 +29,13 @@ function getTransport() {
   return cachedTransport;
 }
 
-export async function sendEmail(options: { to: string; subject: string; text: string; html?: string }): Promise<EmailResult> {
+export async function sendEmail(options: {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  attachments?: { filename: string; content: Buffer; contentType?: string }[];
+}): Promise<EmailResult> {
   if (!smtpConfigured()) {
     console.warn(`[email] SMTP delivery not configured; email to ${options.to} ("${options.subject}") was not sent.`);
     return { channel: "log", ok: true };
@@ -41,7 +47,8 @@ export async function sendEmail(options: { to: string; subject: string; text: st
       to: options.to,
       subject: options.subject,
       text: options.text,
-      html: options.html
+      html: options.html,
+      attachments: options.attachments
     });
     return { channel: "email", ok: true };
   } catch (error) {
