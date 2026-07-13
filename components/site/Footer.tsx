@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { FloatingActionHub } from "@/components/site/FloatingActionHub";
+import { localSeoPages } from "@/lib/local-seo-pages";
 import { site } from "@/lib/site-data";
 
 const companyLinks = [
@@ -34,6 +35,11 @@ const supportLinks = [
   { href: "/terms", label: "Terms" }
 ];
 
+const areaLinks = [
+  { href: "/areas", label: "All Local Care Areas" },
+  ...localSeoPages.slice(0, 5).map((page) => ({ href: `/areas/${page.slug}`, label: page.title }))
+];
+
 const socialLinks = {
   whatsappChannel: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d",
   facebook: "https://www.facebook.com/MudgalGastromedics",
@@ -44,7 +50,7 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-[#111111] px-5 pb-7 pt-14 text-sm text-[#969696] md:px-8">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
-        <div className="grid items-start gap-9 lg:grid-cols-[1.35fr_0.72fr_0.72fr_0.84fr_1.05fr_1fr]">
+        <div className="grid items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
             <div className="w-fit rounded border border-brand/25 bg-white p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
@@ -57,6 +63,8 @@ export function Footer() {
           <FooterColumn title="Company" links={companyLinks} />
 
           <FooterColumn title="Services" links={serviceLinks} />
+
+          <FooterColumn title="Areas Served" links={areaLinks} />
 
           <div>
             <FooterColumn title="Support" links={supportLinks} />

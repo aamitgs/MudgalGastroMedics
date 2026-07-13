@@ -54,7 +54,7 @@ export function AiVisitAssistant({ visitId }: { visitId: string }) {
         <Bot size={14} /> Ask about this visit
       </p>
       {turns.length === 0 ? (
-        <p className="mt-2 text-xs text-muted">Ask a question about this patient's visit — allergies, history, what you noted earlier. Answers are grounded only in this visit's own record.</p>
+        <p className="mt-2 text-xs text-muted">Ask a question about this patient&apos;s visit — allergies, history, what you noted earlier. Answers are grounded only in this visit&apos;s own record.</p>
       ) : (
         <div className="mt-2 max-h-64 space-y-2 overflow-y-auto rounded border border-cyan-200 bg-white p-3">
           {turns.map((turn, index) => (

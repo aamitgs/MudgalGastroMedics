@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -37,4 +39,17 @@ const nextConfig = {
   }
 };
 
-export default nextConfig;
+// Uploads source maps to Sentry at build time when SENTRY_AUTH_TOKEN/ORG/PROJECT
+// are set (Track 4.5); silently skips the upload step otherwise (documented
+// SDK behavior), so this stays a no-op build wrapper until that account exists.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  widenClientFileUpload: true,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: true
+  }
+});

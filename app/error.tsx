@@ -1,21 +1,22 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 import { useEffect } from "react";
 
 /**
- * App Router error boundary (Track 4.5 groundwork) — catches any otherwise-
- * uncaught rendering error below the root layout, across every route
- * (public site, staff/admin, doctor, Hospital OS). Previously an error here
- * produced Next's generic error page with no record kept anywhere; this at
- * least leaves a browser-console entry with the digest Next.js also prints
- * server-side, so the two can be cross-referenced. Never shows the raw
- * error/stack to the user (frozen contract: friendly, actionable messages
- * only) — offers a reset instead.
+ * App Router error boundary (Track 4.5) — catches any otherwise-uncaught
+ * rendering error below the root layout, across every route (public site,
+ * staff/admin, doctor, Hospital OS). Leaves a browser-console entry with the
+ * digest Next.js also prints server-side (so the two can be cross-referenced)
+ * and reports to Sentry when SENTRY_DSN is configured — a no-op otherwise.
+ * Never shows the raw error/stack to the user (frozen contract: friendly,
+ * actionable messages only) — offers a reset instead.
  */
 export default function ErrorBoundary({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error("Unhandled render error", { message: error.message, digest: error.digest });
+    Sentry.captureException(error);
   }, [error]);
 
   return (

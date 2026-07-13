@@ -1,15 +1,17 @@
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 
 /**
- * Zero-dependency structured error logging (Track 4.5 groundwork). Most
- * hosts (Vercel, Railway, etc.) capture stdout/stderr and make it
- * searchable, so a consistent JSON line here is a real, permanent record
- * for exactly the failure class that previously vanished into a generic
- * 500 with nothing kept anywhere. Wiring an actual error-tracking service
- * (Sentry/GlitchTip) is deferred pending the hosting decision (the
- * roadmap's own "Depends: hosting" note on this track) — this logger's
- * call shape is the seam to plug one in later without touching call
- * sites again.
+ * Structured error logging (Track 4.5) — every host (Vercel included)
+ * captures and indexes stdout/stderr, so the JSON line below is always a
+ * real, permanent record regardless of whether Sentry is configured.
+ *
+ * `extra` is deliberately NOT forwarded to Sentry, only to the console JSON:
+ * call sites pass things like a recipient email address or a query fragment
+ * (see lib/email.ts, lib/database.ts) that stay inside this hospital's own
+ * log stream today — forwarding them to a third-party service by default
+ * would be a real PHI/PII exposure, not a logging nicety. Sentry gets the
+ * exception (message/stack) and a non-identifying `context` tag only.
  */
 export function logServerError(context: string, error: unknown, extra?: Record<string, unknown>) {
   const payload = {
@@ -21,4 +23,8 @@ export function logServerError(context: string, error: unknown, extra?: Record<s
     ...extra
   };
   console.error(JSON.stringify(payload));
+
+  Sentry.captureException(error instanceof Error ? error : new Error(String(error)), {
+    tags: { context }
+  });
 }

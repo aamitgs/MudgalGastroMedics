@@ -886,7 +886,7 @@ function DoctorConsultationCard({
 
         <AiPatientSummaryPanel phone={visit.phone} />
 
-        <AiVisitAssistant key={visit.id} visitId={visit.id} />
+        <AiVisitAssistant key={`${visit.id}-assistant`} visitId={visit.id} />
 
         <AllergyGuard key={visit.id} visitId={visit.id} allergies={patient?.allergies} />
 

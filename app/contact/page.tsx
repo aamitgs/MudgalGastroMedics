@@ -4,6 +4,7 @@ import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { ContactForm } from "@/components/site/ContactForm";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { site } from "@/lib/site-data";
@@ -77,6 +78,10 @@ export default function ContactPage() {
 
       <Section className="overflow-hidden">
         <HeroOpdTimingCard />
+      </Section>
+
+      <Section muted className="pt-0">
+        <LocalProminencePanel />
       </Section>
 
       <Section className="relative z-10 pt-0">

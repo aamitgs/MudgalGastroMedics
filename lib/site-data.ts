@@ -11,6 +11,8 @@ export const site = {
   region: "Uttar Pradesh",
   postalCode: "282001",
   country: "India",
+  latitude: 27.15058,
+  longitude: 78.037782,
   phone: "0562-3501228",
   mobile: "+91 9828912257",
   whatsapp: "919828912257",
@@ -18,11 +20,17 @@ export const site = {
   email: "admin@mudgalgastromedics.com",
   emailAlt: "admin@mudgalgastromedics.com",
   directionsUrl: "https://maps.app.goo.gl/EHcBzTLo2GUqdLtt5",
+  googleBusinessProfileUrl: "https://maps.app.goo.gl/EHcBzTLo2GUqdLtt5",
+  googleReviewUrl: "https://maps.app.goo.gl/EHcBzTLo2GUqdLtt5",
+  facebookUrl: "https://www.facebook.com/MudgalGastromedics",
+  youtubeUrl: "https://www.youtube.com/@mudgalgastromedics9355",
+  whatsappChannelUrl: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d",
   mapEmbed:
     "https://www.google.com/maps?q=Mudgal%20Gastromedics%20Hospital%2016%20HIG%20Shaheed%20Nagar%20Agra&output=embed"
 };
 
 export const fullAddress = `${site.addressLine1}, ${site.addressLine2}, ${site.city}, ${site.region} ${site.postalCode}`;
+export const hospitalEntityId = `${site.url}/#hospital`;
 
 export const doctor = {
   name: "Dr. Deepak Kumar Sharma",
@@ -542,18 +550,20 @@ export function hospitalSchema() {
   return {
     "@context": "https://schema.org",
     "@type": ["Hospital", "MedicalClinic"],
+    "@id": hospitalEntityId,
     name: site.name,
     alternateName: site.shortName,
     url: site.url,
     logo: `${site.url}/mgm-logo.png`,
-    image: `${site.url}/images/hospital/hospital-front-view.jpg`,
+    image: [
+      `${site.url}/images/hospital/hospital-front-view.jpg`,
+      `${site.url}/images/hospital/reception-waiting-area.jpg`,
+      `${site.url}/images/hospital/endoscopy-room.jpg`,
+      `${site.url}/images/hospital/fibroscan-room.jpg`
+    ],
     telephone: [site.phone, site.mobile],
     email: [site.email, site.emailAlt],
-    sameAs: [
-      "https://www.facebook.com/MudgalGastromedics",
-      "https://www.youtube.com/@mudgalgastromedics9355",
-      "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d"
-    ],
+    sameAs: [site.googleBusinessProfileUrl, site.facebookUrl, site.youtubeUrl, site.whatsappChannelUrl],
     priceRange: "₹₹",
     additionalType: ["Gastroenterology Hospital", "Liver Care Centre", "Endoscopy Centre"],
     medicalSpecialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
@@ -564,6 +574,11 @@ export function hospitalSchema() {
       addressRegion: site.region,
       postalCode: site.postalCode,
       addressCountry: "IN"
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: site.latitude,
+      longitude: site.longitude
     },
     areaServed: localServiceAreas,
     hasMap: site.directionsUrl,

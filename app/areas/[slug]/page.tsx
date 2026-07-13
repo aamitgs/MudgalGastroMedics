@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, HelpCircle, MapPin, Route, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";
 import { Section, SectionHead } from "@/components/site/Section";
-import { getLocalSeoPage, localSeoPages } from "@/lib/local-seo-pages";
+import { getLocalSeoPage, getLocalSeoPageDetail, localSeoPages } from "@/lib/local-seo-pages";
 import { breadcrumbSchema } from "@/lib/seo-schema";
-import { fullAddress, site } from "@/lib/site-data";
+import { fullAddress, hospitalEntityId, site } from "@/lib/site-data";
 
 type LocalAreaPageProps = {
   params: Promise<{ slug: string }>;
@@ -59,35 +60,79 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
   const { slug } = await params;
   const page = getLocalSeoPage(slug);
   if (!page) notFound();
+  const detail = getLocalSeoPageDetail(page.slug);
   const showOpdTimingCard = opdTimingAreaSlugs.has(page.slug);
+  const pageUrl = `${site.url}/areas/${page.slug}`;
+  const serviceEntityId = `${pageUrl}#service`;
 
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["MedicalClinic", "LocalBusiness"],
-        name: `${page.title} - ${site.name}`,
-        url: `${site.url}/areas/${page.slug}`,
+        "@type": "MedicalWebPage",
+        name: page.title,
+        url: pageUrl,
         description: page.description,
-        telephone: site.mobile,
-        priceRange: "₹₹",
-        medicalSpecialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: `${site.addressLine1}, ${site.addressLine2}`,
-          addressLocality: site.city,
-          addressRegion: site.region,
-          postalCode: site.postalCode,
-          addressCountry: site.country
+        about: page.primaryService,
+        mainEntity: { "@id": serviceEntityId },
+        audience: {
+          "@type": "PeopleAudience",
+          geographicArea: page.nearbyAreas
         },
-        areaServed: page.nearbyAreas,
-        parentOrganization: {
-          "@type": "Hospital",
+        provider: {
+          "@type": ["Hospital", "MedicalClinic"],
+          "@id": hospitalEntityId,
           name: site.name,
-          url: site.url
+          url: site.url,
+          telephone: site.mobile,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: `${site.addressLine1}, ${site.addressLine2}`,
+            addressLocality: site.city,
+            addressRegion: site.region,
+            postalCode: site.postalCode,
+            addressCountry: site.country
+          },
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: site.latitude,
+            longitude: site.longitude
+          },
+          medicalSpecialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
+          hasMap: site.directionsUrl
         },
-        hasMap: site.directionsUrl
+        mainContentOfPage: detail?.careDifference
       },
+      {
+        "@type": "Service",
+        "@id": serviceEntityId,
+        name: page.title,
+        serviceType: page.primaryService,
+        description: page.description,
+        url: pageUrl,
+        provider: { "@id": hospitalEntityId },
+        areaServed: page.nearbyAreas.map((area) => ({
+          "@type": "Place",
+          name: area
+        })),
+        availableChannel: {
+          "@type": "ServiceChannel",
+          servicePhone: site.mobile,
+          serviceUrl: `${site.url}/contact`
+        }
+      },
+      ...(detail?.faqs.length
+        ? [
+            {
+              "@type": "FAQPage",
+              mainEntity: detail.faqs.map((faq) => ({
+                "@type": "Question",
+                name: faq.question,
+                acceptedAnswer: { "@type": "Answer", text: faq.answer }
+              }))
+            }
+          ]
+        : []),
       breadcrumbSchema([
         { name: "Home", url: "/" },
         { name: page.title, url: `/areas/${page.slug}` }
@@ -137,7 +182,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
       ) : null}
 
       <Section>
-        <SectionHead eyebrow="Local SEO Care Page" title={`${page.shortTitle} near you`}>
+        <SectionHead eyebrow="Local Care Guide" title={`${page.shortTitle} near you`}>
           <p>{page.description}</p>
         </SectionHead>
         <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr]">
@@ -145,15 +190,16 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
             <BrandIconTile className="mb-5 h-14 w-14" />
             <h2 className="text-3xl font-black leading-tight text-ink">Why patients choose this care</h2>
             <p className="mt-4 text-lg leading-8 text-muted">{page.localFocus}</p>
+            {detail ? <p className="mt-4 text-lg leading-8 text-muted">{detail.careDifference}</p> : null}
             <div className="mt-6 grid gap-3">
-              {[
-                "Specialist gastroenterology and liver care under one hospital setting.",
-                "Procedure planning support for endoscopy, colonoscopy, ERCP and FibroScan-related care.",
-                "Clear guidance for fasting, medicines, previous reports and urgent warning symptoms."
-              ].map((item) => (
-                <div key={item} className="flex gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
+              {(detail?.localHighlights ?? [
+                { title: "Specialist care", text: "Specialist gastroenterology and liver care under one hospital setting." },
+                { title: "Procedure planning", text: "Procedure planning support for endoscopy, colonoscopy, ERCP and FibroScan-related care." },
+                { title: "Clear guidance", text: "Clear guidance for fasting, medicines, previous reports and urgent warning symptoms." }
+              ]).map((item) => (
+                <div key={item.title} className="flex gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
                   <ShieldCheck className="mt-0.5 shrink-0 text-teal" size={19} />
-                  <span>{item}</span>
+                  <span><strong className="text-ink">{item.title}:</strong> {item.text}</span>
                 </div>
               ))}
             </div>
@@ -163,6 +209,12 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Hospital Location</p>
             <h2 className="mt-3 text-2xl font-black text-ink">Shaheed Nagar, Agra</h2>
             <p className="mt-3 leading-7 text-muted">{fullAddress}</p>
+            {detail ? (
+              <div className="mt-5 flex items-start gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
+                <Route className="mt-1 shrink-0 text-brand" size={20} />
+                <span>{detail.routeContext}</span>
+              </div>
+            ) : null}
             <div className="mt-5 flex items-start gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
               <MapPin className="mt-1 shrink-0 text-brand" size={20} />
               <span>Call reception before visiting for urgent symptoms such as vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty.</span>
@@ -170,6 +222,22 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
           </aside>
         </div>
       </Section>
+
+      {detail ? (
+        <Section muted>
+          <SectionHead eyebrow="Before You Visit" title={`Prepare for ${page.shortTitle.toLowerCase()}`}>
+            <p>These notes are specific to this local care pathway and help reception guide timing, reports and preparation.</p>
+          </SectionHead>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {detail.preparationNotes.map((note) => (
+              <article key={note} className="rounded border border-line bg-white p-5 shadow-soft">
+                <ShieldCheck className="mb-4 text-teal" size={22} />
+                <p className="font-semibold leading-relaxed text-muted">{note}</p>
+              </article>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section muted>
         <SectionHead eyebrow="Related Care" title="Services and guides linked to this search">
@@ -200,6 +268,27 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
             </span>
           ))}
         </div>
+      </Section>
+
+      {detail?.faqs.length ? (
+        <Section muted>
+          <SectionHead eyebrow="Local FAQs" title={`Common questions about ${page.shortTitle.toLowerCase()}`} />
+          <div className="grid gap-4 lg:grid-cols-3">
+            {detail.faqs.map((faq) => (
+              <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
+                <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
+                  <HelpCircle className="mt-1 shrink-0 text-brand" size={18} />
+                  <span>{faq.question}</span>
+                </summary>
+                <p className="mt-3 pl-8 leading-relaxed text-muted">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      <Section muted>
+        <LocalProminencePanel compact />
       </Section>
 
       <Section muted>
