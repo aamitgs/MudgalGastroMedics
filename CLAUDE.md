@@ -10,7 +10,7 @@ the standing contract for every session. The full audit-derived build order live
    WhatsApp, testimonials belong here and ONLY here.
 2. **MudgalGastromedics OS** (`/admin`, `/doctor`, `/mudgalgastromedics-os`, `/login`) —
    runs the hospital. Never call it an HMS/ERP; never let marketing components reach
-   authenticated screens. `components/AppChrome.tsx` enforces the chrome split.
+   authenticated screens. `components/chrome/AppChrome.tsx` enforces the chrome split.
 
 Browser titles on OS surfaces: `<Screen> • MudgalGastromedics OS`.
 
@@ -64,7 +64,7 @@ TanStack Table · Recharts · Sonner (via `lib/notify.ts`, never raw `toast`) ·
 - Improve/refactor/reuse/extend — never rewrite working systems. Refactors never change
   behavior.
 - Module-by-module: one roadmap item per change-set; never sweep the whole app at once.
-- Small focused files. `components/HospitalOperatingSystem.tsx` (2,188 lines) is the
+- Small focused files. `components/chrome/HospitalOperatingSystem.tsx` (2,188 lines) is the
   one sanctioned monolith awaiting decomposition — do not grow it; extract when touching it.
 - Commits: conventional format, one concern each, e.g.
   `feat(clinical): active allergy alert at prescribe time (Track 0.1)`.
@@ -88,7 +88,8 @@ Drive the affected flow in the running app (`npm run dev`), not just the test su
   backend (`document-store.ts`, JSON fallback when `DATABASE_URL` unset); `lib/access/`
   RBAC; `lib/clinical/` safety rules; `lib/patient-access/` OTP record access;
   `lib/validation/` Zod schemas; `lib/notify.ts` toasts.
-- `components/` — flat legacy root (Track 1.7 will move to feature folders);
+- `components/` — feature folders (`patients/`, `billing/`, `pharmacy/`, `chrome/` for
+  OS shell+auth, `site/` for public-website marketing, `patient-portal/`, ...);
   `ui/` shadcn primitives; `design-system/` shared platform primitives.
 - `docs/build-roadmap.md` — sequenced build order (Tracks 0–4). `docs/access-control.md`
   — RBAC model.

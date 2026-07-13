@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { Section, SectionHead } from "@/components/Section";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { Section, SectionHead } from "@/components/site/Section";
 import { fullAddress, site } from "@/lib/site-data";
 
 const title = "Stomach, Intestine & Liver Consultation and Check-Up Camp";

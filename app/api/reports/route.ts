@@ -11,12 +11,13 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const parsed = reportRangeQuerySchema.safeParse({
     from: url.searchParams.get("from") ?? undefined,
-    to: url.searchParams.get("to") ?? undefined
+    to: url.searchParams.get("to") ?? undefined,
+    doctor: url.searchParams.get("doctor") ?? undefined
   });
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
 
   const range = parsed.data.from && parsed.data.to ? { from: parsed.data.from, to: parsed.data.to } : undefined;
-  return NextResponse.json({ ok: true, report: await createAdminReport(range) });
+  return NextResponse.json({ ok: true, report: await createAdminReport(range, parsed.data.doctor) });
 }

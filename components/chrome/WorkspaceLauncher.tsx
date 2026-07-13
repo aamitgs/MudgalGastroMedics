@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { BadgeIndianRupee, FlaskConical, HeartPulse, Pill, Settings, Stethoscope, UserRound, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AccessLogin } from "@/components/AccessLogin";
-import { AdminLogin } from "@/components/AdminLogin";
-import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { AccessLogin } from "@/components/chrome/AccessLogin";
+import { AdminLogin } from "@/components/chrome/AdminLogin";
+import { LiveClockWeather } from "@/components/site/LiveClockWeather";
 import type { AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
 

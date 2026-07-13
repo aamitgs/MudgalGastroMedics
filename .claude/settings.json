@@ -13,10 +13,6 @@
       "Bash(rm -f /tmp/dev-server-og-fix.log /tmp/dev-server-smtp-real-test.log)",
       "Bash(npm run *)",
       "Bash(git fetch *)",
-      "Bash(git add *)",
-      "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "Bash(git commit *)",
       "Bash(kill %1)",
       "Bash(pkill -f \"port 3214\")",
       "Bash(pkill -f \"next dev\")",
@@ -48,7 +44,15 @@
       "Bash(lsof -i :3000 -sTCP:LISTEN -t)",
       "Bash(xargs -r kill)",
       "Bash(rm -f /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/*.pdf /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/fee2a31b-f290-4f56-b751-e5b5233dddbb/scratchpad/*.png)",
-      "Bash(rm -f /tmp/edge-test.pdf /tmp/edge-test2.pdf /tmp/mismatch-test.pdf /tmp/mismatch-test2.pdf /tmp/pdf-verify2.txt)"
+      "Bash(rm -f /tmp/edge-test.pdf /tmp/edge-test2.pdf /tmp/mismatch-test.pdf /tmp/mismatch-test2.pdf /tmp/pdf-verify2.txt)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:3000/)",
+      "Bash(cp /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-email-pdf.mjs /Users/amitsharma/Downloads/Developer/MudgalGastroMedics/.verify-email-pdf.tmp.mjs)",
+      "Bash(node .verify-email-pdf.tmp.mjs)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(curl -s -o /dev/null -w \"server check: %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(qlmanage -t -s 1400 -o /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/referral-letter-test.pdf)",
+      "Bash(node /Users/amitsharma/Downloads/Developer/MudgalGastroMedics/.tmp-verify-doctor-filter.mjs)"
     ]
   }
 }

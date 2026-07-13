@@ -1,5 +1,5 @@
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
 import { fullAddress, site } from "@/lib/site-data";
 import { Clock, MapPin } from "lucide-react";
 

@@ -114,6 +114,7 @@ type AdminReport = {
       unit: string;
     }>;
   };
+  availableDoctors: string[];
 };
 
 type ReportResponse = {
@@ -132,11 +133,14 @@ export function AdminReports() {
   const [error, setError] = useState("");
   const [from, setFrom] = useState(todayKey());
   const [to, setTo] = useState(todayKey());
+  const [doctor, setDoctor] = useState("");
 
   async function loadReport(range: { from: string; to: string }) {
     setLoading(true);
     setError("");
-    const response = await fetch(`/api/reports?from=${range.from}&to=${range.to}`, { cache: "no-store" });
+    const params = new URLSearchParams({ from: range.from, to: range.to });
+    if (doctor) params.set("doctor", doctor);
+    const response = await fetch(`/api/reports?${params.toString()}`, { cache: "no-store" });
     const data = (await response.json().catch(() => ({}))) as ReportResponse;
     if (!response.ok || !data.ok || !data.report) {
       setError(data.error || "Unable to load reports.");
@@ -153,7 +157,9 @@ export function AdminReports() {
     async function loadOnRangeChange() {
       setLoading(true);
       setError("");
-      const response = await fetch(`/api/reports?from=${from}&to=${to}`, { cache: "no-store" });
+      const params = new URLSearchParams({ from, to });
+      if (doctor) params.set("doctor", doctor);
+      const response = await fetch(`/api/reports?${params.toString()}`, { cache: "no-store" });
       const data = (await response.json().catch(() => ({}))) as ReportResponse;
       if (!active) return;
       if (!response.ok || !data.ok || !data.report) {
@@ -170,7 +176,7 @@ export function AdminReports() {
     return () => {
       active = false;
     };
-  }, [from, to]);
+  }, [from, to, doctor]);
 
   function resetToToday() {
     setFrom(todayKey());
@@ -221,6 +227,21 @@ export function AdminReports() {
             To
             <input type="date" value={to} min={from} onChange={(event) => setTo(event.target.value)} className="min-h-9 rounded border border-line bg-surface px-2 text-sm text-ink" />
           </label>
+          {report && report.availableDoctors.length > 0 ? (
+            <label className="flex items-center gap-1.5 text-sm font-semibold text-muted">
+              Doctor
+              <select
+                value={doctor}
+                onChange={(event) => setDoctor(event.target.value)}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-sm text-ink"
+              >
+                <option value="">All doctors</option>
+                {report.availableDoctors.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           {from !== todayKey() || to !== todayKey() ? (
             <ActionButton variant="secondary" size="sm" onClick={resetToToday}>
               Today
@@ -247,7 +268,7 @@ export function AdminReports() {
               </div>
             );
             return metric ? (
-              <DrilldownPanel key={label} metric={metric} range={range}>
+              <DrilldownPanel key={label} metric={metric} range={range} doctor={doctor || undefined}>
                 {tile}
               </DrilldownPanel>
             ) : (

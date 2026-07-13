@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CakeSlice, Camera, HeartHandshake, PartyPopper, Sparkles, Trophy, Users } from "lucide-react";
-import { MotionReveal } from "@/components/MotionReveal";
-import { Section, SectionHead } from "@/components/Section";
+import { MotionReveal } from "@/components/site/MotionReveal";
+import { Section, SectionHead } from "@/components/site/Section";
 
 export const metadata: Metadata = {
   title: "Life@MGM",

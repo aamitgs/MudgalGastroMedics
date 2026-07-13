@@ -18,6 +18,8 @@ type DrilldownPanelProps = {
   /** Report/analytics metric key understood by app/api/reports/drilldown (lib/report-drilldown.ts). */
   metric: string;
   range?: { from: string; to: string };
+  /** Narrows OPD-visit-backed metrics (Track 3.5) to one doctor's visits; ignored by metrics with no doctor attribution. */
+  doctor?: string;
   /** Clickable trigger — a tile, row, or label. Rendered as a button. */
   children: React.ReactNode;
   className?: string;
@@ -29,7 +31,7 @@ type DrilldownPanelProps = {
  * export — self-contained, so adding a new drillable tile never requires
  * wiring filters into whatever module normally owns that data.
  */
-export function DrilldownPanel({ metric, range, children, className }: DrilldownPanelProps) {
+export function DrilldownPanel({ metric, range, doctor, children, className }: DrilldownPanelProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{ title: string; headers: string[]; rows: string[][] } | null>(null);
@@ -46,6 +48,9 @@ export function DrilldownPanel({ metric, range, children, className }: Drilldown
     if (range) {
       params.set("from", range.from);
       params.set("to", range.to);
+    }
+    if (doctor) {
+      params.set("doctor", doctor);
     }
     const response = await fetch(`/api/reports/drilldown?${params.toString()}`, { cache: "no-store" });
     const result = (await response.json().catch(() => ({}))) as DrilldownResponse;

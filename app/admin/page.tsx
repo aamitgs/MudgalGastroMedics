@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { AdminModuleNav } from "@/components/AdminModuleNav";
-import { Section } from "@/components/Section";
-import { WorkspaceLauncher } from "@/components/WorkspaceLauncher";
+import { AdminModuleNav } from "@/components/chrome/AdminModuleNav";
+import { Section } from "@/components/site/Section";
+import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
 import { LazyModuleSection } from "@/components/hospital-os/LazyModuleSection";
 import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
 import { visibleAdminModules } from "@/lib/access/admin-modules";

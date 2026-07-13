@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Bell, CalendarCheck, FileUp, KeyRound, MessageCircle, Phone, ShieldCheck } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
-import { Section } from "@/components/Section";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { Section } from "@/components/site/Section";
 import { portalFeatures } from "@/lib/platform-data";
 import { site } from "@/lib/site-data";
 

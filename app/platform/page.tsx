@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Activity, ArrowRight, BrainCircuit, Building2, ClipboardList, Globe2, LockKeyhole, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
-import { ButtonLink } from "@/components/ButtonLink";
-import { PlatformFeatureCard } from "@/components/PlatformFeatureCard";
-import { Section } from "@/components/Section";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
+import { Section } from "@/components/site/Section";
 import { implementationPhases, platformModules } from "@/lib/platform-data";
 import { site } from "@/lib/site-data";
 

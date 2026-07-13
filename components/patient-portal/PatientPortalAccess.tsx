@@ -2,8 +2,8 @@
 
 import { CalendarCheck, KeyRound, LogOut, MessageCircle, Phone, ShieldCheck, Smartphone } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { LiveClockWeather } from "@/components/LiveClockWeather";
-import { PatientFeedbackWidget } from "@/components/PatientFeedbackWidget";
+import { LiveClockWeather } from "@/components/site/LiveClockWeather";
+import { PatientFeedbackWidget } from "@/components/site/PatientFeedbackWidget";
 import {
   PatientHealthDashboard,
   type PatientAppointmentSummary,
@@ -11,7 +11,7 @@ import {
   type PatientInsuranceClaimSummary,
   type PatientVisitSummary,
   type PatientVitalsPoint
-} from "@/components/PatientHealthDashboard";
+} from "@/components/patient-portal/PatientHealthDashboard";
 import type { FamilyMember } from "@/lib/family-types";
 import { site } from "@/lib/site-data";
 

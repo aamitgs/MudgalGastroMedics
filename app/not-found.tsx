@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Home, Search } from "lucide-react";
-import { ButtonLink } from "@/components/ButtonLink";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { Section } from "@/components/Section";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { Section } from "@/components/site/Section";
 
 export default function NotFound() {
   return (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Section } from "@/components/Section";
+import { Section } from "@/components/site/Section";
 
 const patientRights = [
   "Receive respectful, dignified, and non-discriminatory care.",

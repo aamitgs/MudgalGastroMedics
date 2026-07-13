@@ -9,10 +9,13 @@ export async function GET(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const url = new URL(request.url);
-  const parsed = analyticsQuerySchema.safeParse({ days: url.searchParams.get("days") ?? undefined });
+  const parsed = analyticsQuerySchema.safeParse({
+    days: url.searchParams.get("days") ?? undefined,
+    doctor: url.searchParams.get("doctor") ?? undefined
+  });
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true, analytics: await createAnalyticsSnapshot(parsed.data.days) });
+  return NextResponse.json({ ok: true, analytics: await createAnalyticsSnapshot(parsed.data.days, parsed.data.doctor) });
 }

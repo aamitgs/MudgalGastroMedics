@@ -48,6 +48,7 @@ type AnalyticsSnapshot = {
   patientSatisfaction: { averageRating: number | null; totalResponses: number; distribution: Array<{ rating: number; count: number }> };
   workload: Array<{ label: string; value: number }>;
   risks: Record<string, number>;
+  availableDoctors: string[];
 };
 
 type AnalyticsResponse = {
@@ -85,11 +86,14 @@ export function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [windowDays, setWindowDays] = useState<(typeof analyticsWindows)[number]>(14);
+  const [doctor, setDoctor] = useState("");
 
   async function loadAnalytics() {
     setLoading(true);
     setError("");
-    const response = await fetch(`/api/analytics?days=${windowDays}`, { cache: "no-store" });
+    const params = new URLSearchParams({ days: String(windowDays) });
+    if (doctor) params.set("doctor", doctor);
+    const response = await fetch(`/api/analytics?${params.toString()}`, { cache: "no-store" });
     const data = (await response.json().catch(() => ({}))) as AnalyticsResponse;
     if (!response.ok || !data.ok || !data.analytics) {
       setError(data.error || "Unable to load analytics.");
@@ -105,7 +109,9 @@ export function AdminAnalytics() {
     async function loadOnWindowChange() {
       setLoading(true);
       setError("");
-      const response = await fetch(`/api/analytics?days=${windowDays}`, { cache: "no-store" });
+      const params = new URLSearchParams({ days: String(windowDays) });
+      if (doctor) params.set("doctor", doctor);
+      const response = await fetch(`/api/analytics?${params.toString()}`, { cache: "no-store" });
       const data = (await response.json().catch(() => ({}))) as AnalyticsResponse;
       if (!active) return;
       if (!response.ok || !data.ok || !data.analytics) {
@@ -120,7 +126,7 @@ export function AdminAnalytics() {
     return () => {
       active = false;
     };
-  }, [windowDays]);
+  }, [windowDays, doctor]);
 
   const executiveCards = useMemo(() => {
     if (!analytics) return [];
@@ -165,6 +171,21 @@ export function AdminAnalytics() {
               ))}
             </select>
           </label>
+          {analytics && analytics.availableDoctors.length > 0 ? (
+            <label className="flex items-center gap-1.5 text-sm font-semibold text-muted">
+              Doctor
+              <select
+                value={doctor}
+                onChange={(event) => setDoctor(event.target.value)}
+                className="min-h-9 rounded border border-line bg-surface px-2 text-sm font-semibold text-ink"
+              >
+                <option value="">All doctors</option>
+                {analytics.availableDoctors.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <ActionButton variant="secondary" onClick={() => void loadAnalytics()}>
             <RefreshCw size={17} /> Refresh Analytics
           </ActionButton>
@@ -264,7 +285,7 @@ export function AdminAnalytics() {
             </div>
             <div className="rounded border border-line bg-surface p-4">
               <p className="mb-4 text-lg font-bold text-ink">Doctor productivity</p>
-              <p className="-mt-3 mb-3 text-xs text-muted">Completed consultations attributed to each doctor.</p>
+              <p className="-mt-3 mb-3 text-xs text-muted">Completed consultations attributed to each doctor — always compares every doctor, unaffected by the doctor filter above.</p>
               <BarList items={analytics.doctorProductivity} tone="brand" />
             </div>
             <div className="rounded border border-line bg-surface p-4">

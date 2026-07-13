@@ -30,9 +30,16 @@ function inRange(dateIso: string | undefined, range: ReportRange) {
   return day >= range.from && day <= range.to;
 }
 
+function distinctDoctorNames(visits: { doctorName?: string }[]) {
+  return Array.from(new Set(visits.map((visit) => visit.doctorName).filter((name): name is string => Boolean(name?.trim())))).sort();
+}
+
 // Defaults to "today" (both ends the same day) so every existing caller that
-// omits a range keeps getting exactly today's figures, unchanged.
-export async function createAdminReport(range: ReportRange = { from: todayKey(), to: todayKey() }) {
+// omits a range keeps getting exactly today's figures, unchanged. `doctor`
+// (Track 3.5) only narrows the `opd` block below — every other section stays
+// hospital-wide since only OpdVisit.doctorName carries real doctor
+// attribution; billing/pharmacy/lab/HR/finance have no doctor field to filter by.
+export async function createAdminReport(range: ReportRange = { from: todayKey(), to: todayKey() }, doctor?: string) {
   const accountEntries = (await listAccountEntries());
   const aiReviews = (await listAiReviews());
   const appointments = (await listAppointments());
@@ -59,6 +66,8 @@ export async function createAdminReport(range: ReportRange = { from: todayKey(),
   const todaysCommunicationLogs = communicationLogs.filter((log) => inRange(log.createdAt, range) || inRange(log.sentAt, range));
   const todaysEntries = accountEntries.filter((entry) => inRange(entry.date, range));
   const todaysOpdVisits = opdVisits.filter((visit) => inRange(visit.createdAt, range));
+  const doctorOpdVisits = doctor ? opdVisits.filter((visit) => visit.doctorName === doctor) : opdVisits;
+  const doctorTodaysOpdVisits = doctor ? todaysOpdVisits.filter((visit) => visit.doctorName === doctor) : todaysOpdVisits;
   const paidVisits = opdVisits.filter((visit) => visit.billingStatus === "Paid");
   const todaysPaidVisits = paidVisits.filter((visit) => inRange(visit.paidAt, range));
   const lowStockItems = inventory.filter((item) => item.quantity <= item.reorderLevel);
@@ -86,11 +95,11 @@ export async function createAdminReport(range: ReportRange = { from: todayKey(),
       addedToday: patients.filter((patient) => inRange(patient.createdAt, range)).length
     },
     opd: {
-      total: opdVisits.length,
-      today: todaysOpdVisits.length,
-      waiting: opdVisits.filter((visit) => visit.status === "Waiting").length,
-      inConsultation: opdVisits.filter((visit) => visit.status === "In Consultation").length,
-      completedToday: todaysOpdVisits.filter((visit) => visit.status === "Completed").length
+      total: doctorOpdVisits.length,
+      today: doctorTodaysOpdVisits.length,
+      waiting: doctorOpdVisits.filter((visit) => visit.status === "Waiting").length,
+      inConsultation: doctorOpdVisits.filter((visit) => visit.status === "In Consultation").length,
+      completedToday: doctorTodaysOpdVisits.filter((visit) => visit.status === "Completed").length
     },
     billing: {
       paidToday: todaysPaidVisits.reduce((sum, visit) => sum + amountValue(visit.estimatedAmount), 0),
@@ -177,6 +186,9 @@ export async function createAdminReport(range: ReportRange = { from: todayKey(),
         reorderLevel: item.reorderLevel,
         unit: item.unit
       }))
-    }
+    },
+    // Always derived from the full unfiltered visit list, regardless of the
+    // active doctor filter, so the filter dropdown never loses an option.
+    availableDoctors: distinctDoctorNames(opdVisits)
   };
 }

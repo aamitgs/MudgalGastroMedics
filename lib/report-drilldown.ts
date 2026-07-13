@@ -26,7 +26,7 @@ function inRange(dateIso: string | undefined, range: ReportRange) {
  * intentionally ignore it — there's no "flagged between these dates" in the
  * data model, only a current status.
  */
-export async function getDrilldownRecords(metric: string, range: ReportRange): Promise<DrilldownResult | null> {
+export async function getDrilldownRecords(metric: string, range: ReportRange, doctor?: string): Promise<DrilldownResult | null> {
   switch (metric) {
     case "appointments.today": {
       const rows = (await listAppointments()).filter((appointment) => inRange(appointment.createdAt, range));
@@ -62,11 +62,13 @@ export async function getDrilldownRecords(metric: string, range: ReportRange): P
       };
     }
     case "opd.today": {
-      const rows = (await listOpdVisits()).filter((visit) => inRange(visit.createdAt, range));
+      const rows = (await listOpdVisits())
+        .filter((visit) => inRange(visit.createdAt, range))
+        .filter((visit) => !doctor || visit.doctorName === doctor);
       return {
-        title: "OPD visits in range",
-        headers: ["Patient", "Phone", "Service", "Status", "Visit Date"],
-        rows: rows.map((visit) => [visit.patientName, visit.phone, visit.service, visit.status, visit.createdAt])
+        title: doctor ? `OPD visits in range — ${doctor}` : "OPD visits in range",
+        headers: ["Patient", "Phone", "Service", "Status", "Doctor", "Visit Date"],
+        rows: rows.map((visit) => [visit.patientName, visit.phone, visit.service, visit.status, visit.doctorName || "Unassigned", visit.createdAt])
       };
     }
     case "inventory.lowStock":

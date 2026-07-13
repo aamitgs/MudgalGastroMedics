@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ChevronRight, Clock3, MessageCircle, Phone, Search, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { Section } from "@/components/Section";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { Section } from "@/components/site/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
 import { site } from "@/lib/site-data";
 

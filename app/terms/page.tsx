@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Section } from "@/components/Section";
+import { Section } from "@/components/site/Section";
 
 const termsSections = [
   {

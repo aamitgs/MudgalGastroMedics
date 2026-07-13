@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkspaceLauncher } from "@/components/WorkspaceLauncher";
+import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
 
 export const metadata: Metadata = {
   title: { absolute: "Staff Login • MudgalGastromedics OS" },

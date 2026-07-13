@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { GalleryGrid } from "@/components/GalleryGrid";
-import { Section, SectionHead } from "@/components/Section";
+import { GalleryGrid } from "@/components/site/GalleryGrid";
+import { Section, SectionHead } from "@/components/site/Section";
 import { getPublicGalleryItems } from "@/lib/cms-public";
 import { equipment } from "@/lib/site-data";
 

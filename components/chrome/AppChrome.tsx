@@ -2,11 +2,11 @@
 
 import { MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { CtaBand } from "@/components/CtaBand";
+import { CtaBand } from "@/components/site/CtaBand";
 import { OfflineBanner } from "@/components/design-system/OfflineBanner";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { StaffChrome } from "@/components/StaffChrome";
+import { Footer } from "@/components/site/Footer";
+import { Header } from "@/components/site/Header";
+import { StaffChrome } from "@/components/chrome/StaffChrome";
 
 /**
  * Product separation: the marketing website chrome (header with booking CTA,

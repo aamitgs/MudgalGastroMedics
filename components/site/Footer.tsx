@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Phone, ShieldCheck } from "lucide-react";
-import { FloatingActionHub } from "@/components/FloatingActionHub";
+import { FloatingActionHub } from "@/components/site/FloatingActionHub";
 import { site } from "@/lib/site-data";
 
 const companyLinks = [

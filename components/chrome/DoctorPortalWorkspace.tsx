@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, ShieldCheck, Sparkles, Stamp, Stethoscope, UserPlus, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, Send, ShieldCheck, Sparkles, Stamp, Stethoscope, UserPlus, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -9,7 +9,10 @@ import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
-import { DoctorRecentActivity } from "@/components/DoctorRecentActivity";
+import { DoctorRecentActivity } from "@/components/chrome/DoctorRecentActivity";
+import { AiMedicalCertificateDraft } from "@/components/opd/AiMedicalCertificateDraft";
+import { AiReferralLetterDraft } from "@/components/opd/AiReferralLetterDraft";
+import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { notify } from "@/lib/notify";
 
 type AiSummaryResponse = {
@@ -525,7 +528,7 @@ export function DoctorPortalWorkspace() {
     setLoading(false);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate">>) {
+  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) {
     let response: Response;
     try {
       response = await fetch("/api/opd", {
@@ -822,7 +825,7 @@ function DoctorConsultationCard({
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
-  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate">>) => Promise<void>;
+  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<void>;
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
   favouriteDiagnoses: string[];
@@ -882,6 +885,8 @@ function DoctorConsultationCard({
         ) : null}
 
         <AiPatientSummaryPanel phone={visit.phone} />
+
+        <AiVisitAssistant key={visit.id} visitId={visit.id} />
 
         <AllergyGuard key={visit.id} visitId={visit.id} allergies={patient?.allergies} />
 
@@ -953,7 +958,54 @@ function DoctorConsultationCard({
               <a href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
                 <Stamp size={16} /> Certificate
               </a>
+              {visit.referralLetter?.trim() ? (
+                <a href={`/api/pdf/referral-letter?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
+                  <Send size={16} /> Referral Letter
+                </a>
+              ) : null}
             </div>
+          </label>
+          <label>
+            <span className="mb-2 block text-sm font-bold text-ink">Referred To</span>
+            <input
+              type="text"
+              defaultValue={visit.referralTo}
+              onBlur={(event) => void updateVisit(visit.id, { referralTo: event.target.value })}
+              disabled={!identityConfirmed}
+              className={inputClass}
+              placeholder="Specialist name, department or facility"
+            />
+          </label>
+          <label>
+            <span className="mb-2 block text-sm font-bold text-ink">Referral Letter</span>
+            <textarea
+              key={visit.referralLetter}
+              defaultValue={visit.referralLetter}
+              onBlur={(event) => void updateVisit(visit.id, { referralLetter: event.target.value })}
+              disabled={!identityConfirmed}
+              className={textareaClass}
+              placeholder="Reason for referral and relevant findings"
+            />
+            <AiReferralLetterDraft
+              visitId={visit.id}
+              referredTo={visit.referralTo}
+              onUseDraft={(draft) => void updateVisit(visit.id, { referralLetter: draft })}
+            />
+          </label>
+          <label>
+            <span className="mb-2 block text-sm font-bold text-ink">Certificate Note</span>
+            <textarea
+              key={visit.certificateNote}
+              defaultValue={visit.certificateNote}
+              onBlur={(event) => void updateVisit(visit.id, { certificateNote: event.target.value })}
+              disabled={!identityConfirmed}
+              className={textareaClass}
+              placeholder="Optional custom wording for the medical certificate — leave blank to use the default findings/advice text"
+            />
+            <AiMedicalCertificateDraft
+              visitId={visit.id}
+              onUseDraft={(draft) => void updateVisit(visit.id, { certificateNote: draft })}
+            />
           </label>
         </div>
       </div>

@@ -10,8 +10,8 @@ import {
   Target,
   Users
 } from "lucide-react";
-import { MotionReveal } from "@/components/MotionReveal";
-import { Section, SectionHead } from "@/components/Section";
+import { MotionReveal } from "@/components/site/MotionReveal";
+import { Section, SectionHead } from "@/components/site/Section";
 import { agraLocalAreas, nearbyServiceCities, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {

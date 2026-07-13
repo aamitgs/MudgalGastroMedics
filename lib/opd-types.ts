@@ -25,6 +25,12 @@ export type OpdVisit = {
   prescription?: string;
   advice?: string;
   followUpDate?: string;
+  /** Name/specialty/facility the patient is being referred to (Track 4.3) — not a structured lookup, since referrals go to external specialists this hospital has no directory of. */
+  referralTo?: string;
+  /** The referral letter body, AI-drafted or hand-written; only rendered into the referral-letter PDF once non-empty. */
+  referralLetter?: string;
+  /** AI-drafted or hand-written certificate wording (Track 4.3); when set, replaces the medical certificate PDF's auto-composed fallback paragraph. */
+  certificateNote?: string;
   /** Set automatically to whichever doctor first writes a clinical field — real attribution, not manual assignment. */
   doctorName?: string;
   /** Set automatically the first time status moves to "In Consultation" — powers a real (not fabricated) average wait time. */

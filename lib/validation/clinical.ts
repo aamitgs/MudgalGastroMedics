@@ -29,6 +29,31 @@ export const dischargeSummaryDraftSchema = z.object({
   admissionId: z.string().trim().default("")
 });
 
+export const referralLetterDraftSchema = z.object({
+  visitId: z.string().trim().default(""),
+  referredTo: z.string().trim().default("")
+});
+
+export const medicalCertificateDraftSchema = z.object({
+  visitId: z.string().trim().default("")
+});
+
+// history is bounded well above a realistic single-visit conversation — a
+// sanity ceiling against a malformed payload, not an expected volume.
+export const visitAssistantQuestionSchema = z.object({
+  visitId: z.string().trim().default(""),
+  question: z.string().trim().min(1, "question is required.").max(500),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().trim().max(2000)
+      })
+    )
+    .max(20)
+    .optional()
+});
+
 export const patientSummaryRequestSchema = z.object({
   phone: z.string().trim().default("")
 });

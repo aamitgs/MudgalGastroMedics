@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { MotionReveal } from "@/components/MotionReveal";
-import { Section, SectionHead } from "@/components/Section";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { MotionReveal } from "@/components/site/MotionReveal";
+import { Section, SectionHead } from "@/components/site/Section";
 import { doctor, fullAddress, site } from "@/lib/site-data";
 
 const pageTitle = "Dr. Deepak Kumar Sharma | Gastroenterologist & Liver Specialist in Agra";

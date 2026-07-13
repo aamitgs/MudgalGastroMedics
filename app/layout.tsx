@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
 import "./globals.css";
-import { AppChrome } from "@/components/AppChrome";
+import { AppChrome } from "@/components/chrome/AppChrome";
 import { hospitalSchema, site } from "@/lib/site-data";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,24 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}
         />
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-58TTM878"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+            title="Google Tag Manager"
+          />
+        </noscript>
+        <Script id="google-tag-manager" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-58TTM878');
+          `}
+        </Script>
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-Y70R4VQ7NJ" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">
           {`

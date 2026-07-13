@@ -2,7 +2,7 @@
 
 import { AlertTriangle, CalendarCheck, CheckCircle2, FileText, MapPin, MessageCircle, Paperclip, Phone, Send, X } from "lucide-react";
 import { FormEvent, useRef, useState } from "react";
-import { BrandIconTile } from "@/components/BrandIconTile";
+import { BrandIconTile } from "@/components/site/BrandIconTile";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import { site } from "@/lib/site-data";
 

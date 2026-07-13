@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Section } from "@/components/Section";
+import { Section } from "@/components/site/Section";
 
 const disclaimerParagraphs = [
   "The information provided on the Mudgal Gastromedics Hospital website is intended solely for general informational and educational purposes.",

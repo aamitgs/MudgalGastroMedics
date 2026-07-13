@@ -16,7 +16,8 @@ export async function GET(request: Request) {
   const parsed = drilldownQuerySchema.safeParse({
     metric: url.searchParams.get("metric") ?? "",
     from: url.searchParams.get("from") ?? undefined,
-    to: url.searchParams.get("to") ?? undefined
+    to: url.searchParams.get("to") ?? undefined,
+    doctor: url.searchParams.get("doctor") ?? undefined
   });
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     to: parsed.data.to ?? todayKey()
   };
 
-  const result = await getDrilldownRecords(parsed.data.metric, range);
+  const result = await getDrilldownRecords(parsed.data.metric, range, parsed.data.doctor);
   if (!result) {
     return NextResponse.json({ ok: false, error: "Unknown metric." }, { status: 400 });
   }

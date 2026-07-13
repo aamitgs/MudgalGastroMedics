@@ -4,7 +4,7 @@ import { Building2, Command, Menu, MessageSquare, Moon, Search, Sun } from "luci
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { LiveClockWeather } from "@/components/site/LiveClockWeather";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 
 export function TopNav({

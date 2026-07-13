@@ -59,10 +59,10 @@ test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
   assert.equal(exists("app/api/hospital-os/realtime/route.ts"), true);
   assert.match(read("app/api/hospital-os/snapshot/route.ts"), /hospital_os\.snapshot\.viewed/);
   assert.match(read("app/api/hospital-os/realtime/route.ts"), /hospital_os\.realtime\.polled/);
-  assert.match(read("components/HospitalOperatingSystem.tsx"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
-  assert.match(read("components/HospitalOperatingSystem.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
-  assert.match(read("components/HospitalOperatingSystem.tsx"), /useQuery/);
-  assert.match(read("components/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
+  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
+  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
+  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /useQuery/);
+  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
   // Track 4.10: extracted to their own files, no longer inline in the monolith.
   assert.match(read("components/hospital-os/AuditTrailPanel.tsx"), /Session audit trail/);
   assert.match(read("components/hospital-os/PatientPortalPanel.tsx"), /AI symptom checker/);
@@ -130,8 +130,8 @@ test("admin dashboard mounts major HMS workspaces", () => {
 test("patient and doctor portals have separate access surfaces", () => {
   assert.equal(exists("app/portal/page.tsx"), true);
   assert.equal(exists("app/doctor/page.tsx"), true);
-  assert.equal(exists("components/PatientPortalAccess.tsx"), true);
-  assert.equal(exists("components/DoctorLogin.tsx"), true);
+  assert.equal(exists("components/patient-portal/PatientPortalAccess.tsx"), true);
+  assert.equal(exists("components/chrome/DoctorLogin.tsx"), true);
   assert.match(read("app/doctor/page.tsx"), /canOpenDoctorWorkspace/);
   assert.match(read("app/api/doctor/session/route.ts"), /DOCTOR_PASSCODE|isValidDoctorPasscode/);
 });

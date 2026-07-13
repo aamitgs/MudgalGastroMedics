@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { HospitalOsDynamic } from "@/components/HospitalOsDynamic";
-import { WorkspaceLauncher } from "@/components/WorkspaceLauncher";
+import { HospitalOsDynamic } from "@/components/chrome/HospitalOsDynamic";
+import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {

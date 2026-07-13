@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { BarChart3, ClipboardList, CreditCard, PackageCheck, Pill, UsersRound } from "lucide-react";
-import { ButtonLink } from "@/components/ButtonLink";
-import { PlatformFeatureCard } from "@/components/PlatformFeatureCard";
-import { Section } from "@/components/Section";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
+import { Section } from "@/components/site/Section";
 import { operationsFeatures } from "@/lib/platform-data";
 
 export const metadata: Metadata = {

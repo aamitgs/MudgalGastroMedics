@@ -1,5 +1,5 @@
 import { ArrowUp, CalendarCheck, MapPin, MessageCircle, Phone } from "lucide-react";
-import { LanguageToggle } from "@/components/LanguageToggle";
+import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { site } from "@/lib/site-data";
 
 const hubActions = [

@@ -6,8 +6,8 @@ import { ChevronDown, Clock, MapPin, Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site-data";
-import { ButtonLink } from "@/components/ButtonLink";
-import { LiveClockWeather } from "@/components/LiveClockWeather";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { LiveClockWeather } from "@/components/site/LiveClockWeather";
 
 const navItems = [
   { href: "/", label: "Home" },

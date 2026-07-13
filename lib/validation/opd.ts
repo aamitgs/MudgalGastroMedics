@@ -34,6 +34,9 @@ export const opdVisitUpdateSchema = z.object({
   prescription: optionalText,
   advice: optionalText,
   followUpDate: optionalText,
+  referralTo: optionalText,
+  referralLetter: optionalText,
+  certificateNote: optionalText,
   refundAction: z.enum(refundActions, { error: "Invalid refund action." }).optional(),
   refundReason: optionalText,
   refundAmount: optionalText

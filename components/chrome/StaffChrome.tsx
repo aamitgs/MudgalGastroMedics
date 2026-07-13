@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { OfflineBanner } from "@/components/design-system/OfflineBanner";
-import { StaffFooter } from "@/components/StaffFooter";
+import { StaffFooter } from "@/components/chrome/StaffFooter";
 import { GlobalCommandPalette } from "@/components/hospital-os/GlobalCommandPalette";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";

@@ -2,7 +2,7 @@
 
 import { Star } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { PatientVisitSummary } from "@/components/PatientHealthDashboard";
+import type { PatientVisitSummary } from "@/components/patient-portal/PatientHealthDashboard";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { notify } from "@/lib/notify";
 

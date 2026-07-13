@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 const HospitalOperatingSystem = dynamic(
-  () => import("@/components/HospitalOperatingSystem").then((module) => module.HospitalOperatingSystem),
+  () => import("@/components/chrome/HospitalOperatingSystem").then((module) => module.HospitalOperatingSystem),
   {
     ssr: false,
     loading: () => <HospitalOsLoading />

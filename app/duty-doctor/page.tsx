@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { CalendarCheck, Clock3, Languages, MessageCircle, Moon, Phone, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/ButtonLink";
-import { MotionReveal } from "@/components/MotionReveal";
-import { Section, SectionHead } from "@/components/Section";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { MotionReveal } from "@/components/site/MotionReveal";
+import { Section, SectionHead } from "@/components/site/Section";
 import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {

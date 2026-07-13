@@ -70,7 +70,16 @@ function patientSatisfactionFrom(entries: { rating: number }[]) {
   return { averageRating, totalResponses, distribution };
 }
 
-export async function createAnalyticsSnapshot(windowDays = 14) {
+function distinctDoctorNames(visits: { doctorName?: string }[]) {
+  return Array.from(new Set(visits.map((visit) => visit.doctorName).filter((name): name is string => Boolean(name?.trim())))).sort();
+}
+
+// `doctor` (Track 3.5) only narrows OPD-visit-derived fields below (volume.opd,
+// trend's opd counts, avgWaitMinutes, executive.opdCompletionRate) — serviceMix/
+// symptomMix blend in appointments (no doctor field) so filtering only their OPD
+// half would be misleading, and doctorProductivity is inherently the
+// compare-every-doctor view, so neither is filtered here.
+export async function createAnalyticsSnapshot(windowDays = 14, doctor?: string) {
   const days = daysBack(windowDays);
   const appointments = (await listAppointments());
   const aiReviews = (await listAiReviews());
@@ -83,6 +92,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
   const admissions = (await listIpdAdmissions());
   const labOrders = (await listLabOrders());
   const opdVisits = (await listOpdVisits());
+  const doctorOpdVisits = doctor ? opdVisits.filter((visit) => visit.doctorName === doctor) : opdVisits;
   const patients = (await listPatients());
   const dispenses = (await listPharmacyDispenses());
   const procedures = (await listProcedureSchedules());
@@ -92,7 +102,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
 
   const trend = days.map((day) => {
     const dayAppointments = appointments.filter((appointment) => appointment.createdAt.slice(0, 10) === day);
-    const dayOpd = opdVisits.filter((visit) => visit.createdAt.slice(0, 10) === day);
+    const dayOpd = doctorOpdVisits.filter((visit) => visit.createdAt.slice(0, 10) === day);
     const dayPaid = paidVisits.filter((visit) => visit.paidAt?.slice(0, 10) === day);
     const dayLab = labOrders.filter((order) => order.createdAt.slice(0, 10) === day);
     const dayPharmacy = dispenses.filter((record) => record.createdAt.slice(0, 10) === day);
@@ -122,7 +132,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
     },
     executive: {
       appointmentConversion: percent(appointmentToOpd, appointments.length),
-      opdCompletionRate: percent(opdVisits.filter((visit) => visit.status === "Completed").length, opdVisits.length),
+      opdCompletionRate: percent(doctorOpdVisits.filter((visit) => visit.status === "Completed").length, doctorOpdVisits.length),
       bedOccupancy: percent(beds.filter((bed) => bed.status === "Occupied").length, beds.length),
       stockRisk: percent(inventory.filter((item) => item.quantity <= item.reorderLevel).length, inventory.length),
       staffPresence: percent(attendance.filter((record) => record.status === "Present").length, attendance.length),
@@ -131,7 +141,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
     volume: {
       appointments: appointments.length,
       patients: patients.length,
-      opd: opdVisits.length,
+      opd: doctorOpdVisits.length,
       procedures: procedures.length,
       labOrders: labOrders.length,
       pharmacyDispenses: dispenses.length,
@@ -159,7 +169,7 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
     ),
     // null (not 0) until at least one visit has a real consultationStartedAt
     // timestamp — never fabricate a wait time from no data.
-    avgWaitMinutes: averageWaitMinutes(opdVisits),
+    avgWaitMinutes: averageWaitMinutes(doctorOpdVisits),
     patientSatisfaction: patientSatisfactionFrom(feedbackEntries),
     queues: {
       opdInFlight: opdVisits.filter((visit) => visit.status === "Waiting" || visit.status === "In Consultation").length,
@@ -186,7 +196,10 @@ export async function createAnalyticsSnapshot(windowDays = 14) {
       unpaidLab: labOrders.filter((order) => order.paymentStatus === "Unpaid").length,
       unpaidPharmacy: dispenses.filter((record) => record.paymentStatus === "Unpaid").length,
       criticalLabsUnacked: labOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length
-    }
+    },
+    // Always derived from the full unfiltered visit list, regardless of the
+    // active doctor filter, so the filter dropdown never loses an option.
+    availableDoctors: distinctDoctorNames(opdVisits)
   };
 }
 

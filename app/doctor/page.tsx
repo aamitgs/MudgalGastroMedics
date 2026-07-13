@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { DoctorLogin } from "@/components/DoctorLogin";
-import { DoctorPortalWorkspace } from "@/components/DoctorPortalWorkspace";
-import { Section } from "@/components/Section";
+import { DoctorLogin } from "@/components/chrome/DoctorLogin";
+import { DoctorPortalWorkspace } from "@/components/chrome/DoctorPortalWorkspace";
+import { Section } from "@/components/site/Section";
 import { accessContextFromCookieStore, canOpenDoctorWorkspace } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {

@@ -7,6 +7,7 @@ import { registerPdfFonts } from "@/lib/pdf/branding";
 import { PrescriptionDocument } from "@/lib/pdf/prescription-document";
 import { InvoiceDocument } from "@/lib/pdf/invoice-document";
 import { MedicalCertificateDocument } from "@/lib/pdf/medical-certificate-document";
+import { ReferralLetterDocument } from "@/lib/pdf/referral-letter-document";
 import { buildDischargeSummaryFooterTemplate, buildDischargeSummaryHeaderTemplate, buildDischargeSummaryHtml } from "@/lib/pdf/discharge-summary-html";
 import { renderHtmlToPdf } from "@/lib/pdf/chromium";
 import { PurchaseOrderDocument } from "@/lib/pdf/purchase-order-document";
@@ -47,6 +48,19 @@ export async function renderMedicalCertificatePdf(visitId: string): Promise<PdfR
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(MedicalCertificateDocument({ visit, patient }));
   return { ok: true, buffer, filename: `medical-certificate-${slugify(visit.patientName)}-${visit.token}.pdf` };
+}
+
+export async function renderReferralLetterPdf(visitId: string): Promise<PdfRenderResult> {
+  const visit = (await getOpdVisitById(visitId));
+  if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
+  if (!visit.referralLetter?.trim()) {
+    return { ok: false, error: "Write or draft a referral letter first.", status: 400 };
+  }
+
+  registerPdfFonts();
+  const patient = await findPatientForVisit(visit.patientId, visit.phone);
+  const buffer = await renderToBuffer(ReferralLetterDocument({ visit, patient }));
+  return { ok: true, buffer, filename: `referral-letter-${slugify(visit.patientName)}-${visit.token}.pdf` };
 }
 
 export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult> {

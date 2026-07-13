@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AppointmentForm } from "@/components/AppointmentForm";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { PatientPortalAccess } from "@/components/PatientPortalAccess";
-import { Section } from "@/components/Section";
+import { AppointmentForm } from "@/components/site/AppointmentForm";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { PatientPortalAccess } from "@/components/patient-portal/PatientPortalAccess";
+import { Section } from "@/components/site/Section";
 
 export const metadata: Metadata = {
   title: "Patient Portal & Appointment Booking",

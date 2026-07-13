@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Activity, ArrowRight, Award, CalendarCheck, ClipboardList, FileText, GraduationCap, HeartPulse, Phone, ShieldCheck, Stethoscope } from "lucide-react";
-import { AppointmentCtaPanel } from "@/components/AppointmentCtaPanel";
-import { BrandIconTile } from "@/components/BrandIconTile";
-import { ButtonLink } from "@/components/ButtonLink";
-import { HeroOpdTimingCard } from "@/components/HeroOpdTimingCard";
-import { MotionReveal } from "@/components/MotionReveal";
-import { Section, Eyebrow } from "@/components/Section";
-import { Stats } from "@/components/Stats";
+import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { BrandIconTile } from "@/components/site/BrandIconTile";
+import { ButtonLink } from "@/components/site/ButtonLink";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
+import { MotionReveal } from "@/components/site/MotionReveal";
+import { Section, Eyebrow } from "@/components/site/Section";
+import { Stats } from "@/components/site/Stats";
 import { getPublicProcedures } from "@/lib/cms-public";
 import { doctor, site, whyChoose } from "@/lib/site-data";
 

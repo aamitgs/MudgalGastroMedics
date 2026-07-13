@@ -1,5 +1,5 @@
 import { CalendarCheck, MapPin, MessageCircle, Phone } from "lucide-react";
-import { ButtonLink } from "@/components/ButtonLink";
+import { ButtonLink } from "@/components/site/ButtonLink";
 import { site } from "@/lib/site-data";
 
 type AppointmentCtaPanelProps = {

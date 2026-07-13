@@ -9,26 +9,24 @@ const styles = StyleSheet.create({
   patientRow: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: 4 },
   patientLabel: { fontSize: 8, color: pdfColors.muted, textTransform: "uppercase", letterSpacing: 0.4 },
   patientValue: { fontSize: 10, fontFamily: "Geist", fontWeight: "semibold", color: pdfColors.ink, marginTop: 1 },
-  certificateBody: { fontSize: 10.5, lineHeight: 1.7, color: pdfColors.ink, marginTop: 6 },
+  addressee: { fontSize: 10.5, fontFamily: "Geist", fontWeight: "semibold", color: pdfColors.ink, marginTop: 10 },
+  letterBody: { fontSize: 10.5, lineHeight: 1.7, color: pdfColors.ink, marginTop: 6 },
   signatureBlock: { marginTop: 40, alignItems: "flex-end" },
   signatureName: { fontFamily: "Geist", fontWeight: "bold", fontSize: 10.5, color: pdfColors.ink },
   signatureMeta: { fontSize: 8, color: pdfColors.muted, marginTop: 2 }
 });
 
-// Built from the same OPD visit fields the prescription PDF already uses
-// (clinicalNote, advice, service) rather than a new certificate-specific data
-// model — there's no dedicated "fitness/rest" input anywhere in the product
-// yet, and inventing one was out of scope for this pass.
-// Track 4.3: visit.certificateNote (AI-drafted or hand-written) now replaces
-// the auto-composed findings/advice fallback below once set — existing
-// certificates with no note keep rendering exactly as before.
-export function MedicalCertificateDocument({ visit, patient }: { visit: OpdVisit; patient?: PatientRecord }) {
-  const examinedOn = generatedAtLabel(new Date(visit.createdAt));
+// Mirrors MedicalCertificateDocument's structure exactly (Track 4.3). Unlike
+// the certificate, there's no boilerplate fallback body — a referral letter
+// with no drafted/written content wouldn't mean anything, so renderReferralLetterPdf
+// refuses to render until visit.referralLetter is non-empty.
+export function ReferralLetterDocument({ visit, patient }: { visit: OpdVisit; patient?: PatientRecord }) {
+  const writtenOn = generatedAtLabel();
 
   return (
-    <Document title={`Medical Certificate - ${visit.patientName}`}>
+    <Document title={`Referral Letter - ${visit.patientName}`}>
       <Page size="A4" style={pdfStyles.page}>
-        <PdfHeader docType="Medical Certificate" reference={visit.token} />
+        <PdfHeader docType="Referral Letter" reference={visit.token} />
 
         <View style={styles.patientRow}>
           <View>
@@ -46,28 +44,20 @@ export function MedicalCertificateDocument({ visit, patient }: { visit: OpdVisit
             <Text style={styles.patientValue}>{[patient?.age, patient?.gender].filter(Boolean).join(" / ") || "Not recorded"}</Text>
           </View>
           <View>
-            <Text style={styles.patientLabel}>Examined On</Text>
-            <Text style={styles.patientValue}>{examinedOn}</Text>
+            <Text style={styles.patientLabel}>Date</Text>
+            <Text style={styles.patientValue}>{writtenOn}</Text>
           </View>
         </View>
 
+        <Text style={styles.addressee}>To: {visit.referralTo || "Referring Specialist"}</Text>
+
         <View style={pdfStyles.card}>
-          <Text style={pdfStyles.sectionLabel}>Certificate</Text>
-          <Text style={styles.certificateBody}>
-            {`This is to certify that I examined ${visit.patientName}${patient?.age ? `, aged ${patient.age}` : ""} on ${examinedOn} for ${visit.service}.`}
-            {"\n\n"}
-            {visit.certificateNote || (
-              <>
-                {visit.clinicalNote ? `Clinical findings: ${visit.clinicalNote}` : "No specific clinical findings recorded at this visit."}
-                {"\n\n"}
-                {visit.advice || "The patient is advised rest and follow-up as clinically indicated."}
-              </>
-            )}
-          </Text>
+          <Text style={pdfStyles.sectionLabel}>Referral Letter</Text>
+          <Text style={styles.letterBody}>{visit.referralLetter}</Text>
         </View>
 
         <View style={styles.signatureBlock}>
-          <Text style={styles.signatureName}>{doctor.name}</Text>
+          <Text style={styles.signatureName}>{visit.doctorName || doctor.name}</Text>
           <Text style={styles.signatureMeta}>{doctor.designation}</Text>
           <Text style={styles.signatureMeta}>Reg. No: {doctor.registration}</Text>
         </View>
