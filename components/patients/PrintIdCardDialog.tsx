@@ -76,12 +76,14 @@ function WristbandMarkup({ patient, qrSvg }: { patient: PatientRecord; qrSvg: st
 
 export function PrintIdCardDialog({
   patient,
-  setPatient
+  setPatient,
+  defaultMode = "card"
 }: {
   patient: PatientRecord | null;
   setPatient: (patient: PatientRecord | null) => void;
+  defaultMode?: PrintMode;
 }) {
-  const [mode, setMode] = useState<PrintMode>("card");
+  const [mode, setMode] = useState<PrintMode>(defaultMode);
   const [qrSvg, setQrSvg] = useState("");
 
   useEffect(() => {

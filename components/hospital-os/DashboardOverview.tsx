@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, Plus, QrCode } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MetricCard } from "@/components/design-system/MetricCard";
+import { WristbandQrButton } from "@/components/hospital-os/WristbandQrButton";
 import { metricIcons, type DashboardMetric, type HospitalTrendPoint, type RealtimeMessage } from "@/lib/hospital-os-data";
 
 export function DashboardOverview({
@@ -36,7 +37,7 @@ export function DashboardOverview({
             </div>
             <div className="flex flex-wrap gap-2">
               <Button type="button" className="gap-2 bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><Plus size={16} /> Create Appointment</Button>
-              <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]"><QrCode size={16} /> Wristband QR</Button>
+              <WristbandQrButton />
             </div>
           </div>
         </CardHeader>
