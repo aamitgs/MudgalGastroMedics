@@ -120,3 +120,6 @@ export const clinicalConfidentialityNote =
 
 export const financialConfidentialityNote =
   "Confidential billing document. Generated electronically for the named patient only.";
+
+export const operationalConfidentialityNote =
+  "Confidential hospital record. Exported electronically for internal staff use only.";

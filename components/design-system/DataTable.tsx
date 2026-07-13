@@ -9,7 +9,7 @@ import {
   type SortingState,
   type VisibilityState
 } from "@tanstack/react-table";
-import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download, Printer, X } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download, FileText, Printer, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { site } from "@/lib/site-data";
-import { downloadCsv } from "@/lib/table-export";
+import { downloadCsv, downloadPdfExport } from "@/lib/table-export";
 
 /**
  * Shared enterprise DataTable (Track 3.1). Server-driven: the caller owns
@@ -106,6 +106,7 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [exportingPdf, setExportingPdf] = useState(false);
   const bodyRef = useRef<HTMLTableSectionElement>(null);
 
   const columnsWithSelect = useMemo<ColumnDef<TData, unknown>[]>(
@@ -219,6 +220,25 @@ export function DataTable<TData>({
               onClick={() => downloadCsv(exportConfig.headers, data.map(exportConfig.row), exportConfig.filename)}
             >
               <Download size={14} /> Export page
+            </ActionButton>
+          ) : null}
+          {exportConfig ? (
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              disabled={data.length === 0 || exportingPdf}
+              onClick={async () => {
+                setExportingPdf(true);
+                await downloadPdfExport(
+                  printTitle,
+                  exportConfig.headers,
+                  data.map(exportConfig.row),
+                  `${exportConfig.filename.replace(/\.[^.]+$/, "")}.pdf`
+                );
+                setExportingPdf(false);
+              }}
+            >
+              <FileText size={14} /> Export PDF
             </ActionButton>
           ) : null}
           <ActionButton variant="secondary" size="sm" onClick={() => window.print()}>

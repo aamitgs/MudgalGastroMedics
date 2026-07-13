@@ -1,3 +1,5 @@
+import { notify } from "@/lib/notify";
+
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -14,4 +16,36 @@ export function downloadCsv(headers: string[], rows: string[][], filename: strin
     .map((row) => row.map((cell) => `"${cell.replaceAll("\"", "\"\"")}"`).join(","))
     .join("\n");
   triggerDownload(new Blob([csv], { type: "text/csv;charset=utf-8" }), filename);
+}
+
+/**
+ * Server-rendered PDF of the same headers/rows CSV export already uses
+ * (Track 3.4) — a real round trip (unlike CSV, which never leaves the
+ * browser), so failures get the same offline-retry treatment as any other
+ * mutation call site rather than a silent no-op.
+ */
+export async function downloadPdfExport(title: string, headers: string[], rows: string[][], filename: string) {
+  const toastId = notify.loading("Preparing PDF…");
+  let response: Response;
+  try {
+    response = await fetch("/api/pdf/table", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, headers, rows })
+    });
+  } catch {
+    notify.retryable(
+      "Unable to reach the server. Check your connection and retry.",
+      () => void downloadPdfExport(title, headers, rows, filename),
+      { id: toastId }
+    );
+    return;
+  }
+  if (!response.ok) {
+    const data = (await response.json().catch(() => ({}))) as { error?: string };
+    notify.error(data.error || "Unable to generate PDF.", { id: toastId });
+    return;
+  }
+  triggerDownload(await response.blob(), filename);
+  notify.success("PDF ready", { id: toastId });
 }

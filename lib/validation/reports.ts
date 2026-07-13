@@ -23,3 +23,12 @@ export const drilldownQuerySchema = z.object({
   from: isoDate.optional(),
   to: isoDate.optional()
 });
+
+// Backs the generic "export current table view as PDF" route (Track 3.4).
+// Bounded well above DataTable's fixed 25-row page size — a sanity ceiling
+// against a malformed payload, not a real expected volume.
+export const tableExportSchema = z.object({
+  title: z.string({ error: "title is required." }).trim().min(1, "title is required.").max(120),
+  headers: z.array(z.string()).min(1, "headers must include at least one column.").max(30),
+  rows: z.array(z.array(z.string())).max(500, "Too many rows to export at once.")
+});
