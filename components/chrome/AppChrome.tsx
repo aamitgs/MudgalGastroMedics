@@ -13,9 +13,11 @@ import { StaffChrome } from "@/components/chrome/StaffChrome";
  * Product separation: the marketing website chrome (header with booking CTA,
  * CTA band, marketing footer) renders only on public pages. Authenticated
  * staff surfaces get the slim StaffChrome; the Hospital OS ships its own
- * full-screen shell.
+ * full-screen shell. /admin and /login are plain server-side redirects now
+ * (Track 4.13) — they issue an HTTP redirect before any of this ever renders,
+ * so only /doctor still actually reaches this chrome.
  */
-const staffChromeRoutes = ["/admin", "/doctor", "/login"];
+const staffChromeRoutes = ["/doctor"];
 
 export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();

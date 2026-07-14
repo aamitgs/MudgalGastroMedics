@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { OfflineBanner } from "@/components/design-system/OfflineBanner";
@@ -29,13 +29,15 @@ const themeStorageKey = "mgm-admin-theme";
  * Slim chrome for authenticated staff surfaces. Deliberately free of marketing
  * components (per product separation): no booking CTAs, no promotional
  * banners, no site navigation — staff are already inside the platform.
- * Owns the staff dark-mode scope so the bar, page content and toasts all
- * follow one persisted preference across /admin, /doctor and /login.
+ * Owns the staff dark-mode scope so the bar and page content follow one
+ * persisted preference across /doctor (/admin and /login now just redirect
+ * here before this chrome ever renders anything).
  */
 export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const { dark, setDark, toggleDark } = useAdminThemeStore();
   const openPalette = useCommandPaletteStore((state) => state.setOpen);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(themeStorageKey);
@@ -45,6 +47,25 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
   useEffect(() => {
     window.localStorage.setItem(themeStorageKey, dark ? "dark" : "light");
   }, [dark]);
+
+  // This chrome renders on /doctor before login too (DoctorLogin's own passcode
+  // form is just this component's `children`) — without this check "Sign out"
+  // showed on the pre-login screen, which is misleading since there's nothing
+  // to sign out of yet.
+  useEffect(() => {
+    let active = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active) setIsAuthenticated(Boolean(data?.ok && data?.authenticated));
+      })
+      .catch(() => {
+        if (active) setIsAuthenticated(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   async function signOut() {
     // Universal sign-out: clears RBAC and legacy sessions regardless of which
@@ -111,9 +132,11 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
             >
               {dark ? <Sun size={15} /> : <Moon size={15} />}
             </ActionButton>
-            <ActionButton onClick={() => void signOut()} variant="outline" className="gap-1.5 px-3 text-sm font-semibold">
-              <LogOut size={15} /> <span className="hidden md:inline">Sign out</span>
-            </ActionButton>
+            {isAuthenticated ? (
+              <ActionButton onClick={() => void signOut()} variant="outline" className="gap-1.5 px-3 text-sm font-semibold">
+                <LogOut size={15} /> <span className="hidden md:inline">Sign out</span>
+              </ActionButton>
+            ) : null}
           </nav>
         </div>
       </header>
