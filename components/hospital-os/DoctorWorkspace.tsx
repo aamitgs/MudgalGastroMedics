@@ -54,7 +54,7 @@ export function DoctorWorkspace({
       <CardContent className="grid gap-4">
         {queueRows.slice(0, 4).map((row) => (
           <button
-            key={row.uhid}
+            key={row.id}
             type="button"
             data-doctor-queue-item
             aria-pressed={row.id === activePatient?.id}
