@@ -203,7 +203,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       },
       breadcrumbSchema([
         { name: "Home", url: "/" },
-        { name: "Services", url: "/services/gastroenterology" },
+        { name: "Services", url: "/services" },
         { name: page.shortTitle, url: `/services/${page.slug}` }
       ])
     ]

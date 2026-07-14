@@ -15,11 +15,14 @@ const companyLinks = [
 ];
 
 const serviceLinks = [
-  { href: "/procedures/endoscopy", label: "Endoscopy" },
-  { href: "/procedures/colonoscopy", label: "Colonoscopy" },
-  { href: "/procedures/ercp", label: "ERCP" },
-  { href: "/procedures/fibroscan", label: "Fibroscan" },
-  { href: "/procedures/gastrointestinal-bleeding-management", label: "GI Bleeding Care" }
+  { href: "/services/gastroenterology", label: "Gastroenterology" },
+  { href: "/services/liver-clinic", label: "Liver Clinic" },
+  { href: "/services/endoscopy-services", label: "Endoscopy Services" },
+  { href: "/services/ercp-bile-duct-care", label: "ERCP & Bile Duct" },
+  { href: "/services/fibroscan-fatty-liver-assessment", label: "Fatty Liver" },
+  { href: "/services/gi-bleeding-emergency-gastro-care", label: "GI Bleeding Care" },
+  { href: "/services/acidity-gerd-ulcer-clinic", label: "Acidity / GERD Clinic" },
+  { href: "/services/ibs-constipation-bowel-disorder-clinic", label: "IBS & Bowel Clinic" }
 ];
 
 const supportLinks = [
@@ -49,26 +52,26 @@ const socialLinks = {
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-16 pt-14 text-sm text-[#969696] md:px-8 md:pb-20">
+    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-16 pt-14 text-[13px] text-[#969696] md:px-8 md:pb-20">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
             <div className="w-fit rounded border border-brand/25 bg-white p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
-            <p className="mt-5 max-w-sm leading-6">
+            <p className="mt-5 max-w-sm leading-5">
               Advanced gastroenterology, hepatology and endoscopy care in Agra with specialized treatment for digestive and liver diseases.
             </p>
           </div>
 
-          <FooterColumn title="Company" links={companyLinks} />
+          <FooterColumn title="Mudgalgastromedics" links={companyLinks} />
 
-          <FooterColumn title="Services" links={serviceLinks} />
+          <FooterColumn title="Services" links={serviceLinks} limit={6} />
 
           <FooterColumn title="Areas Served" links={areaLinks} />
 
           <div>
-            <FooterColumn title="Support" links={supportLinks} />
+            <FooterColumn title="Support" links={supportLinks} limit={6} />
           </div>
 
           <div>
@@ -85,7 +88,7 @@ export function Footer() {
             <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="mx-auto block w-fit lg:mx-0" aria-label="Open MGM on Google Maps">
               <GoogleQr />
             </a>
-            <p className="mt-4 text-base">Scan to view reviews</p>
+            <p className="mt-4 text-sm">Scan to view reviews</p>
             <p className="mx-auto mt-2 max-w-56 text-xs leading-5 lg:mx-0">Mudgal Gastromedics Hospital, Shaheed Nagar, Agra</p>
           </div>
         </div>
@@ -119,24 +122,44 @@ export function Footer() {
   );
 }
 
-function FooterColumn({ title, links }: { title: string; links: Array<{ href: string; label: string }> }) {
+function FooterColumn({ title, links, limit }: { title: string; links: Array<{ href: string; label: string }>; limit?: number }) {
+  const visibleLinks = typeof limit === "number" ? links.slice(0, limit) : links;
+  const hiddenLinks = typeof limit === "number" ? links.slice(limit) : [];
+
   return (
     <div>
       <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">{title}</h3>
-      <div className="grid gap-2 text-sm leading-6">
-        {links.map((link) =>
-          link.href.startsWith("http") ? (
-            <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="hover:text-white">
-              {link.label}
-            </a>
-          ) : (
-            <Link key={link.label} href={link.href} className="hover:text-white">
-              {link.label}
-            </Link>
-          )
-        )}
+      <div className="grid gap-1.5 text-[13px] leading-5">
+        {visibleLinks.map((link) => (
+          <FooterLink key={link.label} link={link} />
+        ))}
+        {hiddenLinks.length ? (
+          <details className="group/show-more">
+            <summary className="mt-1 inline-flex cursor-pointer list-none items-center text-[13px] font-semibold text-white/70 transition hover:text-white [&::-webkit-details-marker]:hidden">
+              <span className="group-open/show-more:hidden">Show more</span>
+              <span className="hidden group-open/show-more:inline">Show fewer</span>
+            </summary>
+            <div className="mt-2 grid gap-2">
+              {hiddenLinks.map((link) => (
+                <FooterLink key={link.label} link={link} />
+              ))}
+            </div>
+          </details>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function FooterLink({ link }: { link: { href: string; label: string } }) {
+  return link.href.startsWith("http") ? (
+    <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-white">
+      {link.label}
+    </a>
+  ) : (
+    <Link href={link.href} className="hover:text-white">
+      {link.label}
+    </Link>
   );
 }
 
@@ -146,7 +169,7 @@ function ContactLine({ icon, label, value, href }: { icon: React.ReactNode; labe
       <span className="mt-1 shrink-0 text-white/45">{icon}</span>
       <div>
         <p className="text-xs font-black uppercase tracking-wider text-white/45">{label}</p>
-        <a href={href} className="text-sm hover:text-white">{value}</a>
+        <a href={href} className="text-[13px] hover:text-white">{value}</a>
       </div>
     </div>
   );
@@ -164,7 +187,7 @@ function SocialPill({ href, label, icon, tone }: { href: string; label: string; 
       href={href}
       target={href === "#" ? undefined : "_blank"}
       rel={href === "#" ? undefined : "noreferrer"}
-      className={`group inline-flex min-h-12 items-center gap-3 rounded-full border px-5 py-2.5 text-sm font-black shadow-[0_18px_44px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.12)] transition duration-300 hover:-translate-y-1 hover:text-white hover:shadow-[0_24px_60px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.18)] ${tones[tone]}`}
+      className={`group inline-flex min-h-11 items-center gap-3 rounded-full border px-4 py-2 text-[13px] font-black shadow-[0_18px_44px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.12)] transition duration-300 hover:-translate-y-1 hover:text-white hover:shadow-[0_24px_60px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.18)] ${tones[tone]}`}
     >
       <span className="grid h-8 w-8 place-items-center rounded-full text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:scale-105">{icon ?? "G"}</span>
       {label}

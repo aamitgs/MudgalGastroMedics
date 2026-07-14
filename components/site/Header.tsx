@@ -43,14 +43,25 @@ const navItems = [
     ]
   },
   {
-    href: "/services/gastroenterology",
+    href: "/services",
     label: "Services",
     children: [
+      { href: "/services", label: "All Services" },
       { href: "/services/gastroenterology", label: "Gastroenterology" },
       { href: "/services/hepatology-liver-care", label: "Hepatology / Liver Care" },
+      { href: "/services/liver-clinic", label: "Liver Clinic" },
       { href: "/services/advanced-endoscopy-centre", label: "Advanced Endoscopy Centre" },
       { href: "/services/diagnostic-services", label: "Diagnostic Services" },
+      { href: "/services/endoscopy-services", label: "Endoscopy Services" },
+      { href: "/services/colonoscopy-services", label: "Colonoscopy Services" },
+      { href: "/services/ercp-bile-duct-care", label: "ERCP & Bile Duct Care" },
+      { href: "/services/fibroscan-fatty-liver-assessment", label: "FibroScan & Fatty Liver Assessment" },
+      { href: "/services/gi-bleeding-emergency-gastro-care", label: "GI Bleeding & Emergency Gastro Care" },
+      { href: "/services/pancreas-biliary-clinic", label: "Pancreas & Biliary Clinic" },
+      { href: "/services/ibs-constipation-bowel-disorder-clinic", label: "IBS, Constipation & Bowel Disorder Clinic" },
+      { href: "/services/acidity-gerd-ulcer-clinic", label: "Acidity, GERD & Ulcer Clinic" },
       { href: "/services/preventive-health-check-up", label: "Preventive Health Check-up" },
+      { href: "/services/gi-cancer-screening-polyp-clinic", label: "GI Cancer Screening & Polyp Clinic" },
       { href: "/services/medical-weight-management", label: "Medical Weight Management" }
     ]
   },
@@ -133,10 +144,21 @@ const navHindi: Record<string, string> = {
   "About Us": "हमारे बारे में",
   "Facilities": "सुविधाएँ",
   "Services": "सेवाएँ",
+  "All Services": "सभी सेवाएँ",
   "Gastroenterology": "गैस्ट्रोएंटरोलॉजी",
   "Hepatology / Liver Care": "हेपेटोलॉजी / लिवर केयर",
+  "Liver Clinic": "लिवर क्लिनिक",
   "Advanced Endoscopy Centre": "एडवांस्ड एंडोस्कोपी सेंटर",
   "Diagnostic Services": "डायग्नोस्टिक सेवाएँ",
+  "Endoscopy Services": "एंडोस्कोपी सेवाएँ",
+  "Colonoscopy Services": "कोलोनोस्कोपी सेवाएँ",
+  "ERCP & Bile Duct Care": "ईआरसीपी और बाइल डक्ट केयर",
+  "FibroScan & Fatty Liver Assessment": "फाइब्रोस्कैन और फैटी लिवर आकलन",
+  "GI Bleeding & Emergency Gastro Care": "जीआई ब्लीडिंग और इमरजेंसी गैस्ट्रो केयर",
+  "Pancreas & Biliary Clinic": "पैंक्रियास और बाइलरी क्लिनिक",
+  "IBS, Constipation & Bowel Disorder Clinic": "आईबीएस, कब्ज और बाउल क्लिनिक",
+  "Acidity, GERD & Ulcer Clinic": "एसिडिटी, जीईआरडी और अल्सर क्लिनिक",
+  "GI Cancer Screening & Polyp Clinic": "जीआई कैंसर स्क्रीनिंग और पॉलीप क्लिनिक",
   "Preventive Health Check-up": "प्रीवेंटिव हेल्थ चेक-अप",
   "Medical Weight Management": "मेडिकल वेट मैनेजमेंट",
   "Hospital Gallery": "हॉस्पिटल गैलरी",
@@ -255,7 +277,7 @@ export function Header() {
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1 whitespace-nowrap py-8 text-[13px] font-semibold transition hover:text-[#19c7f3] xl:text-[14px] 2xl:text-[15px] ${item.label === "Home" ? "text-[#19c7f3]" : ""}`}
+                  className="flex items-center gap-1 whitespace-nowrap py-8 text-[13px] font-semibold transition hover:text-[#19c7f3] xl:text-[14px] 2xl:text-[15px]"
                 >
                   <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
@@ -302,7 +324,7 @@ export function Header() {
           >
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`}>
-                <Link href={item.href} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded px-2 py-3 hover:bg-soft ${item.label === "Home" ? "text-brand" : ""}`}>
+                <Link href={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between rounded px-2 py-3 hover:bg-soft">
                   <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={18} /> : null}
                 </Link>
