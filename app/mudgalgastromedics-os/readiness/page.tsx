@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { AdminProductionReadiness } from "@/components/readiness/AdminProductionReadiness";
 import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
+import { HospitalOsPageShell } from "@/components/hospital-os/HospitalOsPageShell";
 import { accessContextFromCookieStore, canOpenModule } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {
@@ -54,25 +55,20 @@ export default async function ReadinessPage() {
   }
 
   return (
-    <main>
-      <section className="border-b border-line bg-surface">
-        <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 py-5">
-          <div>
-            <Link href="/mudgalgastromedics-os" className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline">
-              <ArrowLeft size={13} /> Dashboard
-            </Link>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Readiness</p>
-            <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Production readiness</h1>
-          </div>
-          <p className="max-w-xl text-sm leading-relaxed text-muted">
+    <HospitalOsPageShell>
+      <div className="mx-auto grid w-full max-w-[1560px] gap-5 px-4 py-5 lg:px-6">
+        <div className="rounded border border-line bg-surface p-5">
+          <Link href="/mudgalgastromedics-os" className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline">
+            <ArrowLeft size={13} /> Dashboard
+          </Link>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Readiness</p>
+          <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Production readiness</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
             Security, data, operations and compliance checks before going live with patient data.
           </p>
         </div>
-      </section>
-
-      <section className="mx-auto grid w-[min(1560px,calc(100%-32px))] gap-4 py-8">
         <AdminProductionReadiness />
-      </section>
-    </main>
+      </div>
+    </HospitalOsPageShell>
   );
 }

@@ -4,14 +4,21 @@ import {
   BarChart3,
   Bed,
   Bell,
-  Building2,
   CalendarClock,
   CircleDollarSign,
   ClipboardList,
   CreditCard,
   FileText,
   FlaskConical,
+  Gauge,
+  History,
+  KeyRound,
+  Layers,
   LayoutDashboard,
+  LineChart,
+  ListTodo,
+  MessageCircle,
+  MessagesSquare,
   Package,
   Pill,
   Settings,
@@ -20,6 +27,7 @@ import {
   Stethoscope,
   UserRound,
   UsersRound,
+  Utensils,
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -119,6 +127,44 @@ export const metricIcons: Record<string, LucideIcon> = {
 
 export type HospitalTrendPoint = { time: string; opd: number; revenue: number };
 
+export type HospitalSnapshot = {
+  rows: PatientFlowRow[];
+  metrics: DashboardMetric[];
+  trend: HospitalTrendPoint[];
+  navBadges: NavBadgeCounts;
+};
+
+type HospitalSnapshotResponse = {
+  ok: boolean;
+  rows?: PatientFlowRow[];
+  metrics?: DashboardMetric[];
+  trend?: HospitalTrendPoint[];
+  navBadges?: NavBadgeCounts;
+  error?: string;
+};
+
+/**
+ * Shared fetcher for react-query key ["hospital-os","patient-flow"] — used by
+ * both HospitalOsShell (for nav badge counts) and the dashboard content (for
+ * the full snapshot). Using the SAME function reference for the same key
+ * matters: react-query dedupes in-flight requests per key regardless of which
+ * component's useQuery call fires first, so both must agree on what a cache
+ * hit for this key actually contains.
+ */
+export async function fetchHospitalSnapshot(): Promise<HospitalSnapshot> {
+  const response = await fetch("/api/hospital-os/snapshot", { cache: "no-store" });
+  const data = (await response.json().catch(() => ({}))) as HospitalSnapshotResponse;
+
+  if (!response.ok || !data.ok || !data.rows) {
+    throw new Error(data.error || "Unable to load Hospital OS snapshot.");
+  }
+
+  // metrics/trend are always computed live by the API from real store data
+  // (never omitted); these fall back to empty, not fabricated numbers, so a
+  // malformed response degrades to "no data" rather than misleading figures.
+  return { rows: data.rows, metrics: data.metrics ?? [], trend: data.trend ?? [], navBadges: data.navBadges ?? {} };
+}
+
 export type RealtimeMessage = { id: string; text: string };
 
 export type HospitalRealtimeEvent =
@@ -175,27 +221,48 @@ function rolesWithPermission(resource: AccessResource | null, action: AccessActi
   return hospitalRoles.filter((role) => roleHasPermission(hospitalRoleToAccessRole[role], resource, action));
 }
 
+// Anchor-only hrefs are prefixed with the dashboard's own path (not bare
+// "#id") — Track 4.13's shell now renders on 14+ other routes too, and a bare
+// "#id" link only scrolls within whatever page you're currently on; clicked
+// from another route it would silently do nothing instead of navigating to
+// the dashboard first. Full navigation to a URL with a hash still scrolls to
+// that element once the page renders, same as before, on every page.
+const dashboardPath = "/mudgalgastromedics-os";
+
 export const navItems: NavItem[] = [
-  { label: "Dashboard", group: "Overview", href: "#analytics", icon: LayoutDashboard, roles: rolesWithPermission(null) },
-  { label: "Patients", group: "Clinical", href: "#operations-table", icon: UsersRound, roles: rolesWithPermission("patients") },
-  { label: "Doctors", group: "Clinical", href: "#doctor-workspace", icon: Stethoscope, roles: rolesWithPermission("appointments") },
-  { label: "Departments", group: "Administration", href: "/admin#module-hr", icon: Building2, roles: rolesWithPermission("hr-records") },
-  { label: "Appointments", group: "Clinical", href: "#appointment-flow", icon: CalendarClock, roles: rolesWithPermission("appointments") },
+  { label: "Dashboard", group: "Overview", href: `${dashboardPath}#analytics`, icon: LayoutDashboard, roles: rolesWithPermission(null) },
+  { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
+  { label: "Doctors", group: "Clinical", href: `${dashboardPath}#doctor-workspace`, icon: Stethoscope, roles: rolesWithPermission("appointments") },
+  // Track 4.13 (docs/build-roadmap.md): migrated modules point at their new
+  // dedicated /mudgalgastromedics-os/* route instead of an /admin#module-x
+  // anchor. Not-yet-migrated modules (Phase 2) keep their old href.
+  { label: "Appointments", group: "Clinical", href: `${dashboardPath}#appointment-flow`, icon: CalendarClock, roles: rolesWithPermission("appointments") },
   { label: "OPD", group: "Clinical", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
   { label: "IPD", group: "Clinical", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
   { label: "Prescriptions", group: "Clinical", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
   { label: "Pharmacy", group: "Operations", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Laboratory", group: "Diagnostics", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
-  { label: "Billing", group: "Finance", href: "#billing", icon: CreditCard, roles: rolesWithPermission("billing") },
+  { label: "Billing", group: "Finance", href: `${dashboardPath}#billing`, icon: CreditCard, roles: rolesWithPermission("billing") },
   { label: "Insurance", group: "Finance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
   { label: "Accounts", group: "Finance", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
-  { label: "HR", group: "Administration", href: "/admin#module-hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
-  { label: "Inventory", group: "Operations", href: "/admin#module-inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
-  { label: "Reports", group: "Administration", href: "/admin#module-reports", icon: BarChart3, roles: rolesWithPermission("reports") },
-  { label: "CMS", group: "Administration", href: "/admin#module-cms", icon: Activity, roles: rolesWithPermission("cms") },
-  { label: "Settings", group: "Administration", href: "/admin#module-settings", icon: Settings, roles: rolesWithPermission("system-settings") },
-  { label: "Notifications", group: "Overview", href: "#realtime-feed", icon: Bell, roles: rolesWithPermission(null) },
-  { label: "AI Assistant", group: "Overview", href: "#patient-portal-preview", icon: Sparkles, roles: rolesWithPermission("patients") }
+  { label: "HR", group: "Administration", href: "/mudgalgastromedics-os/hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
+  { label: "Inventory", group: "Operations", href: "/mudgalgastromedics-os/inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
+  { label: "Reports", group: "Administration", href: "/mudgalgastromedics-os/reports", icon: BarChart3, roles: rolesWithPermission("reports") },
+  { label: "CMS", group: "Administration", href: "/mudgalgastromedics-os/cms", icon: Activity, roles: rolesWithPermission("cms") },
+  { label: "Settings", group: "Administration", href: "/mudgalgastromedics-os/settings", icon: Settings, roles: rolesWithPermission("system-settings") },
+  { label: "Notifications", group: "Overview", href: `${dashboardPath}#realtime-feed`, icon: Bell, roles: rolesWithPermission(null) },
+  { label: "AI Assistant", group: "Overview", href: `${dashboardPath}#patient-portal-preview`, icon: Sparkles, roles: rolesWithPermission("patients") },
+  // New entries for modules migrated in Phase 1 that had no prior Hospital OS
+  // sidebar entry at all (they only lived on /admin before).
+  { label: "Readiness", group: "Administration", href: "/mudgalgastromedics-os/readiness", icon: Gauge, roles: rolesWithPermission("system-settings") },
+  { label: "Audit", group: "Administration", href: "/mudgalgastromedics-os/audit", icon: History, roles: rolesWithPermission("audit-logs") },
+  { label: "Analytics", group: "Administration", href: "/mudgalgastromedics-os/analytics", icon: LineChart, roles: rolesWithPermission("reports") },
+  { label: "Access", group: "Administration", href: "/mudgalgastromedics-os/access", icon: KeyRound, roles: rolesWithPermission("user-management") },
+  { label: "Modules", group: "Administration", href: "/mudgalgastromedics-os/modules", icon: Layers, roles: rolesWithPermission("system-settings") },
+  { label: "Diet Plans", group: "Clinical", href: "/mudgalgastromedics-os/diet-plans", icon: Utensils, roles: rolesWithPermission("diet-plans") },
+  { label: "Automation", group: "Operations", href: "/mudgalgastromedics-os/automation", icon: ListTodo, roles: rolesWithPermission("appointments") },
+  { label: "Comms", group: "Operations", href: "/mudgalgastromedics-os/communication", icon: MessageCircle, roles: rolesWithPermission("appointments") },
+  { label: "Staff Notes", group: "Operations", href: "/mudgalgastromedics-os/staff-notes", icon: MessagesSquare, roles: rolesWithPermission(null) }
 ];
 
 export type HospitalOsSection =
@@ -274,18 +341,18 @@ export const patientFlowRows: PatientFlowRow[] = [
 ];
 
 export const commandRecords: CommandRecord[] = [
-  { id: "cmd-1", entity: "Patient", title: "Aarav Sharma", subtitle: "UHID MGM-24018 - active OPD", href: "#patient-workspace", keywords: ["aarav", "mgm-24018", "opd"], priority: 100 },
-  { id: "cmd-2", entity: "Doctor", title: "Dr. Deepak Kumar Sharma", subtitle: "Gastroenterology - available today", href: "#doctor-workspace", keywords: ["doctor", "deepak", "gastro"], priority: 96 },
-  { id: "cmd-3", entity: "Invoice", title: "INV-5821", subtitle: "Rs 18,450 - insurance review", href: "#billing", keywords: ["invoice", "billing", "insurance"], priority: 90 },
-  { id: "cmd-4", entity: "Medicine", title: "Pantoprazole 40 mg", subtitle: "Pharmacy stock 42 strips", href: "#operations-table", keywords: ["medicine", "pharmacy", "stock"], priority: 76 },
-  { id: "cmd-5", entity: "Appointment", title: "ERCP follow-up", subtitle: "Today 3:20 PM - Room 2", href: "#appointment-flow", keywords: ["appointment", "ercp"], priority: 82 },
-  { id: "cmd-6", entity: "Department", title: "Endoscopy Unit", subtitle: "2 rooms active, 1 procedure delayed", href: "#analytics", keywords: ["department", "endoscopy"], priority: 62 },
-  { id: "cmd-7", entity: "Employee", title: "Nurse Priya S.", subtitle: "Assigned to HDU and vitals desk", href: "#doctor-workspace", keywords: ["employee", "nurse"], priority: 60 },
-  { id: "cmd-8", entity: "Insurance", title: "Star Health policy STH-9082", subtitle: "Preauth pending for MGM-24018", href: "#billing", keywords: ["insurance", "preauth"], priority: 80 },
-  { id: "cmd-9", entity: "Report", title: "LFT panel", subtitle: "Critical bilirubin flag", href: "#patient-workspace", keywords: ["report", "lab", "lft"], priority: 92 },
-  { id: "cmd-10", entity: "Bed", title: "HDU-04", subtitle: "Occupied - discharge expected 6 PM", href: "#analytics", keywords: ["bed", "hdu"], priority: 68 },
-  { id: "cmd-11", entity: "Room", title: "Procedure Room 2", subtitle: "ERCP list running 12 minutes late", href: "#appointment-flow", keywords: ["room", "procedure"], priority: 58 },
-  { id: "cmd-12", entity: "Procedure", title: "Colonoscopy package", subtitle: "Billing template and consent ready", href: "#billing", keywords: ["procedure", "colonoscopy"], priority: 54 }
+  { id: "cmd-1", entity: "Patient", title: "Aarav Sharma", subtitle: "UHID MGM-24018 - active OPD", href: `${dashboardPath}#patient-workspace`, keywords: ["aarav", "mgm-24018", "opd"], priority: 100 },
+  { id: "cmd-2", entity: "Doctor", title: "Dr. Deepak Kumar Sharma", subtitle: "Gastroenterology - available today", href: `${dashboardPath}#doctor-workspace`, keywords: ["doctor", "deepak", "gastro"], priority: 96 },
+  { id: "cmd-3", entity: "Invoice", title: "INV-5821", subtitle: "Rs 18,450 - insurance review", href: `${dashboardPath}#billing`, keywords: ["invoice", "billing", "insurance"], priority: 90 },
+  { id: "cmd-4", entity: "Medicine", title: "Pantoprazole 40 mg", subtitle: "Pharmacy stock 42 strips", href: `${dashboardPath}#operations-table`, keywords: ["medicine", "pharmacy", "stock"], priority: 76 },
+  { id: "cmd-5", entity: "Appointment", title: "ERCP follow-up", subtitle: "Today 3:20 PM - Room 2", href: `${dashboardPath}#appointment-flow`, keywords: ["appointment", "ercp"], priority: 82 },
+  { id: "cmd-6", entity: "Department", title: "Endoscopy Unit", subtitle: "2 rooms active, 1 procedure delayed", href: `${dashboardPath}#analytics`, keywords: ["department", "endoscopy"], priority: 62 },
+  { id: "cmd-7", entity: "Employee", title: "Nurse Priya S.", subtitle: "Assigned to HDU and vitals desk", href: `${dashboardPath}#doctor-workspace`, keywords: ["employee", "nurse"], priority: 60 },
+  { id: "cmd-8", entity: "Insurance", title: "Star Health policy STH-9082", subtitle: "Preauth pending for MGM-24018", href: `${dashboardPath}#billing`, keywords: ["insurance", "preauth"], priority: 80 },
+  { id: "cmd-9", entity: "Report", title: "LFT panel", subtitle: "Critical bilirubin flag", href: `${dashboardPath}#patient-workspace`, keywords: ["report", "lab", "lft"], priority: 92 },
+  { id: "cmd-10", entity: "Bed", title: "HDU-04", subtitle: "Occupied - discharge expected 6 PM", href: `${dashboardPath}#analytics`, keywords: ["bed", "hdu"], priority: 68 },
+  { id: "cmd-11", entity: "Room", title: "Procedure Room 2", subtitle: "ERCP list running 12 minutes late", href: `${dashboardPath}#appointment-flow`, keywords: ["room", "procedure"], priority: 58 },
+  { id: "cmd-12", entity: "Procedure", title: "Colonoscopy package", subtitle: "Billing template and consent ready", href: `${dashboardPath}#billing`, keywords: ["procedure", "colonoscopy"], priority: 54 }
 ];
 
 /** Audit actions that are internal telemetry, not activity worth surfacing in the live feed. */

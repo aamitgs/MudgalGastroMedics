@@ -59,8 +59,10 @@ test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
   assert.equal(exists("app/api/hospital-os/realtime/route.ts"), true);
   assert.match(read("app/api/hospital-os/snapshot/route.ts"), /hospital_os\.snapshot\.viewed/);
   assert.match(read("app/api/hospital-os/realtime/route.ts"), /hospital_os\.realtime\.polled/);
-  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
-  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
+  // Phase 0b (Track 4.13): shell extraction moved the snapshot fetch and realtime
+  // polling connection out of the monolith into the shared shell/data layer.
+  assert.match(read("lib/hospital-os-data.ts"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
+  assert.match(read("components/hospital-os/HospitalOsShell.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
   assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /useQuery/);
   assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
   // Track 4.10: extracted to their own files, no longer inline in the monolith.
