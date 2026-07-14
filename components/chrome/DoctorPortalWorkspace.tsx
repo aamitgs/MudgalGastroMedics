@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CalendarClock, CheckCircle2, Copy, FileDown, FileText, Printer, RefreshCw, Search, Send, ShieldCheck, Sparkles, Stamp, Stethoscope, UserPlus, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, ChevronsLeft, ChevronsRight, Copy, FileDown, FileText, Printer, RefreshCw, Search, Send, ShieldCheck, Sparkles, Stamp, Stethoscope, UserPlus, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -499,6 +499,7 @@ export function DoctorPortalWorkspace() {
   const [printable, setPrintable] = useState<PrintableDoctorSummary | null>(null);
   const [showNewConsultation, setShowNewConsultation] = useState(false);
   const [creatingConsultation, setCreatingConsultation] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   async function loadWorkspace() {
     setLoading(true);
@@ -683,137 +684,150 @@ export function DoctorPortalWorkspace() {
 
   return (
     <>
-      <div className="grid gap-4">
-        <div className="grid gap-4 md:grid-cols-4">
-          {stats.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="rounded border border-line/80 bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
-                <span className="grid h-10 w-10 place-items-center rounded bg-soft text-brand">
-                  <Icon size={19} />
-                </span>
-                <span className="text-xl font-bold text-ink">{value}</span>
-              </div>
-              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-muted">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        <DoctorRecentActivity />
-
-        <div className="grid gap-4 xl:grid-cols-[300px_1fr]">
-          <aside className="rounded border border-line/80 bg-white shadow-sm xl:self-start">
-            <div className="border-b border-line p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Doctor Queue</p>
-                  <h2 className="mt-1 text-xl font-bold text-ink">Consultations</h2>
+      <div className="flex items-start gap-3">
+        <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${sidebarOpen ? "w-[360px] opacity-100" : "w-0 opacity-0"}`}>
+          <div className="grid w-[360px] grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-2">
+              {stats.map(({ label, value, icon: Icon }) => (
+                <div key={label} className="flex min-w-0 items-center justify-between gap-3 rounded border border-line/80 bg-white p-3 shadow-sm">
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded bg-soft text-brand">
+                      <Icon size={16} />
+                    </span>
+                    <span className="min-w-0 text-xs font-semibold uppercase leading-tight tracking-[0.1em] text-muted">{label}</span>
+                  </span>
+                  <span className="shrink-0 text-lg font-bold text-ink">{value}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <ActionButton variant="primary" onClick={() => setShowNewConsultation((value) => !value)} aria-expanded={showNewConsultation}>
-                    <UserPlus size={16} /> New Consultation
-                  </ActionButton>
-                  <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
-                    <RefreshCw size={17} />
-                  </ActionButton>
-                </div>
-              </div>
-              {showNewConsultation ? (
-                <form onSubmit={createWalkInConsultation} className="mt-4 grid gap-2 rounded border border-line bg-soft/60 p-3">
-                  <p className="text-xs font-bold text-ink">Start a walk-in consultation (no appointment needed)</p>
-                  <div className="grid gap-2">
-                    <input name="patientName" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                    <input name="phone" required type="tel" placeholder="Phone number" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                  </div>
-                  <input name="symptoms" placeholder="Symptoms, comma separated (optional)" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <select name="priority" defaultValue="Routine" className="min-h-9 rounded border border-line bg-white px-2 text-sm font-semibold text-ink">
-                      <option>Routine</option>
-                      <option>Urgent</option>
-                    </select>
-                    <ActionButton type="submit" variant="primary" size="sm" disabled={creatingConsultation}>
-                      {creatingConsultation ? "Starting…" : "Start Consultation"}
-                    </ActionButton>
-                    <ActionButton type="button" variant="ghost" size="sm" onClick={() => setShowNewConsultation(false)}>
-                      Cancel
-                    </ActionButton>
-                  </div>
-                </form>
-              ) : null}
-              <label className="relative mt-4 block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search token, UHID, patient"
-                  className="min-h-9 w-full rounded border border-line bg-white pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
-                />
-              </label>
-            </div>
-            {error ? <p className="border-b border-line bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
-            <div className="grid max-h-[780px] gap-3 overflow-auto p-4">
-              {loading ? <ModuleSkeleton /> : null}
-              {!loading && filteredVisits.length === 0 ? (
-                <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
-                  <Stethoscope className="mx-auto text-brand" size={34} />
-                  <p className="mt-4 text-xl font-bold text-ink">No consultation queue.</p>
-                </div>
-              ) : null}
-              {filteredVisits.map((visit) => (
-                <button
-                  key={visit.id}
-                  type="button"
-                  onClick={() => setSelectedVisitId(visit.id)}
-                  className={`rounded border p-3 text-left transition hover:-translate-y-0.5 hover:border-brand ${selectedVisit?.id === visit.id ? "border-brand bg-cyan-50 shadow-sm" : "border-line bg-white"}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="truncate text-base font-bold text-ink">{visit.patientName}</h3>
-                    <span className="shrink-0 rounded-full border border-line bg-white px-2 py-0.5 text-[10px] font-bold text-muted">{visit.status}</span>
-                  </div>
-                  <p className="mt-1 truncate text-xs font-black uppercase tracking-[0.1em] text-brand">{visit.token}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
-                  <p className="mt-1 truncate text-xs text-muted">{visit.service}</p>
-                </button>
               ))}
             </div>
-          </aside>
 
-          <section className="grid gap-4">
-            {selectedVisit ? (
-              <DoctorConsultationCard
-                key={selectedVisit.id}
-                visit={selectedVisit}
-                patient={selectedPatient}
-                updateVisit={updateVisit}
-                copySummary={copySummary}
-                printSummary={printSummary}
-                favouriteDiagnoses={favouriteDiagnoses}
-                favouritePrescriptions={favouritePrescriptions}
-              />
-            ) : (
-              <div className="rounded border border-dashed border-line bg-white p-10 text-center shadow-sm">
-                <UserRound className="mx-auto text-brand" size={38} />
-                <p className="mt-4 text-2xl font-bold text-ink">Select a patient from the queue.</p>
-              </div>
-            )}
+            <DoctorRecentActivity />
 
-            <div className="rounded border border-line/80 bg-white shadow-sm">
+            <aside className="rounded border border-line/80 bg-white shadow-sm">
               <div className="border-b border-line p-4">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Follow-up List</p>
-                <h2 className="mt-1 text-xl font-bold text-ink">Upcoming review patients</h2>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Doctor Queue</p>
+                    <h2 className="mt-1 text-xl font-bold text-ink">Consultations</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ActionButton variant="primary" onClick={() => setShowNewConsultation((value) => !value)} aria-expanded={showNewConsultation}>
+                      <UserPlus size={16} /> New Consultation
+                    </ActionButton>
+                    <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
+                      <RefreshCw size={17} />
+                    </ActionButton>
+                  </div>
+                </div>
+                {showNewConsultation ? (
+                  <form onSubmit={createWalkInConsultation} className="mt-4 grid grid-cols-1 gap-2 rounded border border-line bg-soft/60 p-3">
+                    <p className="text-xs font-bold text-ink">Start a walk-in consultation (no appointment needed)</p>
+                    <div className="grid gap-2">
+                      <input name="patientName" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                      <input name="phone" required type="tel" placeholder="Phone number" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                    </div>
+                    <input name="symptoms" placeholder="Symptoms, comma separated (optional)" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select name="priority" defaultValue="Routine" className="min-h-9 rounded border border-line bg-white px-2 text-sm font-semibold text-ink">
+                        <option>Routine</option>
+                        <option>Urgent</option>
+                      </select>
+                      <ActionButton type="submit" variant="primary" size="sm" disabled={creatingConsultation}>
+                        {creatingConsultation ? "Starting…" : "Start Consultation"}
+                      </ActionButton>
+                      <ActionButton type="button" variant="ghost" size="sm" onClick={() => setShowNewConsultation(false)}>
+                        Cancel
+                      </ActionButton>
+                    </div>
+                  </form>
+                ) : null}
+                <label className="relative mt-4 block">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search token, UHID, patient"
+                    className="min-h-9 w-full rounded border border-line bg-white pl-10 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+                  />
+                </label>
               </div>
-              <div className="grid gap-3 p-4">
-                {followUps.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No follow-up dates added yet.</p> : null}
-                {followUps.map((visit) => (
-                  <button key={visit.id} type="button" onClick={() => setSelectedVisitId(visit.id)} className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-white p-4 text-left transition hover:border-brand hover:bg-cyan-50">
-                    <span>
-                      <span className="block font-bold text-ink">{visit.patientName}</span>
-                      <span className="block text-sm text-muted">{visit.service}{visit.uhid ? ` | ${visit.uhid}` : ""}</span>
-                    </span>
-                    <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-sm font-bold text-brand">{visit.followUpDate}</span>
+              {error ? <p className="border-b border-line bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
+              <div className="grid max-h-[780px] grid-cols-1 gap-3 overflow-auto p-4">
+                {loading ? <ModuleSkeleton /> : null}
+                {!loading && filteredVisits.length === 0 ? (
+                  <div className="rounded border border-dashed border-line bg-soft/60 p-8 text-center">
+                    <Stethoscope className="mx-auto text-brand" size={34} />
+                    <p className="mt-4 text-xl font-bold text-ink">No consultation queue.</p>
+                  </div>
+                ) : null}
+                {filteredVisits.map((visit) => (
+                  <button
+                    key={visit.id}
+                    type="button"
+                    onClick={() => setSelectedVisitId(visit.id)}
+                    className={`rounded border p-3 text-left transition hover:-translate-y-0.5 hover:border-brand ${selectedVisit?.id === visit.id ? "border-brand bg-cyan-50 shadow-sm" : "border-line bg-white"}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="truncate text-base font-bold text-ink">{visit.patientName}</h3>
+                      <span className="shrink-0 rounded-full border border-line bg-white px-2 py-0.5 text-[10px] font-bold text-muted">{visit.status}</span>
+                    </div>
+                    <p className="mt-1 truncate text-xs font-black uppercase tracking-[0.1em] text-brand">{visit.token}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
+                    <p className="mt-1 truncate text-xs text-muted">{visit.service}</p>
                   </button>
                 ))}
               </div>
+            </aside>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((value) => !value)}
+          aria-expanded={sidebarOpen}
+          aria-label={sidebarOpen ? "Collapse queue panel" : "Expand queue panel"}
+          title={sidebarOpen ? "Collapse queue panel" : "Expand queue panel"}
+          className="sticky top-24 grid h-14 w-6 shrink-0 place-items-center rounded-lg bg-emerald-600 text-white shadow-[0_10px_24px_rgba(16,185,129,0.35)] transition hover:-translate-y-0.5 hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/30"
+        >
+          {sidebarOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
+        </button>
+
+        <div className="min-w-0 flex-1 grid gap-4">
+          {selectedVisit ? (
+            <DoctorConsultationCard
+              key={selectedVisit.id}
+              visit={selectedVisit}
+              patient={selectedPatient}
+              updateVisit={updateVisit}
+              copySummary={copySummary}
+              printSummary={printSummary}
+              favouriteDiagnoses={favouriteDiagnoses}
+              favouritePrescriptions={favouritePrescriptions}
+            />
+          ) : (
+            <div className="rounded border border-dashed border-line bg-white p-10 text-center shadow-sm">
+              <UserRound className="mx-auto text-brand" size={38} />
+              <p className="mt-4 text-2xl font-bold text-ink">Select a patient from the queue.</p>
             </div>
-          </section>
+          )}
+
+          <div className="rounded border border-line/80 bg-white shadow-sm">
+            <div className="border-b border-line p-4">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Follow-up List</p>
+              <h2 className="mt-1 text-xl font-bold text-ink">Upcoming review patients</h2>
+            </div>
+            <div className="grid gap-3 p-4">
+              {followUps.length === 0 ? <p className="rounded border border-dashed border-line bg-soft/60 p-4 text-sm font-semibold text-muted">No follow-up dates added yet.</p> : null}
+              {followUps.map((visit) => (
+                <button key={visit.id} type="button" onClick={() => setSelectedVisitId(visit.id)} className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-white p-4 text-left transition hover:border-brand hover:bg-cyan-50">
+                  <span>
+                    <span className="block font-bold text-ink">{visit.patientName}</span>
+                    <span className="block text-sm text-muted">{visit.service}{visit.uhid ? ` | ${visit.uhid}` : ""}</span>
+                  </span>
+                  <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-sm font-bold text-brand">{visit.followUpDate}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
