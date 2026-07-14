@@ -12,7 +12,11 @@ async function expectNoAxeViolations(page: import("@playwright/test").Page) {
 }
 
 test("workspace launcher and staff login pass axe checks", async ({ page }) => {
+  // /login is retired (Track 4.13, docs/build-roadmap.md) — it redirects to
+  // /mudgalgastromedics-os, which shows the identical WorkspaceLauncher when
+  // signed out, so this exercises the real destination directly.
   await page.goto("/login");
+  await expect(page).toHaveURL(/\/mudgalgastromedics-os$/);
   await expect(page.getByText("Choose your workspace")).toBeVisible();
   await expectNoAxeViolations(page);
 

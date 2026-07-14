@@ -177,7 +177,10 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   async function signOutOfWorkspace() {
     if (osSession?.legacy) await fetch("/api/admin/session", { method: "DELETE" });
     else await fetch("/api/auth/logout", { method: "POST" });
-    window.location.assign("/login");
+    // /login is a redirect to here (retired, same reasoning as /admin) —
+    // going straight there skips the hop; this page shows the same
+    // WorkspaceLauncher once signed out.
+    window.location.assign("/mudgalgastromedics-os");
   }
 
   useEffect(() => {

@@ -1,17 +1,12 @@
-import type { Metadata } from "next";
-import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: { absolute: "Staff Login • MudgalGastromedics OS" },
-  description: "Staff sign-in for the Mudgal Gastromedics Hospital operating system.",
-  alternates: { canonical: "/login" },
-  robots: { index: false, follow: false }
-};
-
+/**
+ * Retired: /mudgalgastromedics-os already renders the exact same
+ * WorkspaceLauncher when unauthenticated, and nothing on the public site
+ * ever linked here (checked before removing) — /doctor has its own separate
+ * DoctorLogin, unrelated to this page. Kept as a redirect, not deleted, so
+ * old bookmarks/sign-out links still land somewhere real.
+ */
 export default function LoginPage() {
-  return (
-    <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[linear-gradient(160deg,var(--site-soft),var(--site-surface)_45%,var(--site-mist))] px-4 py-16">
-      <WorkspaceLauncher />
-    </main>
-  );
+  redirect("/mudgalgastromedics-os");
 }

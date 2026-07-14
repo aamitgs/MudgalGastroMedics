@@ -54,7 +54,10 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
       fetch("/api/admin/session", { method: "DELETE" }),
       fetch("/api/doctor/session", { method: "DELETE" })
     ]);
-    window.location.assign("/login");
+    // /login is a redirect to here (retired, same reasoning as /admin) —
+    // going straight there skips the hop; this page shows the same
+    // WorkspaceLauncher once signed out.
+    window.location.assign("/mudgalgastromedics-os");
   }
 
   return (
