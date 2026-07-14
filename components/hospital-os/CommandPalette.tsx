@@ -48,7 +48,11 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandRoot>
+      {/* results/pages are already Fuse.js-filtered (including each item's keywords)
+          before they reach this component — cmdk's own built-in filter only sees
+          the literal `value` string below and would silently re-hide any match
+          that came from a keyword alias not present in that string. */}
+      <CommandRoot shouldFilter={false}>
         <CommandInput value={query} onValueChange={setQuery} placeholder="Search patient, doctor, invoice, medicine, appointment, report, bed, room..." />
         <CommandList>
           <CommandEmpty>No matching records. Try a UHID, invoice number, medicine, bed, room, procedure, or a module name like Settings or HR.</CommandEmpty>

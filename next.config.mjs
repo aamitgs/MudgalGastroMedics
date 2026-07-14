@@ -15,7 +15,10 @@ const securityHeaders = [
 
 const nextConfig = {
   // Keep `next build` from invalidating assets served by a running dev server.
-  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+  // NEXT_DIST_DIR lets a second `next dev` (e.g. Playwright's e2e webServer)
+  // run alongside a normal one without tripping Next's single-instance lock,
+  // which keys off this directory rather than the port.
+  distDir: process.env.NEXT_DIST_DIR ?? (process.env.NODE_ENV === "development" ? ".next-dev" : ".next"),
   images: {
     formats: ["image/avif", "image/webp"]
   },

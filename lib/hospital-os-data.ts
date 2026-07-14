@@ -4,6 +4,7 @@ import {
   BarChart3,
   Bed,
   Bell,
+  BrainCircuit,
   CalendarClock,
   CircleDollarSign,
   ClipboardList,
@@ -19,12 +20,16 @@ import {
   ListTodo,
   MessageCircle,
   MessagesSquare,
+  NotebookPen,
   Package,
   Pill,
+  Receipt,
+  ScanLine,
   Settings,
   ShieldCheck,
   Sparkles,
   Stethoscope,
+  Syringe,
   UserRound,
   UsersRound,
   Utensils,
@@ -54,6 +59,8 @@ export type NavItem = {
   /** IA group this item belongs to. */
   group: NavGroup;
   badge?: string;
+  /** Extra search aliases for the command palette (e.g. a module's registry name when the sidebar label differs, like "Finance" for "Insurance"/"Accounts"). */
+  keywords?: string[];
 };
 
 export type PatientFlowRow = {
@@ -231,20 +238,38 @@ const dashboardPath = "/mudgalgastromedics-os";
 
 export const navItems: NavItem[] = [
   { label: "Dashboard", group: "Overview", href: `${dashboardPath}#analytics`, icon: LayoutDashboard, roles: rolesWithPermission(null) },
+  // "Patients" and "Appointments" deliberately still point at this dashboard's
+  // own OperationsTable / PatientRegistrationForm+AppointmentBookingForm
+  // sections, not the new /mudgalgastromedics-os/patients|appointments routes
+  // added in Phase 2 — those dashboard sections are real, e2e-tested,
+  // Hospital-OS-native UI (bulk actions, CSV export, doctor assignment), not
+  // just the old home of a since-migrated module, so repointing the sidebar
+  // would silently swap tested functionality for the more generic admin
+  // registry view instead of simply adding a route. The new pages still exist
+  // (reachable by direct URL) for RBAC/registry consistency with every other
+  // migrated module; revisit the IA once Phase 2 is complete.
   { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
   { label: "Doctors", group: "Clinical", href: `${dashboardPath}#doctor-workspace`, icon: Stethoscope, roles: rolesWithPermission("appointments") },
+  { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   // Track 4.13 (docs/build-roadmap.md): migrated modules point at their new
   // dedicated /mudgalgastromedics-os/* route instead of an /admin#module-x
   // anchor. Not-yet-migrated modules (Phase 2) keep their old href.
   { label: "Appointments", group: "Clinical", href: `${dashboardPath}#appointment-flow`, icon: CalendarClock, roles: rolesWithPermission("appointments") },
-  { label: "OPD", group: "Clinical", href: "/admin#module-opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
-  { label: "IPD", group: "Clinical", href: "/admin#module-ipd", icon: Bed, roles: rolesWithPermission("beds") },
+  { label: "OPD", group: "Clinical", href: "/mudgalgastromedics-os/opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
+  { label: "Procedures", group: "Clinical", href: "/mudgalgastromedics-os/procedures", icon: Syringe, roles: rolesWithPermission("appointments") },
+  { label: "IPD", group: "Clinical", href: "/mudgalgastromedics-os/ipd", icon: Bed, roles: rolesWithPermission("beds") },
+  { label: "Doctor Workflow", group: "Clinical", href: "/mudgalgastromedics-os/doctor-workflow", icon: NotebookPen, roles: rolesWithPermission("prescriptions") },
   { label: "Prescriptions", group: "Clinical", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
-  { label: "Pharmacy", group: "Operations", href: "/admin#module-pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
-  { label: "Laboratory", group: "Diagnostics", href: "/admin#module-lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
+  { label: "Pharmacy", group: "Operations", href: "/mudgalgastromedics-os/pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
+  { label: "Laboratory", group: "Diagnostics", href: "/mudgalgastromedics-os/lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
+  { label: "Radiology & Pathology", group: "Diagnostics", href: "/mudgalgastromedics-os/radiology-pathology", icon: ScanLine, roles: rolesWithPermission("lab-orders") },
+  // "Billing" (dashboard's own BillingForm, a real e2e-tested billing-entry
+  // section) deliberately stays as-is, same reasoning as Patients/Appointments
+  // above — "Billing Summary" is the new Phase 2 revenue/receipts report page.
   { label: "Billing", group: "Finance", href: `${dashboardPath}#billing`, icon: CreditCard, roles: rolesWithPermission("billing") },
-  { label: "Insurance", group: "Finance", href: "/admin#module-finance", icon: ShieldCheck, roles: rolesWithPermission("insurance") },
-  { label: "Accounts", group: "Finance", href: "/admin#module-finance", icon: WalletCards, roles: rolesWithPermission("billing") },
+  { label: "Billing Summary", group: "Finance", href: "/mudgalgastromedics-os/billing", icon: Receipt, roles: rolesWithPermission("billing") },
+  { label: "Insurance", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: ShieldCheck, roles: rolesWithPermission("insurance"), keywords: ["finance"] },
+  { label: "Accounts", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: WalletCards, roles: rolesWithPermission("billing"), keywords: ["finance"] },
   { label: "HR", group: "Administration", href: "/mudgalgastromedics-os/hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
   { label: "Inventory", group: "Operations", href: "/mudgalgastromedics-os/inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Reports", group: "Administration", href: "/mudgalgastromedics-os/reports", icon: BarChart3, roles: rolesWithPermission("reports") },

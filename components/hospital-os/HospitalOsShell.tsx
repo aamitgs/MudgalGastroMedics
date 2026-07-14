@@ -47,7 +47,10 @@ const commandFuse = new Fuse(commandRecords, {
 const navFuse = new Fuse(navItems, {
   includeScore: true,
   threshold: 0.35,
-  keys: [{ name: "label", weight: 1 }]
+  keys: [
+    { name: "label", weight: 0.7 },
+    { name: "keywords", weight: 0.3 }
+  ]
 });
 
 function realtimeEventMessage(event: HospitalRealtimeEvent) {
@@ -397,7 +400,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        {mobileNav ? <button type="button" aria-label="Close navigation overlay" className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setMobileNav(false)} /> : null}
+        {mobileNav ? <button type="button" aria-label="Close navigation overlay" className="fixed inset-0 z-40 bg-ink/30 lg:hidden" onClick={() => setMobileNav(false)} /> : null}
 
         <section className="min-w-0 flex-1">
           <TopNav
