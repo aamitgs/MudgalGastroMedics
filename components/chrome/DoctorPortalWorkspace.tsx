@@ -690,8 +690,8 @@ export function DoctorPortalWorkspace() {
 
         <DoctorRecentActivity />
 
-        <div className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
-          <aside className="rounded border border-line/80 bg-white shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[300px_1fr]">
+          <aside className="rounded border border-line/80 bg-white shadow-sm xl:self-start">
             <div className="border-b border-line p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -710,7 +710,7 @@ export function DoctorPortalWorkspace() {
               {showNewConsultation ? (
                 <form onSubmit={createWalkInConsultation} className="mt-4 grid gap-2 rounded border border-line bg-soft/60 p-3">
                   <p className="text-xs font-bold text-ink">Start a walk-in consultation (no appointment needed)</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="grid gap-2">
                     <input name="patientName" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
                     <input name="phone" required type="tel" placeholder="Phone number" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
                   </div>
@@ -753,16 +753,14 @@ export function DoctorPortalWorkspace() {
                   key={visit.id}
                   type="button"
                   onClick={() => setSelectedVisitId(visit.id)}
-                  className={`rounded border p-4 text-left transition hover:-translate-y-0.5 hover:border-brand ${selectedVisit?.id === visit.id ? "border-brand bg-cyan-50 shadow-sm" : "border-line bg-white"}`}
+                  className={`rounded border p-3 text-left transition hover:-translate-y-0.5 hover:border-brand ${selectedVisit?.id === visit.id ? "border-brand bg-cyan-50 shadow-sm" : "border-line bg-white"}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{visit.token}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
-                      <h3 className="mt-1 text-lg font-bold text-ink">{visit.patientName}</h3>
-                    </div>
-                    <span className="rounded-full border border-line bg-white px-2.5 py-1 text-[11px] font-bold text-muted">{visit.status}</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="truncate text-base font-bold text-ink">{visit.patientName}</h3>
+                    <span className="shrink-0 rounded-full border border-line bg-white px-2 py-0.5 text-[10px] font-bold text-muted">{visit.status}</span>
                   </div>
-                  <p className="mt-2 text-sm text-muted">{visit.service}</p>
+                  <p className="mt-1 truncate text-xs font-black uppercase tracking-[0.1em] text-brand">{visit.token}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
+                  <p className="mt-1 truncate text-xs text-muted">{visit.service}</p>
                 </button>
               ))}
             </div>

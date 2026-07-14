@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { DoctorLogin } from "@/components/chrome/DoctorLogin";
 import { DoctorPortalWorkspace } from "@/components/chrome/DoctorPortalWorkspace";
-import { Section } from "@/components/site/Section";
 import { accessContextFromCookieStore, canOpenDoctorWorkspace } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {
@@ -30,9 +29,15 @@ export default async function DoctorPortalPage() {
         </div>
       </section>
 
-      <Section muted className="pt-10 md:pt-14">
-        {isAuthenticated ? <DoctorPortalWorkspace /> : <DoctorLogin />}
-      </Section>
+      {/* Deliberately not components/site/Section — that's the public-website
+          marketing wrapper (caps content at 1180px), a chrome-split violation
+          on an authenticated OS surface. This matches the 1560px width already
+          used by this page's own hero and StaffChrome's top bar. */}
+      <section className="clinical-grid bg-soft/75 pb-16 pt-10 md:pb-24 md:pt-14">
+        <div className="mx-auto w-[min(1560px,calc(100%-32px))]">
+          {isAuthenticated ? <DoctorPortalWorkspace /> : <DoctorLogin />}
+        </div>
+      </section>
     </main>
   );
 }
