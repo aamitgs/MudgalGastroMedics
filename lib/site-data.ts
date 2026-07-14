@@ -37,6 +37,15 @@ export const doctor = {
   designation: "Consultant Gastroenterologist & Hepatologist",
   registration: "MCI-57000",
   image: "/placeholders/doctor-deepak-kumar-sharma.svg",
+  // Prescription-pad-specific letterhead text (Track: prescription pad
+  // redesign) — deliberately separate from `designation`/`education` above,
+  // which feed the public website and every other PDF's signature block.
+  // The letterhead uses shorter, print-convention wording the doctor
+  // specified for this document only.
+  credentials: "MBBS, MD(Medicine), DM(Gastroenterology)",
+  prescriptionRole: "Consultant Gastroenterologist, Hepatologist & Endoscopist",
+  priorConsultancy: "Ex Consultant (Max Hospital, Delhi)",
+  signatureRole: "Interventional Gastroenterologist",
   education: [
     "DM (Gastroenterology), SMS Medical College, Jaipur, 2017",
     "MD (Medicine), S.N. Medical College, Agra, 2013",

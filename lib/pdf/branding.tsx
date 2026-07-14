@@ -16,7 +16,8 @@ export function registerPdfFonts() {
       { src: path.join(geistDir, "Geist-Regular.ttf"), fontWeight: "normal" },
       { src: path.join(geistDir, "Geist-Medium.ttf"), fontWeight: "medium" },
       { src: path.join(geistDir, "Geist-SemiBold.ttf"), fontWeight: "semibold" },
-      { src: path.join(geistDir, "Geist-Bold.ttf"), fontWeight: "bold" }
+      { src: path.join(geistDir, "Geist-Bold.ttf"), fontWeight: "bold" },
+      { src: path.join(geistDir, "Geist-Italic.ttf"), fontWeight: "normal", fontStyle: "italic" }
     ]
   });
   // react-pdf hyphenates by default, which mangles clinical terms and dosages mid-word.
@@ -24,6 +25,7 @@ export function registerPdfFonts() {
 }
 
 export const logoPath = path.join(process.cwd(), "public", "mgm-logo.png");
+export const stomachIconPath = path.join(process.cwd(), "public", "mgm-icon.png");
 
 export const pdfColors = {
   ink: "#0f172a",
