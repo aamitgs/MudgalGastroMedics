@@ -945,22 +945,22 @@ function DoctorConsultationCard({
               disabled={!identityConfirmed}
               className={inputClass}
             />
-            <div className="mt-4 grid gap-2 sm:grid-cols-4">
-              <ActionButton variant="secondary" onClick={() => void copySummary(visit, patient)}>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <ActionButton variant="secondary" className="whitespace-nowrap" onClick={() => void copySummary(visit, patient)}>
                 <Copy size={16} /> Copy Summary
               </ActionButton>
-              <ActionButton variant="primary" onClick={() => printSummary(visit, patient)}>
+              <ActionButton variant="primary" className="whitespace-nowrap" onClick={() => printSummary(visit, patient)}>
                 <Printer size={16} /> Print
               </ActionButton>
-              <a href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
+              <a href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
                 <Stamp size={16} /> Certificate
               </a>
               {visit.referralLetter?.trim() ? (
-                <a href={`/api/pdf/referral-letter?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
+                <a href={`/api/pdf/referral-letter?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
                   <Send size={16} /> Referral Letter
                 </a>
               ) : null}
-              <a href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">
+              <a href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">
                 <FileDown size={16} /> Download PDF
               </a>
             </div>
