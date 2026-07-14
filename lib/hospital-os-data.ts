@@ -4,6 +4,7 @@ import {
   BarChart3,
   Bed,
   Bell,
+  BookUser,
   BrainCircuit,
   CalendarClock,
   CircleDollarSign,
@@ -13,6 +14,7 @@ import {
   FlaskConical,
   Gauge,
   History,
+  Inbox,
   KeyRound,
   Layers,
   LayoutDashboard,
@@ -240,21 +242,22 @@ export const navItems: NavItem[] = [
   { label: "Dashboard", group: "Overview", href: `${dashboardPath}#analytics`, icon: LayoutDashboard, roles: rolesWithPermission(null) },
   // "Patients" and "Appointments" deliberately still point at this dashboard's
   // own OperationsTable / PatientRegistrationForm+AppointmentBookingForm
-  // sections, not the new /mudgalgastromedics-os/patients|appointments routes
-  // added in Phase 2 — those dashboard sections are real, e2e-tested,
-  // Hospital-OS-native UI (bulk actions, CSV export, doctor assignment), not
-  // just the old home of a since-migrated module, so repointing the sidebar
-  // would silently swap tested functionality for the more generic admin
-  // registry view instead of simply adding a route. The new pages still exist
-  // (reachable by direct URL) for RBAC/registry consistency with every other
-  // migrated module; revisit the IA once Phase 2 is complete.
+  // sections — real, e2e-tested, Hospital-OS-native live-triage UI (bulk
+  // actions, CSV export, doctor assignment; new patient/appointment forms),
+  // not the same thing as the registry/report pages below. "Patient Registry"
+  // and "Appointment Requests" are the dedicated /mudgalgastromedics-os/*
+  // pages added in Phase 2, now given their own entries (same label-pair
+  // pattern as "Billing" vs. "Billing Summary") so both destinations are
+  // reachable from the sidebar like every other module, instead of only one.
   { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
+  { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
   { label: "Doctors", group: "Clinical", href: `${dashboardPath}#doctor-workspace`, icon: Stethoscope, roles: rolesWithPermission("appointments") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   // Track 4.13 (docs/build-roadmap.md): migrated modules point at their new
   // dedicated /mudgalgastromedics-os/* route instead of an /admin#module-x
   // anchor. Not-yet-migrated modules (Phase 2) keep their old href.
   { label: "Appointments", group: "Clinical", href: `${dashboardPath}#appointment-flow`, icon: CalendarClock, roles: rolesWithPermission("appointments") },
+  { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },
   { label: "OPD", group: "Clinical", href: "/mudgalgastromedics-os/opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
   { label: "Procedures", group: "Clinical", href: "/mudgalgastromedics-os/procedures", icon: Syringe, roles: rolesWithPermission("appointments") },
   { label: "IPD", group: "Clinical", href: "/mudgalgastromedics-os/ipd", icon: Bed, roles: rolesWithPermission("beds") },
