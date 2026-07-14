@@ -56,9 +56,9 @@ export default function AiPlanningPage() {
             </div>
           </div>
           <div className="rounded border border-white/16 bg-white/10 p-5 shadow-[0_28px_80px_rgba(2,22,29,0.25)] backdrop-blur-md">
-            <div className="rounded border border-amber-200/25 bg-amber-100/10 p-5">
+            <div className="rounded border border-gold/25 bg-gold/10 p-5">
               <div className="flex gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-amber-300/20 text-amber-100">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gold/20 text-cyan-50">
                   <AlertTriangle size={22} />
                 </span>
                 <div>

@@ -6,6 +6,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 import { OfflineBanner } from "@/components/design-system/OfflineBanner";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { PublicCareSearch } from "@/components/site/PublicCareSearch";
 import { StaffChrome } from "@/components/chrome/StaffChrome";
 
 /**
@@ -18,6 +19,7 @@ const staffChromeRoutes = ["/admin", "/doctor", "/login"];
 
 export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
+  const isBlogRoute = pathname === "/blog" || Boolean(pathname?.startsWith("/blog/"));
 
   // Single root switch every route renders through, so wrapping here makes
   // every motion.* component honor the OS reduced-motion setting
@@ -45,6 +47,7 @@ export function AppChrome({ children }: Readonly<{ children: React.ReactNode }>)
   return (
     <MotionConfig reducedMotion="user">
       <Header />
+      {isBlogRoute ? null : <PublicCareSearch />}
       {children}
       <CtaBand />
       <Footer />

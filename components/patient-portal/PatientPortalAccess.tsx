@@ -341,7 +341,7 @@ export function PatientPortalAccess() {
                   Enter the 6-digit code sent to <span className="font-bold text-ink">{phone}</span>.
                 </p>
                 {devCode ? (
-                  <p className="rounded border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
+                  <p className="rounded border border-gold/25 bg-gold/10 p-3 text-sm font-semibold text-ink">
                     SMS delivery is not configured yet — your code is <span className="font-mono font-bold">{devCode}</span>.
                   </p>
                 ) : null}
@@ -389,7 +389,7 @@ export function PatientPortalAccess() {
           </>
         ) : (
           <div className="mt-4 grid gap-3">
-            <p className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+            <p className="rounded border border-teal/20 bg-soft p-3 text-sm font-semibold text-teal-dark">
               Signed in as +91 {authedPhone}
             </p>
             {!hasEmail ? (
@@ -419,12 +419,12 @@ export function PatientPortalAccess() {
           </div>
         )}
 
-        {status ? <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{status}</p> : null}
+        {status ? <p className="mt-4 rounded border border-coral/20 bg-coral/10 p-3 text-sm font-semibold text-coral">{status}</p> : null}
         <div className="mt-5 grid gap-2">
           <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
             <Phone size={17} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
           </a>
-          <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white">
+          <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-4 font-bold text-white">
             <MessageCircle size={17} /> <span data-en>WhatsApp Reception</span><span data-hi lang="hi">व्हाट्सऐप रिसेप्शन</span>
           </a>
         </div>

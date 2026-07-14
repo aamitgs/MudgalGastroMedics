@@ -7,6 +7,7 @@ import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/site/ButtonLink";
+import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { LiveClockWeather } from "@/components/site/LiveClockWeather";
 
 const navItems = [
@@ -273,6 +274,7 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
+            <LanguageToggle compact className="h-12 min-w-[98px] rounded px-4 text-[15px] xl:h-[52px] xl:min-w-[108px]" />
             <ButtonLink href="/portal#appointment" className="hidden min-w-[144px] whitespace-nowrap border-coral bg-coral px-3.5 text-[13px] hover:bg-brand-dark md:inline-flex xl:min-w-[156px] xl:text-sm">
               <span data-en>Book Appointment</span>
               <span data-hi lang="hi">बुक करें</span>

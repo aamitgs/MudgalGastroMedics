@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ChevronRight, Clock3, MessageCircle, Phone, Search, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { BlogPostSearch } from "@/components/site/BlogPostSearch";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section } from "@/components/site/Section";
@@ -78,11 +79,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   return (
     <main>
       <section className="relative overflow-hidden bg-mist px-4 py-8 text-white md:py-12">
-        <div className="absolute inset-0 clinical-grid opacity-70" />
         <div className="relative mx-auto w-[min(1280px,calc(100%-12px))] overflow-hidden rounded-[28px] border border-cyan-100/30 bg-ink shadow-[0_30px_90px_rgba(8,64,84,0.24)]">
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.86)_47%,rgba(8,145,178,0.36)_100%),url('/images/hospital/waitingarea-full-hero.png')] bg-cover bg-center" />
-          <div className="absolute inset-0 opacity-45 [background-image:linear-gradient(rgba(34,211,238,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.1)_1px,transparent_1px)] [background-size:76px_76px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_34%,rgba(34,211,238,0.24),transparent_32%),linear-gradient(90deg,rgba(2,22,29,0.56),rgba(2,22,29,0.1))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.62),rgba(2,22,29,0.12)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.28))]" />
           <div className="relative grid min-h-[580px] gap-10 px-6 py-12 md:px-14 lg:grid-cols-[0.92fr_1.08fr] lg:px-20 lg:py-16">
             <div className="flex max-w-2xl flex-col justify-center">
               <div className="mb-7 flex items-center gap-4">
@@ -296,6 +296,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </div>
 
           <aside className="space-y-5 lg:sticky lg:top-28">
+            <BlogPostSearch posts={sortedPosts} />
+
             <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded bg-soft text-brand">

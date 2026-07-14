@@ -1030,8 +1030,8 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
               ))}
             </div>
             {isBleeding ? (
-              <div className="mt-4 flex gap-3 rounded border border-red-300/30 bg-red-600/20 p-4 text-sm leading-relaxed text-white/85">
-                <AlertCircle className="mt-0.5 shrink-0 text-red-100" size={19} />
+              <div className="mt-4 flex gap-3 rounded border border-coral/30 bg-coral/20 p-4 text-sm leading-relaxed text-white/85">
+                <AlertCircle className="mt-0.5 shrink-0 text-cyan-50" size={19} />
                 <span className="inline-lang">
                   <span data-en>Severe or active bleeding symptoms need immediate medical attention. Call reception or local emergency services urgently.</span>
                   <span data-hi lang="hi">गंभीर या सक्रिय रक्तस्राव के लक्षणों के लिए तत्काल चिकित्सा ध्यान देने की आवश्यकता है। तुरंत रिसेप्शन या स्थानीय आपातकालीन सेवाओं को कॉल करें।</span>

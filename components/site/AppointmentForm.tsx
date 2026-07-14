@@ -457,10 +457,10 @@ export function AppointmentForm() {
             </select>
           </label>
           {urgentSelected ? (
-            <div className="rounded-xl border border-red-200 bg-[linear-gradient(135deg,#fff7f5,#ffffff)] p-4 shadow-[0_16px_36px_rgba(180,58,39,0.12)] lg:col-span-12">
+            <div className="rounded-xl border border-coral/20 bg-[linear-gradient(135deg,#fff7f5,#ffffff)] p-4 shadow-[0_16px_36px_rgba(180,58,39,0.12)] lg:col-span-12">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-red-50 text-red-600">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-coral/10 text-coral">
                     <AlertTriangle size={22} />
                   </span>
                   <div>
@@ -580,7 +580,7 @@ export function AppointmentForm() {
         <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(8,145,178,0.42),inset_0_1px_0_rgba(255,255,255,0.28)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <Send size={18} /> <span data-en>Submit Request</span><span data-hi lang="hi">अनुरोध भेजें</span>
         </button>
-        <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(5,150,105,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(5,150,105,0.38),inset_0_1px_0_rgba(255,255,255,0.26)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
+        <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(5,150,105,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(5,150,105,0.34),inset_0_1px_0_rgba(255,255,255,0.26)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <MessageCircle size={18} /> WhatsApp Now
         </a>
         <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-5 font-bold tracking-[0.01em] text-ink shadow-[0_18px_42px_rgba(8,64,84,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
@@ -598,13 +598,13 @@ export function AppointmentForm() {
                 <p className="mt-3 inline-flex rounded-full border border-cyan-100/25 bg-white/8 px-3 py-1 text-sm font-black text-cyan-50">Request ID: {savedAppointmentId}</p>
               ) : null}
             </div>
-            <CheckCircle2 className="text-emerald-300" size={34} />
+            <CheckCircle2 className="text-teal" size={34} />
           </div>
           <div className="mt-5 grid gap-3 rounded-xl border border-white/14 bg-white/8 p-3 sm:grid-cols-2 lg:grid-cols-4">
             <a href="/portal#appointment" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-4 font-black text-white shadow-[0_18px_42px_rgba(8,145,178,0.28),inset_0_1px_0_rgba(255,255,255,0.22)] transition hover:-translate-y-0.5">
               <CalendarCheck size={17} /> Book Appointment
             </a>
-            <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-black text-white shadow-[0_18px_42px_rgba(5,150,105,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] transition hover:-translate-y-0.5">
+            <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-4 font-black text-white shadow-[0_18px_42px_rgba(5,150,105,0.26),inset_0_1px_0_rgba(255,255,255,0.2)] transition hover:-translate-y-0.5">
               <MessageCircle size={17} /> WhatsApp
             </a>
             <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] transition hover:-translate-y-0.5 hover:text-brand">

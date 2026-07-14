@@ -3,9 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { BlogPostSearch } from "@/components/site/BlogPostSearch";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section, SectionHead } from "@/components/site/Section";
+import { seoBlogPosts } from "@/lib/blog-posts";
 import { fullAddress, site } from "@/lib/site-data";
 
 const title = "Stomach, Intestine & Liver Consultation and Check-Up Camp";
@@ -116,8 +118,10 @@ export default function CampBlogPostPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
-      <section className="page-hero-bg py-16 text-white md:py-24">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1fr_auto]">
+      <section className="relative overflow-hidden bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.84)_52%,rgba(8,145,178,0.38)_100%),url('/images/hospital/waitingarea-full-hero.png')] bg-cover bg-center py-16 text-white md:py-24">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.52),rgba(2,22,29,0.08)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.26))]" />
+        <div className="relative mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1fr_auto]">
           <div>
             <Link href="/blog" className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-100/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-gold" />
@@ -218,7 +222,7 @@ export default function CampBlogPostPage() {
                 </div>
               </div>
 
-              <p className="mt-6 rounded border border-coral/20 bg-red-50 p-4 font-semibold text-coral">
+              <p className="mt-6 rounded border border-coral/20 bg-coral/10 p-4 font-semibold text-coral">
                 Note: Patients will not be seen without registration.
               </p>
 
@@ -240,7 +244,7 @@ export default function CampBlogPostPage() {
                 <p><span className="font-bold text-ink">पंजीकरण शुल्क:</span> {registrationFee}/-</p>
                 <p><span className="font-bold text-ink">संपर्क:</span> {contactNumber}</p>
               </div>
-              <p className="mt-6 rounded border border-coral/20 bg-red-50 p-4 font-semibold text-coral">
+              <p className="mt-6 rounded border border-coral/20 bg-coral/10 p-4 font-semibold text-coral">
                 नोट: बिना पंजीकरण के मरीज नहीं देखे जाएंगे।
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
@@ -252,6 +256,8 @@ export default function CampBlogPostPage() {
           </article>
 
           <aside className="grid gap-5">
+            <BlogPostSearch posts={seoBlogPosts} />
+
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Camp Completed</p>
               <p className="mt-3 text-sm leading-relaxed text-muted">

@@ -131,7 +131,7 @@ export function HeroOpdTimingCard() {
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-white" />
       <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-90 [background-image:radial-gradient(circle_at_18%_12%,rgba(34,211,238,0.12),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(211,154,43,0.1),transparent_28%),radial-gradient(circle_at_70%_86%,rgba(16,185,129,0.12),transparent_34%)]" />
       <div aria-hidden="true" className="absolute inset-[1px] -z-10 rounded-[34px] border border-cyan-100/55 bg-white/75" />
-      <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-[0.32] [background-image:linear-gradient(rgba(8,145,178,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(8,145,178,0.22)_1px,transparent_1px)] [background-size:72px_72px]" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(255,255,255,0.5),transparent_38%,rgba(8,145,178,0.08))]" />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-10 rounded-[36px] p-[3px]"
@@ -156,13 +156,13 @@ export function HeroOpdTimingCard() {
             </div>
 
             <div className="relative mx-auto mt-7 grid h-56 w-56 shrink-0 place-items-center sm:h-60 sm:w-60">
-              <div aria-hidden="true" className="absolute inset-3 rounded-full border border-cyan-200/15 bg-black/30 shadow-[0_0_70px_rgba(34,211,238,0.18)]" />
-              <svg viewBox="0 0 240 240" className="relative h-full w-full drop-shadow-[0_28px_60px_rgba(0,0,0,0.48)]" role="img" aria-label={`Analog clock showing ${status.displayTime} IST`}>
+              <div aria-hidden="true" className="absolute inset-3 rounded-full border border-cyan-200/15 bg-ink/30 shadow-[0_0_70px_rgba(34,211,238,0.18)]" />
+              <svg viewBox="0 0 240 240" className="relative h-full w-full drop-shadow-[0_28px_60px_rgba(8,64,84,0.44)]" role="img" aria-label={`Analog clock showing ${status.displayTime} IST`}>
                 <defs>
                   <radialGradient id="opdClockFace" cx="42%" cy="34%" r="78%">
-                    <stop stopColor="#18262a" />
-                    <stop offset="0.46" stopColor="#081316" />
-                    <stop offset="1" stopColor="#000000" />
+                    <stop stopColor="#164e63" />
+                    <stop offset="0.46" stopColor="#12313b" />
+                    <stop offset="1" stopColor="#082f3a" />
                   </radialGradient>
                 </defs>
                 <circle cx="120" cy="120" r="112" fill="url(#opdClockFace)" />
@@ -275,11 +275,11 @@ export function HeroOpdTimingCard() {
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),transparent)]" />
           <div className="flex items-center justify-between gap-4">
             <p className="rounded-full border border-cyan-100/80 bg-white/65 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_28px_rgba(8,64,84,0.08)] backdrop-blur-xl">OPD Consultation</p>
-            <span className={`h-4 w-4 rounded-full ring-4 ring-white/80 ${open ? "bg-emerald-500 shadow-[0_0_24px_rgba(16,185,129,0.9)]" : "bg-gold shadow-[0_0_22px_rgba(211,154,43,0.85)]"}`} />
+            <span className={`h-4 w-4 rounded-full ring-4 ring-white/80 ${open ? "bg-teal shadow-[0_0_24px_rgba(5,150,105,0.78)]" : "bg-gold shadow-[0_0_22px_rgba(211,154,43,0.85)]"}`} />
           </div>
           <div className="relative mt-5 overflow-hidden rounded-[28px] border border-cyan-100/30 bg-[linear-gradient(135deg,rgba(8,47,73,0.9),rgba(8,84,98,0.78)_52%,rgba(4,120,87,0.62))] p-5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_22px_55px_rgba(8,64,84,0.2)] backdrop-blur-2xl">
             <div aria-hidden="true" className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-cyan-200/25 blur-2xl" />
-            <div aria-hidden="true" className="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(255,255,255,0.72)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.72)_1px,transparent_1px)] [background-size:46px_46px]" />
+            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),transparent_42%,rgba(255,255,255,0.08))]" />
             <p className="relative text-[11px] font-black uppercase tracking-[0.18em] text-cyan-100/70">Morning OPD</p>
             <p className="mt-2 text-4xl font-black leading-none text-white sm:text-5xl">11 AM - 2 PM</p>
             <div className="my-5 h-px bg-gradient-to-r from-gold via-cyan-200/70 to-transparent" />
@@ -296,7 +296,7 @@ export function HeroOpdTimingCard() {
             </div>
             <div className={glassRowClass}>
               <span className="text-sm font-bold text-muted">Current OPD status</span>
-              <span className={`font-black ${open ? "text-emerald-600" : "text-gold"}`}>{open ? "Open" : "Closed"}</span>
+              <span className={`font-black ${open ? "text-teal" : "text-gold"}`}>{open ? "Open" : "Closed"}</span>
             </div>
           </div>
         </div>
@@ -328,10 +328,10 @@ export function HeroOpdTimingCard() {
               <p className="mt-1 font-black text-ink">Hospital Support</p>
             </div>
           </div>
-          <div className="mt-4 rounded-[20px] border border-red-100/90 bg-[linear-gradient(145deg,rgba(255,250,250,0.9),rgba(255,255,255,0.68))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_38px_rgba(127,29,29,0.07)] backdrop-blur-xl">
+          <div className="mt-4 rounded-[20px] border border-coral/20 bg-[linear-gradient(145deg,rgba(255,250,250,0.9),rgba(255,255,255,0.68))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_38px_rgba(127,29,29,0.07)] backdrop-blur-xl">
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-600">
+                <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-coral">
                   <AlertTriangle size={14} /> Warning signs
                 </p>
                 <p className="mt-1 overflow-hidden text-sm font-bold leading-5 text-muted [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">

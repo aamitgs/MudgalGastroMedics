@@ -93,7 +93,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
       <AnimatePresence>
         {active ? (
         <motion.div
-          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4 sm:p-6"
+          className="fixed inset-0 z-50 grid place-items-center bg-ink/90 p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={`${active.title} image preview`}
@@ -112,7 +112,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             animate={reducedMotion ? undefined : { scale: 1 }}
             exit={reducedMotion ? undefined : { scale: 0.98 }}
           >
-            <div className="relative h-[min(76vh,800px)] w-full overflow-hidden rounded bg-black">
+            <div className="relative h-[min(76vh,800px)] w-full overflow-hidden rounded bg-ink">
               <Image src={active.src} alt={`${active.title} at Mudgal Gastromedics Hospital`} fill sizes="100vw" className="object-contain" />
             </div>
             <p className="mt-3 text-center font-extrabold text-white">{active.title}</p>

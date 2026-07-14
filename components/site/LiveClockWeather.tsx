@@ -129,7 +129,7 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launch
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-semibold text-muted" aria-label="Current time, OPD status and weather in Agra">
           <span className="tabular-nums whitespace-nowrap">{istDayFormat.format(now)} {istTimeFormat.format(now)} IST</span>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${open ? "bg-emerald-400" : "bg-red-400"}`} />
+            <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${open ? "bg-teal" : "bg-coral"}`} />
             {open ? "OPD open now" : "OPD closed"}
             <span className="text-muted/80">· 11 AM-2 PM & 5 PM-6 PM, Mon-Sat. Sunday closed</span>
           </span>
@@ -147,7 +147,7 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launch
 
   return (
     <span className="inline-flex items-center gap-1.5" aria-label="Current time and weather in Agra">
-      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${open ? "bg-emerald-400" : "bg-red-400"}`} />
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${open ? "bg-teal" : "bg-coral"}`} />
       <span className="sr-only">{open ? "Open now." : "Currently closed."}</span>
       <span className="tabular-nums">{istTimeFormat.format(now)} IST</span>
       {weather && WeatherIcon ? (

@@ -10,7 +10,7 @@ type ButtonLinkProps = {
 
 const variants = {
   primary: "border-cyan-300/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] hover:shadow-[0_24px_58px_rgba(8,145,178,0.42),inset_0_1px_0_rgba(255,255,255,0.28)]",
-  secondary: "border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] text-white shadow-[0_18px_42px_rgba(5,150,105,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_24px_58px_rgba(5,150,105,0.38),inset_0_1px_0_rgba(255,255,255,0.26)]",
+  secondary: "border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] text-white shadow-[0_18px_42px_rgba(5,150,105,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_24px_58px_rgba(5,150,105,0.34),inset_0_1px_0_rgba(255,255,255,0.26)]",
   ghost: "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-[0_18px_42px_rgba(8,64,84,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] hover:border-cyan-200 hover:text-brand hover:shadow-[0_24px_58px_rgba(8,64,84,0.2),inset_0_1px_0_rgba(255,255,255,0.95)]"
 };
 

@@ -27,7 +27,7 @@ export function PatientFeedbackWidget({ visits }: { visits: PatientVisitSummary[
 
   if (submitted) {
     return (
-      <div className="rounded border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+      <div className="rounded border border-teal/20 bg-soft p-4 text-sm font-semibold text-teal-dark">
         Thanks for sharing your feedback!
       </div>
     );
@@ -71,7 +71,7 @@ export function PatientFeedbackWidget({ visits }: { visits: PatientVisitSummary[
             aria-label={`${value} star${value > 1 ? "s" : ""}`}
             className="p-0.5"
           >
-            <Star size={22} className={value <= (hoverRating || rating) ? "fill-amber-400 text-amber-400" : "text-line"} />
+            <Star size={22} className={value <= (hoverRating || rating) ? "fill-gold text-gold" : "text-line"} />
           </button>
         ))}
       </div>

@@ -31,7 +31,7 @@ export default function DisclaimerPage() {
         <article className="rounded border border-line bg-white p-6 shadow-soft md:p-8">
           <div className="grid gap-4">
             {disclaimerParagraphs.map((paragraph, index) => (
-              <p key={paragraph} className={`leading-relaxed ${index === 6 ? "rounded border border-coral/20 bg-red-50 p-4 font-semibold text-coral" : "text-muted"}`}>
+              <p key={paragraph} className={`leading-relaxed ${index === 6 ? "rounded border border-coral/20 bg-coral/10 p-4 font-semibold text-coral" : "text-muted"}`}>
                 {paragraph}
               </p>
             ))}

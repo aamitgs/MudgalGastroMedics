@@ -87,7 +87,7 @@ export function ContactForm() {
               href={whatsappLink}
               target="_blank"
               rel="noreferrer"
-              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 text-sm font-bold text-white transition hover:-translate-y-0.5"
+              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-4 text-sm font-bold text-white transition hover:-translate-y-0.5"
             >
               <MessageCircle size={16} /> Send on WhatsApp instead
             </a>

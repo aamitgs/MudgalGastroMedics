@@ -49,7 +49,7 @@ const socialLinks = {
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-7 pt-14 text-sm text-[#969696] md:px-8">
+    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-28 pt-14 text-sm text-[#969696] md:px-8 md:pb-32">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
@@ -154,9 +154,9 @@ function ContactLine({ icon, label, value, href }: { icon: React.ReactNode; labe
 
 function SocialPill({ href, label, icon, tone }: { href: string; label: string; icon?: React.ReactNode; tone: "whatsapp" | "facebook" | "youtube" }) {
   const tones = {
-    whatsapp: "border-emerald-300/30 bg-[linear-gradient(135deg,rgba(16,185,129,0.2),rgba(255,255,255,0.04))] text-emerald-50 hover:border-emerald-300/70 hover:bg-[linear-gradient(135deg,rgba(16,185,129,0.32),rgba(255,255,255,0.08))] [&_span]:bg-emerald-400/18 [&_span]:text-emerald-100",
-    facebook: "border-sky-300/28 bg-[linear-gradient(135deg,rgba(37,99,235,0.2),rgba(255,255,255,0.04))] text-sky-50 hover:border-sky-300/70 hover:bg-[linear-gradient(135deg,rgba(37,99,235,0.3),rgba(255,255,255,0.08))] [&_span]:bg-sky-400/18 [&_span]:text-sky-100",
-    youtube: "border-red-300/28 bg-[linear-gradient(135deg,rgba(220,38,38,0.18),rgba(255,255,255,0.04))] text-red-50 hover:border-red-300/70 hover:bg-[linear-gradient(135deg,rgba(220,38,38,0.3),rgba(255,255,255,0.08))] [&_span]:bg-red-400/18 [&_span]:text-red-100"
+    whatsapp: "border-teal/30 bg-[linear-gradient(135deg,rgba(5,150,105,0.22),rgba(255,255,255,0.04))] text-cyan-50 hover:border-teal/70 hover:bg-[linear-gradient(135deg,rgba(5,150,105,0.34),rgba(255,255,255,0.08))] [&_span]:bg-teal/18 [&_span]:text-cyan-100",
+    facebook: "border-brand/28 bg-[linear-gradient(135deg,rgba(8,145,178,0.22),rgba(255,255,255,0.04))] text-cyan-50 hover:border-brand/70 hover:bg-[linear-gradient(135deg,rgba(8,145,178,0.34),rgba(255,255,255,0.08))] [&_span]:bg-brand/18 [&_span]:text-cyan-100",
+    youtube: "border-coral/28 bg-[linear-gradient(135deg,rgba(220,38,38,0.18),rgba(255,255,255,0.04))] text-cyan-50 hover:border-coral/70 hover:bg-[linear-gradient(135deg,rgba(220,38,38,0.3),rgba(255,255,255,0.08))] [&_span]:bg-coral/18 [&_span]:text-cyan-100"
   };
 
   return (

@@ -46,8 +46,8 @@ export function Stats() {
         <div aria-hidden="true" className="absolute inset-0 bg-white/42" />
         <div aria-hidden="true" className="absolute -left-24 -top-28 h-72 w-72 rounded-full bg-cyan-200/35 blur-3xl" />
         <div aria-hidden="true" className="absolute left-[35%] -top-28 h-72 w-72 rounded-full bg-gold/18 blur-3xl" />
-        <div aria-hidden="true" className="absolute -right-24 -bottom-32 h-80 w-80 rounded-full bg-emerald-200/35 blur-3xl" />
-        <div aria-hidden="true" className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(rgba(8,145,178,0.28)_1px,transparent_1px),linear-gradient(90deg,rgba(8,145,178,0.28)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div aria-hidden="true" className="absolute -right-24 -bottom-32 h-80 w-80 rounded-full bg-teal/20 blur-3xl" />
+        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42),transparent_38%,rgba(8,145,178,0.08))]" />
 
       <div className="relative grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {stats.map(({ target, label, detail, icon: Icon }) => (

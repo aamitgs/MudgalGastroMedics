@@ -248,7 +248,7 @@ export function PatientHealthDashboard({
           </a>
           <a
             href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent("Hello, I would like to start a teleconsultation.")}`}
-            className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-4 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-500/20 dark:text-emerald-300"
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-teal/40 bg-teal/10 px-4 text-sm font-semibold text-teal-dark transition hover:bg-teal/20 dark:text-teal"
           >
             <Video size={16} /> Start Teleconsultation
           </a>

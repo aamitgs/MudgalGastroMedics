@@ -28,11 +28,11 @@ const variants: Record<ActionButtonVariant, string> = {
   primary:
     "border border-cyan-300 dark:border-cyan-800/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_18px_42px_rgba(8,145,178,0.28)] hover:-translate-y-0.5",
   success:
-    "border border-emerald-300 dark:border-emerald-800/20 bg-[linear-gradient(135deg,#10b981,#047857)] text-white shadow-[0_18px_42px_rgba(16,185,129,0.24)] hover:-translate-y-0.5",
+    "border border-teal/30 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] text-white shadow-[0_18px_42px_rgba(5,150,105,0.24)] hover:-translate-y-0.5",
   warning:
-    "border border-amber-300 dark:border-amber-800/40 bg-amber-500 text-white hover:bg-amber-600 focus-visible:ring-amber-500/25",
+    "border border-gold/35 bg-gold text-white hover:bg-gold/90 focus-visible:ring-gold/25",
   secondary: "border border-line bg-soft text-ink hover:border-brand hover:text-brand",
-  danger: "border border-red-600 bg-red-600 text-white hover:bg-red-700",
+  danger: "border border-coral bg-coral text-white hover:bg-coral/90",
   ghost: "text-muted hover:bg-soft hover:text-brand",
   outline: "border border-line text-muted hover:border-brand hover:text-brand"
 };

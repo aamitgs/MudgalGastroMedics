@@ -57,7 +57,14 @@
       "Bash(node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('@playwright/test OK'\\)\\).catch\\(e=>console.log\\('@playwright/test FAIL', e.message\\)\\)\")",
       "Bash(node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('OK'\\)\\).catch\\(e=>console.log\\('FAIL', e.message\\)\\)\")",
       "Bash(NODE_PATH=/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules node -e \"import\\('@playwright/test'\\).then\\(\\(\\)=>console.log\\('OK via NODE_PATH'\\)\\).catch\\(e=>console.log\\('FAIL', e.message\\)\\)\" --experimental-modules)",
-      "Bash(NODE_PATH=/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-hindi.mjs)"
+      "Bash(NODE_PATH=/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-hindi.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/doctor --max-time 5)",
+      "Bash(node /private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/doctor-sidebar-test.mjs)",
+      "Bash(node \"/private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-12-routes.mjs\")",
+      "Bash(NODE_PATH=\"/Users/amitsharma/Downloads/Developer/MudgalGastroMedics/node_modules\" node \"/private/tmp/claude-501/-Users-amitsharma-Downloads-Developer-MudgalGastroMedics/1c954776-6c97-468c-aeb7-f2dd6ee5cc2a/scratchpad/verify-12-routes.mjs\")",
+      "Bash(git -C /Users/amitsharma/Downloads/Developer/MudgalGastroMedics status --short)",
+      "Bash(chromium-cli --help)",
+      "Bash(curl -sf http://localhost:3000)"
     ]
   }
 }

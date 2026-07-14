@@ -21,7 +21,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
-      <AlertTriangle size={40} className="text-red-600" aria-hidden="true" />
+      <AlertTriangle size={40} className="text-coral" aria-hidden="true" />
       <h1 className="text-xl font-bold text-ink">Something went wrong</h1>
       <p className="max-w-md text-sm text-muted">This page hit an unexpected error. Your data is safe — try again, or go back and retry the action.</p>
       <button

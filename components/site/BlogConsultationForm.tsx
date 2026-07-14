@@ -133,10 +133,10 @@ export function BlogConsultationForm({
       </button>
       {message ? (
         <div className="mt-4 rounded-lg border border-white/14 bg-white/8 p-3">
-          <p className="flex items-start gap-2 text-sm font-semibold text-cyan-50/88"><CheckCircle2 className="mt-0.5 shrink-0 text-emerald-300" size={17} /> {message}</p>
+          <p className="flex items-start gap-2 text-sm font-semibold text-cyan-50/88"><CheckCircle2 className="mt-0.5 shrink-0 text-teal" size={17} /> {message}</p>
           {requestId ? <p className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Request ID: {requestId}</p> : null}
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[linear-gradient(135deg,#10b981,#047857)] px-3 text-sm font-black text-white">
+            <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-3 text-sm font-black text-white">
               <MessageCircle size={16} /> WhatsApp
             </a>
             <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-white px-3 text-sm font-black text-ink">
