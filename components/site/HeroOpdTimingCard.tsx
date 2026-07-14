@@ -12,6 +12,7 @@ const opdWindows = [
   { start: 11 * 60, end: 14 * 60 },
   { start: 17 * 60, end: 18 * 60 }
 ];
+const initialClockSnapshot = new Date("2026-01-01T09:00:00.000Z");
 type WeatherInfo = {
   temperature: number;
   humidity: number;
@@ -82,7 +83,7 @@ function getIndiaStatus(date: Date) {
 }
 
 export function HeroOpdTimingCard() {
-  const [status, setStatus] = useState(() => getIndiaStatus(new Date()));
+  const [status, setStatus] = useState(() => getIndiaStatus(initialClockSnapshot));
   const [weather, setWeather] = useState<WeatherInfo | null>(null);
   const [weatherError, setWeatherError] = useState(false);
 

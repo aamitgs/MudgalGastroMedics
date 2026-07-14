@@ -49,7 +49,7 @@ const socialLinks = {
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-28 pt-14 text-sm text-[#969696] md:px-8 md:pb-32">
+    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-16 pt-14 text-sm text-[#969696] md:px-8 md:pb-20">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
