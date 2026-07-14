@@ -27,7 +27,10 @@ export function DoctorLogin() {
       return;
     }
 
-    window.location.reload();
+    // Now only rendered inside WorkspaceLauncher's Doctor Portal tile, not on
+    // /doctor itself (Track 4.13) — a real navigation there, not reload(), so
+    // it lands on the real workspace instead of reloading the launcher.
+    window.location.assign("/doctor");
   }
 
   return (

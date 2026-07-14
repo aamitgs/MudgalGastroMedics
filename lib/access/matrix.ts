@@ -79,13 +79,13 @@ export const roleMeta: Record<AccessRole, RoleMeta> = {
   "super-admin": {
     label: "Super Admin",
     description: "Full system access including user management, settings and audit logs.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   admin: {
     label: "Admin",
     description: "Day-to-day operational control across modules; cannot change system settings or Super Admin assignments.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   "main-doctor": {
@@ -103,49 +103,49 @@ export const roleMeta: Record<AccessRole, RoleMeta> = {
   nurse: {
     label: "Nurse",
     description: "Vitals entry, HDU monitoring and escalation, medication logging, bed status updates.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   reception: {
     label: "Reception / Front Desk",
     description: "Registration, appointment booking, bed assignment requests, queues and basic billing.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   pharmacist: {
     label: "Pharmacist",
     description: "Pharmacy inventory, prescription fulfilment, stock and reorder alerts.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   "lab-technician": {
     label: "Lab Technician",
     description: "Lab order queue, sample tracking, result upload.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   "billing-accounts": {
     label: "Billing / Accounts",
     description: "Invoicing, payments, insurance verification and claims, financial reports.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   hr: {
     label: "HR",
     description: "Staff records, attendance, leave, payroll. No patient data access.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   pro: {
     label: "PRO (Public Relations)",
     description: "Patient/family liaison and referrals. Reads contact/admission info; no clinical editing.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   dietitian: {
     label: "Dietitian",
     description: "Reviews patient nutrition/medical history and manages diet plans for OPD and admitted patients.",
-    landing: "/admin",
+    landing: "/mudgalgastromedics-os",
     staffLogin: true
   },
   patient: {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { DoctorLogin } from "@/components/chrome/DoctorLogin";
+import { redirect } from "next/navigation";
 import { DoctorPortalWorkspace } from "@/components/chrome/DoctorPortalWorkspace";
 import { accessContextFromCookieStore, canOpenDoctorWorkspace } from "@/lib/access/page-auth";
 
@@ -14,6 +14,12 @@ export const metadata: Metadata = {
 export default async function DoctorPortalPage() {
   const cookieStore = await cookies();
   const isAuthenticated = canOpenDoctorWorkspace(await accessContextFromCookieStore(cookieStore));
+
+  // Doctor login now lives on the Doctor Portal tile in WorkspaceLauncher
+  // (Track 4.13) instead of a standalone form here — anyone who can't open
+  // this workspace (never signed in, or signed in with a non-doctor role)
+  // goes to the one real entry point instead.
+  if (!isAuthenticated) redirect("/mudgalgastromedics-os");
 
   return (
     <main>
@@ -35,7 +41,7 @@ export default async function DoctorPortalPage() {
           used by this page's own hero and StaffChrome's top bar. */}
       <section className="clinical-grid bg-soft/75 pb-16 pt-10 md:pb-24 md:pt-14">
         <div className="mx-auto w-[min(1560px,calc(100%-32px))]">
-          {isAuthenticated ? <DoctorPortalWorkspace /> : <DoctorLogin />}
+          <DoctorPortalWorkspace />
         </div>
       </section>
     </main>

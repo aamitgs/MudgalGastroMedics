@@ -5,6 +5,7 @@ import { BadgeIndianRupee, FlaskConical, HeartPulse, Pill, Settings, Stethoscope
 import { useEffect, useState } from "react";
 import { AccessLogin } from "@/components/chrome/AccessLogin";
 import { AdminLogin } from "@/components/chrome/AdminLogin";
+import { DoctorLogin } from "@/components/chrome/DoctorLogin";
 import { LiveClockWeather } from "@/components/site/LiveClockWeather";
 import type { AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
@@ -20,14 +21,18 @@ type WorkspaceTile = {
   destination: string;
 };
 
+// Destinations are the real Hospital OS routes (Track 4.13) — these used to
+// be /admin#module-x anchors from before that migration; /admin is now just
+// a redirect, so those stale hrefs still worked but only via two extra hops
+// through HospitalOsShell's legacy-hash fallback.
 const tiles: WorkspaceTile[] = [
   { key: "doctor", label: "Doctor Portal", hint: "OPD queue & consultations", icon: Stethoscope, role: "", destination: "/doctor" },
-  { key: "reception", label: "Reception Desk", hint: "Appointments & registration", icon: UsersRound, role: "reception", destination: "/admin#module-appointments" },
-  { key: "pharmacy", label: "Pharmacy", hint: "Dispensing & stock", icon: Pill, role: "pharmacist", destination: "/admin#module-pharmacy" },
-  { key: "laboratory", label: "Laboratory", hint: "Orders & results", icon: FlaskConical, role: "lab-technician", destination: "/admin#module-lab" },
-  { key: "nursing", label: "Nursing Station", hint: "Beds, vitals & HDU", icon: HeartPulse, role: "nurse", destination: "/admin#module-ipd" },
-  { key: "billing", label: "Billing", hint: "Receipts & claims", icon: BadgeIndianRupee, role: "billing-accounts", destination: "/admin#module-billing" },
-  { key: "administration", label: "Administration", hint: "Operations & access control", icon: Settings, role: "admin", destination: "/admin" }
+  { key: "reception", label: "Reception Desk", hint: "Appointments & registration", icon: UsersRound, role: "reception", destination: "/mudgalgastromedics-os/appointments" },
+  { key: "pharmacy", label: "Pharmacy", hint: "Dispensing & stock", icon: Pill, role: "pharmacist", destination: "/mudgalgastromedics-os/pharmacy" },
+  { key: "laboratory", label: "Laboratory", hint: "Orders & results", icon: FlaskConical, role: "lab-technician", destination: "/mudgalgastromedics-os/lab" },
+  { key: "nursing", label: "Nursing Station", hint: "Beds, vitals & HDU", icon: HeartPulse, role: "nurse", destination: "/mudgalgastromedics-os/ipd" },
+  { key: "billing", label: "Billing", hint: "Receipts & claims", icon: BadgeIndianRupee, role: "billing-accounts", destination: "/mudgalgastromedics-os/billing" },
+  { key: "administration", label: "Administration", hint: "Operations & access control", icon: Settings, role: "admin", destination: "/mudgalgastromedics-os" }
 ];
 
 const lastWorkspaceKey = "mgmLastWorkspace";
@@ -40,6 +45,7 @@ export function WorkspaceLauncher() {
   const [lastTile, setLastTile] = useState<WorkspaceTile | null>(null);
   const [system, setSystem] = useState<SystemStatus | null>(null);
   const [showLegacy, setShowLegacy] = useState(false);
+  const [showDoctorPasscode, setShowDoctorPasscode] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +93,10 @@ export function WorkspaceLauncher() {
       <div className="mx-auto w-full max-w-md">
         <button
           type="button"
-          onClick={() => setChosen(null)}
+          onClick={() => {
+            setChosen(null);
+            setShowDoctorPasscode(false);
+          }}
           className="mb-4 text-sm font-semibold text-brand transition hover:underline"
         >
           ← All workspaces
@@ -97,6 +106,22 @@ export function WorkspaceLauncher() {
           landingOverride={chosen.destination}
           workspaceLabel={chosen.label}
         />
+        {chosen.key === "doctor" ? (
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setShowDoctorPasscode((value) => !value)}
+              className="text-xs font-semibold text-muted underline-offset-2 transition hover:text-brand hover:underline"
+            >
+              Trouble signing in?
+            </button>
+            {showDoctorPasscode ? (
+              <div className="mt-4">
+                <DoctorLogin />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     );
   }
