@@ -553,9 +553,13 @@ export function DoctorPortalWorkspace() {
     notify.saved("Saved", { id: "doctor-autosave" });
   }
 
-  async function createWalkInConsultation(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  // Takes the form element itself (captured synchronously at submit time),
+  // never the synthetic event — React nulls event.currentTarget once the
+  // handler's synchronous phase ends, which this function outlives via
+  // multiple awaits, and the retry closure re-invokes this same function
+  // much later still.
+  async function submitWalkIn(form: HTMLFormElement) {
+    const formData = new FormData(form);
     const patientName = String(formData.get("patientName") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
     if (!patientName || !phone) {
@@ -567,16 +571,17 @@ export function DoctorPortalWorkspace() {
       .split(",")
       .map((symptom) => symptom.trim())
       .filter(Boolean);
+    const priority = formData.get("priority");
     let response: Response;
     try {
       response = await fetch("/api/opd", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority: formData.get("priority") })
+        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority })
       });
     } catch {
       setCreatingConsultation(false);
-      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void createWalkInConsultation(event));
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitWalkIn(form));
       return;
     }
     const data = (await response.json().catch(() => ({}))) as OpdResponse;
@@ -588,8 +593,13 @@ export function DoctorPortalWorkspace() {
     setVisits((items) => [data.visit as OpdVisit, ...items]);
     setSelectedVisitId(data.visit.id);
     setShowNewConsultation(false);
-    event.currentTarget.reset();
+    form.reset();
     notify.success(`Consultation started for ${data.visit.patientName}.`);
+  }
+
+  function createWalkInConsultation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void submitWalkIn(event.currentTarget);
   }
 
   useEffect(() => {
