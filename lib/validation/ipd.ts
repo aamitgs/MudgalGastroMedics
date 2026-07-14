@@ -1,7 +1,18 @@
 import { z } from "zod";
-import { bedStatuses, ipdAdmissionStatuses, medicationAdministrationStatuses } from "@/lib/ipd-types";
+import { bedStatuses, hospitalWards, ipdAdmissionStatuses, medicationAdministrationStatuses } from "@/lib/ipd-types";
 
 const optionalText = z.string().trim().optional();
+
+export const ipdBedCreateSchema = z.object({
+  ward: z.enum(hospitalWards as [string, ...string[]], { error: "Invalid ward." }),
+  label: z.string().trim().min(1, "Bed label is required."),
+  dailyRate: z.coerce.number().min(0, "Daily rate must be zero or more."),
+  notes: optionalText
+});
+
+export const ipdBedDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Bed id is required.")
+});
 
 export const ipdAdmissionCreateSchema = z.object({
   visitId: z.string().trim().min(1, "OPD visit is required."),

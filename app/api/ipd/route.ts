@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import type { BedStatus, IpdAdmissionStatus } from "@/lib/ipd-types";
+import type { BedStatus, HospitalWard, IpdAdmissionStatus } from "@/lib/ipd-types";
 import {
+  createBed,
   createIpdAdmission,
   createMedicationOrder,
+  deleteBed,
   discontinueMedicationOrder,
   getOccupancyStats,
   listBeds,
@@ -25,6 +27,8 @@ import { firstZodIssueMessage } from "@/lib/validation/http";
 import {
   ipdAdmissionCreateSchema,
   ipdAdmissionUpdateSchema,
+  ipdBedCreateSchema,
+  ipdBedDeleteSchema,
   ipdBedUpdateSchema,
   ipdEscalateSchema,
   ipdMedicationAdministrationSchema,
@@ -52,10 +56,37 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({}));
+
+  if (body.type === "bed") {
+    const parsed = ipdBedCreateSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+    // Adding physical bed inventory is a facilities decision, not a routine
+    // ward-status update — gated on beds:create (super-admin/admin/reception
+    // hold it; clinical roles hold only view/edit on this resource).
+    const auth = await authorize(request, "beds", "create");
+    if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+    const result = await createBed(parsed.data as { ward: HospitalWard; label: string; dailyRate: number; notes?: string });
+    if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+    await recordAuditEvent({
+      actorRole: auth.context.activeRole,
+      actorId: auth.context.userId,
+      action: "ipd.bed.created",
+      entityType: "ipd_bed",
+      entityId: result.bed.id,
+      after: result.bed,
+      device: auditRequestMetadata(request)
+    });
+
+    return NextResponse.json({ ok: true, bed: result.bed, beds: (await listBeds()) });
+  }
+
   const auth = await authorize(request, "beds", "edit");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const parsed = ipdAdmissionCreateSchema.safeParse(await request.json().catch(() => ({})));
+  const parsed = ipdAdmissionCreateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
@@ -75,6 +106,33 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ ok: true, admission: result.admission, beds: (await listBeds()) });
+}
+
+export async function DELETE(request: Request) {
+  const parsed = ipdBedDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
+
+  // Retiring bed inventory is a step up from beds:create — restricted to
+  // beds:delete, which only super-admin holds by default.
+  const auth = await authorize(request, "beds", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const before = structuredClone((await listBeds()).find((item) => item.id === parsed.data.id) ?? null);
+  const result = await deleteBed(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "ipd.bed.removed",
+    entityType: "ipd_bed",
+    entityId: result.bed.id,
+    severity: "warning",
+    before,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true, beds: (await listBeds()) });
 }
 
 export async function PATCH(request: Request) {

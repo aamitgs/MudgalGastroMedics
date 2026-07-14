@@ -5,6 +5,7 @@ import type {
   BedStatus,
   BedTransfer,
   HospitalBed,
+  HospitalWard,
   IpdAdmission,
   IpdAdmissionStatus,
   MedicationAdministration,
@@ -320,6 +321,40 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
   doc.admissions.unshift(admission);
   await store.save(doc);
   return { admission };
+}
+
+export async function createBed(input: { ward: HospitalWard; label: string; dailyRate: number; notes?: string }) {
+  const doc = await store.load();
+  const label = normalizeText(input.label);
+  if (!label) return { error: "Bed label is required." };
+
+  const bed: HospitalBed = {
+    id: `BED-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    ward: input.ward,
+    label,
+    status: "Vacant",
+    dailyRate: normalizeNumber(input.dailyRate),
+    notes: normalizeText(input.notes) || undefined
+  };
+  doc.beds.push(bed);
+  await store.save(doc);
+  return { bed };
+}
+
+export async function deleteBed(id: string) {
+  const doc = await store.load();
+  const bed = doc.beds.find((item) => item.id === id);
+  if (!bed) return { error: "Bed not found." };
+
+  // Ground-truth check against admissions, not bed.status — a bed's status
+  // field could in principle drift from whether a patient is actually in it;
+  // this is the one check that must never be wrong.
+  const hasActiveAdmission = doc.admissions.some((admission) => admission.bedId === id && admission.status === "Admitted");
+  if (hasActiveAdmission) return { error: "Cannot remove a bed with an active admission. Discharge or transfer the patient first." };
+
+  doc.beds = doc.beds.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { bed };
 }
 
 export async function updateBed(input: { id: string; status?: BedStatus; notes?: string }) {

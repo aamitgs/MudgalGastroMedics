@@ -4,7 +4,7 @@ import { BedDouble, Edit3, FileDown } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedWardMap";
-import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
+import type { BedStatus, BedTransfer, HospitalBed, HospitalWard, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
 import { computeHduEscalation, ipdAdmissionStatuses } from "@/lib/ipd-types";
 import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admission-query";
 import type { OpdVisit } from "@/lib/opd-types";
@@ -188,6 +188,48 @@ export function AdminIpdBeds() {
     const data = await patchIpd({ id: admissionId, markedForDischarge }, () => void handleMarkForDischarge(admissionId, markedForDischarge));
     if (!data) return;
     if (data.admission) setAdmissions((items) => items.map((item) => (item.id === data.admission!.id ? data.admission! : item)));
+  }
+
+  async function handleAddBed(input: { ward: HospitalWard; label: string; dailyRate: number; notes?: string }) {
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "bed", ...input })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void handleAddBed(input));
+      return;
+    }
+    const data = (await response.json().catch(() => ({}))) as IpdResponse;
+    if (!response.ok || !data.ok || !data.bed) {
+      notify.error(data.error || "Unable to add bed.");
+      return;
+    }
+    setBeds((current) => data.beds ?? current);
+    notify.success(`${data.bed.label} added`);
+  }
+
+  async function handleRemoveBed(bedId: string) {
+    let response: Response;
+    try {
+      response = await fetch("/api/ipd", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: bedId })
+      });
+    } catch {
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void handleRemoveBed(bedId));
+      return;
+    }
+    const data = (await response.json().catch(() => ({}))) as IpdResponse;
+    if (!response.ok || !data.ok) {
+      notify.error(data.error || "Unable to remove bed.");
+      return;
+    }
+    setBeds((current) => data.beds ?? current);
+    notify.success("Bed removed");
   }
 
   async function createAdmission(event: FormEvent<HTMLFormElement>) {
@@ -419,6 +461,8 @@ export function AdminIpdBeds() {
           onEscalate={handleEscalate}
           onBedStatus={handleBedStatus}
           onMarkForDischarge={handleMarkForDischarge}
+          onAddBed={handleAddBed}
+          onRemoveBed={handleRemoveBed}
         />
       </div>
 

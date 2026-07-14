@@ -1,16 +1,18 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { AlertTriangle, Bed as BedIcon, Clock, HeartPulse, History, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Bed as BedIcon, Clock, HeartPulse, History, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MetricCard } from "@/components/design-system/MetricCard";
 import { EmptyState } from "@/components/design-system/EmptyState";
-import { computeHduEscalation, wardMeta } from "@/lib/ipd-types";
-import type { BedStatus, BedTransfer, HospitalBed, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import { computeHduEscalation, hospitalWards, wardMeta } from "@/lib/ipd-types";
+import type { BedStatus, BedTransfer, HospitalBed, HospitalWard, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
+
+type AddBedInput = { ward: HospitalWard; label: string; dailyRate: number; notes?: string };
 
 export type OccupancyStats = {
   totalBeds: number;
@@ -43,6 +45,8 @@ type BedWardMapProps = {
   onEscalate: (admissionId: string, escalated: boolean, reason?: string) => Promise<void>;
   onBedStatus: (bedId: string, status: BedStatus) => Promise<void>;
   onMarkForDischarge: (admissionId: string, marked: boolean) => Promise<void>;
+  onAddBed?: (input: AddBedInput) => Promise<void>;
+  onRemoveBed?: (bedId: string) => Promise<void>;
 };
 
 const statusTone: Record<BedStatus, string> = {
@@ -80,12 +84,15 @@ export function BedWardMap({
   onLogVitals,
   onEscalate,
   onBedStatus,
-  onMarkForDischarge
+  onMarkForDischarge,
+  onAddBed,
+  onRemoveBed
 }: BedWardMapProps) {
   const [selectedBedId, setSelectedBedId] = useState<string | null>(null);
   const [transferTarget, setTransferTarget] = useState("");
   const [transferReason, setTransferReason] = useState("");
   const [vitalsAdmissionId, setVitalsAdmissionId] = useState<string | null>(null);
+  const [addBedOpen, setAddBedOpen] = useState(false);
 
   const admissionByBedId = useMemo(() => {
     const map = new Map<string, IpdAdmission>();
@@ -175,14 +182,41 @@ export function BedWardMap({
     setVitalsAdmissionId(null);
   }
 
+  async function submitAddBed(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!onAddBed) return;
+    const data = new FormData(event.currentTarget);
+    await onAddBed({
+      ward: data.get("ward") as HospitalWard,
+      label: String(data.get("label") || ""),
+      dailyRate: Number(data.get("dailyRate") || 0),
+      notes: String(data.get("notes") || "") || undefined
+    });
+    setAddBedOpen(false);
+  }
+
+  async function removeSelectedBed() {
+    if (!selectedBed || !onRemoveBed) return;
+    if (!window.confirm(`Remove ${selectedBed.label} from the bed inventory? This cannot be undone.`)) return;
+    await onRemoveBed(selectedBed.id);
+    closeDialog();
+  }
+
   return (
     <div className="hospital-os-theme grid gap-5 rounded-xl border border-[var(--hos-border)] bg-[var(--hos-bg)] p-5">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hos-primary)]">Bed, Room &amp; HDU Manager</p>
-        <h2 className="mt-1 text-2xl font-semibold text-[var(--hos-text)]">Live ward map</h2>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--hos-muted-text)]">
-          Spatial view of every bed by ward. Click a bed for admission detail, transfers, discharge prep and HDU vitals.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hos-primary)]">Bed, Room &amp; HDU Manager</p>
+          <h2 className="mt-1 text-2xl font-semibold text-[var(--hos-text)]">Live ward map</h2>
+          <p className="mt-1 max-w-2xl text-sm text-[var(--hos-muted-text)]">
+            Spatial view of every bed by ward. Click a bed for admission detail, transfers, discharge prep and HDU vitals.
+          </p>
+        </div>
+        {onAddBed ? (
+          <Button type="button" size="sm" onClick={() => setAddBedOpen(true)}>
+            <Plus size={15} /> Add bed
+          </Button>
+        ) : null}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -391,6 +425,11 @@ export function BedWardMap({
                       {selectedBed.status === "Cleaning" || selectedBed.status === "Maintenance" ? (
                         <Button type="button" size="sm" variant="outline" onClick={() => onBedStatus(selectedBed.id, "Vacant")}>Mark ready</Button>
                       ) : null}
+                      {onRemoveBed ? (
+                        <Button type="button" size="sm" variant="outline" className="text-[var(--hos-danger)]" onClick={() => void removeSelectedBed()}>
+                          <Trash2 size={14} /> Remove bed
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -398,6 +437,37 @@ export function BedWardMap({
               <DialogFooter showCloseButton />
             </>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addBedOpen} onOpenChange={setAddBedOpen}>
+        <DialogContent className="hospital-os-theme border-[var(--hos-border)] bg-[var(--hos-surface)] text-[var(--hos-text)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add bed</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitAddBed} className="grid gap-3">
+            <label className="grid gap-1 text-xs font-semibold text-[var(--hos-muted-text)]">
+              Ward
+              <select name="ward" required className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]">
+                {hospitalWards.map((ward) => (
+                  <option key={ward} value={ward}>{ward}</option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-[var(--hos-muted-text)]">
+              Bed label
+              <input name="label" required placeholder="e.g. HDU 03" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-[var(--hos-muted-text)]">
+              Daily rate (Rs.)
+              <input name="dailyRate" type="number" min="0" required placeholder="e.g. 4500" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-[var(--hos-muted-text)]">
+              Notes (optional)
+              <input name="notes" placeholder="Optional" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />
+            </label>
+            <Button type="submit" size="sm">Create bed</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
