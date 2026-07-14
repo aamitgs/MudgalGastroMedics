@@ -57,7 +57,7 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
     label: "Critical labs unacked",
     value: n(data.risks.criticalLabsUnacked),
     tone: criticalTone(data.risks.criticalLabsUnacked),
-    href: "#module-lab"
+    href: "/mudgalgastromedics-os/lab"
   };
 
   switch (role) {
@@ -66,21 +66,21 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
       return {
         heading: "Hospital today",
         tiles: [
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-opd" },
-          { label: "Revenue today", value: `Rs ${today.revenue.toLocaleString("en-IN")}`, tone: "success", href: "#module-billing" },
-          { label: "Bed occupancy", value: `${data.executive.bedOccupancy}%`, tone: "primary", href: "#module-ipd" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/opd" },
+          { label: "Revenue today", value: `Rs ${today.revenue.toLocaleString("en-IN")}`, tone: "success", href: "/mudgalgastromedics-os/billing" },
+          { label: "Bed occupancy", value: `${data.executive.bedOccupancy}%`, tone: "primary", href: "/mudgalgastromedics-os/ipd" },
           {
             label: "Critical alerts",
             value: n(data.risks.criticalLabsUnacked + data.risks.urgentAppointments + data.risks.expiringItems),
             tone: criticalTone(data.risks.criticalLabsUnacked + data.risks.urgentAppointments + data.risks.expiringItems),
-            href: "#module-lab"
+            href: "/mudgalgastromedics-os/lab"
           }
         ],
         actions: [
-          { label: "Reports", href: "#module-reports" },
-          { label: "Analytics", href: "#module-analytics" },
-          { label: "Access control", href: "#module-access" },
-          { label: "Audit log", href: "#module-audit" }
+          { label: "Reports", href: "/mudgalgastromedics-os/reports" },
+          { label: "Analytics", href: "/mudgalgastromedics-os/analytics" },
+          { label: "Access control", href: "/mudgalgastromedics-os/access" },
+          { label: "Audit log", href: "/mudgalgastromedics-os/audit" }
         ]
       };
     case "main-doctor":
@@ -88,31 +88,31 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
       return {
         heading: "Clinical today",
         tiles: [
-          { label: "Patients waiting", value: n(data.queues.opdInFlight), tone: attentionTone(data.queues.opdInFlight), href: "#module-opd" },
+          { label: "Patients waiting", value: n(data.queues.opdInFlight), tone: attentionTone(data.queues.opdInFlight), href: "/mudgalgastromedics-os/opd" },
           criticalLabs,
-          { label: "Lab results pending", value: n(data.queues.labPending), tone: attentionTone(data.queues.labPending), href: "#module-lab" },
-          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "#module-ipd" }
+          { label: "Lab results pending", value: n(data.queues.labPending), tone: attentionTone(data.queues.labPending), href: "/mudgalgastromedics-os/lab" },
+          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "/mudgalgastromedics-os/ipd" }
         ],
         actions: [
-          { label: "Doctor workflow", href: "#module-doctor-workflow" },
-          { label: "OPD queue", href: "#module-opd" },
-          { label: "Laboratory", href: "#module-lab" },
-          { label: "IPD & beds", href: "#module-ipd" }
+          { label: "Doctor workflow", href: "/mudgalgastromedics-os/doctor-workflow" },
+          { label: "OPD queue", href: "/mudgalgastromedics-os/opd" },
+          { label: "Laboratory", href: "/mudgalgastromedics-os/lab" },
+          { label: "IPD & beds", href: "/mudgalgastromedics-os/ipd" }
         ]
       };
     case "nurse":
       return {
         heading: "Ward today",
         tiles: [
-          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "#module-ipd" },
+          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "/mudgalgastromedics-os/ipd" },
           criticalLabs,
-          { label: "Flagged patients", value: n(data.risks.flaggedPatients), tone: attentionTone(data.risks.flaggedPatients), href: "#module-patients" },
-          { label: "OPD waiting", value: n(data.queues.opdInFlight), tone: attentionTone(data.queues.opdInFlight), href: "#module-opd" }
+          { label: "Flagged patients", value: n(data.risks.flaggedPatients), tone: attentionTone(data.risks.flaggedPatients), href: "/mudgalgastromedics-os/patients" },
+          { label: "OPD waiting", value: n(data.queues.opdInFlight), tone: attentionTone(data.queues.opdInFlight), href: "/mudgalgastromedics-os/opd" }
         ],
         actions: [
-          { label: "IPD & beds", href: "#module-ipd" },
-          { label: "Patients", href: "#module-patients" },
-          { label: "OPD queue", href: "#module-opd" }
+          { label: "IPD & beds", href: "/mudgalgastromedics-os/ipd" },
+          { label: "Patients", href: "/mudgalgastromedics-os/patients" },
+          { label: "OPD queue", href: "/mudgalgastromedics-os/opd" }
         ]
       };
     case "reception":
@@ -120,87 +120,87 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
       return {
         heading: "Front desk today",
         tiles: [
-          { label: "New requests", value: n(data.queues.receptionNew), tone: attentionTone(data.queues.receptionNew), href: "#module-appointments" },
+          { label: "New requests", value: n(data.queues.receptionNew), tone: attentionTone(data.queues.receptionNew), href: "/mudgalgastromedics-os/appointments" },
           {
             label: "Urgent symptoms",
             value: n(data.risks.urgentAppointments),
             tone: criticalTone(data.risks.urgentAppointments),
-            href: "#module-appointments"
+            href: "/mudgalgastromedics-os/appointments"
           },
-          { label: "OPD in flight", value: n(data.queues.opdInFlight), tone: "primary", href: "#module-opd" },
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-opd" }
+          { label: "OPD in flight", value: n(data.queues.opdInFlight), tone: "primary", href: "/mudgalgastromedics-os/opd" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/opd" }
         ],
         actions: [
-          { label: "Register patient", href: "#module-patients" },
-          { label: "Appointments", href: "#module-appointments" },
-          { label: "OPD queue", href: "#module-opd" },
-          { label: "Billing", href: "#module-billing" }
+          { label: "Register patient", href: "/mudgalgastromedics-os/patients" },
+          { label: "Appointments", href: "/mudgalgastromedics-os/appointments" },
+          { label: "OPD queue", href: "/mudgalgastromedics-os/opd" },
+          { label: "Billing", href: "/mudgalgastromedics-os/billing" }
         ]
       };
     case "lab-technician":
       return {
         heading: "Laboratory today",
         tiles: [
-          { label: "Orders pending", value: n(data.queues.labPending), tone: attentionTone(data.queues.labPending), href: "#module-lab" },
+          { label: "Orders pending", value: n(data.queues.labPending), tone: attentionTone(data.queues.labPending), href: "/mudgalgastromedics-os/lab" },
           criticalLabs,
-          { label: "Unpaid lab orders", value: n(data.risks.unpaidLab), tone: attentionTone(data.risks.unpaidLab), href: "#module-lab" },
-          { label: "OPD waiting", value: n(data.queues.opdInFlight), tone: "primary", href: "#module-lab" }
+          { label: "Unpaid lab orders", value: n(data.risks.unpaidLab), tone: attentionTone(data.risks.unpaidLab), href: "/mudgalgastromedics-os/lab" },
+          { label: "OPD waiting", value: n(data.queues.opdInFlight), tone: "primary", href: "/mudgalgastromedics-os/lab" }
         ],
-        actions: [{ label: "Lab queue", href: "#module-lab" }, { label: "Patients", href: "#module-patients" }]
+        actions: [{ label: "Lab queue", href: "/mudgalgastromedics-os/lab" }, { label: "Patients", href: "/mudgalgastromedics-os/patients" }]
       };
     case "pharmacist":
       return {
         heading: "Pharmacy today",
         tiles: [
-          { label: "Unpaid dispenses", value: n(data.queues.pharmacyUnpaid), tone: attentionTone(data.queues.pharmacyUnpaid), href: "#module-pharmacy" },
-          { label: "Low stock items", value: n(data.risks.lowStockItems), tone: attentionTone(data.risks.lowStockItems), href: "#module-inventory" },
+          { label: "Unpaid dispenses", value: n(data.queues.pharmacyUnpaid), tone: attentionTone(data.queues.pharmacyUnpaid), href: "/mudgalgastromedics-os/pharmacy" },
+          { label: "Low stock items", value: n(data.risks.lowStockItems), tone: attentionTone(data.risks.lowStockItems), href: "/mudgalgastromedics-os/inventory" },
           {
             label: "Expiry alerts",
             value: n(data.risks.expiringItems),
             tone: criticalTone(data.risks.expiringItems),
-            href: "#module-inventory"
+            href: "/mudgalgastromedics-os/inventory"
           },
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-pharmacy" }
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/pharmacy" }
         ],
         actions: [
-          { label: "Dispense", href: "#module-pharmacy" },
-          { label: "Inventory", href: "#module-inventory" }
+          { label: "Dispense", href: "/mudgalgastromedics-os/pharmacy" },
+          { label: "Inventory", href: "/mudgalgastromedics-os/inventory" }
         ]
       };
     case "billing-accounts":
       return {
         heading: "Finance today",
         tiles: [
-          { label: "Revenue today", value: `Rs ${today.revenue.toLocaleString("en-IN")}`, tone: "success", href: "#module-billing" },
-          { label: "Unpaid lab", value: n(data.risks.unpaidLab), tone: attentionTone(data.risks.unpaidLab), href: "#module-lab" },
-          { label: "Unpaid pharmacy", value: n(data.risks.unpaidPharmacy), tone: attentionTone(data.risks.unpaidPharmacy), href: "#module-pharmacy" },
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-billing" }
+          { label: "Revenue today", value: `Rs ${today.revenue.toLocaleString("en-IN")}`, tone: "success", href: "/mudgalgastromedics-os/billing" },
+          { label: "Unpaid lab", value: n(data.risks.unpaidLab), tone: attentionTone(data.risks.unpaidLab), href: "/mudgalgastromedics-os/lab" },
+          { label: "Unpaid pharmacy", value: n(data.risks.unpaidPharmacy), tone: attentionTone(data.risks.unpaidPharmacy), href: "/mudgalgastromedics-os/pharmacy" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/billing" }
         ],
         actions: [
-          { label: "Billing", href: "#module-billing" },
-          { label: "Insurance & accounts", href: "#module-finance" },
-          { label: "Reports", href: "#module-reports" }
+          { label: "Billing", href: "/mudgalgastromedics-os/billing" },
+          { label: "Insurance & accounts", href: "/mudgalgastromedics-os/finance" },
+          { label: "Reports", href: "/mudgalgastromedics-os/reports" }
         ]
       };
     case "hr":
       return {
         heading: "People today",
         tiles: [
-          { label: "Staff presence", value: `${data.executive.staffPresence}%`, tone: "primary", href: "#module-hr" },
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-hr" }
+          { label: "Staff presence", value: `${data.executive.staffPresence}%`, tone: "primary", href: "/mudgalgastromedics-os/hr" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/hr" }
         ],
-        actions: [{ label: "HR & attendance", href: "#module-hr" }]
+        actions: [{ label: "HR & attendance", href: "/mudgalgastromedics-os/hr" }]
       };
     case "dietitian":
       return {
         heading: "Nutrition today",
         tiles: [
-          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "#module-ipd" },
-          { label: "OPD today", value: n(today.opd), tone: "primary", href: "#module-opd" }
+          { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "/mudgalgastromedics-os/ipd" },
+          { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/opd" }
         ],
         actions: [
-          { label: "Patients", href: "#module-patients" },
-          { label: "Diet plans", href: "#module-diet-plans" }
+          { label: "Patients", href: "/mudgalgastromedics-os/patients" },
+          { label: "Diet plans", href: "/mudgalgastromedics-os/diet-plans" }
         ]
       };
     case "patient":

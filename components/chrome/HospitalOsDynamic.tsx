@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { ReactNode } from "react";
 
 const HospitalOperatingSystem = dynamic(
   () => import("@/components/chrome/HospitalOperatingSystem").then((module) => module.HospitalOperatingSystem),
@@ -10,8 +11,8 @@ const HospitalOperatingSystem = dynamic(
   }
 );
 
-export function HospitalOsDynamic() {
-  return <HospitalOperatingSystem />;
+export function HospitalOsDynamic({ roleTodayBand }: { roleTodayBand?: ReactNode } = {}) {
+  return <HospitalOperatingSystem roleTodayBand={roleTodayBand} />;
 }
 
 function HospitalOsLoading() {

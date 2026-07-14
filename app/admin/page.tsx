@@ -1,57 +1,18 @@
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { AdminModuleNav } from "@/components/chrome/AdminModuleNav";
-import { Section } from "@/components/site/Section";
-import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
-import { LazyModuleSection } from "@/components/hospital-os/LazyModuleSection";
-import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
-import { visibleAdminModules } from "@/lib/access/admin-modules";
-import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: { absolute: "Operations • MudgalGastromedics OS" },
-  description: "Internal reception dashboard for appointment requests and hospital operations workflow planning at Mudgal Gastromedics Hospital.",
-  alternates: { canonical: "/admin" },
-  robots: { index: false, follow: false }
-};
-
-export default async function AdminPage() {
-  const cookieStore = await cookies();
-  const context = await accessContextFromCookieStore(cookieStore);
-  const isAuthenticated = canOpenAdminShell(context);
-  // Role-filtered modules (Track 2.2): render only what the active role may
-  // view. The server enforces the same matrix on every API call — this
-  // removes 403 dead-ends, it is not the security boundary.
-  const modules = isAuthenticated ? visibleAdminModules(context.activeRole) : [];
-
-  return (
-    <main>
-        <section className="border-b border-line bg-surface">
-          <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 py-5">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Operations</p>
-              <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Reception &amp; operations dashboard</h1>
-            </div>
-            <p className="max-w-xl text-sm leading-relaxed text-muted">
-              Appointment requests, patient records, OPD/IPD, billing, lab, pharmacy and access control for staff follow-up and queue planning.
-            </p>
-          </div>
-        </section>
-
-        {isAuthenticated ? <AdminModuleNav modules={modules.map(({ id, label }) => ({ id, label }))} /> : null}
-
-        <Section muted className="pb-10 pt-8 md:pb-12 md:pt-10">
-          {isAuthenticated ? (
-            <div className="grid gap-4">
-              <RoleTodayBand role={context.activeRole} />
-              {modules.map((module) => (
-                <LazyModuleSection key={module.id} id={module.id} />
-              ))}
-            </div>
-          ) : (
-            <WorkspaceLauncher />
-          )}
-        </Section>
-    </main>
-  );
+/**
+ * Retired (Track 4.13, docs/build-roadmap.md): every module that used to
+ * render inline here now has its own dedicated /mudgalgastromedics-os/*
+ * route with the real persistent shell. /mudgalgastromedics-os enforces the
+ * same auth gate this page used to (canOpenAdminShell), so no auth check is
+ * needed here — this is a pure redirect.
+ *
+ * A server redirect can't see the URL's #hash (browsers never send it), but
+ * browsers do preserve an existing hash across a redirect whose Location
+ * header doesn't specify its own — so an old /admin#module-hr bookmark
+ * arrives at /mudgalgastromedics-os#module-hr, where HospitalOsShell's
+ * legacy-hash effect finishes the redirect onto the real page.
+ */
+export default function AdminPage() {
+  redirect("/mudgalgastromedics-os");
 }

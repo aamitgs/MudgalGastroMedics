@@ -24,9 +24,13 @@ test("workspace launcher and staff login pass axe checks", async ({ page }) => {
 test("operations dashboard passes axe checks", async ({ page }) => {
   test.setTimeout(120_000);
   await page.request.post("/api/admin/session", { data: { username: "admin", password: "mgm-admin" } });
+  // /admin is retired (Track 4.13, docs/build-roadmap.md) — it redirects to
+  // the Hospital OS dashboard, which now carries the per-role "Today" band
+  // that used to live on /admin (RoleTodayBand, ported over as part of the
+  // retirement so no functionality was lost).
   await page.goto("/admin");
-  await expect(page.getByText("Reception & operations dashboard")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText("Users, roles & approvals")).toBeVisible({ timeout: 30_000 });
+  await expect(page).toHaveURL(/\/mudgalgastromedics-os$/, { timeout: 60_000 });
+  await expect(page.getByText("Hospital today")).toBeVisible({ timeout: 60_000 });
   await expectNoAxeViolations(page);
 });
 

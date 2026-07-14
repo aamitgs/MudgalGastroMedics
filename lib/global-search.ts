@@ -45,7 +45,7 @@ export function searchPatients(query: string, patients: PatientRecord[]): Search
       category: "Patients" as const,
       title: patient.name,
       subtitle: `${patient.uhid} · ${patient.phone}${patient.bloodGroup ? ` · ${patient.bloodGroup}` : ""}`,
-      href: "#module-patients",
+      href: "/mudgalgastromedics-os/patients",
       patientPhone: patient.phone,
       score: fieldScore(query, patient.name, patient.uhid, patient.phone, patient.allergies)
     }))
@@ -59,7 +59,7 @@ export function searchAppointments(query: string, appointments: AppointmentRecor
       category: "Appointments" as const,
       title: appointment.name,
       subtitle: `${appointment.service} · ${appointment.status}${appointment.date ? ` · ${appointment.date}` : ""}`,
-      href: "#module-appointments",
+      href: "/mudgalgastromedics-os/appointments",
       patientPhone: appointment.phone,
       score: fieldScore(query, appointment.name, appointment.phone, appointment.service, appointment.uhid)
     }))
@@ -73,7 +73,7 @@ export function searchLabOrders(query: string, orders: LabOrder[]): SearchResult
       category: "Laboratory" as const,
       title: order.patientName,
       subtitle: `${order.tests.join(", ") || order.service} · ${order.status}${order.criticalFlag ? " · CRITICAL" : ""}`,
-      href: "#module-lab",
+      href: "/mudgalgastromedics-os/lab",
       patientPhone: order.phone,
       score: fieldScore(query, order.patientName, order.phone, order.token, ...order.tests)
     }))
@@ -87,7 +87,7 @@ export function searchInventory(query: string, items: InventoryItem[]): SearchRe
       category: "Pharmacy" as const,
       title: item.name,
       subtitle: `${item.category} · ${item.quantity} ${item.unit} in stock`,
-      href: "#module-inventory",
+      href: "/mudgalgastromedics-os/inventory",
       score: fieldScore(query, item.name, item.category, item.vendor)
     }))
     .filter((result) => result.score > 0);
@@ -100,7 +100,7 @@ export function searchAdmissions(query: string, admissions: IpdAdmission[]): Sea
       category: "Admissions" as const,
       title: admission.patientName,
       subtitle: `${admission.ward} · Bed ${admission.bedLabel} · ${admission.status}`,
-      href: "#module-ipd",
+      href: "/mudgalgastromedics-os/ipd",
       patientPhone: admission.phone,
       score: fieldScore(query, admission.patientName, admission.phone, admission.bedLabel, admission.diagnosis)
     }))
@@ -114,7 +114,7 @@ export function searchStaff(query: string, staff: StaffMember[]): SearchResult[]
       category: "Employees" as const,
       title: member.name,
       subtitle: `${member.role} · ${member.department}`,
-      href: "#module-hr",
+      href: "/mudgalgastromedics-os/hr",
       score: fieldScore(query, member.name, member.role, member.department, member.phone)
     }))
     .filter((result) => result.score > 0);

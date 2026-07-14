@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun, UsersRound } from "lucide-react";
+import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun } from "lucide-react";
 import { useEffect } from "react";
 import { Toaster } from "sonner";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -15,9 +15,11 @@ import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
 import { useAdminThemeStore } from "@/stores/admin-theme-store";
 import { useCommandPaletteStore } from "@/stores/command-history-store";
 
+// "Operations" (formerly /admin) was retired once every module got a real
+// route (Track 4.13) — /admin now just redirects here, so a separate nav
+// entry pointing at the same destination would be a pure duplicate.
 const staffLinks = [
   { href: "/mudgalgastromedics-os", label: "Hospital OS", icon: LayoutDashboard },
-  { href: "/admin", label: "Operations", icon: UsersRound },
   { href: "/doctor", label: "Doctor", icon: Stethoscope }
 ];
 

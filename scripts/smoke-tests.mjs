@@ -93,39 +93,41 @@ test("mobile API exposes versioned token-gated endpoints", () => {
   }
 });
 
-test("admin dashboard mounts major HMS workspaces", () => {
-  // Track 4.1: modules are dynamically imported and lazy-mounted (not static
-  // JSX in app/admin/page.tsx), so this checks each component's dynamic-import
-  // loader is wired up in LazyModuleSection, which mounts them on demand.
-  const source = read("components/hospital-os/LazyModuleSection.tsx");
-  const components = [
-    "AdminReports",
-    "AdminAuditLog",
-    "AdminAnalytics",
-    "AdminCmsWorkspace",
-    "AdminEnterpriseModules",
-    "AdminAutomation",
-    "AdminAiReviews",
-    "AdminPatients",
-    "AdminAppointments",
-    "AdminOpdQueue",
-    "AdminProcedures",
-    "AdminIpdBeds",
-    "AdminDoctorWorkflow",
-    "AdminLab",
-    "AdminPharmacy",
-    "AdminBillingSummary",
-    "AdminFinance",
-    "AdminHR",
-    "AdminInventory",
-    "AdminCommunication",
-    "AdminProductionReadiness"
-  ];
+test("every HMS workspace has a dedicated Hospital OS route", () => {
+  // Track 4.13: /admin (and its LazyModuleSection dynamic-import map) was
+  // retired once every module got its own real /mudgalgastromedics-os/*
+  // route — this checks each component is actually imported+rendered by its
+  // corresponding page.tsx instead.
+  const routeByComponent = {
+    AdminReports: "reports",
+    AdminAuditLog: "audit",
+    AdminAnalytics: "analytics",
+    AdminCmsWorkspace: "cms",
+    AdminEnterpriseModules: "modules",
+    AdminAutomation: "automation",
+    AdminAiReviews: "ai-reviews",
+    AdminPatients: "patients",
+    AdminAppointments: "appointments",
+    AdminOpdQueue: "opd",
+    AdminProcedures: "procedures",
+    AdminIpdBeds: "ipd",
+    AdminDoctorWorkflow: "doctor-workflow",
+    AdminLab: "lab",
+    AdminPharmacy: "pharmacy",
+    AdminBillingSummary: "billing",
+    AdminFinance: "finance",
+    AdminHR: "hr",
+    AdminInventory: "inventory",
+    AdminCommunication: "communication",
+    AdminProductionReadiness: "readiness"
+  };
 
-  for (const component of components) {
-    // Track 1.7: each lives in its own per-domain feature folder now
-    // (e.g. "@/components/reports/AdminReports"), not flat under components/.
-    assert.match(source, new RegExp(`import\\("@/components/[\\w-]+/${component}"\\)`), `${component} should have a dynamic-import loader in the admin dashboard`);
+  for (const [component, slug] of Object.entries(routeByComponent)) {
+    const route = `app/mudgalgastromedics-os/${slug}/page.tsx`;
+    assert.equal(exists(route), true, `${route} should exist`);
+    const source = read(route);
+    assert.match(source, new RegExp(`import\\s*\\{\\s*${component}\\s*\\}\\s*from\\s*"@/components/[\\w-]+/${component}"`), `${route} should import ${component}`);
+    assert.match(source, new RegExp(`<${component}\\s*/>`), `${route} should render <${component} />`);
   }
 });
 

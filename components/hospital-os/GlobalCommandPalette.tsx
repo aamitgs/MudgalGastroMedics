@@ -37,10 +37,10 @@ const categoryIcon: Record<SearchCategory, typeof Users> = {
 };
 
 const quickCreateActions: FavouriteCommand[] = [
-  { id: "qc-patient", label: "New patient", href: "/admin#module-patients" },
-  { id: "qc-appointment", label: "Book appointment", href: "/admin#module-appointments" },
-  { id: "qc-invoice", label: "Generate invoice", href: "/admin#module-billing" },
-  { id: "qc-lab", label: "Order lab test", href: "/admin#module-lab" }
+  { id: "qc-patient", label: "New patient", href: "/mudgalgastromedics-os/patients" },
+  { id: "qc-appointment", label: "Book appointment", href: "/mudgalgastromedics-os/appointments" },
+  { id: "qc-invoice", label: "Generate invoice", href: "/mudgalgastromedics-os/billing" },
+  { id: "qc-lab", label: "Order lab test", href: "/mudgalgastromedics-os/lab" }
 ];
 
 function navigate(href: string) {

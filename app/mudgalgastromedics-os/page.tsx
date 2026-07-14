@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { HospitalOsDynamic } from "@/components/chrome/HospitalOsDynamic";
 import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
+import { RoleTodayBand } from "@/components/hospital-os/RoleTodayBand";
 import { accessContextFromCookieStore, canOpenAdminShell } from "@/lib/access/page-auth";
 
 export const metadata: Metadata = {
@@ -13,9 +14,9 @@ export const metadata: Metadata = {
 
 export default async function HospitalOsPage() {
   const cookieStore = await cookies();
-  const isAuthenticated = canOpenAdminShell(await accessContextFromCookieStore(cookieStore));
+  const context = await accessContextFromCookieStore(cookieStore);
 
-  if (!isAuthenticated) {
+  if (!canOpenAdminShell(context)) {
     return (
       <main className="hospital-os-theme grid min-h-screen place-items-center bg-[var(--hos-bg)] p-6">
         <WorkspaceLauncher />
@@ -23,5 +24,10 @@ export default async function HospitalOsPage() {
     );
   }
 
-  return <HospitalOsDynamic />;
+  // RoleTodayBand is an async server component; the dashboard tree below it is
+  // entirely client-rendered (next/dynamic, ssr:false), so it's rendered here
+  // and passed down as an already-resolved prop rather than imported client-side
+  // (this is what used to be /admin's per-role "Today" band, retired with /admin
+  // — see docs/build-roadmap.md, Track 4.13).
+  return <HospitalOsDynamic roleTodayBand={<RoleTodayBand role={context.activeRole} />} />;
 }

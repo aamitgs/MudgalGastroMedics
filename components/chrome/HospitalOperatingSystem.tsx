@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Building2, MoreHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import type { ReactNode } from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -59,7 +60,7 @@ function exportPatientFlowRow(patient: PatientFlowRow) {
   downloadCsvFile([patientFlowExportRow(patient)], `hospital-os-patient-flow-${patientSlug}.csv`);
 }
 
-function HospitalOsProviders() {
+function HospitalOsProviders({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const [client] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -72,14 +73,21 @@ function HospitalOsProviders() {
   return (
     <QueryClientProvider client={client}>
       <HospitalOsShell>
-        <DashboardContent />
+        <DashboardContent roleTodayBand={roleTodayBand} />
       </HospitalOsShell>
     </QueryClientProvider>
   );
 }
 
-export function HospitalOperatingSystem() {
-  return <HospitalOsProviders />;
+/**
+ * `roleTodayBand` is a server-rendered RoleTodayBand element passed down from
+ * app/mudgalgastromedics-os/page.tsx — RoleTodayBand is an async server
+ * component and this whole tree is client-only (next/dynamic, ssr:false), so
+ * it can't be imported here directly; it can only arrive pre-rendered as a
+ * prop, same as any other "server component passed to a client component".
+ */
+export function HospitalOperatingSystem({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
+  return <HospitalOsProviders roleTodayBand={roleTodayBand} />;
 }
 
 /**
@@ -90,7 +98,7 @@ export function HospitalOperatingSystem() {
  * dashboard itself — the live patient-flow table, bulk actions, doctor
  * assignment, audit trail and the role-gated section list.
  */
-function DashboardContent() {
+function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -339,6 +347,12 @@ function DashboardContent() {
       >
         <DashboardOverview realtimeMessages={realtimeMessages} metrics={liveDashboardMetrics} series={liveTrend} isLoading={isLoading} />
       </motion.section>
+
+      {/* Rendered after DashboardOverview's own h1 (Track 4.13) so RoleTodayBand's
+          h2 doesn't precede the page's h1 in DOM order — axe's heading-order
+          rule flags exactly that as an invalid jump once a later h3 (e.g. an
+          empty-state) appears with no h2 between it and the page's h1. */}
+      {roleTodayBand}
 
       {access.clinicalWorkspace ? (
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)]">

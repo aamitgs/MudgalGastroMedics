@@ -50,7 +50,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: item.quantity === 0 ? "Critical" : "High",
         title: `Low stock: ${item.name}`,
         detail: `${item.quantity} ${item.unit} left — at or below the reorder level of ${item.reorderLevel}.`,
-        href: "/admin#module-inventory"
+        href: "/mudgalgastromedics-os/inventory"
       });
     }
     const expiry = inventoryExpiryStatus(item, now);
@@ -64,7 +64,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
           expiry === "expired"
             ? `Expiry date ${item.expiryDate} has passed — quarantine this stock; it must not be dispensed.`
             : `Expires on ${item.expiryDate}. Plan return or priority use before expiry.`,
-        href: "/admin#module-inventory"
+        href: "/mudgalgastromedics-os/inventory"
       });
     }
   }
@@ -77,7 +77,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: "Critical",
         title: `Urgent symptoms: ${appointment.name}`,
         detail: `Appointment request flagged urgent (${appointment.symptoms.join(", ") || "symptoms not listed"}) and still ${appointment.status.toLowerCase()}.`,
-        href: "/admin#module-appointments"
+        href: "/mudgalgastromedics-os/appointments"
       });
     }
   }
@@ -99,7 +99,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: "Critical",
         title: `HDU attention: bed ${admission.bedLabel}`,
         detail: `Staff-attention flag (never a diagnosis): ${reasons.join("; ")}.`,
-        href: "/admin#module-ipd"
+        href: "/mudgalgastromedics-os/ipd"
       });
     }
   }
@@ -112,7 +112,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
       priority: "Critical",
       title: `Critical lab result: ${order.patientName}`,
       detail: `${order.tests.join(", ") || order.service} — ${(order.criticalReasons ?? ["flagged critical"]).join(" ")} Requires doctor acknowledgement.`,
-      href: "/admin#module-lab"
+      href: "/mudgalgastromedics-os/lab"
     });
   }
 
@@ -124,7 +124,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: "High",
         title: "Escalated AI review",
         detail: "An AI-generated item was escalated by a reviewer and needs a decision.",
-        href: "/admin#module-ai-reviews"
+        href: "/mudgalgastromedics-os/ai-reviews"
       });
     }
   }
@@ -139,7 +139,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: "High",
         title: `Long wait: ${visit.patientName}`,
         detail: `Token ${visit.token} has been waiting ${waitedMinutes} minutes (alert threshold ${opdWaitAlertMinutes}).`,
-        href: "/admin#module-opd"
+        href: "/mudgalgastromedics-os/opd"
       });
     }
   }
@@ -154,7 +154,7 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         priority: "High",
         title: `Bed turnover overdue: ${bed.label}`,
         detail: `In Cleaning status for ${overdueMinutes} minutes — past the ${turnoverOverdueMinutes}-minute turnover target.`,
-        href: "/admin#module-ipd"
+        href: "/mudgalgastromedics-os/ipd"
       });
     }
   }

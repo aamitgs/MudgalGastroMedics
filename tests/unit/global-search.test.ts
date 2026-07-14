@@ -126,7 +126,7 @@ describe("searchPatients (ranking tiers)", () => {
     const [result] = searchPatients("Asha", [patient({ name: "Asha Verma", uhid: "MGM-24018", phone: "9876543210", bloodGroup: "O+" })]);
     expect(result).toMatchObject({
       category: "Patients",
-      href: "#module-patients",
+      href: "/mudgalgastromedics-os/patients",
       patientPhone: "9876543210",
       title: "Asha Verma"
     });
@@ -139,7 +139,7 @@ describe("searchPatients (ranking tiers)", () => {
 describe("searchAppointments", () => {
   it("matches by name, phone or service and carries patientPhone", () => {
     const [result] = searchAppointments("gastro", [appointment({ service: "Gastro consult" })]);
-    expect(result).toMatchObject({ category: "Appointments", href: "#module-appointments", patientPhone: "9876500000" });
+    expect(result).toMatchObject({ category: "Appointments", href: "/mudgalgastromedics-os/appointments", patientPhone: "9876500000" });
   });
 });
 
@@ -167,7 +167,7 @@ describe("searchInventory", () => {
 describe("searchAdmissions", () => {
   it("matches by bed label and diagnosis", () => {
     const [result] = searchAdmissions("HDU-01", [admission()]);
-    expect(result).toMatchObject({ category: "Admissions", href: "#module-ipd", patientPhone: "9876522222" });
+    expect(result).toMatchObject({ category: "Admissions", href: "/mudgalgastromedics-os/ipd", patientPhone: "9876522222" });
   });
 });
 

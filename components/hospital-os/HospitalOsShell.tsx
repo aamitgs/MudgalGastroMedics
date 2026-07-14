@@ -27,6 +27,7 @@ import {
   navItems
 } from "@/lib/hospital-os-data";
 import type { HospitalRealtimeEvent, NavBadgeCounts } from "@/lib/hospital-os-data";
+import { moduleRouteFromHash } from "@/lib/access/admin-modules";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
@@ -184,6 +185,19 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
     const storedTheme = window.localStorage.getItem("hospital-os-theme");
     if (storedSidebar) setSidebarCollapsed(storedSidebar === "collapsed");
     if (storedTheme === "dark" && !darkMode) toggleDarkMode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Retired /admin's anchor-scroll modules (Track 4.13) each got a real route,
+  // but a server-side redirect can never see a URL's #hash (browsers don't
+  // send it) — it only preserves whatever hash the visitor already had. So an
+  // old /admin#module-hr bookmark lands here as /mudgalgastromedics-os#module-hr;
+  // this one-time check finishes that journey client-side, onto the real page.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const target = moduleRouteFromHash(hash);
+    if (target && target !== pathname) window.location.replace(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
