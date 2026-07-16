@@ -23,6 +23,11 @@ export const authPasswordChangeSchema = z.object({
   newPassword: z.string().default("")
 });
 
+// Profile photo: image-only (no PDF, unlike patient documents) and a much
+// smaller cap — this is a small avatar, not a scanned report.
+export const allowedAccountPhotoMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
+export const maxAccountPhotoSizeBytes = 2 * 1024 * 1024;
+
 export const authRoleSwitchSchema = z.object({
   role: z.string().default(""),
   password: z.string().default("")

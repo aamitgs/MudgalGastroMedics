@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         authenticated: true,
         status: "active",
         legacy: true,
-        user: { id: legacy.userId, name: legacy.userName, username: legacy.userId, roles: legacy.roles, defaultRole: legacy.activeRole, totpEnabled: false },
+        user: { id: legacy.userId, name: legacy.userName, username: legacy.userId, roles: legacy.roles, defaultRole: legacy.activeRole, totpEnabled: false, hasPhoto: false },
         activeRole: legacy.activeRole,
         elevated: false,
         landing: roleMeta[legacy.activeRole].landing,
@@ -34,7 +34,8 @@ export async function GET(request: Request) {
       username: user.username,
       roles: user.roles,
       defaultRole: user.defaultRole,
-      totpEnabled: user.totpEnabled
+      totpEnabled: user.totpEnabled,
+      hasPhoto: Boolean(user.photoDocumentId)
     },
     activeRole: session.activeRole,
     elevated: isElevated(session),

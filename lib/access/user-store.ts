@@ -24,6 +24,8 @@ export type AccessUser = {
   failedLoginCount: number;
   lockedUntil?: string;
   lastLoginAt?: string;
+  /** Latest patient-file-store document id (entityType "access-user") — self-service profile photo. */
+  photoDocumentId?: string;
 };
 
 type AccessUserStore = {

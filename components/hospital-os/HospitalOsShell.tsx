@@ -79,6 +79,7 @@ type OsSession = {
   legacy: boolean;
   activeRole: AccessRole;
   heldRoles: AccessRole[];
+  hasPhoto: boolean;
 };
 
 async function fetchOsSession(): Promise<OsSession | null> {
@@ -90,7 +91,8 @@ async function fetchOsSession(): Promise<OsSession | null> {
     name: data.user?.name ?? "Staff",
     legacy: Boolean(data.legacy),
     activeRole: data.activeRole,
-    heldRoles: data.user?.roles ?? []
+    heldRoles: data.user?.roles ?? [],
+    hasPhoto: Boolean(data.user?.hasPhoto)
   };
 }
 
@@ -421,6 +423,8 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
             darkMode={darkMode}
             onToggleTheme={toggleDarkMode}
             realtimeStatus={realtimeStatus}
+            hasPhoto={Boolean(osSession?.hasPhoto)}
+            onPhotoUpdated={() => queryClient.invalidateQueries({ queryKey: ["hospital-os", "session"] })}
           />
           {children}
         </section>

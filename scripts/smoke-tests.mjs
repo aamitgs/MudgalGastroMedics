@@ -262,3 +262,22 @@ test("database migration baseline is documented", () => {
   assert.match(read("database/README.md"), /npm run db:check/);
   assert.match(read("lib/production-readiness.ts"), /DATA_SOURCE/);
 });
+
+test("self-service account photo upload is wired end-to-end", () => {
+  assert.equal(exists("app/api/account/photo/route.ts"), true);
+  const route = read("app/api/account/photo/route.ts");
+  // Self-service: gated by session identity alone, never an authorize()
+  // resource/action grant — a staff member can only ever read/replace their
+  // OWN photo, unlike the admin-gated /api/documents upload.
+  assert.match(route, /getSessionAndUser\(request\)/);
+  assert.doesNotMatch(route, /authorize\(request/);
+  assert.match(route, /entityType: "access-user"/);
+  assert.match(route, /allowedAccountPhotoMimeTypes/);
+  assert.match(route, /account\.photo\.updated/);
+
+  assert.match(read("lib/access/user-store.ts"), /photoDocumentId/);
+  assert.match(read("lib/validation/auth.ts"), /allowedAccountPhotoMimeTypes.*image\/jpeg.*image\/png.*image\/webp/s);
+
+  assert.match(read("app/api/auth/me/route.ts"), /hasPhoto: Boolean\(user\.photoDocumentId\)/);
+  assert.match(read("components/hospital-os/TopNav.tsx"), /\/api\/account\/photo/);
+});
