@@ -4,11 +4,11 @@ import Fuse from "fuse.js";
 import {
   ChevronLeft,
   ChevronRight,
-  HeartPulse,
   LogOut,
   ShieldCheck,
   X
 } from "lucide-react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -286,8 +286,8 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
         >
           <div className="flex h-16 items-center justify-between border-b border-[var(--hos-border)] px-4">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--hos-primary)] text-white">
-                <HeartPulse size={19} />
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white">
+                <Image src="/mgm-icon.png" alt="" width={948} height={1500} className="h-7 w-auto object-contain" />
               </div>
               {!sidebarCollapsed ? (
                 <div className="min-w-0">

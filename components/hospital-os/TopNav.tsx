@@ -1,7 +1,7 @@
 "use client";
 
 import { Building2, Command, Menu, MessageSquare, Moon, Search, Sun } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LiveClockWeather } from "@/components/design-system/LiveClockWeather";
@@ -61,6 +61,7 @@ export function TopNav({
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
         <Avatar className="h-10 w-10 border border-[var(--hos-border)]">
+          <AvatarImage src="/mgm-icon.png" alt="" className="bg-white object-contain p-1.5" />
           <AvatarFallback className="bg-[var(--hos-muted)] text-xs font-semibold text-[var(--hos-text)]">MG</AvatarFallback>
         </Avatar>
       </div>
