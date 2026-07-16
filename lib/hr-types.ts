@@ -28,6 +28,8 @@ export type StaffMember = {
   permissions: StaffPermission[];
   emergencyContact?: string;
   notes?: string;
+  /** Latest patient-file-store document id (entityType "staff-member") — self-service profile photo for legacy-admin sessions, which have no AccessUser record to attach one to instead. */
+  photoDocumentId?: string;
 };
 
 export type AttendanceStatus = "Present" | "Absent" | "Half Day" | "Leave";

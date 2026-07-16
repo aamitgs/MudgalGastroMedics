@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getRequestAccessContext, getSessionAndUser } from "@/lib/access/guard";
 import { roleMeta, rolePermissions } from "@/lib/access/matrix";
 import { isElevated } from "@/lib/access/session-store";
+import { getStaffById } from "@/lib/hr-store";
 
 export async function GET(request: Request) {
   const resolved = await getSessionAndUser(request);
@@ -9,12 +10,17 @@ export async function GET(request: Request) {
     // Legacy admin/doctor cookies have no RBAC session but still map to a role.
     const legacy = await getRequestAccessContext(request);
     if (legacy.authenticated && legacy.legacy) {
+      // The legacy admin cookie maps to a real StaffMember record (which can
+      // carry a self-service photo, app/api/account/photo/route.ts); the
+      // legacy doctor cookie maps to no persisted record at all, so it never
+      // has one.
+      const staff = await getStaffById(legacy.userId);
       return NextResponse.json({
         ok: true,
         authenticated: true,
         status: "active",
         legacy: true,
-        user: { id: legacy.userId, name: legacy.userName, username: legacy.userId, roles: legacy.roles, defaultRole: legacy.activeRole, totpEnabled: false, hasPhoto: false },
+        user: { id: legacy.userId, name: legacy.userName, username: legacy.userId, roles: legacy.roles, defaultRole: legacy.activeRole, totpEnabled: false, hasPhoto: Boolean(staff?.photoDocumentId) },
         activeRole: legacy.activeRole,
         elevated: false,
         landing: roleMeta[legacy.activeRole].landing,

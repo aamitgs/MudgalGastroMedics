@@ -156,6 +156,17 @@ export async function listStaff() {
   return (await store.load()).staff.map(withPermissions);
 }
 
+/** Self-service only — deliberately separate from updateStaff (the HR-admin editor, hr-records:edit gated) so a legacy-session self-service photo upload can only ever touch its own photo field, nothing else about the record. */
+export async function updateStaffPhoto(id: string, photoDocumentId: string) {
+  const doc = await store.load();
+  const member = doc.staff.find((item) => item.id === id);
+  if (!member) return null;
+  member.photoDocumentId = photoDocumentId;
+  member.updatedAt = nowIso();
+  await store.save(doc);
+  return member;
+}
+
 export async function getStaffById(id: string) {
   const member = (await store.load()).staff.find((item) => item.id === id);
   return member ? withPermissions(member) : null;
