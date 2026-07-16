@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { ExternalReferral, ExternalReferralStatus, ExternalReferralType } from "@/lib/external-referral-types";
 
@@ -43,7 +44,7 @@ export async function createExternalReferral(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
   const referral: ExternalReferral = {
-    id: `EXT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("EXT"),
     createdAt: now,
     updatedAt: now,
     visitId: visit.id,

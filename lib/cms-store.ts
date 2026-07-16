@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { galleryItems, procedures } from "@/lib/site-data";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 
@@ -30,11 +31,11 @@ function now() {
 }
 
 function makeId() {
-  return `CMS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  return generateId("CMS", 4);
 }
 
 function makeRevisionId() {
-  return `CMSREV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  return generateId("CMSREV", 4);
 }
 
 function normalize(value: unknown) {

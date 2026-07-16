@@ -3,6 +3,7 @@ import "server-only";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { query, shouldUseDatabaseStores } from "@/lib/database";
+import { generateId } from "@/lib/id";
 
 export type DocumentMetadata = {
   id: string;
@@ -63,7 +64,7 @@ function getStore() {
 }
 
 function makeDocumentId() {
-  return `DOC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  return generateId("DOC", 5);
 }
 
 function rowToMetadata(row: DocumentRow): DocumentMetadata {

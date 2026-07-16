@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AccessRole } from "@/lib/access/matrix";
 
 /**
@@ -43,7 +44,7 @@ export async function createRoleChangeApproval(input: {
   requestedByName: string;
 }) {
   const approval: AccessApproval = {
-    id: `APR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("APR", 4),
     type: "role-change",
     targetUserId: input.targetUserId,
     targetUserName: input.targetUserName,

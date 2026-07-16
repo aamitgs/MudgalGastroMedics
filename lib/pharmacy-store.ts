@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { adjustInventoryQuantity, listInventoryItems } from "@/lib/inventory-store";
 import type { OpdVisit } from "@/lib/opd-types";
 import { getOpdVisitById } from "@/lib/opd-store";
@@ -71,7 +72,7 @@ export async function createPharmacyDispense(input: Record<string, unknown>) {
   const total = Math.max(0, subtotal - discount);
   const now = new Date().toISOString();
   const record: PharmacyDispenseRecord = {
-    id: `PH-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("PH"),
     createdAt: now,
     updatedAt: now,
     status: "Dispensed",

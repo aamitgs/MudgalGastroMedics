@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { normalizePatientPhone } from "@/lib/patient-access/identity-store";
 
 /**
@@ -48,7 +49,7 @@ export async function createOtpChallenge(phone: string) {
   const doc = await store.load();
   pruneExpired(doc);
   const challenge: PatientChallenge = {
-    id: `CHL-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("CHL", 4),
     kind: "sms-otp",
     phone: normalizePatientPhone(phone),
     createdAt: new Date().toISOString(),
@@ -66,7 +67,7 @@ export async function createMagicLinkChallenge(phone: string) {
   const doc = await store.load();
   pruneExpired(doc);
   const challenge: PatientChallenge = {
-    id: `CHL-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("CHL", 4),
     kind: "magic-link",
     phone: normalizePatientPhone(phone),
     createdAt: new Date().toISOString(),

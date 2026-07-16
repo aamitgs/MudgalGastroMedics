@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { upsertPatientFromInput } from "@/lib/patient-store";
 
@@ -24,7 +25,7 @@ export async function createAppointment(input: Record<string, unknown>) {
     : [];
 
   const appointment: AppointmentRecord = {
-    id: `MGM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("MGM", 4),
     patientId: patient.id,
     uhid: patient.uhid,
     createdAt: new Date().toISOString(),

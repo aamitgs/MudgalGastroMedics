@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 
 type PatientStore = {
@@ -67,7 +68,7 @@ export async function upsertPatientFromInput(input: Record<string, unknown>) {
   }
 
   const patient: PatientRecord = {
-    id: `PAT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("PAT"),
     uhid: createUhid(doc.patients.length),
     createdAt: now,
     updatedAt: now,
@@ -103,7 +104,7 @@ export async function createPatient(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
   const patient: PatientRecord = {
-    id: `PAT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("PAT"),
     uhid: createUhid(doc.patients.length),
     createdAt: now,
     updatedAt: now,

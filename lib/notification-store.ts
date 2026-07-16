@@ -2,6 +2,7 @@ import "server-only";
 import { listAiReviews } from "@/lib/ai-review-store";
 import { listAppointments } from "@/lib/appointment-store";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { listInventoryItems } from "@/lib/inventory-store";
 import { listBeds, listIpdAdmissions, listVitals } from "@/lib/ipd-store";
 import { listLabOrders } from "@/lib/lab-store";
@@ -42,7 +43,7 @@ function applyUpsert(doc: NotificationDoc, input: NotificationInput, now: string
     return open;
   }
   const created: StaffNotification = {
-    id: `NTF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("NTF", 4),
     createdAt: now,
     updatedAt: now,
     status: "Unread",

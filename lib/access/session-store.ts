@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AccessRole } from "@/lib/access/matrix";
 
 export const accessSessionCookie = "mgm_session";
@@ -59,7 +60,7 @@ export async function createAccessSession(input: {
   const token = randomBytes(32).toString("base64url");
   const now = new Date();
   const session: AccessSession = {
-    id: `SES-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("SES", 4),
     tokenHash: hashToken(token),
     userId: input.userId,
     activeRole: input.activeRole,

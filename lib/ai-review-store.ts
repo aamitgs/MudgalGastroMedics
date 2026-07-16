@@ -2,6 +2,7 @@ import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { getAppointmentById, listAppointments } from "@/lib/appointment-store";
 import { createAppointmentPlanningNote } from "@/lib/ai-planning";
+import { generateId } from "@/lib/id";
 import type { AiCaseReview, AiCaseSource, AiReviewStatus } from "@/lib/ai-types";
 import { getOpdVisitById, listOpdVisits } from "@/lib/opd-store";
 
@@ -20,7 +21,7 @@ const docStore = createDocumentStore<AiReviewStore>("ai-reviews", (parsed) => {
 
 
 function makeId() {
-  return `AIR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  return generateId("AIR");
 }
 
 export async function listAiReviews() {

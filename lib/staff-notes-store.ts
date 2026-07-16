@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AccessRole } from "@/lib/access/matrix";
 import type { StaffNote, StaffNoteCategory, StaffNoteDepartment, StaffNotePriority, StaffNoteStatus } from "@/lib/staff-notes-types";
 
@@ -28,7 +29,7 @@ export async function createStaffNote(input: {
   const doc = await store.load();
   const now = new Date().toISOString();
   const note: StaffNote = {
-    id: `NOTE-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("NOTE", 4),
     createdAt: now,
     updatedAt: now,
     category: input.category,

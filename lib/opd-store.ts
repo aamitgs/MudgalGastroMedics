@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
@@ -38,7 +39,7 @@ export async function createOpdVisit(appointment: AppointmentRecord) {
   const today = new Date().toISOString().slice(0, 10);
   const sequence = doc.visits.filter((visit) => visit.createdAt.slice(0, 10) === today).length + 1;
   const visit: OpdVisit = {
-    id: `OPD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("OPD"),
     token: `MGM-${String(sequence).padStart(3, "0")}`,
     appointmentId: appointment.id,
     patientId: appointment.patientId,

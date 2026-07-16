@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AccessRole } from "@/lib/access/matrix";
 import { isAccessRole } from "@/lib/access/matrix";
 
@@ -35,7 +36,7 @@ const store = createDocumentStore<AccessUserStore>("access-users", (parsed) => {
 });
 
 function makeUserId() {
-  return `USR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  return generateId("USR", 4);
 }
 
 export function normalizeUsername(value: string) {

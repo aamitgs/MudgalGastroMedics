@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { FamilyMember, FamilyRelation } from "@/lib/family-types";
 import { familyRelations } from "@/lib/family-types";
 
@@ -36,7 +37,7 @@ export async function addFamilyMember(input: Record<string, unknown>) {
   const relation = normalizeText(input.relation);
   const doc = await store.load();
   const member: FamilyMember = {
-    id: `FAM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("FAM"),
     createdAt: new Date().toISOString(),
     ownerPhone,
     name,

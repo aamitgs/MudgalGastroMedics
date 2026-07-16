@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type {
   BedStatus,
@@ -94,7 +95,7 @@ export async function recordVitals(input: Record<string, unknown>) {
   if (!admission) return { error: "Active admission not found." };
 
   const reading: VitalsReading = {
-    id: `VIT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("VIT"),
     admissionId,
     recordedAt: new Date().toISOString(),
     recordedBy: normalizeText(input.recordedBy) || "Duty nurse",
@@ -130,7 +131,7 @@ export async function createMedicationOrder(input: Record<string, unknown>) {
   if (!drugName) return { error: "Drug name is required." };
 
   const order: MedicationOrder = {
-    id: `MED-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("MED"),
     admissionId,
     drugName,
     dose: normalizeText(input.dose),
@@ -165,7 +166,7 @@ export async function recordMedicationAdministration(input: Record<string, unkno
 
   const status = normalizeText(input.status);
   const record: MedicationAdministration = {
-    id: `MAR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("MAR"),
     admissionId: order.admissionId,
     medicationOrderId,
     administeredAt: new Date().toISOString(),
@@ -209,7 +210,7 @@ export async function transferBed(input: { admissionId: string; toBedId: string;
   admission.updatedAt = new Date().toISOString();
 
   const transfer: BedTransfer = {
-    id: `TRF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("TRF"),
     admissionId: admission.id,
     fromBedId: fromBed?.id ?? "",
     fromBedLabel: fromBed?.label ?? "Unknown",
@@ -288,7 +289,7 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
   const admission: IpdAdmission = {
-    id: `IPD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("IPD"),
     createdAt: now,
     updatedAt: now,
     status: "Admitted",
@@ -329,7 +330,7 @@ export async function createBed(input: { ward: HospitalWard; label: string; dail
   if (!label) return { error: "Bed label is required." };
 
   const bed: HospitalBed = {
-    id: `BED-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("BED"),
     ward: input.ward,
     label,
     status: "Vacant",

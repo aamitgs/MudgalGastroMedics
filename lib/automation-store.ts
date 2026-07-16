@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { listAppointments } from "@/lib/appointment-store";
 import { listAiReviews } from "@/lib/ai-review-store";
 import { listCommunicationLogs } from "@/lib/communication-store";
@@ -28,7 +29,7 @@ const docStore = createDocumentStore<AutomationStore>("automation", (parsed) => 
 
 
 function makeId() {
-  return `AUT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  return generateId("AUT");
 }
 
 function normalizeText(value: unknown) {

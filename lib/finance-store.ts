@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { listIpdAdmissions } from "@/lib/ipd-store";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
@@ -63,7 +64,7 @@ export async function createInsuranceClaim(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
   const claim: InsuranceClaim = {
-    id: `CLM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("CLM"),
     createdAt: now,
     updatedAt: now,
     admissionId: admission?.id,
@@ -122,7 +123,7 @@ export async function createAccountEntry(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
   const entry: AccountEntry = {
-    id: `ACC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("ACC"),
     createdAt: now,
     updatedAt: now,
     date: normalizeText(input.date) || now.slice(0, 10),

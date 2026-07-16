@@ -11,6 +11,7 @@ import type {
 } from "@/lib/audit-types";
 import { computeAuditChanges } from "@/lib/audit-diff";
 import { query, shouldUseDatabaseStores } from "@/lib/database";
+import { generateId } from "@/lib/id";
 
 type AuditStore = {
   events: AuditEvent[];
@@ -79,7 +80,7 @@ function getStore() {
 }
 
 function makeAuditId() {
-  return `AUD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  return generateId("AUD", 5);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffRole, StaffStatus } from "@/lib/hr-types";
 import { staffPermissions } from "@/lib/hr-types";
 
@@ -148,7 +149,7 @@ function withPermissions(member: StaffMember): StaffMember {
 }
 
 function makeId(prefix: string) {
-  return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  return generateId(prefix);
 }
 
 export async function listStaff() {

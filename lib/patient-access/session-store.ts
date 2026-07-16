@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 
 export const patientSessionCookie = "mgm_patient_session";
 
@@ -41,7 +42,7 @@ export async function createPatientSession(input: { identityId: string; phone: s
   const token = randomBytes(32).toString("base64url");
   const now = new Date();
   const session: PatientSession = {
-    id: `PSE-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("PSE", 4),
     tokenHash: hashToken(token),
     identityId: input.identityId,
     phone: input.phone,

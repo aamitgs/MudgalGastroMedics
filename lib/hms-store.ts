@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { getHmsModule, hmsModules } from "@/lib/hms-modules";
 import type { HmsModuleRecord, HmsRecordStatus } from "@/lib/hms-types";
 
@@ -50,7 +51,7 @@ export async function createHmsRecord(input: {
 
   const now = new Date().toISOString();
   const record: HmsModuleRecord = {
-    id: `HMS-R-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("HMS-R"),
     moduleId: hmsModule.id,
     title: input.title.trim(),
     status: input.status || "Pending",

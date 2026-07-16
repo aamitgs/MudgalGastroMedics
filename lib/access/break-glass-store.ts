@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 
 /**
  * Break-glass emergency access: a doctor asserts a genuine emergency and gains
@@ -32,7 +33,7 @@ const store = createDocumentStore<BreakGlassStore>("access-break-glass", (parsed
 export async function createBreakGlassGrant(input: { userId: string; userName: string; reason: string }) {
   const now = new Date();
   const grant: BreakGlassGrant = {
-    id: `BGL-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("BGL", 4),
     userId: input.userId,
     userName: input.userName,
     reason: input.reason,

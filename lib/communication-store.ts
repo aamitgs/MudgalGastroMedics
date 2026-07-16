@@ -1,6 +1,7 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import type { CommunicationChannel, CommunicationLog, CommunicationStatus, CommunicationTemplateKey } from "@/lib/communication-types";
+import { generateId } from "@/lib/id";
+import type { CommunicationChannel, CommunicationLog, CommunicationStatus } from "@/lib/communication-types";
 import { communicationTemplates } from "@/lib/communication-types";
 import { getPatientById, listPatients } from "@/lib/patient-store";
 
@@ -23,7 +24,7 @@ function normalizeText(value: unknown) {
 }
 
 function makeId() {
-  return `COM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  return generateId("COM");
 }
 
 function findTemplate(key: string) {

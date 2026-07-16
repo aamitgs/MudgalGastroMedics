@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 
 /**
  * Patient portal identities — a separate user base from staff (lib/access).
@@ -55,7 +56,7 @@ export async function ensurePatientIdentity(phone: string): Promise<PatientIdent
   if (existing) return existing;
   const now = new Date().toISOString();
   const identity: PatientIdentity = {
-    id: `PID-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    id: generateId("PID", 4),
     createdAt: now,
     updatedAt: now,
     phone: normalizePatientPhone(phone),

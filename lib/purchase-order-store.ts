@@ -1,5 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
+import { generateId } from "@/lib/id";
 import { adjustInventoryQuantity, listInventoryItems } from "@/lib/inventory-store";
 import type { PurchaseOrderItem, PurchaseOrderRecord, PurchaseOrderStatus } from "@/lib/purchase-order-types";
 
@@ -43,7 +44,7 @@ export async function createPurchaseOrder(input: {
 
   const now = new Date().toISOString();
   const record: PurchaseOrderRecord = {
-    id: `PO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+    id: generateId("PO"),
     createdAt: now,
     updatedAt: now,
     status: "Draft",
