@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Command, Menu, MessageSquare, Moon, Search, Sun } from "lucide-react";
+import { Building2, Command, Menu, Moon, Search, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LiveClockWeather } from "@/components/design-system/LiveClockWeather";
@@ -54,9 +54,6 @@ export function TopNav({
             <p className="mt-2 text-sm text-[var(--hos-muted-text)]">Multi-branch switching is stubbed for v1 and not connected to a backend.</p>
           </PopoverContent>
         </Popover>
-        <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" aria-label="Messages">
-          <MessageSquare size={18} />
-        </Button>
         <Button type="button" variant="outline" size="icon" className="border-[var(--hos-border)]" onClick={onOpenShortcuts} aria-label="Keyboard shortcuts">
           <Command size={18} />
         </Button>

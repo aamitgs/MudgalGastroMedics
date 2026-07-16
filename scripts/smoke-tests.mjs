@@ -471,3 +471,14 @@ test("Doctor Portal moved under /mudgalgastromedics-os/* and the old route was r
   // both tabs at once while on the Doctor Portal.
   assert.match(read("components/chrome/StaffChrome.tsx"), /pathname === href/);
 });
+
+test("Hospital OS TopNav has no unwired buttons", () => {
+  // A "Messages" icon button sat in every Hospital OS page's header with no
+  // onClick at all and no backing feature anywhere in the codebase (no
+  // store, no API route, no types) — clicking it silently did nothing.
+  // Removed rather than stubbed, since (unlike the disclosed "Branch
+  // switcher" stub beside it) nothing was ever built for it to open.
+  const topNav = read("components/hospital-os/TopNav.tsx");
+  assert.doesNotMatch(topNav, /aria-label="Messages"/);
+  assert.doesNotMatch(topNav, /MessageSquare/);
+});
