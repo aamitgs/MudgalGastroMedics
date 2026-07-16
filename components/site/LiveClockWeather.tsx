@@ -2,6 +2,7 @@
 
 import { Cloud, CloudFog, CloudLightning, CloudRain, CloudSun, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { isOpdOpenNow, opdWindows } from "@/lib/site-data";
 
 type Weather = {
   tempC: number;
@@ -30,7 +31,6 @@ const istDayFormat = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata"
 });
 
-/** OPD hours: Mon-Sat, 11:00-14:00 and 17:00-18:00 IST. Hospital operation is 24/7. */
 function isHospitalOpen(now: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -42,8 +42,7 @@ function isHospitalOpen(now: Date) {
   const weekday = parts.find((part) => part.type === "weekday")?.value ?? "";
   const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
   const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
-  const minutes = hour * 60 + minute;
-  return weekday !== "Sun" && ((minutes >= 11 * 60 && minutes < 14 * 60) || (minutes >= 17 * 60 && minutes < 18 * 60));
+  return isOpdOpenNow(weekday, hour * 60 + minute);
 }
 
 function greetingFor(now: Date) {
@@ -131,7 +130,7 @@ export function LiveClockWeather({ variant }: { variant: "site" | "os" | "launch
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${open ? "bg-teal" : "bg-coral"}`} />
             {open ? "OPD open now" : "OPD closed"}
-            <span className="text-muted/80">· 11 AM-2 PM & 5 PM-6 PM, Mon-Sat. Sunday closed</span>
+            <span className="text-muted/80">· {opdWindows[0].startLabel}-{opdWindows[0].endLabel} & {opdWindows[1].startLabel}-{opdWindows[1].endLabel}, Mon-Sat. Sunday closed</span>
           </span>
           {weather && WeatherIcon ? (
             <span className="inline-flex items-center gap-1.5">

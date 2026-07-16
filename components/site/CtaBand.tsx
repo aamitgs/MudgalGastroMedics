@@ -1,6 +1,6 @@
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { ButtonLink } from "@/components/site/ButtonLink";
-import { fullAddress, site } from "@/lib/site-data";
+import { fullAddress, opdWindows, site } from "@/lib/site-data";
 import { Clock, MapPin } from "lucide-react";
 
 export function CtaBand() {
@@ -24,7 +24,7 @@ export function CtaBand() {
                 <Clock className="mt-1 shrink-0 text-cyan-100" size={19} />
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white">OPD Timings</p>
-                  <p className="mt-1">Mon-Sat: Morning 11 AM-2 PM, Evening 5 PM-6 PM</p>
+                  <p className="mt-1">Mon-Sat: Morning {opdWindows[0].startLabel}-{opdWindows[0].endLabel}, Evening {opdWindows[1].startLabel}-{opdWindows[1].endLabel}</p>
                   <p className="mt-1 text-sm text-white/62">Sunday closed. Hospital operates 24/7. Call reception for urgent assistance.</p>
                 </div>
               </div>

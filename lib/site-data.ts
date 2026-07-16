@@ -32,6 +32,24 @@ export const site = {
 export const fullAddress = `${site.addressLine1}, ${site.addressLine2}, ${site.city}, ${site.region} ${site.postalCode}`;
 export const hospitalEntityId = `${site.url}/#hospital`;
 
+/**
+ * OPD consultation hours: Mon-Sat, 11 AM-2 PM and 5 PM-6 PM IST, closed Sunday.
+ * Hospital operation itself (ER/IPD) is 24/7 — this only covers walk-in OPD.
+ * Single source of truth for both display copy and "is OPD open now" checks.
+ */
+export const opdWindows = [
+  { startLabel: "11 AM", endLabel: "2 PM", startMinutes: 11 * 60, endMinutes: 14 * 60 },
+  { startLabel: "5 PM", endLabel: "6 PM", startMinutes: 17 * 60, endMinutes: 18 * 60 }
+] as const;
+
+/** `weekdayShort` is the Intl "short" weekday value (e.g. "Sun", "Mon"); `minutesSinceMidnight` is local IST minutes. */
+export function isOpdOpenNow(weekdayShort: string, minutesSinceMidnight: number): boolean {
+  return (
+    weekdayShort !== "Sun" &&
+    opdWindows.some((window) => minutesSinceMidnight >= window.startMinutes && minutesSinceMidnight < window.endMinutes)
+  );
+}
+
 export const doctor = {
   name: "Dr. Deepak Kumar Sharma",
   designation: "Consultant Gastroenterologist & Hepatologist",

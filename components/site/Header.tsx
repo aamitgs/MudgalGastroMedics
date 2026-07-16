@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronDown, Clock, MapPin, Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { site } from "@/lib/site-data";
+import { opdWindows, site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { LiveClockWeather } from "@/components/site/LiveClockWeather";
@@ -260,7 +260,7 @@ export function Header() {
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/75">
             <LiveClockWeather variant="site" />
-            <span className="inline-flex items-center gap-1.5"><Clock size={15} /> OPD: Mon-Sat, 11 AM-2 PM & 5 PM-6 PM. Sun closed</span>
+            <span className="inline-flex items-center gap-1.5"><Clock size={15} /> OPD: Mon-Sat, {opdWindows[0].startLabel}-{opdWindows[0].endLabel} & {opdWindows[1].startLabel}-{opdWindows[1].endLabel}. Sun closed</span>
             <span className="hidden items-center gap-1.5 sm:inline-flex"><MapPin size={15} /> Shaheed Nagar, Agra</span>
           </div>
         </div>

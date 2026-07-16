@@ -4,7 +4,7 @@ import { AlertTriangle, CalendarCheck, CheckCircle2, FileText, MapPin, MessageCi
 import { FormEvent, useRef, useState } from "react";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
 import type { AppointmentRecord } from "@/lib/appointment-types";
-import { site } from "@/lib/site-data";
+import { opdWindows, site } from "@/lib/site-data";
 
 /** Display-only Hindi labels; the submitted symptom value stays English so records remain consistent. */
 const symptomHindi: Record<string, string> = {
@@ -386,8 +386,8 @@ export function AppointmentForm() {
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Time</span><span data-hi lang="hi">पसंदीदा समय</span></span>
             <select name="timeSlot" className={fieldClass}>
               <option>Flexible</option>
-              <option>Morning 11 AM-2 PM</option>
-              <option>Evening 5 PM-6 PM</option>
+              <option>Morning {opdWindows[0].startLabel}-{opdWindows[0].endLabel}</option>
+              <option>Evening {opdWindows[1].startLabel}-{opdWindows[1].endLabel}</option>
             </select>
           </label>
           {appointmentFor === "IPD" ? (

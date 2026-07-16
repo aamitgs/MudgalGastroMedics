@@ -3,15 +3,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AlertTriangle, CalendarDays, Clock3, CloudSun, Droplets, Moon, PhoneCall, SunMedium, Wind } from "lucide-react";
-import { site } from "@/lib/site-data";
+import { isOpdOpenNow, opdWindows, site } from "@/lib/site-data";
 
 const timeZone = "Asia/Kolkata";
 const weatherEndpoint =
   "https://api.open-meteo.com/v1/forecast?latitude=27.1767&longitude=78.0081&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FKolkata";
-const opdWindows = [
-  { start: 11 * 60, end: 14 * 60 },
-  { start: 17 * 60, end: 18 * 60 }
-];
 const initialClockSnapshot = new Date("2026-01-01T09:00:00.000Z");
 type WeatherInfo = {
   temperature: number;
@@ -70,8 +66,7 @@ function getIndiaStatus(date: Date) {
   const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
   const second = Number(parts.find((part) => part.type === "second")?.value ?? "0");
   const minutes = hour * 60 + minute;
-  const isOpenDay = weekday !== "Sun";
-  const isOpen = isOpenDay && opdWindows.some(({ start, end }) => minutes >= start && minutes < end);
+  const isOpen = isOpdOpenNow(weekday, minutes);
   const displayTime = new Intl.DateTimeFormat("en-IN", {
     timeZone,
     hour: "numeric",
@@ -282,10 +277,10 @@ export function HeroOpdTimingCard() {
             <div aria-hidden="true" className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-cyan-200/25 blur-2xl" />
             <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),transparent_42%,rgba(255,255,255,0.08))]" />
             <p className="relative text-[11px] font-black uppercase tracking-[0.18em] text-cyan-100/70">Morning OPD</p>
-            <p className="mt-2 text-4xl font-black leading-none text-white sm:text-5xl">11 AM - 2 PM</p>
+            <p className="mt-2 text-4xl font-black leading-none text-white sm:text-5xl">{opdWindows[0].startLabel} - {opdWindows[0].endLabel}</p>
             <div className="my-5 h-px bg-gradient-to-r from-gold via-cyan-200/70 to-transparent" />
             <p className="relative text-[11px] font-black uppercase tracking-[0.18em] text-cyan-100/70">Evening OPD</p>
-            <p className="mt-2 text-3xl font-black leading-none text-cyan-100 sm:text-4xl">5 PM - 6 PM</p>
+            <p className="mt-2 text-3xl font-black leading-none text-cyan-100 sm:text-4xl">{opdWindows[1].startLabel} - {opdWindows[1].endLabel}</p>
           </div>
           <p className="mt-4 flex items-center gap-2 text-base font-bold text-muted">
             <CalendarDays size={18} /> Monday to Saturday.

@@ -1,5 +1,5 @@
 import { ArrowUp, CalendarCheck, ChevronDown, MapPin, MessageCircle, Phone } from "lucide-react";
-import { site } from "@/lib/site-data";
+import { opdWindows, site } from "@/lib/site-data";
 
 const hubActions = [
   {
@@ -32,7 +32,7 @@ const hubActions = [
   }
 ];
 
-const opdTiming = "OPD 11 AM-2 PM, 5-6 PM";
+const opdTiming = `OPD ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}, ${opdWindows[1].startLabel.replace(" PM", "")}-${opdWindows[1].endLabel}`;
 
 export function FloatingActionHub() {
   return (
