@@ -4,11 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Building2, MoreHorizontal } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import type { ReactNode } from "react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -34,7 +30,7 @@ import { AuditTrailPanel } from "@/components/hospital-os/AuditTrailPanel";
 import { BillingForm } from "@/components/hospital-os/BillingForm";
 import { DashboardOverview } from "@/components/hospital-os/DashboardOverview";
 import { DoctorWorkspace } from "@/components/hospital-os/DoctorWorkspace";
-import { HospitalOsShell } from "@/components/hospital-os/HospitalOsShell";
+import { HospitalOsPageShell } from "@/components/hospital-os/HospitalOsPageShell";
 import { OperationsTable } from "@/components/hospital-os/OperationsTable";
 import { PatientPortalPanel } from "@/components/hospital-os/PatientPortalPanel";
 import { PatientRegistrationForm } from "@/components/hospital-os/PatientRegistrationForm";
@@ -60,34 +56,23 @@ function exportPatientFlowRow(patient: PatientFlowRow) {
   downloadCsvFile([patientFlowExportRow(patient)], `hospital-os-patient-flow-${patientSlug}.csv`);
 }
 
-function HospitalOsProviders({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
-  const [client] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 20_000,
-        refetchOnWindowFocus: false
-      }
-    }
-  }));
-
-  return (
-    <QueryClientProvider client={client}>
-      <HospitalOsShell>
-        <DashboardContent roleTodayBand={roleTodayBand} />
-      </HospitalOsShell>
-    </QueryClientProvider>
-  );
-}
-
 /**
  * `roleTodayBand` is a server-rendered RoleTodayBand element passed down from
  * app/mudgalgastromedics-os/page.tsx — RoleTodayBand is an async server
  * component and this whole tree is client-only (next/dynamic, ssr:false), so
  * it can't be imported here directly; it can only arrive pre-rendered as a
  * prop, same as any other "server component passed to a client component".
+ *
+ * HospitalOsPageShell provides the QueryClient + HospitalOsShell, same as
+ * every per-module route — this used to hand-roll its own QueryClient here
+ * (Track 2.7 audit: two ad hoc instances with identical config).
  */
 export function HospitalOperatingSystem({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
-  return <HospitalOsProviders roleTodayBand={roleTodayBand} />;
+  return (
+    <HospitalOsPageShell>
+      <DashboardContent roleTodayBand={roleTodayBand} />
+    </HospitalOsPageShell>
+  );
 }
 
 /**
