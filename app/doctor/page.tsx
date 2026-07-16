@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DoctorPortalWorkspace } from "@/components/chrome/DoctorPortalWorkspace";
 import { accessContextFromCookieStore, canOpenDoctorWorkspace } from "@/lib/access/page-auth";
+import { listOpdVisits } from "@/lib/opd-store";
+import { listPatients } from "@/lib/patient-store";
 
 export const metadata: Metadata = {
   title: { absolute: "Doctor Workspace • MudgalGastromedics OS" },
@@ -20,6 +22,14 @@ export default async function DoctorPortalPage() {
   // this workspace (never signed in, or signed in with a non-doctor role)
   // goes to the one real entry point instead.
   if (!isAuthenticated) redirect("/mudgalgastromedics-os");
+
+  // Fetched here instead of client-side on mount (Track 3.4 audit) — the
+  // doctor/duty-doctor/super-admin roles that can reach this gate already
+  // have "view" on both "appointments" and "patients" in the RBAC matrix
+  // (lib/access/matrix.ts), so calling the stores directly is exactly as
+  // authorized as the client fetch it replaces, without the extra HTTP
+  // round-trip through /api/opd and /api/patients.
+  const [visits, patients] = await Promise.all([listOpdVisits(), listPatients()]);
 
   return (
     <main>
@@ -41,7 +51,7 @@ export default async function DoctorPortalPage() {
           used by this page's own hero and StaffChrome's top bar. */}
       <section className="clinical-grid bg-soft/75 pb-16 pt-10 md:pb-24 md:pt-14">
         <div className="mx-auto w-[min(1560px,calc(100%-32px))]">
-          <DoctorPortalWorkspace />
+          <DoctorPortalWorkspace initialVisits={visits} initialPatients={patients} />
         </div>
       </section>
     </main>

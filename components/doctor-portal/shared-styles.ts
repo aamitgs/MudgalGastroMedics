@@ -1,0 +1,2 @@
+export const textareaClass = "min-h-28 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
+export const inputClass = "min-h-9 w-full rounded border border-line bg-white px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-soft disabled:opacity-60";
