@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AccessLogin } from "@/components/chrome/AccessLogin";
 import { AdminLogin } from "@/components/chrome/AdminLogin";
 import { DoctorLogin } from "@/components/chrome/DoctorLogin";
-import { LiveClockWeather } from "@/components/site/LiveClockWeather";
+import { LiveClockWeather } from "@/components/design-system/LiveClockWeather";
 import type { AccessRole } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
 

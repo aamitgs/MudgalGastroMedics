@@ -8,7 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { opdWindows, site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { LanguageToggle } from "@/components/site/LanguageToggle";
-import { LiveClockWeather } from "@/components/site/LiveClockWeather";
+import { LiveClockWeather } from "@/components/design-system/LiveClockWeather";
 
 const navItems = [
   { href: "/", label: "Home" },
