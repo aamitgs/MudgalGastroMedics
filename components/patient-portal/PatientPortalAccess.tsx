@@ -9,6 +9,7 @@ import {
   type PatientAppointmentSummary,
   type PatientIpdAdmissionSummary,
   type PatientInsuranceClaimSummary,
+  type PatientLabOrderSummary,
   type PatientVisitSummary,
   type PatientVitalsPoint
 } from "@/components/patient-portal/PatientHealthDashboard";
@@ -22,6 +23,7 @@ type LookupResponse = {
   ipdAdmissions?: PatientIpdAdmissionSummary[];
   vitals?: PatientVitalsPoint[];
   insuranceClaims?: PatientInsuranceClaimSummary[];
+  labOrders?: PatientLabOrderSummary[];
   error?: string;
 };
 
@@ -60,6 +62,7 @@ export function PatientPortalAccess() {
   const [ipdAdmissions, setIpdAdmissions] = useState<PatientIpdAdmissionSummary[]>([]);
   const [vitals, setVitals] = useState<PatientVitalsPoint[]>([]);
   const [insuranceClaims, setInsuranceClaims] = useState<PatientInsuranceClaimSummary[]>([]);
+  const [labOrders, setLabOrders] = useState<PatientLabOrderSummary[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [printableVisit, setPrintableVisit] = useState<PatientVisitSummary | null>(null);
   const [status, setStatus] = useState("");
@@ -134,6 +137,7 @@ export function PatientPortalAccess() {
       setIpdAdmissions(data.ipdAdmissions ?? []);
       setVitals(data.vitals ?? []);
       setInsuranceClaims(data.insuranceClaims ?? []);
+      setLabOrders(data.labOrders ?? []);
       setFamilyMembers(familyResponse.ok && familyData.ok ? familyData.members ?? [] : []);
     }
 
@@ -249,6 +253,7 @@ export function PatientPortalAccess() {
     setIpdAdmissions([]);
     setVitals([]);
     setInsuranceClaims([]);
+    setLabOrders([]);
     setFamilyMembers([]);
     setStatus("");
   }
@@ -461,6 +466,7 @@ export function PatientPortalAccess() {
               ipdAdmissions={ipdAdmissions}
               vitals={vitals}
               insuranceClaims={insuranceClaims}
+              labOrders={labOrders}
               familyMembers={familyMembers}
               onAddFamilyMember={addFamilyMember}
               onRemoveFamilyMember={removeFamilyMember}

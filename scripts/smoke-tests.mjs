@@ -297,3 +297,23 @@ test("prescription regimen templates are wired end-to-end", () => {
   // the doctor already typed (Track 4.2's "never silently lose data" principle).
   assert.match(read("components/doctor-portal/PrescriptionField.tsx"), /draft\.trim\(\) \? `\$\{draft\}/);
 });
+
+test("patient-facing report-ready and recall reminders are wired end-to-end", () => {
+  assert.match(read("lib/lab-store.ts"), /export async function listPatientLabOrders/);
+  assert.match(read("app/api/patient/appointments/route.ts"), /listPatientLabOrders/);
+  assert.match(read("app/api/patient/appointments/route.ts"), /labOrders/);
+  // Deliberately minimal patient-facing lab fields — no resultSummary/
+  // criticalFlag/criticalReasons exposed (raw critical values shown with no
+  // clinician mediating the context is a real patient-safety risk).
+  assert.doesNotMatch(read("app/api/patient/appointments/route.ts"), /resultSummary:|criticalFlag:|criticalReasons:/);
+
+  const dashboard = read("components/patient-portal/PatientHealthDashboard.tsx");
+  assert.match(dashboard, /evaluateRecalls/);
+  assert.match(dashboard, /"Result Ready"/);
+  // The old bug this replaced: showing a followUpDate reminder forever, even
+  // after the patient already returned for that visit — evaluateRecalls'
+  // "fulfilled" status must gate it out now, not a bare followUpDate check.
+  assert.doesNotMatch(dashboard, /if \(visit\.followUpDate\) items\.push/);
+
+  assert.match(read("lib/clinical/recall.ts"), /export type RecallVisit/);
+});

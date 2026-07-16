@@ -9,7 +9,18 @@
  * staff ever manually closed the reminder.
  */
 
-import type { OpdVisit } from "@/lib/opd-types";
+/**
+ * Structural rather than importing OpdVisit directly — the exact same
+ * evaluator is reused for the patient portal's own reshaped visit summary
+ * type (which isn't assignment-compatible with the full OpdVisit shape),
+ * not just the staff-side automation/notification/analytics call sites.
+ */
+export type RecallVisit = {
+  id: string;
+  patientId?: string;
+  createdAt: string;
+  followUpDate?: string;
+};
 
 export type RecallStatus = "not-due" | "due-soon" | "overdue" | "fulfilled";
 
@@ -26,8 +37,8 @@ export const recallDueSoonWindowDays = 7;
 /** Past this many days overdue, a recall reads as an escalated safety concern, not a routine reminder. */
 export const recallEscalationDays = 30;
 
-function groupVisitsByPatient(visits: OpdVisit[]): Map<string, OpdVisit[]> {
-  const byPatient = new Map<string, OpdVisit[]>();
+function groupVisitsByPatient<T extends RecallVisit>(visits: T[]): Map<string, T[]> {
+  const byPatient = new Map<string, T[]>();
   for (const visit of visits) {
     if (!visit.patientId) continue;
     const list = byPatient.get(visit.patientId);
@@ -43,7 +54,7 @@ function groupVisitsByPatient(visits: OpdVisit[]): Map<string, OpdVisit[]> {
  * auto-marked fulfilled — safer to leave a human to resolve it than to guess
  * a false match and silently hide a real gap.
  */
-function evaluate(visit: OpdVisit, visitsForPatient: OpdVisit[], now: Date): RecallEvaluation | null {
+function evaluate<T extends RecallVisit>(visit: T, visitsForPatient: T[], now: Date): RecallEvaluation | null {
   if (!visit.followUpDate) return null;
   const dueDate = new Date(visit.followUpDate);
   if (Number.isNaN(dueDate.getTime())) return null;
@@ -61,13 +72,13 @@ function evaluate(visit: OpdVisit, visitsForPatient: OpdVisit[], now: Date): Rec
 }
 
 /** Single-visit evaluation — mainly for tests; call sites evaluating many visits should use evaluateRecalls to avoid re-scanning the full list per visit. */
-export function evaluateRecall(visit: OpdVisit, allVisits: OpdVisit[], now = new Date()): RecallEvaluation | null {
+export function evaluateRecall<T extends RecallVisit>(visit: T, allVisits: T[], now = new Date()): RecallEvaluation | null {
   const visitsForPatient = visit.patientId ? allVisits.filter((other) => other.patientId === visit.patientId) : [visit];
   return evaluate(visit, visitsForPatient, now);
 }
 
 /** Groups by patient once (O(n)), then evaluates every visit that carries a followUpDate. Keyed by visit id. */
-export function evaluateRecalls(visits: OpdVisit[], now = new Date()): Map<string, RecallEvaluation> {
+export function evaluateRecalls<T extends RecallVisit>(visits: T[], now = new Date()): Map<string, RecallEvaluation> {
   const byPatient = groupVisitsByPatient(visits);
   const results = new Map<string, RecallEvaluation>();
   for (const visit of visits) {

@@ -4,6 +4,7 @@ import { listPatientAppointments } from "@/lib/appointment-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { listPatientIpdAdmissions, listVitals } from "@/lib/ipd-store";
 import { listPatientInsuranceClaims } from "@/lib/finance-store";
+import { listPatientLabOrders } from "@/lib/lab-store";
 import { patientRecordsLookupSchema } from "@/lib/validation/patient-auth";
 
 export async function POST(request: Request) {
@@ -90,5 +91,18 @@ export async function POST(request: Request) {
     status: claim.status
   }));
 
-  return NextResponse.json({ ok: true, appointments, visits, ipdAdmissions, vitals, insuranceClaims });
+  // Deliberately minimal — no resultSummary/criticalFlag/criticalReasons here.
+  // Raw critical lab values shown to a patient with no clinician mediating the
+  // context is a real patient-safety risk (misread/panic); this only powers a
+  // "your report is ready, please contact the hospital" pointer, never the
+  // clinical content itself.
+  const labOrders = (await listPatientLabOrders(phone)).map((order) => ({
+    id: order.id,
+    createdAt: order.createdAt,
+    service: order.service,
+    tests: order.tests,
+    status: order.status
+  }));
+
+  return NextResponse.json({ ok: true, appointments, visits, ipdAdmissions, vitals, insuranceClaims, labOrders });
 }

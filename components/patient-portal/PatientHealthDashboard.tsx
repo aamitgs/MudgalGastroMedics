@@ -20,6 +20,7 @@ import {
 import { FormEvent, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { EmptyState } from "@/components/design-system/EmptyState";
+import { evaluateRecalls } from "@/lib/clinical/recall";
 import { familyRelations } from "@/lib/family-types";
 import type { FamilyMember } from "@/lib/family-types";
 import { site } from "@/lib/site-data";
@@ -41,6 +42,7 @@ export type PatientAppointmentSummary = {
 export type PatientVisitSummary = {
   id: string;
   token: string;
+  patientId?: string;
   createdAt: string;
   status: string;
   patientName: string;
@@ -56,6 +58,14 @@ export type PatientVisitSummary = {
   prescription?: string;
   advice?: string;
   followUpDate?: string;
+};
+
+export type PatientLabOrderSummary = {
+  id: string;
+  createdAt: string;
+  service: string;
+  tests: string[];
+  status: string;
 };
 
 export type PatientIpdAdmissionSummary = {
@@ -110,6 +120,7 @@ type PatientHealthDashboardProps = {
   ipdAdmissions: PatientIpdAdmissionSummary[];
   vitals: PatientVitalsPoint[];
   insuranceClaims: PatientInsuranceClaimSummary[];
+  labOrders: PatientLabOrderSummary[];
   familyMembers: FamilyMember[];
   onAddFamilyMember: (input: { name: string; relation: string; age?: string; phone?: string }) => Promise<void>;
   onRemoveFamilyMember: (id: string) => Promise<void>;
@@ -135,6 +146,7 @@ export function PatientHealthDashboard({
   ipdAdmissions,
   vitals,
   insuranceClaims,
+  labOrders,
   familyMembers,
   onAddFamilyMember,
   onRemoveFamilyMember,
@@ -152,16 +164,34 @@ export function PatientHealthDashboard({
 
   const reminders = useMemo(() => {
     const items: { id: string; message: string }[] = [];
+
+    // Only due-soon/overdue recalls are surfaced — a follow-up the patient has
+    // already come back for (evaluateRecalls' "fulfilled" status) or one
+    // that's not due for months never shows, unlike the old "any followUpDate
+    // at all" check this replaced (which nagged forever, even after the visit).
+    const recalls = evaluateRecalls(visits);
     for (const visit of visits) {
-      if (visit.followUpDate) items.push({ id: `${visit.id}-followup`, message: `Follow-up visit suggested on ${visit.followUpDate} for ${visit.service}.` });
+      const recall = recalls.get(visit.id);
+      if (recall?.status === "overdue") {
+        items.push({ id: `${visit.id}-followup`, message: `Your follow-up for ${visit.service} was due on ${recall.dueDate} — please book a visit soon.` });
+      } else if (recall?.status === "due-soon") {
+        items.push({ id: `${visit.id}-followup`, message: `Follow-up visit due on ${recall.dueDate} for ${visit.service}.` });
+      }
     }
+
+    for (const order of labOrders) {
+      if (order.status === "Result Ready") {
+        items.push({ id: `${order.id}-lab-ready`, message: `Your ${order.tests.join(", ") || order.service} report is ready — please contact the hospital to collect it.` });
+      }
+    }
+
     for (const admission of ipdAdmissions) {
       if (admission.status === "Admitted" && admission.expectedDischargeDate) {
         items.push({ id: `${admission.id}-discharge`, message: `Expected discharge from ${admission.bedLabel} around ${formatDate(admission.expectedDischargeDate)}.` });
       }
     }
     return items;
-  }, [visits, ipdAdmissions]);
+  }, [visits, labOrders, ipdAdmissions]);
 
   const timeline = useMemo<TimelineEvent[]>(() => {
     const events: TimelineEvent[] = [];

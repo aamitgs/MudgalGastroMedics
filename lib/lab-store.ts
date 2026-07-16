@@ -33,6 +33,16 @@ export async function listLabOrders() {
   return doc.orders;
 }
 
+export async function listPatientLabOrders(phone: string) {
+  const normalizedPhone = phone.replace(/\D/g, "");
+  if (normalizedPhone.length < 6) return [];
+
+  return (await docStore.load()).orders.filter((order) => {
+    const orderPhone = order.phone.replace(/\D/g, "");
+    return orderPhone.endsWith(normalizedPhone) || normalizedPhone.endsWith(orderPhone);
+  });
+}
+
 export async function createLabOrder(input: Record<string, unknown>) {
   const doc = await docStore.load();
   const visitId = normalizeText(input.visitId);
