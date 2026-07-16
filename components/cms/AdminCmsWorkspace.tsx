@@ -6,7 +6,6 @@ import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { CmsContentSortField } from "@/lib/cms-content-query";
-import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
@@ -27,7 +26,7 @@ type CmsResponse = {
   items?: CmsContentItem[];
   item?: CmsContentItem;
   revisions?: CmsContentRevision[];
-  currentUser?: StaffMember;
+  currentUser?: { name: string; role: string };
   pageCount?: number;
   error?: string;
 };
@@ -46,7 +45,7 @@ export function AdminCmsWorkspace() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
   const [previewItem, setPreviewItem] = useState<CmsContentItem | null>(null);
   const [revisions, setRevisions] = useState<CmsContentRevision[]>([]);
-  const [currentUser, setCurrentUser] = useState<StaffMember | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ name: string; role: string } | null>(null);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCount, setPageCount] = useState(1);
@@ -257,7 +256,7 @@ export function AdminCmsWorkspace() {
           </p>
           {currentUser ? (
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-teal-dark">
-              Signed in as {currentUser.name} | {currentUser.role} | {currentUser.permissions.join(", ")}
+              Signed in as {currentUser.name} | {currentUser.role}
             </p>
           ) : null}
         </div>

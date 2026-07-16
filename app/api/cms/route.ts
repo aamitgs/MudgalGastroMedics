@@ -4,15 +4,15 @@ import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } from "@/lib/cms-store";
 import { queryCmsContent, type CmsContentSortField, type SortDirection } from "@/lib/cms-content-query";
-import { getAdminAuthContext, requirePermission } from "@/lib/rbac";
+import { authorize } from "@/lib/access/guard";
 import { cmsStatusUpdateSchema, cmsUpsertSchema } from "@/lib/validation/operations";
 
 const sortFields: CmsContentSortField[] = ["title", "type", "status", "owner", "createdAt"];
 
 export async function GET(request: Request) {
-  const context = await getAdminAuthContext(request);
-  const allowed = requirePermission(context, "cms:read");
-  if (!allowed.ok) return NextResponse.json({ ok: false, error: allowed.error }, { status: allowed.status });
+  const auth = await authorize(request, "cms", "view");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  const currentUser = { name: auth.context.userName, role: auth.context.activeRole };
 
   const params = new URL(request.url).searchParams;
   const itemId = params.get("itemId") || undefined;
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       ok: true,
       items: allItems,
       revisions: (await listCmsRevisions(itemId)),
-      currentUser: context.staff
+      currentUser
     });
   }
 
@@ -49,36 +49,34 @@ export async function GET(request: Request) {
     ok: true,
     ...result,
     revisions: (await listCmsRevisions(itemId)),
-    currentUser: context.staff
+    currentUser
   });
 }
 
 export async function POST(request: Request) {
-  const context = await getAdminAuthContext(request);
-  const writeAllowed = requirePermission(context, "cms:write");
-  if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
+  // Publishing/archiving needs no separate check: under the current RBAC
+  // matrix only "admin" (and the super-admin bypass) hold any "cms" grant at
+  // all, so a single "edit" check already covers publish — unlike the
+  // retired legacy bridge, no role here has edit-without-publish.
+  const auth = await authorize(request, "cms", "edit");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const parsed = cmsUpsertSchema.safeParse(await request.json().catch(() => ({})));
   const body = parsed.success ? parsed.data : {};
   const type = body.type && cmsContentTypes.includes(body.type as CmsContentType) ? (body.type as CmsContentType) : "Page";
   const status = body.status && cmsContentStatuses.includes(body.status as CmsContentStatus) ? (body.status as CmsContentStatus) : "Draft";
 
-  if (status === "Published" || status === "Archived") {
-    const publishAllowed = requirePermission(context, "cms:publish");
-    if (!publishAllowed.ok) return NextResponse.json({ ok: false, error: "CMS publish permission required." }, { status: 403 });
-  }
-
   const item = (await upsertCmsContent({ ...body, type, status }));
 
   if (!item) return NextResponse.json({ ok: false, error: "Title and slug are required." }, { status: 400 });
 
   await recordAuditEvent({
-    actorRole: "admin",
-    actorId: context.staff?.id,
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
     action: "cms.content.saved",
     entityType: "cms_content",
     entityId: item.id,
-    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role },
+    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: auth.context.userName },
     device: auditRequestMetadata(request)
   });
 
@@ -86,9 +84,8 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const context = await getAdminAuthContext(request);
-  const writeAllowed = requirePermission(context, "cms:write");
-  if (!writeAllowed.ok) return NextResponse.json({ ok: false, error: writeAllowed.error }, { status: writeAllowed.status });
+  const auth = await authorize(request, "cms", "edit");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const parsed = cmsStatusUpdateSchema.safeParse(await request.json().catch(() => ({})));
   const { id, status: rawStatus } = parsed.success ? parsed.data : { id: "", status: undefined };
@@ -96,21 +93,16 @@ export async function PATCH(request: Request) {
 
   if (!id || !status) return NextResponse.json({ ok: false, error: "Valid id and status are required." }, { status: 400 });
 
-  if (status === "Published" || status === "Archived") {
-    const publishAllowed = requirePermission(context, "cms:publish");
-    if (!publishAllowed.ok) return NextResponse.json({ ok: false, error: "CMS publish permission required." }, { status: 403 });
-  }
-
   const item = (await updateCmsStatus(id, status));
   if (!item) return NextResponse.json({ ok: false, error: "CMS item not found." }, { status: 404 });
 
   await recordAuditEvent({
-    actorRole: "admin",
-    actorId: context.staff?.id,
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
     action: "cms.content.status.updated",
     entityType: "cms_content",
     entityId: item.id,
-    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: context.staff?.name, role: context.staff?.role },
+    metadata: { type: item.type, status: item.status, slug: item.slug, staffName: auth.context.userName },
     device: auditRequestMetadata(request)
   });
 

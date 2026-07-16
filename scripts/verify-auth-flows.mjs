@@ -102,6 +102,16 @@ check("reception denied audit logs (403)", audit.status === 403, String(audit.st
 const me = await api(staff, "GET", "/api/auth/me");
 check("me reflects active reception role", me.data.activeRole === "reception", JSON.stringify(me.data).slice(0, 120));
 
+console.log("-- CMS route: migrated onto authorize(), matrix-only access --");
+// Under the current RBAC matrix only "admin" (and the super-admin bypass)
+// hold any "cms" grant — reception has none, unlike the retired legacy
+// bridge which gave Reception cms:read. Confirms app/api/cms/route.ts's
+// migration off lib/rbac.ts didn't loosen or tighten access unexpectedly.
+const adminCms = await api(admin, "GET", "/api/cms");
+check("legacy admin (super-admin) can read CMS", adminCms.status === 200, String(adminCms.status));
+const receptionCms = await api(staff, "GET", "/api/cms");
+check("RBAC reception denied CMS (403)", receptionCms.status === 403, String(receptionCms.status));
+
 const wrongRole = await api(jar(), "POST", "/api/auth/login", { username, password: newPassword, role: "admin" });
 check("role-not-held rejected (403)", wrongRole.status === 403, String(wrongRole.status));
 

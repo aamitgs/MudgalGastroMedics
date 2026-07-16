@@ -153,12 +153,14 @@ test("production safety defaults are documented in auth and mobile helpers", () 
   assert.match(read("lib/mobile-api.ts"), /isProduction\(\) \? "" : "mgm-mobile"/);
 });
 
-test("staff RBAC and CMS publish permissions are enforced", () => {
-  assert.equal(exists("lib/rbac.ts"), true);
+test("staff RBAC and CMS permissions are enforced", () => {
+  assert.equal(exists("lib/rbac.ts"), false);
+  assert.match(read("app/api/cms/route.ts"), /authorize\(request, "cms"/);
+  // Legacy StaffMember.permissions (incl. cms:publish) is still maintained for
+  // the AdminHR toggle UI and the DB schema, even though no route reads it
+  // for authorization anymore since the CMS route migrated onto authorize().
   assert.match(read("lib/hr-types.ts"), /cms:publish/);
   assert.match(read("lib/hr-store.ts"), /roleDefaultPermissions/);
-  assert.match(read("app/api/cms/route.ts"), /requirePermission/);
-  assert.match(read("app/api/cms/route.ts"), /CMS publish permission required/);
   assert.match(read("components/hr/AdminHR.tsx"), /staffPermissions/);
   assert.match(read("database/schema.sql"), /permissions text\[\]/);
 });
