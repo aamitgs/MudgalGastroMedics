@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Eye, EyeOff, FileCheck2, KeyRound, LockKeyhole, ShieldCheck, Smartphone, UserCheck } from "lucide-react";
 import { useState } from "react";
-import { roleMeta, staffLoginRoles, type AccessRole } from "@/lib/access/matrix";
+import { roleMeta, staffLoginRoles } from "@/lib/access/matrix";
 import { site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
 
