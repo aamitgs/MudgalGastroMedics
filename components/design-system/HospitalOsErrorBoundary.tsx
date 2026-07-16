@@ -8,8 +8,9 @@ import { useEffect } from "react";
 /**
  * Error boundary for /mudgalgastromedics-os/* routes. The sidebar/top bar
  * (HospitalOsShell) is rendered inside each page's own component tree, not a
- * parent layout, so a page-level error unmounts it too — unlike /doctor,
- * where StaffChrome sits above the route segment and survives errors
+ * parent layout, so a page-level error unmounts it too — unlike the Doctor
+ * Portal (/mudgalgastromedics-os/doctor-portal), where StaffChrome sits in
+ * its own layout.tsx above the route segment and survives errors
  * automatically. This gives OS routes an OS-styled fallback with an explicit
  * way back to the dashboard, instead of falling through to the root
  * error.tsx (site tokens, no nav) and stranding the user.

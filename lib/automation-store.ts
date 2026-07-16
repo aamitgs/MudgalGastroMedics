@@ -218,7 +218,7 @@ export async function generateAutomationTasks() {
           patientName: visit.patientName,
           phone: visit.phone,
           owner: "Reception",
-          actionUrl: "/doctor"
+          actionUrl: "/mudgalgastromedics-os/doctor-portal"
         }));
       }
     }

@@ -26,7 +26,7 @@ type WorkspaceTile = {
 // a redirect, so those stale hrefs still worked but only via two extra hops
 // through HospitalOsShell's legacy-hash fallback.
 const tiles: WorkspaceTile[] = [
-  { key: "doctor", label: "Doctor Portal", hint: "OPD queue & consultations", icon: Stethoscope, role: "", destination: "/doctor" },
+  { key: "doctor", label: "Doctor Portal", hint: "OPD queue & consultations", icon: Stethoscope, role: "", destination: "/mudgalgastromedics-os/doctor-portal" },
   { key: "reception", label: "Reception Desk", hint: "Appointments & registration", icon: UsersRound, role: "reception", destination: "/mudgalgastromedics-os/appointments" },
   { key: "pharmacy", label: "Pharmacy", hint: "Dispensing & stock", icon: Pill, role: "pharmacist", destination: "/mudgalgastromedics-os/pharmacy" },
   { key: "laboratory", label: "Laboratory", hint: "Orders & results", icon: FlaskConical, role: "lab-technician", destination: "/mudgalgastromedics-os/lab" },

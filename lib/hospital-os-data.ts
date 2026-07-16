@@ -244,7 +244,7 @@ export const navItems: NavItem[] = [
   { label: "Procedures", group: "Clinical", href: "/mudgalgastromedics-os/procedures", icon: Syringe, roles: rolesWithPermission("appointments") },
   { label: "IPD", group: "Clinical", href: "/mudgalgastromedics-os/ipd", icon: Bed, roles: rolesWithPermission("beds") },
   { label: "Doctor Workflow", group: "Clinical", href: "/mudgalgastromedics-os/doctor-workflow", icon: NotebookPen, roles: rolesWithPermission("prescriptions") },
-  { label: "Prescriptions", group: "Clinical", href: "/doctor", icon: FileText, roles: rolesWithPermission("prescriptions") },
+  { label: "Prescriptions", group: "Clinical", href: "/mudgalgastromedics-os/doctor-portal", icon: FileText, roles: rolesWithPermission("prescriptions") },
   { label: "Pharmacy", group: "Operations", href: "/mudgalgastromedics-os/pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Laboratory", group: "Diagnostics", href: "/mudgalgastromedics-os/lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
   { label: "Radiology & Pathology", group: "Diagnostics", href: "/mudgalgastromedics-os/radiology-pathology", icon: ScanLine, roles: rolesWithPermission("lab-orders") },
@@ -259,7 +259,7 @@ export const navItems: NavItem[] = [
   { label: "Notifications", group: "Overview", href: `${dashboardPath}#realtime-feed`, icon: Bell, roles: rolesWithPermission(null) },
   // Real AI features (patient summary, visit assistant, discharge/referral/
   // certificate drafting) live inside the Doctor Portal, not a standalone page.
-  { label: "AI Assistant", group: "Overview", href: "/doctor", icon: Sparkles, roles: rolesWithPermission("patients") },
+  { label: "AI Assistant", group: "Overview", href: "/mudgalgastromedics-os/doctor-portal", icon: Sparkles, roles: rolesWithPermission("patients") },
   { label: "Readiness", group: "Administration", href: "/mudgalgastromedics-os/readiness", icon: Gauge, roles: rolesWithPermission("system-settings") },
   { label: "Audit", group: "Administration", href: "/mudgalgastromedics-os/audit", icon: History, roles: rolesWithPermission("audit-logs") },
   { label: "Analytics", group: "Administration", href: "/mudgalgastromedics-os/analytics", icon: LineChart, roles: rolesWithPermission("reports") },

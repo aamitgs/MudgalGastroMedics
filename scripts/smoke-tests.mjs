@@ -178,11 +178,14 @@ test("every HMS workspace has a dedicated Hospital OS route", () => {
 
 test("patient and doctor portals have separate access surfaces", () => {
   assert.equal(exists("app/(marketing)/portal/page.tsx"), true);
-  assert.equal(exists("app/doctor/page.tsx"), true);
+  assert.equal(exists("app/mudgalgastromedics-os/doctor-portal/page.tsx"), true);
   assert.equal(exists("components/patient-portal/PatientPortalAccess.tsx"), true);
   assert.equal(exists("components/chrome/DoctorLogin.tsx"), true);
-  assert.match(read("app/doctor/page.tsx"), /canOpenDoctorWorkspace/);
+  assert.match(read("app/mudgalgastromedics-os/doctor-portal/page.tsx"), /canOpenDoctorWorkspace/);
   assert.match(read("app/api/doctor/session/route.ts"), /DOCTOR_PASSCODE|isValidDoctorPasscode/);
+  // /doctor was retired outright (Track 4.14) — confirmed with the user that
+  // nothing external ever linked there, so no redirect stub is kept.
+  assert.equal(exists("app/doctor"), false);
 });
 
 test("production safety defaults are documented in auth and mobile helpers", () => {
@@ -324,7 +327,12 @@ test("self-service account photo upload is wired end-to-end", () => {
   assert.match(read("lib/validation/auth.ts"), /allowedAccountPhotoMimeTypes.*image\/jpeg.*image\/png.*image\/webp/s);
 
   assert.match(read("app/api/auth/me/route.ts"), /hasPhoto: Boolean\(user\.photoDocumentId\)/);
-  assert.match(read("components/hospital-os/TopNav.tsx"), /\/api\/account\/photo/);
+
+  // Upload/validation logic lives in one shared component, not copied into
+  // both TopNav (Hospital OS shell) and StaffChrome (Doctor Portal shell).
+  assert.match(read("components/design-system/ProfilePhotoButton.tsx"), /\/api\/account\/photo/);
+  assert.match(read("components/hospital-os/TopNav.tsx"), /ProfilePhotoButton/);
+  assert.match(read("components/chrome/StaffChrome.tsx"), /ProfilePhotoButton/);
 });
 
 test("prescription regimen templates are wired end-to-end", () => {
@@ -403,7 +411,7 @@ test("Global Patient Drawer is mounted on the Hospital OS shell, not just the do
   // Every admin module (Patients, Pharmacy, Lab, IPD, Appointments, Billing...)
   // calls usePatientDrawerStore().openDrawer() when a row is clicked, but the
   // <PatientDrawer /> component that actually renders the sheet was only ever
-  // mounted inside StaffChrome.tsx (the /doctor shell) — every row click across
+  // mounted inside StaffChrome.tsx (the Doctor Portal shell) — every row click across
   // every /mudgalgastromedics-os/* page silently did nothing. Confirmed live
   // with Playwright: role="dialog" count stayed 0 after clicking a patient row
   // before this fix, 1 after.
@@ -416,7 +424,7 @@ test("Sonner Toaster is mounted on the Hospital OS shell, not just the doctor po
   // lib/notify.ts (used by every admin module for success/error/retry
   // feedback) is a thin wrapper over sonner's toast() — it renders nothing
   // without a mounted <Toaster />. That component only ever lived in
-  // StaffChrome.tsx (the /doctor shell), so every notify.*() call across every
+  // StaffChrome.tsx (the Doctor Portal shell), so every notify.*() call across every
   // /mudgalgastromedics-os/* admin module produced zero visible feedback.
   // Confirmed live with Playwright: an offline notify.retryable() call showed
   // no toast before this fix, a real "Unable to reach the server..." toast
@@ -428,7 +436,7 @@ test("Sonner Toaster is mounted on the Hospital OS shell, not just the doctor po
 
 test("StaffFooter is mounted on the Hospital OS shell and defers to its ShortcutsDialog", () => {
   // StaffFooter (system status, version, Privacy/Terms/Support, shortcuts)
-  // only ever rendered inside StaffChrome.tsx (the /doctor shell) — the OS
+  // only ever rendered inside StaffChrome.tsx (the Doctor Portal shell) — the OS
   // shell had no footer at all. It's shared here via its existing
   // onOpenShortcuts prop so staff see one canonical shortcuts list (the
   // shell's own ShortcutsDialog) instead of a second, slightly different one
@@ -440,4 +448,26 @@ test("StaffFooter is mounted on the Hospital OS shell and defers to its Shortcut
 
   const footer = read("components/chrome/StaffFooter.tsx");
   assert.match(footer, /onOpenShortcuts/);
+});
+
+test("Doctor Portal moved under /mudgalgastromedics-os/* and the old route was retired", () => {
+  // Track 4.14: the doctor's workspace now lives at
+  // /mudgalgastromedics-os/doctor-portal instead of a standalone /doctor
+  // route, so the whole product lives inside one URL namespace. /doctor was
+  // retired outright, not kept as a redirect — confirmed with the user that
+  // nothing external (bookmarks, QR codes, printed material) ever linked
+  // there, so there was no bookmark-continuity risk to guard against.
+  assert.equal(exists("app/mudgalgastromedics-os/doctor-portal/page.tsx"), true);
+  assert.equal(exists("app/mudgalgastromedics-os/doctor-portal/layout.tsx"), true);
+  assert.equal(exists("app/doctor"), false);
+  assert.match(read("app/mudgalgastromedics-os/doctor-portal/layout.tsx"), /StaffChrome/);
+
+  assert.match(read("components/chrome/WorkspaceLauncher.tsx"), /destination: "\/mudgalgastromedics-os\/doctor-portal"/);
+  assert.match(read("lib/access/matrix.ts"), /landing: "\/mudgalgastromedics-os\/doctor-portal"/);
+
+  // The "Doctor" and "Hospital OS" nav tabs must use an exact pathname match,
+  // not startsWith — /mudgalgastromedics-os/doctor-portal is now a sub-path
+  // of the Hospital OS tile's own href, so a prefix check would light up
+  // both tabs at once while on the Doctor Portal.
+  assert.match(read("components/chrome/StaffChrome.tsx"), /pathname === href/);
 });

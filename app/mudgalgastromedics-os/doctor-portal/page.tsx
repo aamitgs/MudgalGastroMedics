@@ -9,7 +9,7 @@ import { listPatients } from "@/lib/patient-store";
 export const metadata: Metadata = {
   title: { absolute: "Doctor Workspace • MudgalGastromedics OS" },
   description: "Protected doctor workspace for OPD queue, UHID-linked patient context, prescriptions and follow-up planning.",
-  alternates: { canonical: "/doctor" },
+  alternates: { canonical: "/mudgalgastromedics-os/doctor-portal" },
   robots: { index: false, follow: false }
 };
 

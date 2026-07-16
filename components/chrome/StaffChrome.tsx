@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, LogOut, Moon, Search, Stethoscope, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import { ActionButton } from "@/components/design-system/ActionButton";
-import { OfflineBanner } from "@/components/design-system/OfflineBanner";
+import { ProfilePhotoButton } from "@/components/design-system/ProfilePhotoButton";
 import { StaffFooter } from "@/components/chrome/StaffFooter";
 import { GlobalCommandPalette } from "@/components/hospital-os/GlobalCommandPalette";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
@@ -20,7 +20,7 @@ import { useCommandPaletteStore } from "@/stores/command-history-store";
 // entry pointing at the same destination would be a pure duplicate.
 const staffLinks = [
   { href: "/mudgalgastromedics-os", label: "Hospital OS", icon: LayoutDashboard },
-  { href: "/doctor", label: "Doctor", icon: Stethoscope }
+  { href: "/mudgalgastromedics-os/doctor-portal", label: "Doctor", icon: Stethoscope }
 ];
 
 /**
@@ -28,33 +28,47 @@ const staffLinks = [
  * components (per product separation): no booking CTAs, no promotional
  * banners, no site navigation — staff are already inside the platform.
  * Dark mode comes from the shared theme store (stores/theme-store.ts), so the
- * preference follows staff across /doctor and Hospital OS, not just this
- * chrome (/admin and /login now just redirect here before this chrome ever
- * renders anything).
+ * preference follows staff across the Doctor Portal and rest of the Hospital
+ * OS, not just this chrome (/admin and /login now just redirect into
+ * /mudgalgastromedics-os before this chrome ever renders anything).
+ * No OfflineBanner of its own (unlike hospital-os/HospitalOsShell, which
+ * needs one) — this chrome now only ever renders under
+ * /mudgalgastromedics-os/*, whose own layout.tsx already provides one.
  */
 export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const { dark, toggleDark } = useThemeStore();
   const openPalette = useCommandPaletteStore((state) => state.setOpen);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasPhoto, setHasPhoto] = useState(false);
+  const mountedRef = useRef(true);
 
-  // This chrome renders on /doctor before login too (DoctorLogin's own passcode
-  // form is just this component's `children`) — without this check "Sign out"
-  // showed on the pre-login screen, which is misleading since there's nothing
-  // to sign out of yet.
-  useEffect(() => {
-    let active = true;
-    fetch("/api/auth/me", { cache: "no-store" })
+  function loadSession() {
+    return fetch("/api/auth/me", { cache: "no-store" })
       .then((response) => response.json())
       .then((data) => {
-        if (active) setIsAuthenticated(Boolean(data?.ok && data?.authenticated));
+        if (!mountedRef.current) return;
+        setIsAuthenticated(Boolean(data?.ok && data?.authenticated));
+        setHasPhoto(Boolean(data?.user?.hasPhoto));
       })
       .catch(() => {
-        if (active) setIsAuthenticated(false);
+        if (!mountedRef.current) return;
+        setIsAuthenticated(false);
+        setHasPhoto(false);
       });
+  }
+
+  // This chrome renders on the Doctor Portal before login too (DoctorLogin's
+  // own passcode form is just this component's `children`) — without this
+  // check "Sign out" showed on the pre-login screen, which is misleading
+  // since there's nothing to sign out of yet.
+  useEffect(() => {
+    mountedRef.current = true;
+    void loadSession();
     return () => {
-      active = false;
+      mountedRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   async function signOut() {
@@ -73,9 +87,6 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
 
   return (
     <div className={dark ? "dark" : undefined}>
-      <div className="sticky top-0 z-50">
-        <OfflineBanner />
-      </div>
       <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex min-h-14 w-[min(1560px,calc(100%-32px))] items-center gap-4">
           <Link href="/mudgalgastromedics-os" className="flex min-w-0 items-center gap-2.5" aria-label="MudgalGastromedics OS home">
@@ -93,7 +104,11 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
                 key={href}
                 href={href}
                 className={`inline-flex min-h-9 items-center gap-1.5 rounded px-3 text-sm font-semibold transition ${
-                  pathname?.startsWith(href) ? "bg-soft text-brand" : "text-muted hover:bg-soft hover:text-ink"
+                  // Exact match, not startsWith: the Doctor Portal now lives at
+                  // /mudgalgastromedics-os/doctor-portal, a sub-path of the
+                  // Hospital OS tile's own href, so a prefix check would light
+                  // up both tabs at once while on the Doctor Portal.
+                  pathname === href ? "bg-soft text-brand" : "text-muted hover:bg-soft hover:text-ink"
                 }`}
               >
                 <Icon size={15} /> <span className="hidden md:inline">{label}</span>
@@ -122,6 +137,9 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
             >
               {dark ? <Sun size={15} /> : <Moon size={15} />}
             </ActionButton>
+            {isAuthenticated ? (
+              <ProfilePhotoButton hasPhoto={hasPhoto} onPhotoUpdated={() => void loadSession()} avatarClassName="h-9 w-9 border border-line" />
+            ) : null}
             {isAuthenticated ? (
               <ActionButton onClick={() => void signOut()} variant="outline" className="gap-1.5 px-3 text-sm font-semibold">
                 <LogOut size={15} /> <span className="hidden md:inline">Sign out</span>

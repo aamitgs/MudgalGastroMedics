@@ -55,8 +55,9 @@ function navigate(href: string) {
 /**
  * Enterprise command palette (Tracks 2.5/2.6/2.7): Ctrl/Cmd+K, live search
  * over real stores, recent patients, favourite commands and quick-create.
- * Mounted once in StaffChrome so it is available on /admin, /doctor and
- * /login — the Master Prompt's fastest way to use the platform.
+ * Mounted once in StaffChrome so it is available on the Doctor Portal
+ * (/mudgalgastromedics-os/doctor-portal) — the Master Prompt's fastest way
+ * to use the platform.
  */
 export function GlobalCommandPalette() {
   const { open, setOpen, toggle } = useCommandPaletteStore();

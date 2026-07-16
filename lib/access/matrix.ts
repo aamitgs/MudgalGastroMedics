@@ -91,13 +91,13 @@ export const roleMeta: Record<AccessRole, RoleMeta> = {
   "main-doctor": {
     label: "Main Doctor",
     description: "Senior/consulting doctor with full clinical authority and department oversight.",
-    landing: "/doctor",
+    landing: "/mudgalgastromedics-os/doctor-portal",
     staffLogin: true
   },
   "duty-doctor": {
     label: "Duty Doctor",
     description: "On-call/shift clinical care for assigned patients, with escalation to the Main Doctor.",
-    landing: "/doctor",
+    landing: "/mudgalgastromedics-os/doctor-portal",
     staffLogin: true
   },
   nurse: {
