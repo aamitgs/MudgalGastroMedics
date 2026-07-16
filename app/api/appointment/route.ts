@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { createAppointment, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
+import { offerWaitlistSlot } from "@/lib/appointment-waitlist-store";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { queryAppointments, type AppointmentSortField, type SortDirection } from "@/lib/appointment-query";
@@ -151,6 +152,26 @@ export async function PATCH(request: Request) {
     metadata: { status: appointment.status, service: appointment.service },
     device: auditRequestMetadata(request)
   });
+
+  // A cancelled slot with a real scheduled date is an opening — offer it to
+  // the oldest matching waitlisted patient instead of it going to waste.
+  // Reception still has to actually contact them (notified via the bell,
+  // Track waitlist addon); no SMS/WhatsApp Business API exists yet to do
+  // that unattended.
+  if (appointment.status === "Cancelled") {
+    const offered = await offerWaitlistSlot(appointment);
+    if (offered) {
+      await recordAuditEvent({
+        actorRole: auth.context.activeRole,
+        actorId: auth.context.userId,
+        action: "appointment_waitlist.offered",
+        entityType: "appointment_waitlist",
+        entityId: offered.id,
+        metadata: { cancelledAppointmentId: appointment.id, service: offered.service },
+        device: auditRequestMetadata(request)
+      });
+    }
+  }
 
   return NextResponse.json({ ok: true, appointment });
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
+import type { AppointmentWaitlistEntry } from "@/lib/appointment-waitlist-types";
 import type { InventoryItem } from "@/lib/inventory-types";
 import type { HospitalBed, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
 import { turnoverOverdueMinutes } from "@/lib/ipd-types";
@@ -15,7 +16,7 @@ function minutesAgo(minutes: number) {
 }
 
 function inputs(overrides: Partial<NotificationRuleInputs> = {}): NotificationRuleInputs {
-  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], labOrders: [], beds: [], ...overrides };
+  return { inventory: [], appointments: [], admissions: [], vitals: [], aiReviews: [], opdVisits: [], labOrders: [], beds: [], waitlistEntries: [], ...overrides };
 }
 
 function item(overrides: Partial<InventoryItem> = {}): InventoryItem {
@@ -120,6 +121,19 @@ function bed(overrides: Partial<HospitalBed> = {}): HospitalBed {
     status: "Cleaning",
     statusUpdatedAt: minutesAgo(turnoverOverdueMinutes + 10),
     dailyRate: 1500,
+    ...overrides
+  };
+}
+
+function waitlistEntry(overrides: Partial<AppointmentWaitlistEntry> = {}): AppointmentWaitlistEntry {
+  return {
+    id: "WL-1",
+    createdAt: minutesAgo(60),
+    updatedAt: minutesAgo(5),
+    name: "Waitlisted Patient",
+    phone: "9876522222",
+    service: "GI consult",
+    status: "Waiting",
     ...overrides
   };
 }
@@ -272,6 +286,24 @@ describe("evaluateNotificationRules", () => {
       now
     );
     expect(result.map((n) => n.source)).toEqual([]);
+  });
+
+  it("flags an offered waitlist slot, naming the patient and service", () => {
+    const result = evaluateNotificationRules(
+      inputs({
+        waitlistEntries: [
+          waitlistEntry({ id: "W1", status: "Offered", name: "Asha Verma", service: "Endoscopy", preferredDate: "2026-07-10" }),
+          waitlistEntry({ id: "W2", status: "Waiting" }),
+          waitlistEntry({ id: "W3", status: "Booked" })
+        ]
+      }),
+      now
+    );
+    expect(result.map((n) => n.source)).toEqual(["waitlist:W1"]);
+    expect(result[0].category).toBe("Administrative");
+    expect(result[0].detail).toContain("Asha Verma");
+    expect(result[0].detail).toContain("Endoscopy");
+    expect(result[0].detail).toContain("2026-07-10");
   });
 
   it("ignores beds within the turnover window, not Cleaning, or with no status timestamp", () => {

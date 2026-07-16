@@ -1,5 +1,6 @@
 import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
+import type { AppointmentWaitlistEntry } from "@/lib/appointment-waitlist-types";
 import { evaluateRecalls, recallEscalationDays } from "@/lib/clinical/recall";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryExpiryStatus } from "@/lib/inventory-types";
@@ -22,7 +23,7 @@ export type NotificationInput = {
 export const opdWaitAlertMinutes = 60;
 
 /** Rule prefixes owned by the sync; open notifications with these sources auto-resolve when the condition clears. */
-export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:", "turnover:", "recall:"];
+export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:", "turnover:", "recall:", "waitlist:"];
 
 export type NotificationRuleInputs = {
   inventory: InventoryItem[];
@@ -33,6 +34,7 @@ export type NotificationRuleInputs = {
   opdVisits: OpdVisit[];
   labOrders: LabOrder[];
   beds: HospitalBed[];
+  waitlistEntries: AppointmentWaitlistEntry[];
 };
 
 /**
@@ -171,6 +173,18 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
       title: `Follow-up overdue: ${visit.patientName}`,
       detail: `Follow-up for ${visit.service} was due ${recall.dueDate} (${recall.daysOverdue} day${recall.daysOverdue === 1 ? "" : "s"} overdue) with no later visit on record. Reception should reach out to reschedule.`,
       href: "/mudgalgastromedics-os/automation"
+    });
+  }
+
+  for (const entry of inputs.waitlistEntries) {
+    if (entry.status !== "Offered") continue;
+    active.push({
+      source: `waitlist:${entry.id}`,
+      category: "Administrative",
+      priority: "High",
+      title: `Waitlist slot opened: ${entry.name}`,
+      detail: `A cancellation opened a slot for ${entry.service}${entry.preferredDate ? ` on ${entry.preferredDate}` : ""} — contact ${entry.name} (${entry.phone}) to confirm.`,
+      href: "/mudgalgastromedics-os/appointments"
     });
   }
 

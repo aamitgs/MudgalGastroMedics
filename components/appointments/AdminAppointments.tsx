@@ -9,6 +9,7 @@ import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentSortField } from "@/lib/appointment-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { AppointmentWaitlistPanel } from "@/components/appointments/AppointmentWaitlistPanel";
 import { DataTable } from "@/components/design-system/DataTable";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
@@ -347,6 +348,8 @@ export function AdminAppointments() {
           {planAppointment ? <PlanningNote appointment={planAppointment} onClose={() => setPlanAppointment(null)} /> : null}
         </div>
       </div>
+
+      <AppointmentWaitlistPanel />
     </div>
   );
 }

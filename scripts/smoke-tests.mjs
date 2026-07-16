@@ -317,3 +317,24 @@ test("patient-facing report-ready and recall reminders are wired end-to-end", ()
 
   assert.match(read("lib/clinical/recall.ts"), /export type RecallVisit/);
 });
+
+test("appointment waitlist auto-offer on cancellation is wired end-to-end", () => {
+  assert.equal(exists("app/api/appointment-waitlist/route.ts"), true);
+  const route = read("app/api/appointment-waitlist/route.ts");
+  assert.match(route, /authorize\(request, "appointments", "view"\)/);
+  assert.match(route, /authorize\(request, "appointments", "edit"\)/);
+  assert.match(route, /appointment_waitlist\.created/);
+  assert.match(route, /appointment_waitlist\.status_updated/);
+
+  assert.match(read("lib/appointment-waitlist-match.ts"), /export function findWaitlistMatch/);
+  assert.match(read("lib/appointment-waitlist-store.ts"), /export async function offerWaitlistSlot/);
+
+  const appointmentRoute = read("app/api/appointment/route.ts");
+  assert.match(appointmentRoute, /offerWaitlistSlot/);
+  // The auto-offer must only fire on an actual cancellation, not every status update.
+  assert.match(appointmentRoute, /appointment\.status === "Cancelled"/);
+
+  assert.match(read("lib/notification-rules.ts"), /waitlist:\$\{entry\.id\}/);
+  assert.match(read("lib/notification-store.ts"), /listAppointmentWaitlist/);
+  assert.match(read("components/appointments/AdminAppointments.tsx"), /AppointmentWaitlistPanel/);
+});
