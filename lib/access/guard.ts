@@ -3,6 +3,7 @@ import "server-only";
 import { getAdminStaffIdFromCookie, hasAdminCookie } from "@/lib/admin-auth";
 import { hasDoctorCookie } from "@/lib/doctor-auth";
 import { getStaffById } from "@/lib/hr-store";
+import type { StaffRole } from "@/lib/hr-types";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import type { AccessAction, AccessResource, AccessRole } from "@/lib/access/matrix";
 import { breakGlassResources, breakGlassRoles, roleHasPermission } from "@/lib/access/matrix";
@@ -36,11 +37,39 @@ const unauthenticated: AccessContext = {
 };
 
 /**
+ * Maps a legacy hr-store StaffRole onto the closest RBAC AccessRole for the
+ * legacy admin-cookie login (app/api/admin/session). Returns null for a role
+ * with no safe RBAC equivalent (e.g. Housekeeping) so the caller fails closed
+ * instead of guessing broad access.
+ */
+function accessRoleForStaffRole(role: StaffRole): AccessRole | null {
+  switch (role) {
+    case "Admin":
+      return "super-admin";
+    case "Doctor":
+      return "main-doctor";
+    case "Nurse":
+      return "nurse";
+    case "Reception":
+      return "reception";
+    case "Pharmacy":
+      return "pharmacist";
+    case "Lab":
+    case "Technician":
+      return "lab-technician";
+    default:
+      return null;
+  }
+}
+
+/**
  * Resolves the caller's identity from either the new RBAC session cookie or
- * the legacy cookies. The legacy admin login has always been the full-access
- * operator account, so it maps to super-admin; the legacy doctor passcode maps
- * to main-doctor. Both mappings keep existing logins and the e2e suite working
- * while new named users get least-privilege RBAC sessions.
+ * the legacy cookies. The legacy admin cookie is scoped to the specific staff
+ * member it was issued to (via accessRoleForStaffRole) — it does NOT grant
+ * blanket super-admin the way it used to; that was a privilege-escalation gap
+ * (a Reception-role legacy login had de facto super-admin on every
+ * authorize()-gated route). The legacy doctor passcode still maps to
+ * main-doctor, since that cookie has no per-staff identity to look up.
  */
 export async function getAccessContext(cookieHeader: string | null): Promise<AccessContext> {
   const sessionToken = getSessionTokenFromCookieHeader(cookieHeader);
@@ -64,15 +93,19 @@ export async function getAccessContext(cookieHeader: string | null): Promise<Acc
 
   if (hasAdminCookie(cookieHeader)) {
     const staffId = getAdminStaffIdFromCookie(cookieHeader) || "STF-ADMIN-001";
-    return {
-      authenticated: true,
-      userId: staffId,
-      userName: (await getStaffById(staffId))?.name ?? "Administrator",
-      roles: ["super-admin"],
-      activeRole: "super-admin",
-      elevated: false,
-      legacy: true
-    };
+    const staff = await getStaffById(staffId);
+    const role = staff && staff.status === "Active" ? accessRoleForStaffRole(staff.role) : null;
+    if (staff && role) {
+      return {
+        authenticated: true,
+        userId: staffId,
+        userName: staff.name,
+        roles: [role],
+        activeRole: role,
+        elevated: false,
+        legacy: true
+      };
+    }
   }
 
   if (hasDoctorCookie(cookieHeader)) {

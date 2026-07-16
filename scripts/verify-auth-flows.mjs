@@ -54,6 +54,26 @@ const admin = jar();
 const adminLogin = await api(admin, "POST", "/api/admin/session", { username: "admin", password: "mgm-admin" });
 check("legacy admin login", adminLogin.data.ok === true, JSON.stringify(adminLogin.data).slice(0, 120));
 
+console.log("-- legacy admin cookie: role-scoped, not blanket super-admin --");
+// Regression test for a real privilege-escalation gap: the legacy admin cookie
+// used to grant blanket super-admin to whoever held it, regardless of the
+// underlying staff member's actual role. A Reception-role legacy login had de
+// facto super-admin on every authorize()-gated route. Fixed in
+// lib/access/guard.ts (accessRoleForStaffRole) — this proves it stays fixed.
+const legacyReception = jar();
+const receptionLogin = await api(legacyReception, "POST", "/api/admin/session", { username: "reception", password: "mgm-reception" });
+check("legacy reception login", receptionLogin.data.ok === true, JSON.stringify(receptionLogin.data).slice(0, 120));
+const receptionMe = await api(legacyReception, "GET", "/api/auth/me");
+check("legacy reception resolves to reception role, not super-admin", receptionMe.data.activeRole === "reception", JSON.stringify(receptionMe.data).slice(0, 120));
+const receptionHr = await api(legacyReception, "GET", "/api/hr");
+check("legacy reception denied HR (403)", receptionHr.status === 403, String(receptionHr.status));
+const receptionAudit = await api(legacyReception, "GET", "/api/audit");
+check("legacy reception denied audit logs (403)", receptionAudit.status === 403, String(receptionAudit.status));
+const receptionUsers = await api(legacyReception, "GET", "/api/access/users");
+check("legacy reception denied user management (403)", receptionUsers.status === 403, String(receptionUsers.status));
+const receptionPatients = await api(legacyReception, "GET", "/api/patients");
+check("legacy reception can still view patients (in-scope)", receptionPatients.status === 200, String(receptionPatients.status));
+
 const created = await api(admin, "POST", "/api/access/users", {
   name: `Verify ${suffix}`,
   username,
