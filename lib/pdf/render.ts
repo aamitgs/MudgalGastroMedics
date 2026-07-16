@@ -13,6 +13,9 @@ import { renderHtmlToPdf } from "@/lib/pdf/chromium";
 import { PurchaseOrderDocument } from "@/lib/pdf/purchase-order-document";
 import { listPurchaseOrders } from "@/lib/purchase-order-store";
 import { TableDocument } from "@/lib/pdf/table-document";
+import { getPublicProcedure } from "@/lib/cms-public";
+import { getPrepChecklist } from "@/lib/procedure-prep";
+import { ProcedurePrepDocument } from "@/lib/pdf/procedure-prep-document";
 
 export type PdfRenderResult =
   | { ok: true; buffer: Buffer; filename: string }
@@ -90,6 +93,18 @@ export async function renderTablePdf({ title, headers, rows }: { title: string; 
   registerPdfFonts();
   const buffer = await renderToBuffer(TableDocument({ title, headers, rows }));
   return { buffer, filename: `${slugify(title)}.pdf` };
+}
+
+// Public content, not a patient record — validated against the real published
+// procedure/disease list (getPublicProcedure) rather than trusting the raw
+// slug, so an unknown/malformed ?slug= 404s instead of rendering a blank doc.
+export async function renderProcedurePrepPdf(slug: string): Promise<PdfRenderResult> {
+  const procedure = await getPublicProcedure(slug);
+  if (!procedure) return { ok: false, error: "Procedure not found.", status: 404 };
+
+  registerPdfFonts();
+  const buffer = await renderToBuffer(ProcedurePrepDocument({ title: procedure.title, checklist: getPrepChecklist(slug) }));
+  return { ok: true, buffer, filename: `${slugify(procedure.title)}-prep-checklist.pdf` };
 }
 
 export async function renderDischargeSummaryPdf(admissionId: string): Promise<PdfRenderResult> {

@@ -77,7 +77,14 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between"
   },
-  footerText: { fontSize: 7.5, color: pdfColors.muted },
+  // A long confidentiality note (e.g. prescription's medicolegal line, or the
+  // patient-education note) has no fixed width otherwise, so a plain flexRow
+  // lets it overlap the page-number text instead of wrapping. Fixed
+  // percentage columns (rather than flex:1 on just one side, which still let
+  // the note's own text overlap the sibling once it wrapped) keep the two
+  // texts in genuinely separate lanes regardless of note length.
+  footerNote: { fontSize: 7.5, color: pdfColors.muted, width: "80%", paddingRight: 12 },
+  footerPageNumber: { fontSize: 7.5, color: pdfColors.muted, width: "20%", textAlign: "right" },
   sectionLabel: { fontFamily: "Geist", fontWeight: "semibold", fontSize: 9, color: pdfColors.brand, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 },
   card: { borderWidth: 1, borderColor: pdfColors.line, borderRadius: 4, padding: 10, marginBottom: 10 },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -107,8 +114,8 @@ export function PdfHeader({ docType, reference }: { docType: string; reference: 
 export function PdfFooter({ confidentialityNote }: { confidentialityNote: string }) {
   return (
     <View style={pdfStyles.footer} fixed>
-      <Text style={pdfStyles.footerText}>{confidentialityNote}</Text>
-      <Text style={pdfStyles.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+      <Text style={pdfStyles.footerNote}>{confidentialityNote}</Text>
+      <Text style={pdfStyles.footerPageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
     </View>
   );
 }
@@ -125,3 +132,6 @@ export const financialConfidentialityNote =
 
 export const operationalConfidentialityNote =
   "Confidential hospital record. Exported electronically for internal staff use only.";
+
+export const patientEducationNote =
+  "General patient-education guidance, not a personalized medical instruction. Your doctor's specific instructions always take priority.";

@@ -11,8 +11,10 @@ import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
 import { getPublicProcedure, getPublicProcedures } from "@/lib/cms-public";
+import { colonLikeSlugs, diseaseSlugs, ercpLikeSlugs, getPrepChecklist, liverLikeSlugs } from "@/lib/procedure-prep";
 import { breadcrumbSchema } from "@/lib/seo-schema";
 import { site } from "@/lib/site-data";
+import { ProcedurePrepChecklist } from "@/components/site/ProcedurePrepChecklist";
 
 type ProcedurePageProps = {
   params: Promise<{ slug: string }>;
@@ -47,26 +49,6 @@ type ProcedureArticle = {
   sections: ArticleSection[];
   faqs: ArticleFaq[];
 };
-
-const diseaseSlugs = new Set([
-  "varices",
-  "liver-cirrhosis",
-  "fatty-liver",
-  "liver-fibrosis",
-  "obstructive-jaundice",
-  "bile-duct-stricture",
-  "pancreatic-disorders",
-  "acidity-gerd",
-  "peptic-ulcer-disease",
-  "difficulty-swallowing",
-  "gi-stricture",
-  "colon-polyps",
-  "ibd-colitis",
-  "ibs",
-  "chronic-constipation",
-  "chronic-diarrhea",
-  "ascites"
-]);
 
 const opdTimingProcedureSlugs = new Set([
   "endoscopy",
@@ -653,9 +635,9 @@ function getCareMode(slug: string, isDisease: boolean) {
 function getProcedureArticle(slug: string, title: string, isDisease: boolean, pageCopy: PageCopy): ProcedureArticle {
   const mode = getCareMode(slug, isDisease);
   const lowerTitle = title.toLowerCase();
-  const isErcpLike = ["ercp", "cbd-stone-removal", "pancreatic-duct-stone-removal", "bile-duct-stenting"].includes(slug);
-  const isColonLike = ["colonoscopy", "polypectomy", "colon-polyp-removal", "ibd-colitis", "colon-polyps", "ibs", "chronic-constipation", "chronic-diarrhea"].includes(slug);
-  const isLiverLike = ["fibroscan", "fatty-liver", "liver-cirrhosis", "liver-fibrosis", "varices", "ascites", "ascitic-fluid-tapping"].includes(slug);
+  const isErcpLike = ercpLikeSlugs.has(slug);
+  const isColonLike = colonLikeSlugs.has(slug);
+  const isLiverLike = liverLikeSlugs.has(slug);
 
   const preparationItems = isDisease
     ? [
@@ -1168,6 +1150,11 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             </article>
           ))}
         </div>
+      </Section>
+
+      <Section>
+        <SectionHead eyebrow="Prep Checklist" title={`Before your ${procedure.title.toLowerCase()} visit`} />
+        <ProcedurePrepChecklist slug={procedure.slug} title={procedure.title} checklist={getPrepChecklist(procedure.slug)} />
       </Section>
 
       <Section muted>
