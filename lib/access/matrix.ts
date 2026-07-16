@@ -151,7 +151,7 @@ export const roleMeta: Record<AccessRole, RoleMeta> = {
   patient: {
     label: "Patient",
     description: "Self-service portal: own appointments, reports, prescriptions, bills.",
-    landing: "/patient-portal",
+    landing: "/portal",
     staffLogin: false
   }
 };
