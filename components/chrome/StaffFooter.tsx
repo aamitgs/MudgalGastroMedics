@@ -30,7 +30,7 @@ function formatSync(date: Date) {
  * identity + live system meta (version, environment, status, last sync) and the
  * standard links. Deliberately minimal — no marketing content.
  */
-export function StaffFooter() {
+export function StaffFooter({ onOpenShortcuts }: { onOpenShortcuts?: () => void } = {}) {
   const [system, setSystem] = useState<SystemInfo | null>(null);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
@@ -78,24 +78,33 @@ export function StaffFooter() {
           <Link href="/terms" className="transition hover:text-brand">Terms</Link>
           <a href={`mailto:${site.email}`} className="transition hover:text-brand">Support</a>
 
-          <Dialog>
-            <DialogTrigger className="inline-flex items-center gap-1 transition hover:text-brand">
+          {onOpenShortcuts ? (
+            // A host shell (e.g. HospitalOsShell) that already has its own
+            // ShortcutsDialog passes this in, so staff see one canonical
+            // shortcuts list instead of two slightly different ones.
+            <button type="button" onClick={onOpenShortcuts} className="inline-flex items-center gap-1 transition hover:text-brand">
               <Keyboard size={13} /> Shortcuts
-            </DialogTrigger>
-            <DialogContent className="max-w-sm">
-              <DialogHeader>
-                <DialogTitle>Keyboard shortcuts</DialogTitle>
-              </DialogHeader>
-              <ul className="mt-2 grid gap-2">
-                {shortcuts.map((shortcut) => (
-                  <li key={shortcut.keys} className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-muted">{shortcut.action}</span>
-                    <kbd className="shrink-0 rounded border border-line bg-soft px-2 py-0.5 font-mono text-xs font-semibold text-ink">{shortcut.keys}</kbd>
-                  </li>
-                ))}
-              </ul>
-            </DialogContent>
-          </Dialog>
+            </button>
+          ) : (
+            <Dialog>
+              <DialogTrigger className="inline-flex items-center gap-1 transition hover:text-brand">
+                <Keyboard size={13} /> Shortcuts
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Keyboard shortcuts</DialogTitle>
+                </DialogHeader>
+                <ul className="mt-2 grid gap-2">
+                  {shortcuts.map((shortcut) => (
+                    <li key={shortcut.keys} className="flex items-center justify-between gap-4 text-sm">
+                      <span className="text-muted">{shortcut.action}</span>
+                      <kbd className="shrink-0 rounded border border-line bg-soft px-2 py-0.5 font-mono text-xs font-semibold text-ink">{shortcut.keys}</kbd>
+                    </li>
+                  ))}
+                </ul>
+              </DialogContent>
+            </Dialog>
+          )}
 
           <span aria-hidden="true" className="text-line">|</span>
           <span>© {new Date().getFullYear()} Mudgal Gastromedics Hospital</span>

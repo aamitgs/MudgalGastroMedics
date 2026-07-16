@@ -425,3 +425,19 @@ test("Sonner Toaster is mounted on the Hospital OS shell, not just the doctor po
   assert.match(shell, /import \{ Toaster \} from "sonner"/);
   assert.match(shell, /<Toaster richColors closeButton position="top-right"/);
 });
+
+test("StaffFooter is mounted on the Hospital OS shell and defers to its ShortcutsDialog", () => {
+  // StaffFooter (system status, version, Privacy/Terms/Support, shortcuts)
+  // only ever rendered inside StaffChrome.tsx (the /doctor shell) — the OS
+  // shell had no footer at all. It's shared here via its existing
+  // onOpenShortcuts prop so staff see one canonical shortcuts list (the
+  // shell's own ShortcutsDialog) instead of a second, slightly different one
+  // baked into the footer — StaffChrome keeps calling it with no prop, so its
+  // own self-contained dialog is unchanged.
+  const shell = read("components/hospital-os/HospitalOsShell.tsx");
+  assert.match(shell, /import \{ StaffFooter \} from "@\/components\/chrome\/StaffFooter"/);
+  assert.match(shell, /<StaffFooter onOpenShortcuts=\{\(\) => setShortcutsOpen\(true\)\} \/>/);
+
+  const footer = read("components/chrome/StaffFooter.tsx");
+  assert.match(footer, /onOpenShortcuts/);
+});

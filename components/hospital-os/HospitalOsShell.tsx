@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StaffFooter } from "@/components/chrome/StaffFooter";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
 import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
@@ -464,6 +465,8 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
           {children}
         </section>
       </div>
+
+      <StaffFooter onOpenShortcuts={() => setShortcutsOpen(true)} />
 
       <CommandPalette
         open={paletteOpen}
