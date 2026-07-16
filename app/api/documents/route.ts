@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { listDocuments, uploadDocument } from "@/lib/documents-store";
+import { listDocuments, uploadDocument } from "@/lib/patient-file-store";
 import { firstZodIssueMessage } from "@/lib/validation/http";
 import { allowedDocumentMimeTypes, documentListQuerySchema, documentUploadFieldsSchema, maxDocumentSizeBytes } from "@/lib/validation/documents";
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
-import { listDocumentVersions } from "@/lib/documents-store";
+import { listDocumentVersions } from "@/lib/patient-file-store";
 import { firstZodIssueMessage } from "@/lib/validation/http";
 import { documentVersionsQuerySchema } from "@/lib/validation/documents";
 
