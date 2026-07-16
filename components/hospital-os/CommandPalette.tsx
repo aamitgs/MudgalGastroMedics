@@ -12,6 +12,7 @@ import {
   CommandList
 } from "@/components/ui/command";
 import type { CommandRecord, NavItem } from "@/lib/hospital-os-data";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 export function CommandPalette({
   open,
@@ -25,9 +26,21 @@ export function CommandPalette({
   setOpen: (open: boolean) => void;
   query: string;
   setQuery: (query: string) => void;
+  /** Live results from /api/search (HospitalOsShell) — a Patient record carries patientPhone and opens the Patient Drawer instead of navigating to href. */
   results: CommandRecord[];
   pages: NavItem[];
 }) {
+  const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+
+  function selectResult(record: CommandRecord) {
+    if (record.patientPhone) {
+      openDrawer(record.patientPhone, record.title);
+      setOpen(false);
+      return;
+    }
+    navigate(record.href);
+  }
+
   // Track 4.13: the palette now opens from every Hospital OS page, not just
   // the dashboard where these anchors actually live. Same-page targets keep
   // the instant pushState+scroll (no reload); a target on a different page
@@ -85,7 +98,7 @@ export function CommandPalette({
           <CommandGroup heading="Direct results">
             <AnimatePresence>
               {results.map((record) => (
-                <CommandItem key={record.id} value={`${record.entity} ${record.title} ${record.subtitle}`} onSelect={() => navigate(record.href)}>
+                <CommandItem key={record.id} value={`${record.entity} ${record.title} ${record.subtitle}`} onSelect={() => selectResult(record)}>
                   <motion.div
                     className="flex w-full items-center gap-3"
                     initial={{ opacity: 0, y: 4 }}

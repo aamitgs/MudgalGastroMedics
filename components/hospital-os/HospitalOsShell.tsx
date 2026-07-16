@@ -20,32 +20,40 @@ import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import { TopNav } from "@/components/hospital-os/TopNav";
 import {
   accessRoleToHospitalRole,
-  canAccessCommandEntity,
-  commandRecords,
   fetchHospitalSnapshot,
   navGroupOrder,
   navItems
 } from "@/lib/hospital-os-data";
-import type { HospitalRealtimeEvent, NavBadgeCounts } from "@/lib/hospital-os-data";
+import type { CommandRecord, HospitalRealtimeEvent, NavBadgeCounts } from "@/lib/hospital-os-data";
+import type { SearchCategory, SearchResult } from "@/lib/global-search";
 import { moduleRouteFromHash } from "@/lib/access/admin-modules";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { useThemeStore } from "@/stores/theme-store";
 
-const commandFuse = new Fuse(commandRecords, {
-  includeScore: true,
-  threshold: 0.35,
-  keys: [
-    { name: "title", weight: 0.45 },
-    { name: "subtitle", weight: 0.25 },
-    { name: "entity", weight: 0.2 },
-    { name: "keywords", weight: 0.1 }
-  ]
-});
+const searchCategoryEntity: Record<SearchCategory, CommandRecord["entity"]> = {
+  Patients: "Patient",
+  Appointments: "Appointment",
+  Laboratory: "Report",
+  Pharmacy: "Medicine",
+  Admissions: "Bed",
+  Employees: "Employee"
+};
 
-// Track 4.13: lets the palette jump straight to a module page (Settings, HR, Access, ...) —
-// commandRecords only covers searchable clinical entities, not the sidebar's own destinations.
+function toCommandRecord(result: SearchResult): CommandRecord {
+  return {
+    id: result.id,
+    entity: searchCategoryEntity[result.category],
+    title: result.title,
+    subtitle: result.subtitle,
+    href: result.href,
+    patientPhone: result.patientPhone
+  };
+}
+
+// Lets the palette jump straight to a module page (Settings, HR, Access, ...) —
+// live search (/api/search) covers searchable clinical entities separately.
 const navFuse = new Fuse(navItems, {
   includeScore: true,
   threshold: 0.35,
@@ -113,7 +121,32 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+  const [liveSearchResults, setLiveSearchResults] = useState<CommandRecord[]>([]);
   const navRef = useRef<HTMLElement | null>(null);
+
+  // Live entity search (/api/search) — the server already gates each category
+  // by the same RBAC matrix enforced everywhere else, so no client-side
+  // permission re-check is needed for these results.
+  useEffect(() => {
+    if (!paletteOpen) return;
+    const trimmed = commandQuery.trim();
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      if (trimmed.length < 2) {
+        setLiveSearchResults([]);
+        return;
+      }
+      const response = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, { cache: "no-store" }).catch(() => null);
+      if (!active) return;
+      const data = ((await response?.json().catch(() => ({}))) ?? {}) as { ok: boolean; results?: SearchResult[] };
+      if (!active) return;
+      setLiveSearchResults(response?.ok && data.ok && data.results ? data.results.map(toCommandRecord) : []);
+    }, 200);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [commandQuery, paletteOpen]);
 
   const {
     role,
@@ -254,9 +287,9 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
       return liveCount === undefined ? item : { ...item, badge: String(liveCount) };
     });
 
-  const commandResults = (commandQuery.trim() ? commandFuse.search(commandQuery).map((result) => result.item) : commandRecords).filter((item) =>
-    canAccessCommandEntity(role, item.entity)
-  );
+  // Empty query shows no entity results (there's nothing meaningful to list
+  // without a search term) — matches GlobalCommandPalette's own behavior.
+  const commandResults = commandQuery.trim() ? liveSearchResults : [];
 
   const pageResults = (commandQuery.trim() ? navFuse.search(commandQuery).map((result) => result.item) : navItems).filter((item) =>
     item.roles.includes(role)

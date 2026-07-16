@@ -18,13 +18,7 @@ type ReadinessResponse = {
 
 const sectionLabels: Record<HospitalOsSection, string> = {
   clinicalWorkspace: "Clinical consultation workspace",
-  patientPortalPreview: "Patient portal preview",
-  patientRegistration: "Patient registration form",
-  appointmentBooking: "Appointment booking form",
-  billing: "Billing form",
-  patientFlow: "Patient flow / operations table",
-  acceptance: "Flow acceptance panel",
-  auditTrail: "Audit trail panel"
+  patientFlow: "Patient flow / operations table"
 };
 
 const integrationAreas = new Set<ProductionCheck["area"]>(["Integrations", "Operations", "Compliance"]);

@@ -6,10 +6,8 @@ import {
   Bell,
   BookUser,
   BrainCircuit,
-  CalendarClock,
   CircleDollarSign,
   ClipboardList,
-  CreditCard,
   FileText,
   FlaskConical,
   Gauge,
@@ -82,22 +80,16 @@ export type PatientFlowRow = {
   phone?: string;
 };
 
-export type DoctorAssignment = {
-  patientId: string;
-  patientName: string;
-  doctor: string;
-};
-
-export const assignableDoctors = ["Dr. Deepak Sharma", "Duty Doctor", "Dr. Neha Bansal", "Dr. Arvind Rao"];
-
 export type CommandRecord = {
   id: string;
   entity: CommandEntity;
   title: string;
   subtitle: string;
   href: string;
-  keywords: string[];
-  priority: number;
+  /** Set for a Patient result — selecting it opens the Patient Drawer instead of navigating to href. */
+  patientPhone?: string;
+  keywords?: string[];
+  priority?: number;
 };
 
 export type ClinicalEvent = {
@@ -240,23 +232,13 @@ const dashboardPath = "/mudgalgastromedics-os";
 
 export const navItems: NavItem[] = [
   { label: "Dashboard", group: "Overview", href: `${dashboardPath}#analytics`, icon: LayoutDashboard, roles: rolesWithPermission(null) },
-  // "Patients" and "Appointments" deliberately still point at this dashboard's
-  // own OperationsTable / PatientRegistrationForm+AppointmentBookingForm
-  // sections — real, e2e-tested, Hospital-OS-native live-triage UI (bulk
-  // actions, CSV export, doctor assignment; new patient/appointment forms),
-  // not the same thing as the registry/report pages below. "Patient Registry"
-  // and "Appointment Requests" are the dedicated /mudgalgastromedics-os/*
-  // pages added in Phase 2, now given their own entries (same label-pair
-  // pattern as "Billing" vs. "Billing Summary") so both destinations are
-  // reachable from the sidebar like every other module, instead of only one.
+  // "Patients" points at the dashboard's own real, live OperationsTable
+  // (patient-flow overview); "Patient Registry" is the dedicated full-CRUD
+  // /mudgalgastromedics-os/patients page — genuinely different views, both kept.
   { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
   { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
-  { label: "Doctors", group: "Clinical", href: `${dashboardPath}#doctor-workspace`, icon: Stethoscope, roles: rolesWithPermission("appointments") },
+  { label: "Doctors", group: "Clinical", href: "/mudgalgastromedics-os/doctor-workflow", icon: Stethoscope, roles: rolesWithPermission("appointments") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
-  // Track 4.13 (docs/build-roadmap.md): migrated modules point at their new
-  // dedicated /mudgalgastromedics-os/* route instead of an /admin#module-x
-  // anchor. Not-yet-migrated modules (Phase 2) keep their old href.
-  { label: "Appointments", group: "Clinical", href: `${dashboardPath}#appointment-flow`, icon: CalendarClock, roles: rolesWithPermission("appointments") },
   { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },
   { label: "OPD", group: "Clinical", href: "/mudgalgastromedics-os/opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
   { label: "Procedures", group: "Clinical", href: "/mudgalgastromedics-os/procedures", icon: Syringe, roles: rolesWithPermission("appointments") },
@@ -266,11 +248,7 @@ export const navItems: NavItem[] = [
   { label: "Pharmacy", group: "Operations", href: "/mudgalgastromedics-os/pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Laboratory", group: "Diagnostics", href: "/mudgalgastromedics-os/lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
   { label: "Radiology & Pathology", group: "Diagnostics", href: "/mudgalgastromedics-os/radiology-pathology", icon: ScanLine, roles: rolesWithPermission("lab-orders") },
-  // "Billing" (dashboard's own BillingForm, a real e2e-tested billing-entry
-  // section) deliberately stays as-is, same reasoning as Patients/Appointments
-  // above — "Billing Summary" is the new Phase 2 revenue/receipts report page.
-  { label: "Billing", group: "Finance", href: `${dashboardPath}#billing`, icon: CreditCard, roles: rolesWithPermission("billing") },
-  { label: "Billing Summary", group: "Finance", href: "/mudgalgastromedics-os/billing", icon: Receipt, roles: rolesWithPermission("billing") },
+  { label: "Billing", group: "Finance", href: "/mudgalgastromedics-os/billing", icon: Receipt, roles: rolesWithPermission("billing") },
   { label: "Insurance", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: ShieldCheck, roles: rolesWithPermission("insurance"), keywords: ["finance"] },
   { label: "Accounts", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: WalletCards, roles: rolesWithPermission("billing"), keywords: ["finance"] },
   { label: "HR", group: "Administration", href: "/mudgalgastromedics-os/hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
@@ -279,9 +257,9 @@ export const navItems: NavItem[] = [
   { label: "CMS", group: "Administration", href: "/mudgalgastromedics-os/cms", icon: Activity, roles: rolesWithPermission("cms") },
   { label: "Settings", group: "Administration", href: "/mudgalgastromedics-os/settings", icon: Settings, roles: rolesWithPermission("system-settings") },
   { label: "Notifications", group: "Overview", href: `${dashboardPath}#realtime-feed`, icon: Bell, roles: rolesWithPermission(null) },
-  { label: "AI Assistant", group: "Overview", href: `${dashboardPath}#patient-portal-preview`, icon: Sparkles, roles: rolesWithPermission("patients") },
-  // New entries for modules migrated in Phase 1 that had no prior Hospital OS
-  // sidebar entry at all (they only lived on /admin before).
+  // Real AI features (patient summary, visit assistant, discharge/referral/
+  // certificate drafting) live inside the Doctor Portal, not a standalone page.
+  { label: "AI Assistant", group: "Overview", href: "/doctor", icon: Sparkles, roles: rolesWithPermission("patients") },
   { label: "Readiness", group: "Administration", href: "/mudgalgastromedics-os/readiness", icon: Gauge, roles: rolesWithPermission("system-settings") },
   { label: "Audit", group: "Administration", href: "/mudgalgastromedics-os/audit", icon: History, roles: rolesWithPermission("audit-logs") },
   { label: "Analytics", group: "Administration", href: "/mudgalgastromedics-os/analytics", icon: LineChart, roles: rolesWithPermission("reports") },
@@ -293,26 +271,12 @@ export const navItems: NavItem[] = [
   { label: "Staff Notes", group: "Operations", href: "/mudgalgastromedics-os/staff-notes", icon: MessagesSquare, roles: rolesWithPermission(null) }
 ];
 
-export type HospitalOsSection =
-  | "clinicalWorkspace"
-  | "patientPortalPreview"
-  | "patientRegistration"
-  | "appointmentBooking"
-  | "billing"
-  | "patientFlow"
-  | "acceptance"
-  | "auditTrail";
+export type HospitalOsSection = "clinicalWorkspace" | "patientFlow";
 
 /** Section visibility derived from the access matrix — one permission per section. */
 const sectionPermission: Record<HospitalOsSection, [AccessResource, AccessAction]> = {
   clinicalWorkspace: ["prescriptions", "view"],
-  patientPortalPreview: ["patients", "view"],
-  patientRegistration: ["patients", "create"],
-  appointmentBooking: ["appointments", "create"],
-  billing: ["billing", "view"],
-  patientFlow: ["appointments", "view"],
-  acceptance: ["system-settings", "view"],
-  auditTrail: ["audit-logs", "view"]
+  patientFlow: ["appointments", "view"]
 };
 
 export const sectionAccess: Record<HospitalOsSection, HospitalRole[]> = Object.fromEntries(
@@ -323,33 +287,6 @@ export const sectionAccess: Record<HospitalOsSection, HospitalRole[]> = Object.f
 
 export function canAccessSection(role: HospitalRole, section: HospitalOsSection) {
   return sectionAccess[section].includes(role);
-}
-
-/** Command palette entity visibility derived from the access matrix. */
-const commandEntityResource: Record<CommandEntity, AccessResource> = {
-  Patient: "patients",
-  Doctor: "appointments",
-  Appointment: "appointments",
-  Bed: "beds",
-  Room: "beds",
-  Procedure: "appointments",
-  Medicine: "pharmacy-inventory",
-  Invoice: "billing",
-  Insurance: "insurance",
-  Report: "reports",
-  Department: "hr-records",
-  Employee: "hr-records"
-};
-
-export const commandEntityAccess: Record<CommandEntity, HospitalRole[]> = Object.fromEntries(
-  (Object.entries(commandEntityResource) as Array<[CommandEntity, AccessResource]>).map(([entity, resource]) => [
-    entity,
-    rolesWithPermission(resource)
-  ])
-) as Record<CommandEntity, HospitalRole[]>;
-
-export function canAccessCommandEntity(role: HospitalRole, entity: CommandEntity) {
-  return commandEntityAccess[entity].includes(role);
 }
 
 /** Shown when a role has no Hospital OS workspace sections built yet; points staff to their dedicated admin module. */
@@ -366,21 +303,6 @@ export const patientFlowRows: PatientFlowRow[] = [
   { id: "pf-4", uhid: "MGM-24021", patient: "Meera Joshi", age: 29, status: "Scheduled", doctor: "Duty Doctor", department: "Endoscopy", billing: "Preauth", insurance: "HDFC Ergo", waitMinutes: 8, risk: "Low", lastActivity: "Procedure slot held" },
   { id: "pf-5", uhid: "MGM-24022", patient: "Devendra Singh", age: 63, status: "Billing Hold", doctor: "Dr. Deepak Sharma", department: "IPD", billing: "Refund Review", insurance: "Ayushman Bharat", waitMinutes: 11, risk: "Moderate", lastActivity: "Discharge bill review" },
   { id: "pf-6", uhid: "MGM-24023", patient: "Kavya Mehta", age: 46, status: "Discharged", doctor: "Dr. Deepak Sharma", department: "Pharmacy", billing: "Paid", insurance: "Self pay", waitMinutes: 0, risk: "Low", lastActivity: "Medicine dispensed" }
-];
-
-export const commandRecords: CommandRecord[] = [
-  { id: "cmd-1", entity: "Patient", title: "Aarav Sharma", subtitle: "UHID MGM-24018 - active OPD", href: `${dashboardPath}#patient-workspace`, keywords: ["aarav", "mgm-24018", "opd"], priority: 100 },
-  { id: "cmd-2", entity: "Doctor", title: "Dr. Deepak Kumar Sharma", subtitle: "Gastroenterology - available today", href: `${dashboardPath}#doctor-workspace`, keywords: ["doctor", "deepak", "gastro"], priority: 96 },
-  { id: "cmd-3", entity: "Invoice", title: "INV-5821", subtitle: "Rs 18,450 - insurance review", href: `${dashboardPath}#billing`, keywords: ["invoice", "billing", "insurance"], priority: 90 },
-  { id: "cmd-4", entity: "Medicine", title: "Pantoprazole 40 mg", subtitle: "Pharmacy stock 42 strips", href: `${dashboardPath}#operations-table`, keywords: ["medicine", "pharmacy", "stock"], priority: 76 },
-  { id: "cmd-5", entity: "Appointment", title: "ERCP follow-up", subtitle: "Today 3:20 PM - Room 2", href: `${dashboardPath}#appointment-flow`, keywords: ["appointment", "ercp"], priority: 82 },
-  { id: "cmd-6", entity: "Department", title: "Endoscopy Unit", subtitle: "2 rooms active, 1 procedure delayed", href: `${dashboardPath}#analytics`, keywords: ["department", "endoscopy"], priority: 62 },
-  { id: "cmd-7", entity: "Employee", title: "Nurse Priya S.", subtitle: "Assigned to HDU and vitals desk", href: `${dashboardPath}#doctor-workspace`, keywords: ["employee", "nurse"], priority: 60 },
-  { id: "cmd-8", entity: "Insurance", title: "Star Health policy STH-9082", subtitle: "Preauth pending for MGM-24018", href: `${dashboardPath}#billing`, keywords: ["insurance", "preauth"], priority: 80 },
-  { id: "cmd-9", entity: "Report", title: "LFT panel", subtitle: "Critical bilirubin flag", href: `${dashboardPath}#patient-workspace`, keywords: ["report", "lab", "lft"], priority: 92 },
-  { id: "cmd-10", entity: "Bed", title: "HDU-04", subtitle: "Occupied - discharge expected 6 PM", href: `${dashboardPath}#analytics`, keywords: ["bed", "hdu"], priority: 68 },
-  { id: "cmd-11", entity: "Room", title: "Procedure Room 2", subtitle: "ERCP list running 12 minutes late", href: `${dashboardPath}#appointment-flow`, keywords: ["room", "procedure"], priority: 58 },
-  { id: "cmd-12", entity: "Procedure", title: "Colonoscopy package", subtitle: "Billing template and consent ready", href: `${dashboardPath}#billing`, keywords: ["procedure", "colonoscopy"], priority: 54 }
 ];
 
 /** Audit actions that are internal telemetry, not activity worth surfacing in the live feed. */
@@ -431,17 +353,7 @@ export function auditEventToRealtimeEvent(event: MinimalAuditEvent): HospitalRea
   }
 }
 
-export const v1AiScope = [
-  "AI Patient Summary",
-  "AI Report Summary",
-  "AI Search",
-  "AI Symptom Checker",
-  "AI Prescription Assistance",
-  "AI Follow-up Suggestions",
-  "AI Analytics"
-];
-
-/** Badge color per PatientStatus/BillingStatus value — shared by the monolith's OperationsTable and the extracted DoctorWorkspace. */
+/** Badge color per PatientStatus/BillingStatus value — used by OperationsTable and PatientWorkspace. */
 export const statusTone: Record<string, string> = {
   "In Consultation": "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
   "Vitals Pending": "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",

@@ -54,7 +54,6 @@ test("core protected APIs are present", () => {
 });
 
 test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
-  assert.equal(exists("app/mudgalgastromedics-os/actions.ts"), true);
   assert.equal(exists("app/api/hospital-os/snapshot/route.ts"), true);
   assert.equal(exists("app/api/hospital-os/realtime/route.ts"), true);
   assert.match(read("app/api/hospital-os/snapshot/route.ts"), /hospital_os\.snapshot\.viewed/);
@@ -64,19 +63,65 @@ test("Hospital OS uses a server snapshot boundary for TanStack Query", () => {
   assert.match(read("lib/hospital-os-data.ts"), /fetch\(\"\/api\/hospital-os\/snapshot\"/);
   assert.match(read("components/hospital-os/HospitalOsShell.tsx"), /pollingUrl: \"\/api\/hospital-os\/realtime\"/);
   assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /useQuery/);
-  assert.match(read("components/chrome/HospitalOperatingSystem.tsx"), /bulkUpdatePatientFlow/);
-  // Track 4.10: extracted to their own files, no longer inline in the monolith.
-  assert.match(read("components/hospital-os/AuditTrailPanel.tsx"), /Session audit trail/);
-  assert.match(read("components/hospital-os/PatientPortalPanel.tsx"), /AI symptom checker/);
-  assert.match(read("components/hospital-os/PatientRegistrationForm.tsx"), /registerHospitalPatient/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient\.registered/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.appointment\.booked/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.billing\.posted/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient_flow\.bulk_updated/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.patient_flow\.doctor_assigned/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.clinical_notes\.autosaved/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.ai_prescription\.confirmed/);
-  assert.match(read("app/mudgalgastromedics-os/actions.ts"), /hospital_os\.teleconsultation\.requested/);
+});
+
+test("dashboard has no fake-persistence preview widgets left (production cleanup)", () => {
+  // These all used to sit on the /mudgalgastromedics-os dashboard, looked
+  // functional (real forms, real Zod validation, real audit-log writes), but
+  // never persisted to the real stores — every one duplicated a real,
+  // fully-working module already reachable from the sidebar. Removed entirely
+  // rather than rewired, since the real equivalents already exist.
+  const removedComponents = [
+    "components/hospital-os/AcceptancePanel.tsx",
+    "components/hospital-os/PatientRegistrationForm.tsx",
+    "components/hospital-os/AppointmentBookingForm.tsx",
+    "components/hospital-os/BillingForm.tsx",
+    "components/hospital-os/AuditTrailPanel.tsx",
+    "components/hospital-os/DoctorWorkspace.tsx",
+    "components/hospital-os/ClinicalNotesEditor.tsx",
+    "components/hospital-os/AiPrescriptionAssistant.tsx",
+    "components/hospital-os/PatientPortalPanel.tsx",
+    "components/hospital-os/AssignDoctorDialog.tsx"
+  ];
+  for (const file of removedComponents) {
+    assert.equal(exists(file), false, `${file} should have been removed`);
+  }
+  assert.equal(exists("app/mudgalgastromedics-os/actions.ts"), false);
+  assert.equal(exists("lib/validation/hospital-os.ts"), false);
+
+  const dashboard = read("components/chrome/HospitalOperatingSystem.tsx");
+  assert.doesNotMatch(dashboard, /bulkUpdatePatientFlow|assignHospitalDoctor|AcceptancePanel|AuditTrailPanel/);
+
+  const store = read("stores/hospital-os-store.ts");
+  assert.doesNotMatch(store, /flowStatus|markPatientRegistered|markAppointmentBooked|markBillingPosted/);
+
+  const patientWorkspace = read("components/hospital-os/PatientWorkspace.tsx");
+  // The 8 placeholder tabs ("vitals workspace ready", "Add prescriptions record", etc.)
+  // are gone — only the two real, API-backed tabs remain.
+  assert.doesNotMatch(patientWorkspace, /workspace ready|Add \$\{/);
+  assert.match(patientWorkspace, /PatientClinicalSnapshot/);
+  assert.match(patientWorkspace, /PatientTimelinePanel/);
+});
+
+test("Hospital OS command palette searches real data, not hardcoded sample records", () => {
+  // HospitalOsShell.tsx used to show a Fuse.js search over a hardcoded array
+  // of fictional patients/doctors/invoices ("Aarav Sharma", "INV-5821 Rs
+  // 18,450", "Star Health policy STH-9082"...) on every real OS page's
+  // Cmd+K palette. Fixed to hit the same real /api/search endpoint
+  // GlobalCommandPalette already uses correctly elsewhere in the app.
+  const shell = read("components/hospital-os/HospitalOsShell.tsx");
+  assert.doesNotMatch(shell, /commandRecords|Aarav Sharma|INV-5821|STH-9082/);
+  assert.match(shell, /fetch\(`\/api\/search\?q=/);
+
+  // patientFlowRows (a separate, legitimately-kept dev-preview fallback,
+  // gated to never render in production — app/api/hospital-os/snapshot/route.ts)
+  // still legitimately contains sample names; only the command-palette data is checked here.
+  assert.doesNotMatch(read("lib/hospital-os-data.ts"), /commandRecords|assignableDoctors|v1AiScope/);
+
+  // Patient results carry patientPhone and open the Patient Drawer instead of
+  // navigating to a raw phone-number "href".
+  assert.match(read("components/hospital-os/CommandPalette.tsx"), /patientPhone/);
+  assert.match(read("components/hospital-os/CommandPalette.tsx"), /openDrawer/);
 });
 
 test("mobile API exposes versioned token-gated endpoints", () => {

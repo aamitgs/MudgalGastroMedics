@@ -131,7 +131,7 @@ export function TopNav({
         </button>
       </div>
       <div className="border-t border-[var(--hos-border)] px-4 py-2 text-xs font-medium text-[var(--hos-muted-text)] lg:px-6">
-        Realtime: <span className="capitalize text-[var(--hos-primary)]">{realtimeStatus}</span> · AI v1 scope excludes AI Receptionist automation.
+        Realtime: <span className="capitalize text-[var(--hos-primary)]">{realtimeStatus}</span>
       </div>
     </header>
   );

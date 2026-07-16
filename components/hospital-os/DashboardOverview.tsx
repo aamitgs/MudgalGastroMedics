@@ -27,16 +27,22 @@ export function DashboardOverview({
         <CardHeader className="pb-3">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Stripe-style command center</p>
+              <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Hospital command center</p>
               <h1 className="mt-2 max-w-3xl text-2xl font-semibold leading-tight md:text-[32px]">
                 Clean operating telemetry for clinical, financial, and capacity decisions.
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--hos-muted-text)]">
-                Live KPIs use Recharts consistently across dashboards. Color is reserved for status, action, and alerts.
+                Live KPIs update in real time. Color is reserved for status, action, and alerts.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" className="gap-2 bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"><Plus size={16} /> Create Appointment</Button>
+              <Button
+                type="button"
+                className="gap-2 bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90"
+                onClick={() => window.location.assign("/mudgalgastromedics-os/appointments")}
+              >
+                <Plus size={16} /> Create Appointment
+              </Button>
               <WristbandQrButton />
             </div>
           </div>
@@ -97,7 +103,7 @@ export function DashboardOverview({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Realtime feed</p>
-              <CardTitle className="mt-1 text-lg">WebSocket with polling fallback</CardTitle>
+              <CardTitle className="mt-1 text-lg">Recent Activity</CardTitle>
             </div>
             <Badge variant="outline" className="border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]">Live</Badge>
           </div>

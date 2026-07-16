@@ -16,24 +16,14 @@ export function OperationsTable({
   table,
   isLoading,
   isError,
-  selectedCount,
   globalFilter,
-  setGlobalFilter,
-  bulkMessage,
-  bulkError,
-  isBulkPending,
-  onBulkSchedule
+  setGlobalFilter
 }: {
   table: ReturnType<typeof useReactTable<PatientFlowRow>>;
   isLoading: boolean;
   isError: boolean;
-  selectedCount: number;
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
-  bulkMessage: string;
-  bulkError: string;
-  isBulkPending: boolean;
-  onBulkSchedule: () => void;
 }) {
   const exportRows = table.getPrePaginationRowModel().rows.map((row) => {
     return patientFlowExportRow(row.original);
@@ -91,7 +81,7 @@ export function OperationsTable({
       <CardHeader className="border-b border-[var(--hos-border)]">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Linear-style operations table</p>
+            <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Live overview</p>
             <CardTitle className="mt-1 text-xl">Active patient flow</CardTitle>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -112,13 +102,8 @@ export function OperationsTable({
             </select>
             <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={exportCsv}><Download size={16} /> Export CSV</Button>
             <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={exportExcel}><FileText size={16} /> Export Excel</Button>
-            <Button type="button" disabled={selectedCount === 0 || isBulkPending} onClick={onBulkSchedule} className="bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]/90">
-              {isBulkPending ? "Scheduling..." : `Bulk Action ${selectedCount ? `(${selectedCount})` : ""}`}
-            </Button>
           </div>
         </div>
-        {bulkMessage ? <p role="status" className="mt-3 text-sm font-semibold text-[var(--hos-success)]">{bulkMessage}</p> : null}
-        {bulkError ? <p role="alert" className="mt-3 text-sm font-semibold text-[var(--hos-danger)]">{bulkError}</p> : null}
       </CardHeader>
       <CardContent className="p-0">
         {isLoading ? (
@@ -137,7 +122,13 @@ export function OperationsTable({
         ) : null}
         {!isLoading && !isError && table.getRowModel().rows.length === 0 ? (
           <div className="p-5">
-            <EmptyState icon={Search} title="No matching patient flow records" description="Adjust the table filter or create a new appointment to start a patient flow." action="Create Appointment" />
+            <EmptyState
+              icon={Search}
+              title="No matching patient flow records"
+              description="Adjust the table filter or create a new appointment to start a patient flow."
+              action="Open Appointments"
+              onAction={() => window.location.assign("/mudgalgastromedics-os/appointments")}
+            />
           </div>
         ) : null}
         {!isLoading && !isError && table.getRowModel().rows.length > 0 ? (
