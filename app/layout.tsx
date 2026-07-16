@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { MotionConfig } from "framer-motion";
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
 import "./globals.css";
-import { AppChrome } from "@/components/chrome/AppChrome";
 import { hospitalSchema, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
@@ -77,7 +77,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             gtag('config', 'G-Y70R4VQ7NJ');
           `}
         </Script>
-        <AppChrome>{children}</AppChrome>
+        {/* Single root switch every route renders through, so wrapping here
+            makes every motion.* component honor the OS reduced-motion
+            setting automatically (Track 1.8) — individual components no
+            longer each need their own useReducedMotion() check to be
+            covered by this baseline; a few still call it explicitly to skip
+            non-duration motion (e.g. initial slide-in offsets), which
+            MotionConfig alone doesn't affect. Previously applied separately
+            inside each of AppChrome.tsx's three pathname-branched chrome
+            wrappers (Track 4.1 route-groups migration removed that
+            duplication by hoisting it here, since it was identical in all
+            three). */}
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
         <Analytics />
       </body>
     </html>

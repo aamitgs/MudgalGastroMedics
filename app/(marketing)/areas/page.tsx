@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, MapPin } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
 import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";

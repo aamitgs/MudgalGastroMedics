@@ -1,15 +1,24 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Activity, ArrowRight, Award, CalendarCheck, ClipboardList, FileText, GraduationCap, HeartPulse, Phone, ShieldCheck, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, Award, CalendarCheck, ClipboardList, FileText, GraduationCap, HeartPulse, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
 import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
-import { Section, Eyebrow } from "@/components/site/Section";
+import { Section } from "@/components/site/Section";
 import { Stats } from "@/components/site/Stats";
 import { getPublicProcedures } from "@/lib/cms-public";
 import { doctor, site, whyChoose } from "@/lib/site-data";
+
+// Title/description/openGraph/keywords/icons are inherited from the root
+// layout's metadata (this is the homepage, so they're already correct here);
+// this only adds what the layout can't provide — a canonical URL for this
+// specific route, matching every other page's explicit `alternates.canonical`.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" }
+};
 
 export default async function Home() {
   const procedures = await getPublicProcedures();
@@ -452,7 +461,7 @@ export default async function Home() {
             </div>
           </MotionReveal>
           <div className="grid gap-4 sm:grid-cols-2">
-            {trustReasons.map(({ title, titleHi, text, textHi, icon: Icon }, index) => (
+            {trustReasons.map(({ title, titleHi, text, textHi }, index) => (
               <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
                 <article className="group h-full rounded border border-line/80 bg-white/90 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
                   <div className="mb-6 flex items-center justify-between gap-4">
@@ -506,7 +515,7 @@ export default async function Home() {
           <div className="relative">
             <div aria-hidden="true" className="absolute left-6 top-8 hidden h-[calc(100%-4rem)] w-px bg-gradient-to-b from-brand via-line to-teal md:block" />
             <div className="grid gap-4">
-              {patientJourney.map(({ title, titleHi, text, textHi, icon: Icon }, index) => (
+              {patientJourney.map(({ title, titleHi, text, textHi }, index) => (
                 <MotionReveal key={title} delay={Math.min(index * 0.04, 0.12)}>
                   <article className="relative grid gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_1fr] md:items-start md:pl-4">
                     <BrandIconTile className="relative z-10 h-12 w-12 rounded-full border border-line shadow-sm" />

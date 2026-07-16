@@ -8,7 +8,7 @@ type DraftResponse = { ok: boolean; draft?: string; safetyNote?: string; error?:
 
 /**
  * AI-drafted discharge summary starting point (Track 4.3), mirroring the
- * existing AiPatientSummaryPanel pattern in DoctorPortalWorkspace.tsx — same
+ * existing AiPatientSummaryPanel pattern in components/doctor-portal/ — same
  * Claude API call shape, same "review before use" flow. The draft only ever
  * reaches the real dischargeSummary field via the explicit "Use this draft"
  * click (the parent then calls its own save path), never written/saved

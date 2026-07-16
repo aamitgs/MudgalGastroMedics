@@ -132,7 +132,7 @@ test("every HMS workspace has a dedicated Hospital OS route", () => {
 });
 
 test("patient and doctor portals have separate access surfaces", () => {
-  assert.equal(exists("app/portal/page.tsx"), true);
+  assert.equal(exists("app/(marketing)/portal/page.tsx"), true);
   assert.equal(exists("app/doctor/page.tsx"), true);
   assert.equal(exists("components/patient-portal/PatientPortalAccess.tsx"), true);
   assert.equal(exists("components/chrome/DoctorLogin.tsx"), true);
@@ -199,7 +199,7 @@ test("internal CMS surfaces are available", () => {
   assert.match(read("app/api/cms/route.ts"), /cms\.content\.saved/);
   assert.match(read("lib/cms-store.ts"), /procedures/);
   assert.match(read("lib/cms-public.ts"), /getPublicProcedures/);
-  assert.match(read("app/procedures/[slug]/page.tsx"), /getPublicProcedure/);
+  assert.match(read("app/(marketing)/procedures/[slug]/page.tsx"), /getPublicProcedure/);
   assert.match(read("app/api/mobile/v1\/procedures\/route.ts"), /getPublicProcedures/);
   assert.match(read("database/schema.sql"), /CREATE TABLE IF NOT EXISTS cms_content_items/);
   assert.match(read("database/schema.sql"), /CREATE TABLE IF NOT EXISTS cms_content_revisions/);

@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ChevronRight, Clock3, MessageCircle, Phone, Search, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Clock3, Search } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BlogPostSearch } from "@/components/site/BlogPostSearch";
-import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section } from "@/components/site/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
-import { site } from "@/lib/site-data";
 
 const POSTS_PER_PAGE = 12;
 const campPostSlug = "stomach-intestine-liver-consultation-check-up-camp";

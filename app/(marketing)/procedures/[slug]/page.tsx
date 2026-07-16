@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertCircle, ArrowRight, CalendarCheck, ClipboardList, FileText, HeartPulse, MessageCircle, Phone, ShieldCheck, Stethoscope } from "lucide-react";
+import { AlertCircle, ArrowRight, ClipboardList, FileText, HeartPulse, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
-import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { LocalCareLinks } from "@/components/site/LocalCareLinks";
 import { MotionReveal } from "@/components/site/MotionReveal";
@@ -1178,7 +1177,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
             { ...pageCopy.pathway[0], icon: ClipboardList },
             { ...pageCopy.pathway[1], icon: HeartPulse },
             { ...pageCopy.pathway[2], icon: FileText }
-          ].map(({ title, titleHi, text, textHi, icon: Icon }) => (
+          ].map(({ title, titleHi, text, textHi }) => (
             <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
               <BrandIconTile className="mb-4 h-11 w-11" />
               <h3 className="inline-lang text-xl font-black">

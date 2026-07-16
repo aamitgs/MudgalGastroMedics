@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/site/ButtonLink";
 import { ContactForm } from "@/components/site/ContactForm";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";

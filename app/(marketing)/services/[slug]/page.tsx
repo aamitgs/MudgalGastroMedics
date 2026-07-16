@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2, ClipboardList, FileText, HeartPulse, MessageCircle, Phone, ShieldCheck, Stethoscope } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, FileText, HeartPulse, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
-import { ButtonLink } from "@/components/site/ButtonLink";
 import { LocalCareLinks } from "@/components/site/LocalCareLinks";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
@@ -346,7 +345,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             { title: "Consultation", text: "Symptoms, history, medicines and previous reports are reviewed before deciding the next step.", icon: ClipboardList },
             { title: "Testing or treatment plan", text: "If needed, tests or procedures are planned with preparation and safety instructions.", icon: HeartPulse },
             { title: "Follow-up", text: "Reports, medicine response, warning signs and long-term monitoring are discussed clearly.", icon: FileText }
-          ].map(({ title, text, icon: Icon }) => (
+          ].map(({ title, text }) => (
             <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
               <BrandIconTile className="mb-4 h-11 w-11" />
               <h3 className="text-xl font-black">{title}</h3>

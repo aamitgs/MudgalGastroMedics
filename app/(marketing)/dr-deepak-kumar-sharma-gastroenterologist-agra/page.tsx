@@ -3,7 +3,6 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
-import { ButtonLink } from "@/components/site/ButtonLink";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";

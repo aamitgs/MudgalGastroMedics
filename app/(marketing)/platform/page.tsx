@@ -4,7 +4,6 @@ import { ButtonLink } from "@/components/site/ButtonLink";
 import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
 import { Section } from "@/components/site/Section";
 import { implementationPhases, platformModules } from "@/lib/platform-data";
-import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Digital Hospital Platform",
