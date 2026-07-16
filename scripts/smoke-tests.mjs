@@ -398,3 +398,16 @@ test("legacy doctor login resolves a real staff identity for profile photo suppo
   assert.match(read("app/api/account/photo/route.ts"), /getStaffById\(legacy\.userId\)/);
   assert.match(read("app/api/auth/me/route.ts"), /getStaffById\(legacy\.userId\)/);
 });
+
+test("Global Patient Drawer is mounted on the Hospital OS shell, not just the doctor portal", () => {
+  // Every admin module (Patients, Pharmacy, Lab, IPD, Appointments, Billing...)
+  // calls usePatientDrawerStore().openDrawer() when a row is clicked, but the
+  // <PatientDrawer /> component that actually renders the sheet was only ever
+  // mounted inside StaffChrome.tsx (the /doctor shell) — every row click across
+  // every /mudgalgastromedics-os/* page silently did nothing. Confirmed live
+  // with Playwright: role="dialog" count stayed 0 after clicking a patient row
+  // before this fix, 1 after.
+  const shell = read("components/hospital-os/HospitalOsShell.tsx");
+  assert.match(shell, /import \{ PatientDrawer \} from "@\/components\/hospital-os\/PatientDrawer"/);
+  assert.match(shell, /<PatientDrawer \/>/);
+});

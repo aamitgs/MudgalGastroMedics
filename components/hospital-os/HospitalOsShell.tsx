@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
+import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
 import { ShortcutsDialog } from "@/components/hospital-os/ShortcutsDialog";
 import { TopNav } from "@/components/hospital-os/TopNav";
 import {
@@ -472,6 +473,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
         pages={pageResults}
       />
       <ShortcutsDialog open={shortcutsOpen} setOpen={setShortcutsOpen} />
+      <PatientDrawer />
     </main>
   );
 }
