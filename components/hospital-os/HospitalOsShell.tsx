@@ -31,6 +31,7 @@ import { moduleRouteFromHash } from "@/lib/access/admin-modules";
 import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
+import { useThemeStore } from "@/stores/theme-store";
 
 const commandFuse = new Fuse(commandRecords, {
   includeScore: true,
@@ -115,15 +116,14 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const {
     role,
     sidebarCollapsed,
-    darkMode,
     setSidebarCollapsed,
     toggleSidebar,
-    toggleDarkMode,
     setRole,
     realtimeStatus,
     setRealtimeStatus,
     addRealtimeMessage
   } = useHospitalOsStore();
+  const { dark: darkMode, toggleDark: toggleDarkMode } = useThemeStore();
 
   // Same queryKey + queryFn the dashboard content uses for its own full
   // snapshot — react-query dedupes to one request when both are mounted
@@ -185,9 +185,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const storedSidebar = window.localStorage.getItem("hospital-os-sidebar");
-    const storedTheme = window.localStorage.getItem("hospital-os-theme");
     if (storedSidebar) setSidebarCollapsed(storedSidebar === "collapsed");
-    if (storedTheme === "dark" && !darkMode) toggleDarkMode();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -207,10 +205,6 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem("hospital-os-sidebar", sidebarCollapsed ? "collapsed" : "expanded");
   }, [sidebarCollapsed]);
-
-  useEffect(() => {
-    window.localStorage.setItem("hospital-os-theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

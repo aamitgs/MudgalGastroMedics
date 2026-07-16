@@ -12,7 +12,7 @@ import { StaffFooter } from "@/components/chrome/StaffFooter";
 import { GlobalCommandPalette } from "@/components/hospital-os/GlobalCommandPalette";
 import { NotificationCenter } from "@/components/hospital-os/NotificationCenter";
 import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
-import { useAdminThemeStore } from "@/stores/admin-theme-store";
+import { useThemeStore } from "@/stores/theme-store";
 import { useCommandPaletteStore } from "@/stores/command-history-store";
 
 // "Operations" (formerly /admin) was retired once every module got a real
@@ -23,30 +23,20 @@ const staffLinks = [
   { href: "/doctor", label: "Doctor", icon: Stethoscope }
 ];
 
-const themeStorageKey = "mgm-admin-theme";
-
 /**
  * Slim chrome for authenticated staff surfaces. Deliberately free of marketing
  * components (per product separation): no booking CTAs, no promotional
  * banners, no site navigation — staff are already inside the platform.
- * Owns the staff dark-mode scope so the bar and page content follow one
- * persisted preference across /doctor (/admin and /login now just redirect
- * here before this chrome ever renders anything).
+ * Dark mode comes from the shared theme store (stores/theme-store.ts), so the
+ * preference follows staff across /doctor and Hospital OS, not just this
+ * chrome (/admin and /login now just redirect here before this chrome ever
+ * renders anything).
  */
 export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
-  const { dark, setDark, toggleDark } = useAdminThemeStore();
+  const { dark, toggleDark } = useThemeStore();
   const openPalette = useCommandPaletteStore((state) => state.setOpen);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(themeStorageKey);
-    if (stored === "dark") setDark(true);
-  }, [setDark]);
-
-  useEffect(() => {
-    window.localStorage.setItem(themeStorageKey, dark ? "dark" : "light");
-  }, [dark]);
 
   // This chrome renders on /doctor before login too (DoctorLogin's own passcode
   // form is just this component's `children`) — without this check "Sign out"
