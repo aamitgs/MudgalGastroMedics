@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
@@ -474,6 +475,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
       />
       <ShortcutsDialog open={shortcutsOpen} setOpen={setShortcutsOpen} />
       <PatientDrawer />
+      <Toaster richColors closeButton position="top-right" theme={darkMode ? "dark" : "light"} />
     </main>
   );
 }

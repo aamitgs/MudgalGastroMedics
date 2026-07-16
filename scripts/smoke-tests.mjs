@@ -411,3 +411,17 @@ test("Global Patient Drawer is mounted on the Hospital OS shell, not just the do
   assert.match(shell, /import \{ PatientDrawer \} from "@\/components\/hospital-os\/PatientDrawer"/);
   assert.match(shell, /<PatientDrawer \/>/);
 });
+
+test("Sonner Toaster is mounted on the Hospital OS shell, not just the doctor portal", () => {
+  // lib/notify.ts (used by every admin module for success/error/retry
+  // feedback) is a thin wrapper over sonner's toast() — it renders nothing
+  // without a mounted <Toaster />. That component only ever lived in
+  // StaffChrome.tsx (the /doctor shell), so every notify.*() call across every
+  // /mudgalgastromedics-os/* admin module produced zero visible feedback.
+  // Confirmed live with Playwright: an offline notify.retryable() call showed
+  // no toast before this fix, a real "Unable to reach the server..." toast
+  // with a working Retry button after.
+  const shell = read("components/hospital-os/HospitalOsShell.tsx");
+  assert.match(shell, /import \{ Toaster \} from "sonner"/);
+  assert.match(shell, /<Toaster richColors closeButton position="top-right"/);
+});
