@@ -1,4 +1,18 @@
-# Design System Master File
+> **Superseded — not the live design system.** This is an early auto-generated draft
+> (2026-06-29) that was never adopted: it specifies Figtree/Noto Sans fonts (actual:
+> Geist), a `--color-primary`/`--space-xs`/`--shadow-*` token vocabulary, and component
+> CSS that don't match anything in the running app. The real, in-use design system is
+> `components/design-system/` (shared platform primitives) plus the two token
+> vocabularies documented in `CLAUDE.md`: site tokens (`text-ink`, `border-line`, ...)
+> under `StaffChrome`, and `--hos-*` tokens inside the Hospital OS shell. Moved here
+> from the top-level `design-system/` folder (2026-07-15) because that name collided
+> with `components/design-system/` and was misleading to anyone searching for the
+> actual design system. Kept for historical reference only — do not follow the rules
+> below for new work.
+
+---
+
+# Design System Master File (historical draft)
 
 > **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
 > If that file exists, its rules **override** this Master file.
