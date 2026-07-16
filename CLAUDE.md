@@ -35,7 +35,7 @@ and non-blocking-by-default — warn, don't obstruct the clinician; log override
 - Strict TypeScript. Zero `any`, zero `@ts-ignore` in source. Never bypass types or lint.
 - Server-side validation for every write. Converge REST routes onto the Zod schemas in
   `lib/validation/` (server actions already use them) — do not add new hand-rolled checks.
-- Minimal dependencies (29 runtime). Before adding one: can existing libs or native APIs do it?
+- Minimal dependencies (30 runtime). Before adding one: can existing libs or native APIs do it?
 - Comments explain business rules, healthcare logic, or constraints code can't show —
   never what the next line does.
 
@@ -64,8 +64,11 @@ TanStack Table · Recharts · Sonner (via `lib/notify.ts`, never raw `toast`) ·
 - Improve/refactor/reuse/extend — never rewrite working systems. Refactors never change
   behavior.
 - Module-by-module: one roadmap item per change-set; never sweep the whole app at once.
-- Small focused files. `components/chrome/HospitalOperatingSystem.tsx` (2,188 lines) is the
-  one sanctioned monolith awaiting decomposition — do not grow it; extract when touching it.
+- Small focused files. `HospitalOperatingSystem.tsx` (418 lines, split into
+  `components/hospital-os/`) and `components/chrome/DoctorPortalWorkspace.tsx`
+  (394 lines, split into `components/doctor-portal/`) have both already been
+  decomposed. No sanctioned monolith currently awaits decomposition — keep it that
+  way: extract on touch rather than letting a file regrow past a few hundred lines.
 - Commits: conventional format, one concern each, e.g.
   `feat(clinical): active allergy alert at prescribe time (Track 0.1)`.
 
