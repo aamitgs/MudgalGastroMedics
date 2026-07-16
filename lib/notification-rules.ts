@@ -1,5 +1,6 @@
 import type { AiCaseReview } from "@/lib/ai-types";
 import type { AppointmentRecord } from "@/lib/appointment-types";
+import { evaluateRecalls, recallEscalationDays } from "@/lib/clinical/recall";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { inventoryExpiryStatus } from "@/lib/inventory-types";
 import type { HospitalBed, IpdAdmission, VitalsReading } from "@/lib/ipd-types";
@@ -21,7 +22,7 @@ export type NotificationInput = {
 export const opdWaitAlertMinutes = 60;
 
 /** Rule prefixes owned by the sync; open notifications with these sources auto-resolve when the condition clears. */
-export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:", "turnover:"];
+export const notificationRulePrefixes = ["low-stock:", "expiry:", "urgent-appointment:", "hdu:", "ai-review:", "opd-wait:", "lab-critical:", "turnover:", "recall:"];
 
 export type NotificationRuleInputs = {
   inventory: InventoryItem[];
@@ -157,6 +158,20 @@ export function evaluateNotificationRules(inputs: NotificationRuleInputs, now = 
         href: "/mudgalgastromedics-os/ipd"
       });
     }
+  }
+
+  const recalls = evaluateRecalls(inputs.opdVisits, now);
+  for (const visit of inputs.opdVisits) {
+    const recall = recalls.get(visit.id);
+    if (recall?.status !== "overdue") continue;
+    active.push({
+      source: `recall:${visit.id}`,
+      category: "Clinical",
+      priority: recall.daysOverdue > recallEscalationDays ? "Critical" : "High",
+      title: `Follow-up overdue: ${visit.patientName}`,
+      detail: `Follow-up for ${visit.service} was due ${recall.dueDate} (${recall.daysOverdue} day${recall.daysOverdue === 1 ? "" : "s"} overdue) with no later visit on record. Reception should reach out to reschedule.`,
+      href: "/mudgalgastromedics-os/automation"
+    });
   }
 
   return active;

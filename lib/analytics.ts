@@ -1,6 +1,7 @@
 import "server-only";
 import { listAppointments } from "@/lib/appointment-store";
 import { listAiReviews } from "@/lib/ai-review-store";
+import { evaluateRecalls } from "@/lib/clinical/recall";
 import { listCommunicationLogs } from "@/lib/communication-store";
 import { listAccountEntries } from "@/lib/finance-store";
 import { listFeedback } from "@/lib/feedback-store";
@@ -195,7 +196,8 @@ export async function createAnalyticsSnapshot(windowDays = 14, doctor?: string) 
       escalatedAiReviews: aiReviews.filter((review) => review.status === "Escalated").length,
       unpaidLab: labOrders.filter((order) => order.paymentStatus === "Unpaid").length,
       unpaidPharmacy: dispenses.filter((record) => record.paymentStatus === "Unpaid").length,
-      criticalLabsUnacked: labOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length
+      criticalLabsUnacked: labOrders.filter((order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled").length,
+      overdueRecalls: Array.from(evaluateRecalls(opdVisits).values()).filter((recall) => recall.status === "overdue").length
     },
     // Always derived from the full unfiltered visit list, regardless of the
     // active doctor filter, so the filter dropdown never loses an option.

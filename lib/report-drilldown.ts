@@ -1,6 +1,7 @@
 import "server-only";
 import { listAppointments } from "@/lib/appointment-store";
 import { listAiReviews } from "@/lib/ai-review-store";
+import { evaluateRecalls } from "@/lib/clinical/recall";
 import { listInventoryItems } from "@/lib/inventory-store";
 import { listLabOrders } from "@/lib/lab-store";
 import { listOpdVisits } from "@/lib/opd-store";
@@ -118,6 +119,19 @@ export async function getDrilldownRecords(metric: string, range: ReportRange, do
         title: "Unacknowledged critical labs",
         headers: ["Patient", "Phone", "Tests", "Status"],
         rows: rows.map((order) => [order.patientName, order.phone, order.tests.join(", "), order.status])
+      };
+    }
+    case "risks.overdueRecalls": {
+      const visits = await listOpdVisits();
+      const recalls = evaluateRecalls(visits);
+      const overdue = visits
+        .map((visit) => ({ visit, recall: recalls.get(visit.id) }))
+        .filter((entry) => entry.recall?.status === "overdue")
+        .sort((a, b) => (b.recall!.daysOverdue ?? 0) - (a.recall!.daysOverdue ?? 0));
+      return {
+        title: "Overdue follow-ups",
+        headers: ["Patient", "Phone", "Service", "Due Date", "Days Overdue"],
+        rows: overdue.map(({ visit, recall }) => [visit.patientName, visit.phone, visit.service, recall!.dueDate, String(recall!.daysOverdue)])
       };
     }
     default:

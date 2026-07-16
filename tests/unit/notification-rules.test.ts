@@ -244,6 +244,36 @@ describe("evaluateNotificationRules", () => {
     expect(result[0].detail).toContain("turnover target");
   });
 
+  it("flags an overdue follow-up as High, escalating to Critical past the escalation window", () => {
+    const result = evaluateNotificationRules(
+      inputs({
+        opdVisits: [
+          visit({ id: "R1", status: "Completed", followUpDate: "2026-06-20" }),
+          visit({ id: "R2", status: "Completed", followUpDate: "2026-05-01" })
+        ]
+      }),
+      now
+    );
+    expect(result.map((n) => [n.source, n.priority])).toEqual([
+      ["recall:R1", "High"],
+      ["recall:R2", "Critical"]
+    ]);
+    expect(result[0].category).toBe("Clinical");
+    expect(result[0].detail).toContain("no later visit on record");
+  });
+
+  it("does not flag a follow-up that is not yet due, or one the patient already returned for", () => {
+    const returnedVisit = visit({ id: "R3", status: "Completed", patientId: "PAT-3", followUpDate: "2026-06-20" });
+    const laterVisit = visit({ id: "R4", status: "Completed", patientId: "PAT-3", createdAt: "2026-06-25T00:00:00" });
+    const result = evaluateNotificationRules(
+      inputs({
+        opdVisits: [visit({ id: "R5", status: "Completed", followUpDate: "2026-08-01" }), returnedVisit, laterVisit]
+      }),
+      now
+    );
+    expect(result.map((n) => n.source)).toEqual([]);
+  });
+
   it("ignores beds within the turnover window, not Cleaning, or with no status timestamp", () => {
     const result = evaluateNotificationRules(
       inputs({

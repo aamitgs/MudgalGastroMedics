@@ -18,6 +18,7 @@ export type RoleDashboardData = {
     unpaidLab: number;
     unpaidPharmacy: number;
     criticalLabsUnacked: number;
+    overdueRecalls: number;
   };
   executive: { bedOccupancy: number; staffPresence: number };
   volume: { activeAdmissions: number };
@@ -90,7 +91,12 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
         tiles: [
           { label: "Patients waiting", value: n(data.queues.opdInFlight), tone: attentionTone(data.queues.opdInFlight), href: "/mudgalgastromedics-os/opd" },
           criticalLabs,
-          { label: "Lab results pending", value: n(data.queues.labPending), tone: attentionTone(data.queues.labPending), href: "/mudgalgastromedics-os/lab" },
+          {
+            label: "Overdue follow-ups",
+            value: n(data.risks.overdueRecalls),
+            tone: attentionTone(data.risks.overdueRecalls),
+            href: "/mudgalgastromedics-os/automation"
+          },
           { label: "Active admissions", value: n(data.volume.activeAdmissions), tone: "primary", href: "/mudgalgastromedics-os/ipd" }
         ],
         actions: [
@@ -127,7 +133,12 @@ export function buildRoleDashboard(role: AccessRole, data: RoleDashboardData): R
             tone: criticalTone(data.risks.urgentAppointments),
             href: "/mudgalgastromedics-os/appointments"
           },
-          { label: "OPD in flight", value: n(data.queues.opdInFlight), tone: "primary", href: "/mudgalgastromedics-os/opd" },
+          {
+            label: "Overdue follow-ups",
+            value: n(data.risks.overdueRecalls),
+            tone: attentionTone(data.risks.overdueRecalls),
+            href: "/mudgalgastromedics-os/automation"
+          },
           { label: "OPD today", value: n(today.opd), tone: "primary", href: "/mudgalgastromedics-os/opd" }
         ],
         actions: [

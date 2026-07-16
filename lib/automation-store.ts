@@ -12,6 +12,8 @@ import { listPharmacyDispenses } from "@/lib/pharmacy-store";
 import { listProcedureSchedules, procedureChecklistProgress } from "@/lib/procedure-store";
 import { getStaffById } from "@/lib/hr-store";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType } from "@/lib/automation-types";
+import { evaluateRecalls, recallEscalationDays } from "@/lib/clinical/recall";
+import type { OpdVisit } from "@/lib/opd-types";
 
 type AutomationStore = {
   tasks: AutomationTask[];
@@ -76,6 +78,21 @@ function upsertGeneratedTask(doc: AutomationStore, input: Omit<AutomationTask, "
   };
   doc.tasks.unshift(task);
   return task;
+}
+
+/** Auto-closes an open OPD-follow-up task once the patient has actually come back — the reminder did its job even if staff never manually clicked Done. */
+function resolveFulfilledRecallTask(doc: AutomationStore, key: string, visit: OpdVisit) {
+  const existing = doc.tasks.find((task) => task.key === key);
+  if (!existing || ["Done", "Skipped"].includes(existing.status)) return;
+  existing.status = "Done";
+  existing.updatedAt = new Date().toISOString();
+  existing.notes = [existing.notes, `Auto-resolved — ${visit.patientName} was seen again on or after the follow-up date.`].filter(Boolean).join(" ");
+}
+
+/** A follow-up overdue past the escalation window is a real chronic-care safety gap, not a routine reminder — surface it accordingly in the task queue. */
+function recallPriority(daysOverdue: number | undefined): AutomationTaskPriority {
+  if (daysOverdue === undefined || daysOverdue <= 0) return "Normal";
+  return daysOverdue > recallEscalationDays ? "Urgent" : "High";
 }
 
 export async function listAutomationTasks() {
@@ -176,23 +193,34 @@ export async function generateAutomationTasks() {
     }
   }
 
-  for (const visit of await listOpdVisits()) {
+  const opdVisits = await listOpdVisits();
+  const recalls = evaluateRecalls(opdVisits);
+  for (const visit of opdVisits) {
     if (visit.followUpDate) {
-      generated.push(upsertGeneratedTask(doc, {
-        key: `opd-follow:${visit.id}:${visit.followUpDate}`,
-        dueAt: visit.followUpDate,
-        type: "OPD Follow-up",
-        priority: "Normal",
-        title: `OPD follow-up due: ${visit.patientName}`,
-        description: `Remind patient about follow-up for ${visit.service}.`,
-        sourceId: visit.id,
-        patientId: visit.patientId,
-        uhid: visit.uhid,
-        patientName: visit.patientName,
-        phone: visit.phone,
-        owner: "Reception",
-        actionUrl: "/doctor"
-      }));
+      const key = `opd-follow:${visit.id}:${visit.followUpDate}`;
+      const recall = recalls.get(visit.id);
+      if (recall?.status === "fulfilled") {
+        resolveFulfilledRecallTask(doc, key, visit);
+      } else {
+        generated.push(upsertGeneratedTask(doc, {
+          key,
+          dueAt: visit.followUpDate,
+          type: "OPD Follow-up",
+          priority: recallPriority(recall?.daysOverdue),
+          title: `OPD follow-up due: ${visit.patientName}`,
+          description:
+            recall?.status === "overdue"
+              ? `Overdue by ${recall.daysOverdue} day(s) — remind patient about follow-up for ${visit.service}.`
+              : `Remind patient about follow-up for ${visit.service}.`,
+          sourceId: visit.id,
+          patientId: visit.patientId,
+          uhid: visit.uhid,
+          patientName: visit.patientName,
+          phone: visit.phone,
+          owner: "Reception",
+          actionUrl: "/doctor"
+        }));
+      }
     }
     if (visit.billingStatus !== "Paid" && Number(String(visit.estimatedAmount || "").replace(/[^\d.]/g, "")) > 0) {
       generated.push(upsertGeneratedTask(doc, {
