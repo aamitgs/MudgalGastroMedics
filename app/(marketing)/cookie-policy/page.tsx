@@ -108,7 +108,6 @@ function ContactBlock() {
       <h2 className="text-2xl font-black leading-tight text-ink md:text-3xl">Contact</h2>
       <div className="mt-5 rounded border border-line bg-soft/60 p-5">
         <p className="text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand hover:text-brand-dark">+91-9828912257</a></p>
-        <p className="mt-2 text-muted">Email: <a href="mailto:admin@mudgalgastromedics.com" className="font-semibold text-brand hover:text-brand-dark">admin@mudgalgastromedics.com</a></p>
       </div>
     </section>
   );

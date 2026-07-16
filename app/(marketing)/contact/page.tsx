@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { ContactForm } from "@/components/site/ContactForm";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
@@ -29,13 +29,6 @@ export default function ContactPage() {
       href: `https://wa.me/${site.whatsapp}`,
       icon: MessageCircle,
       tone: "bg-teal text-white"
-    },
-    {
-      title: "Email",
-      value: site.email,
-      href: `mailto:${site.email}`,
-      icon: Mail,
-      tone: "bg-ink text-white"
     }
   ];
 

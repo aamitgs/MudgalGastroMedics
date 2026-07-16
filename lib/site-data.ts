@@ -606,7 +606,6 @@ export function hospitalSchema() {
       `${site.url}/images/hospital/fibroscan-room.jpg`
     ],
     telephone: [site.phone, site.mobile],
-    email: [site.email, site.emailAlt],
     sameAs: [site.googleBusinessProfileUrl, site.facebookUrl, site.youtubeUrl, site.whatsappChannelUrl],
     priceRange: "₹₹",
     additionalType: ["Gastroenterology Hospital", "Liver Care Centre", "Endoscopy Centre"],

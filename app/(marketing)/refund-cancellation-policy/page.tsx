@@ -78,7 +78,6 @@ export default function RefundCancellationPolicyPage() {
                 <p className="font-black text-ink">Mudgal Gastromedics Hospital</p>
                 <p className="mt-2 text-muted">16, H.I.G., Behind Police Chowki, Shaheed Nagar, Agra, Uttar Pradesh, India</p>
                 <p className="mt-2 text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand hover:text-brand-dark">+91-9828912257</a></p>
-                <p className="mt-2 text-muted">Email: <a href="mailto:admin@mudgalgastromedics.com" className="font-semibold text-brand hover:text-brand-dark">admin@mudgalgastromedics.com</a></p>
               </div>
             </section>
           </div>
