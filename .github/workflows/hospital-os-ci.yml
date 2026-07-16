@@ -26,6 +26,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Dependency vulnerability scan (non-blocking)
+        run: npm audit --omit=dev
+        continue-on-error: true
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
