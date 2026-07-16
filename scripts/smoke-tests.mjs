@@ -383,3 +383,18 @@ test("appointment waitlist auto-offer on cancellation is wired end-to-end", () =
   assert.match(read("lib/notification-store.ts"), /listAppointmentWaitlist/);
   assert.match(read("components/appointments/AdminAppointments.tsx"), /AppointmentWaitlistPanel/);
 });
+
+test("legacy doctor login resolves a real staff identity for profile photo support", () => {
+  const guard = read("lib/access/guard.ts");
+  // The legacy doctor passcode used to map to a hardcoded "legacy-doctor"
+  // placeholder with no persisted record at all — self-service photo upload
+  // (getStaffById(legacy.userId) in the photo/me routes) had nothing to
+  // attach a photo to. Now resolves the real seeded STF-DOCTOR-001 record,
+  // with the old placeholder kept only as a fallback if that record is ever
+  // removed/deactivated, so login itself can never break.
+  assert.match(guard, /getStaffById\("STF-DOCTOR-001"\)/);
+  assert.match(guard, /userId: "legacy-doctor"/);
+
+  assert.match(read("app/api/account/photo/route.ts"), /getStaffById\(legacy\.userId\)/);
+  assert.match(read("app/api/auth/me/route.ts"), /getStaffById\(legacy\.userId\)/);
+});

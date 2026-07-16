@@ -109,6 +109,23 @@ export async function getAccessContext(cookieHeader: string | null): Promise<Acc
   }
 
   if (hasDoctorCookie(cookieHeader)) {
+    // Resolves to the real seeded StaffMember (STF-DOCTOR-001) so this session
+    // has a persisted identity — self-service profile photo (Track: legacy
+    // login photo support) needs a real record to attach to, same as the
+    // admin branch above. Falls back to the old synthetic identity if that
+    // record was ever removed/deactivated, so login itself never breaks.
+    const staff = await getStaffById("STF-DOCTOR-001");
+    if (staff && staff.status === "Active") {
+      return {
+        authenticated: true,
+        userId: staff.id,
+        userName: staff.name,
+        roles: ["main-doctor"],
+        activeRole: "main-doctor",
+        elevated: false,
+        legacy: true
+      };
+    }
     return {
       authenticated: true,
       userId: "legacy-doctor",
