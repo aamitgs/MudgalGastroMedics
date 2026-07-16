@@ -7,6 +7,7 @@ import { detectDrugInteractions } from "@/lib/clinical/drug-interactions";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { InteractionGuard } from "@/components/doctor-portal/InteractionGuard";
+import { PrescriptionTemplateMenu } from "@/components/doctor-portal/PrescriptionTemplateMenu";
 import { textareaClass } from "@/components/doctor-portal/shared-styles";
 
 /**
@@ -42,7 +43,21 @@ export function PrescriptionField({
 
   return (
     <label>
-      <span className="mb-2 block text-sm font-bold text-ink">Prescription</span>
+      <span className="mb-2 flex items-center justify-between gap-2">
+        <span className="text-sm font-bold text-ink">Prescription</span>
+        <PrescriptionTemplateMenu
+          draft={draft}
+          onInsert={(text) => {
+            // Append rather than replace when something is already typed — a
+            // template insert must never silently discard prescription text
+            // the doctor has already written (Track 4.2's "never silently
+            // lose data" principle applies just as much here).
+            const next = draft.trim() ? `${draft}\n\n${text}` : text;
+            setDraft(next);
+            onSave(next);
+          }}
+        />
+      </span>
       {!draft.trim() ? (
         <FavouriteChips
           favourites={favourites}

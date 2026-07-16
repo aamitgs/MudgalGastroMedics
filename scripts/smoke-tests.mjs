@@ -281,3 +281,19 @@ test("self-service account photo upload is wired end-to-end", () => {
   assert.match(read("app/api/auth/me/route.ts"), /hasPhoto: Boolean\(user\.photoDocumentId\)/);
   assert.match(read("components/hospital-os/TopNav.tsx"), /\/api\/account\/photo/);
 });
+
+test("prescription regimen templates are wired end-to-end", () => {
+  assert.equal(exists("app/api/prescription-templates/route.ts"), true);
+  const route = read("app/api/prescription-templates/route.ts");
+  assert.match(route, /authorize\(request, "prescriptions", "view"\)/);
+  assert.match(route, /authorize\(request, "prescriptions", "edit"\)/);
+  assert.match(route, /prescription_template\.created/);
+  assert.match(route, /prescription_template\.updated/);
+  assert.match(route, /prescription_template\.deleted/);
+
+  assert.match(read("lib/prescription-template-store.ts"), /export async function (listPrescriptionTemplates|createPrescriptionTemplate|updatePrescriptionTemplate|deletePrescriptionTemplate)/);
+  assert.match(read("components/doctor-portal/PrescriptionField.tsx"), /PrescriptionTemplateMenu/);
+  // Inserting a saved template must never silently discard prescription text
+  // the doctor already typed (Track 4.2's "never silently lose data" principle).
+  assert.match(read("components/doctor-portal/PrescriptionField.tsx"), /draft\.trim\(\) \? `\$\{draft\}/);
+});
