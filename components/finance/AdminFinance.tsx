@@ -15,6 +15,7 @@ import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
 import { FormField } from "@/components/design-system/FormField";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
@@ -60,12 +61,12 @@ function formatAmount(value: number) {
   return `Rs. ${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
-const entryTypeTone: Record<AccountEntryType, string> = {
-  Income: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Deposit: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Expense: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  Refund: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  Adjustment: "border-line bg-soft text-muted"
+const entryTypeTone: Record<AccountEntryType, BadgeTone> = {
+  Income: "success",
+  Deposit: "success",
+  Expense: "critical",
+  Refund: "critical",
+  Adjustment: "inactive"
 };
 
 export function AdminFinance() {
@@ -370,7 +371,7 @@ export function AdminFinance() {
         accessorKey: "type",
         header: "Type",
         size: 110,
-        cell: ({ row }) => <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${entryTypeTone[row.original.type]}`}>{row.original.type}</span>
+        cell: ({ row }) => <StatusBadge tone={entryTypeTone[row.original.type]} className="rounded-full px-2 py-0.5 text-xs">{row.original.type}</StatusBadge>
       },
       { accessorKey: "category", header: "Category", size: 160, cell: ({ row }) => <span className="font-bold text-ink">{row.original.category}</span> },
       { accessorKey: "amount", header: "Amount", size: 110, cell: ({ row }) => <span className="font-bold text-teal-dark">{formatAmount(row.original.amount)}</span> },

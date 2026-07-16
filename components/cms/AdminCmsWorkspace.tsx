@@ -11,6 +11,7 @@ import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
 import { FormField } from "@/components/design-system/FormField";
+import { StatusBadge, getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { cmsContentCreateSchema, type CmsContentCreateInput } from "@/lib/validation/cms";
@@ -34,11 +35,11 @@ type CmsResponse = {
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 const pageSize = 25;
 
-const statusTone: Record<CmsContentStatus, string> = {
-  Draft: "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300",
-  "In Review": "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300",
-  Published: "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300",
-  Archived: "border-zinc-200 bg-zinc-50 text-zinc-700"
+const statusTone: Record<CmsContentStatus, BadgeTone> = {
+  Draft: "inactive",
+  "In Review": "warning",
+  Published: "success",
+  Archived: "inactive"
 };
 
 export function AdminCmsWorkspace() {
@@ -212,7 +213,7 @@ export function AdminCmsWorkspace() {
             aria-label="CMS status"
             value={row.original.status}
             onChange={(event) => void updateStatus(row.original.id, event.target.value as CmsContentStatus)}
-            className={`rounded-full border px-2 py-1 text-xs font-bold ${statusTone[row.original.status]}`}
+            className={`rounded-full border px-2 py-1 text-xs font-bold ${getStatusToneClass(statusTone[row.original.status])}`}
           >
             {cmsContentStatuses.map((status) => (
               <option key={status}>{status}</option>
@@ -361,7 +362,7 @@ export function AdminCmsWorkspace() {
                           <p className="font-bold text-ink">
                             v{revision.version} | {revision.action}
                           </p>
-                          <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${statusTone[revision.status]}`}>{revision.status}</span>
+                          <StatusBadge tone={statusTone[revision.status]} className="rounded-full px-2 py-0.5 text-[11px]">{revision.status}</StatusBadge>
                         </div>
                         <p className="mt-1 text-xs text-muted">{new Date(revision.createdAt).toLocaleString("en-IN")}</p>
                       </div>

@@ -9,6 +9,7 @@ import type { AuditLogSortField } from "@/lib/audit-log-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 
 const auditExportHeaders = ["Created", "Actor Role", "Actor ID", "Action", "Entity Type", "Entity ID", "Severity"];
 
@@ -23,10 +24,10 @@ type AuditResponse = {
   error?: string;
 };
 
-const severityTone: Record<AuditSeverity, string> = {
-  info: "border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300",
-  warning: "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300",
-  critical: "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-300"
+const severityTone: Record<AuditSeverity, BadgeTone> = {
+  info: "info",
+  warning: "warning",
+  critical: "critical"
 };
 
 const pageSize = 25;
@@ -138,7 +139,7 @@ export function AdminAuditLog() {
         accessorKey: "severity",
         header: "Severity",
         size: 110,
-        cell: ({ row }) => <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${severityTone[row.original.severity]}`}>{row.original.severity}</span>
+        cell: ({ row }) => <StatusBadge tone={severityTone[row.original.severity]} className="rounded-full px-2 py-0.5 text-xs">{row.original.severity}</StatusBadge>
       },
       {
         id: "actions",

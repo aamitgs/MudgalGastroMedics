@@ -7,6 +7,7 @@ import { isPurchaseOrderOverdue, purchaseOrderStatuses } from "@/lib/purchase-or
 import type { PurchaseOrderRecord, PurchaseOrderStatus } from "@/lib/purchase-order-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
 
@@ -17,11 +18,11 @@ type DraftLine = { inventoryItemId: string; name: string; unit: string; quantity
 type InventoryListResponse = { ok: boolean; items?: InventoryItem[]; error?: string };
 type PurchaseOrderListResponse = { ok: boolean; orders?: PurchaseOrderRecord[]; order?: PurchaseOrderRecord; error?: string };
 
-const statusTone: Record<PurchaseOrderStatus, string> = {
-  Draft: "border-line bg-soft text-muted",
-  Ordered: "border-cyan-200 bg-cyan-50 text-brand dark:border-cyan-900 dark:bg-cyan-950",
-  Received: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Cancelled: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+const statusTone: Record<PurchaseOrderStatus, BadgeTone> = {
+  Draft: "inactive",
+  Ordered: "info",
+  Received: "success",
+  Cancelled: "critical"
 };
 
 const purchaseOrderExportHeaders = ["Order ID", "Vendor", "Status", "Items", "Expected Delivery", "Created"];
@@ -318,7 +319,7 @@ export function AdminPurchaseOrders() {
                         Overdue
                       </span>
                     ) : null}
-                    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase ${statusTone[order.status]}`}>{order.status}</span>
+                    <StatusBadge tone={statusTone[order.status]} className="rounded-full px-2.5 py-0.5 text-[11px] uppercase">{order.status}</StatusBadge>
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-muted">{order.items.map((item) => `${item.name} × ${item.quantityOrdered} ${item.unit}`).join(", ")}</p>

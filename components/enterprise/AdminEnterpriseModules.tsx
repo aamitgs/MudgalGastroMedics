@@ -6,6 +6,7 @@ import type { HmsBuildStatus, HmsModule, HmsModuleRecord, HmsRecordStatus } from
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 
 type HmsResponse = {
   ok: boolean;
@@ -15,11 +16,11 @@ type HmsResponse = {
   error?: string;
 };
 
-const statusTone: Record<HmsBuildStatus, string> = {
-  "Live MVP": "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300",
-  Foundation: "border-cyan-200 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300",
-  Planned: "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300",
-  "Production Pending": "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
+const statusTone: Record<HmsBuildStatus, BadgeTone> = {
+  "Live MVP": "success",
+  Foundation: "info",
+  Planned: "inactive",
+  "Production Pending": "warning"
 };
 
 const recordStatuses: HmsRecordStatus[] = ["Active", "Pending", "Completed", "On Hold"];
@@ -183,7 +184,7 @@ export function AdminEnterpriseModules() {
             >
               <div className="flex items-start justify-between gap-3">
                 <span className="text-xs font-black uppercase tracking-[0.14em] text-brand">{String(module.order).padStart(2, "0")}</span>
-                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone[module.status]}`}>{module.status}</span>
+                <StatusBadge tone={statusTone[module.status]} className="rounded-full px-2.5 py-1 text-[11px]">{module.status}</StatusBadge>
               </div>
               <h3 className="mt-3 text-lg font-bold leading-tight text-ink">{module.name}</h3>
               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{module.summary}</p>
@@ -199,7 +200,7 @@ export function AdminEnterpriseModules() {
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">{selected.group} Module</p>
                   <h3 className="mt-1 text-xl font-bold text-ink">{selected.name}</h3>
                 </div>
-                <span className={`rounded-full border px-3 py-1.5 text-xs font-bold ${statusTone[selected.status]}`}>{selected.status}</span>
+                <StatusBadge tone={statusTone[selected.status]} className="rounded-full px-3 py-1.5 text-xs">{selected.status}</StatusBadge>
               </div>
               <p className="mt-3 leading-relaxed text-muted">{selected.summary}</p>
               <div className="mt-4 flex flex-wrap gap-2">

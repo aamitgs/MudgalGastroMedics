@@ -10,6 +10,7 @@ import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
 import { FormField } from "@/components/design-system/FormField";
+import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
@@ -56,12 +57,12 @@ function whatsAppUrl(phone: string, message: string) {
   return `https://wa.me/${target.startsWith("91") ? target : `91${target}`}?text=${encodeURIComponent(message)}`;
 }
 
-const statusTone: Record<CommunicationStatus, string> = {
-  Draft: "border-line bg-soft text-muted",
-  Queued: "border-cyan-200 bg-cyan-50 text-brand dark:border-cyan-900 dark:bg-cyan-950",
-  Sent: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Failed: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  "Follow-up Needed": "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300"
+const statusTone: Record<CommunicationStatus, BadgeTone> = {
+  Draft: "inactive",
+  Queued: "info",
+  Sent: "success",
+  Failed: "critical",
+  "Follow-up Needed": "warning"
 };
 
 export function AdminCommunication() {
@@ -271,7 +272,7 @@ export function AdminCommunication() {
             aria-label="Communication status"
             value={row.original.status}
             onChange={(event) => void updateStatus(row.original.id, event.target.value as CommunicationStatus)}
-            className={`rounded border px-2 py-1 text-xs font-bold ${statusTone[row.original.status]}`}
+            className={`rounded border px-2 py-1 text-xs font-bold ${getStatusToneClass(statusTone[row.original.status])}`}
           >
             {communicationStatuses.map((status) => (
               <option key={status}>{status}</option>

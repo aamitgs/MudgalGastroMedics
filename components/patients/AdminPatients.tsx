@@ -12,6 +12,7 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
 import { RecentValueChips } from "@/components/design-system/RecentValueChips";
+import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { PrintIdCardDialog } from "@/components/patients/PrintIdCardDialog";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
@@ -54,10 +55,10 @@ const pageSize = 25;
 
 type DuplicateMatch = { id: string; uhid: string; name: string; phone: string };
 
-const statusTone: Record<PatientStatus, string> = {
-  Active: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Inactive: "border-line bg-soft text-muted",
-  Flagged: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+const statusTone: Record<PatientStatus, BadgeTone> = {
+  Active: "success",
+  Inactive: "inactive",
+  Flagged: "critical"
 };
 
 export function AdminPatients() {
@@ -291,7 +292,7 @@ export function AdminPatients() {
             aria-label="Status"
             value={row.original.status}
             onChange={(event) => void updateStatus(row.original.id, event.target.value as PatientStatus)}
-            className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] ${statusTone[row.original.status]}`}
+            className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] ${getStatusToneClass(statusTone[row.original.status])}`}
           >
             {patientStatuses.map((status) => (
               <option key={status}>{status}</option>

@@ -10,6 +10,7 @@ import type { AppointmentSortField } from "@/lib/appointment-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
@@ -40,12 +41,12 @@ type MutationResponse = { ok: boolean; appointment?: AppointmentRecord; error?: 
 
 const pageSize = 25;
 
-const statusTone: Record<AppointmentStatus, string> = {
-  New: "border-cyan-200 bg-cyan-50 text-brand dark:border-cyan-900 dark:bg-cyan-950",
-  Contacted: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Confirmed: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Completed: "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300",
-  Cancelled: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+const statusTone: Record<AppointmentStatus, BadgeTone> = {
+  New: "info",
+  Contacted: "warning",
+  Confirmed: "success",
+  Completed: "inactive",
+  Cancelled: "critical"
 };
 
 export function AdminAppointments() {
@@ -206,7 +207,7 @@ export function AdminAppointments() {
             aria-label="Appointment status"
             value={row.original.status}
             onChange={(event) => void updateStatus(row.original.id, event.target.value as AppointmentStatus)}
-            className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] ${statusTone[row.original.status]}`}
+            className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] ${getStatusToneClass(statusTone[row.original.status])}`}
           >
             {appointmentStatuses.map((status) => (
               <option key={status}>{status}</option>

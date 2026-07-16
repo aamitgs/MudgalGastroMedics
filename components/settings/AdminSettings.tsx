@@ -8,6 +8,7 @@ import { fullAddress, site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { getStatusToneClass } from "@/components/design-system/StatusBadge";
 
 type ReadinessResponse = {
   ok: boolean;
@@ -29,9 +30,9 @@ const sectionLabels: Record<HospitalOsSection, string> = {
 const integrationAreas = new Set<ProductionCheck["area"]>(["Integrations", "Operations", "Compliance"]);
 
 function statusTone(status: ProductionCheckStatus) {
-  if (status === "pass") return "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300";
-  if (status === "warn") return "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300";
-  return "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-300";
+  if (status === "pass") return getStatusToneClass("success");
+  if (status === "warn") return getStatusToneClass("warning");
+  return getStatusToneClass("critical");
 }
 
 export function AdminSettings() {

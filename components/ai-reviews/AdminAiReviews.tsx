@@ -9,6 +9,7 @@ import type { AiReviewSortField } from "@/lib/ai-review-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
@@ -46,10 +47,10 @@ type AiReviewResponse = {
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 const pageSize = 25;
 
-const urgencyTone: Record<AiCaseReview["urgency"], string> = {
-  Routine: "border-line bg-soft text-muted",
-  "Priority Review": "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  "Urgent Reception Call": "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+const urgencyTone: Record<AiCaseReview["urgency"], BadgeTone> = {
+  Routine: "inactive",
+  "Priority Review": "warning",
+  "Urgent Reception Call": "critical"
 };
 
 export function AdminAiReviews() {
@@ -210,7 +211,7 @@ export function AdminAiReviews() {
         accessorKey: "urgency",
         header: "Urgency",
         size: 170,
-        cell: ({ row }) => <span className={`rounded-full border px-2 py-0.5 text-xs font-bold ${urgencyTone[row.original.urgency]}`}>{row.original.urgency}</span>
+        cell: ({ row }) => <StatusBadge tone={urgencyTone[row.original.urgency]} className="rounded-full px-2 py-0.5 text-xs">{row.original.urgency}</StatusBadge>
       },
       {
         accessorKey: "status",
