@@ -75,6 +75,7 @@ TanStack Table · Recharts · Sonner (via `lib/notify.ts`, never raw `toast`) ·
 ## Verification (before calling any change done)
 
 ```sh
+npm run typecheck     # tsc --noEmit, fast-failing, run this first
 npm run test          # lint + vitest unit + smoke
 npm run test:e2e      # Playwright (includes a11y suite)
 npm run prod:check    # production readiness

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint app components lib stores tests scripts tailwind.config.ts vitest.config.ts playwright.config.ts next.config.mjs postcss.config.mjs eslint.config.mjs",
+    "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/hospital-os.spec.ts",
