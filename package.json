@@ -14,6 +14,7 @@
     "test:smoke": "node --test scripts/smoke-tests.mjs",
     "test": "npm run lint && npm run test:unit && npm run test:smoke",
     "test:all": "npm run test && npm run test:e2e",
+    "verify:auth": "node scripts/verify-auth-flows.mjs",
     "prod:check": "node scripts/verify-production-readiness.mjs",
     "db:export": "node scripts/export-json-to-sql.mjs",
     "db:apply": "node scripts/apply-schema.mjs",

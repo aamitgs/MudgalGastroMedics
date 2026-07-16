@@ -35,5 +35,16 @@ jobs:
       - name: Production readiness report
         run: npm run prod:check -- --report-only
 
+      - name: Auth & RBAC flow regression checks
+        run: |
+          NEXT_DIST_DIR=.next-e2e npm run dev -- --hostname 127.0.0.1 --port 3100 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:3100/mudgalgastromedics-os > /dev/null && break
+            sleep 2
+          done
+          npm run verify:auth
+
       - name: Hospital OS Playwright and axe checks
         run: npm run test:e2e
