@@ -1,5 +1,6 @@
 import { CalendarCheck, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ButtonLink } from "@/components/site/ButtonLink";
+import { OpdWaitWidget } from "@/components/site/OpdWaitWidget";
 import { site } from "@/lib/site-data";
 
 type AppointmentCtaPanelProps = {
@@ -12,6 +13,7 @@ export function AppointmentCtaPanel({ className = "", layout = "auto" }: Appoint
 
   return (
     <div className={`rounded-lg border border-white/16 bg-[rgba(255,255,255,0.10)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md ${className}`}>
+      <OpdWaitWidget className="mb-3 px-1" />
       <div className={gridClass}>
         <ButtonLink href="/portal#appointment" className="min-h-13 px-5 text-base shadow-[0_18px_46px_rgba(8,145,178,0.42)]">
           <CalendarCheck size={19} /> Book Appointment

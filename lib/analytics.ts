@@ -51,7 +51,7 @@ function topCounts(items: string[], fallback = "Uncategorized") {
 }
 
 /** Minutes between visit creation and consultationStartedAt — real, not fabricated: only computed where that timestamp actually exists. */
-function averageWaitMinutes(visits: { createdAt: string; consultationStartedAt?: string }[]) {
+export function averageWaitMinutes(visits: { createdAt: string; consultationStartedAt?: string }[]) {
   const waits = visits
     .filter((visit): visit is typeof visit & { consultationStartedAt: string } => Boolean(visit.consultationStartedAt))
     .map((visit) => (new Date(visit.consultationStartedAt).getTime() - new Date(visit.createdAt).getTime()) / 60000)

@@ -50,6 +50,23 @@ export function isOpdOpenNow(weekdayShort: string, minutesSinceMidnight: number)
   );
 }
 
+const indiaTimeZone = "Asia/Kolkata";
+
+/** Shared IST weekday/minutes extraction — reused by the client-side clock card and any server-side "is OPD open now" check, so the timezone math lives in exactly one place. */
+export function getIndiaWeekdayMinutes(date = new Date()): { weekdayShort: string; minutesSinceMidnight: number } {
+  const parts = new Intl.DateTimeFormat("en-IN", {
+    timeZone: indiaTimeZone,
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(date);
+  const weekdayShort = parts.find((part) => part.type === "weekday")?.value ?? "";
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+  return { weekdayShort, minutesSinceMidnight: hour * 60 + minute };
+}
+
 export const doctor = {
   name: "Dr. Deepak Kumar Sharma",
   designation: "Consultant Gastroenterologist & Hepatologist",
