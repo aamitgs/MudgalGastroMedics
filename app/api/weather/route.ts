@@ -31,7 +31,7 @@ export async function GET() {
       `&current=temperature_2m,weather_code&timezone=Asia%2FKolkata`;
     const response = await fetch(url, { next: { revalidate: 1800 } });
     if (!response.ok) {
-      return NextResponse.json({ ok: false }, { status: 502 });
+      return NextResponse.json({ ok: false, error: "Unable to reach the weather provider." }, { status: 502 });
     }
     const data = (await response.json()) as {
       current?: { temperature_2m?: number; weather_code?: number };
@@ -39,7 +39,7 @@ export async function GET() {
     const temperature = data.current?.temperature_2m;
     const code = data.current?.weather_code;
     if (typeof temperature !== "number" || typeof code !== "number") {
-      return NextResponse.json({ ok: false }, { status: 502 });
+      return NextResponse.json({ ok: false, error: "Weather provider returned an unexpected response." }, { status: 502 });
     }
     const described = describeWeatherCode(code);
     return NextResponse.json({
@@ -49,6 +49,6 @@ export async function GET() {
       icon: described.icon
     });
   } catch {
-    return NextResponse.json({ ok: false }, { status: 502 });
+    return NextResponse.json({ ok: false, error: "Unable to fetch current weather." }, { status: 502 });
   }
 }
