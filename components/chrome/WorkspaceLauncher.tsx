@@ -129,9 +129,8 @@ export function WorkspaceLauncher() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div className="flex flex-col items-center text-center">
-        <Image src="/mgm-logo.png" alt={site.name} width={128} height={128} className="h-28 w-28 object-contain" />
-        <h1 className="mt-4 text-3xl font-bold leading-tight text-ink">{site.name}</h1>
-        <p className="mt-1 text-sm font-semibold text-muted">Choose your workspace</p>
+        <Image src="/mgm-logo.png" alt={site.name} width={612} height={285} className="h-auto w-96 object-contain" />
+        <h1 className="mt-2 text-lg font-semibold text-muted">Choose your workspace</h1>
         <div className="mt-3">
           <LiveClockWeather variant="launcher" />
         </div>

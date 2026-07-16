@@ -144,7 +144,7 @@ export function AccessLogin({
     <div className="mx-auto w-full max-w-md">
       <div className="rounded-2xl border border-line/80 bg-surface p-8 shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
         <div className="flex flex-col items-center text-center">
-          <Image src="/mgm-logo.png" alt={site.name} width={64} height={64} className="h-16 w-16 object-contain" />
+          <Image src="/mgm-logo.png" alt={site.name} width={612} height={285} className="h-auto w-64 object-contain" />
           <h1 className="mt-4 text-2xl font-bold leading-tight text-ink">{site.name}</h1>
           <p className="mt-1 text-sm font-semibold text-muted">{site.secondaryTagline}</p>
           {workspaceLabel ? (
