@@ -1,25 +1,29 @@
 "use client";
 
-import { FormEvent, useState } from "react";
 import { CalendarCheck, CheckCircle2, MessageCircle, Phone, Send } from "lucide-react";
+import { useState } from "react";
+import { z } from "zod";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { isValidPhoneNumber, normalizePhoneNumber } from "@/lib/phone";
 import { site } from "@/lib/site-data";
 
 const countryCodes = ["+91", "+1", "+44", "+971", "+966", "+974", "+965", "+968", "+61", "+65", "+977", "+880"];
 
-function normalizePhone(value: FormDataEntryValue | null | undefined, countryCode = "+91") {
-  const raw = String(value ?? "").trim();
-  const digits = raw.replace(/\D/g, "");
-  if (!digits) return "";
-  if (raw.startsWith("+")) return `+${digits}`;
-  if (countryCode === "+91" && digits.length === 10 && /^[6-9]/.test(digits)) return `+91 ${digits}`;
-  if (countryCode === "+91" && digits.length === 11 && digits.startsWith("0") && /^[6-9]/.test(digits.slice(1))) return `+91 ${digits.slice(1)}`;
-  return `${countryCode} ${digits}`;
-}
+const blogConsultationSchema = z
+  .object({
+    name: z.string().trim().min(1, "Please enter patient name."),
+    countryCode: z.string(),
+    phone: z.string(),
+    contactMethod: z.string(),
+    concern: z.string()
+  })
+  .refine((data) => isValidPhoneNumber(normalizePhoneNumber(data.phone, data.countryCode)), {
+    message: "Please enter a valid phone number with country code if outside India.",
+    path: ["phone"]
+  })
+  .transform((data) => ({ ...data, phone: normalizePhoneNumber(data.phone, data.countryCode) }));
 
-function isValidPhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15;
-}
+type BlogConsultationValues = z.infer<typeof blogConsultationSchema>;
 
 type BlogConsultationFormProps = {
   articleTitle: string;
@@ -47,64 +51,58 @@ export function BlogConsultationForm({
   const [requestId, setRequestId] = useState("");
   const fieldClass = "min-h-12 w-full rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink shadow-sm transition placeholder:text-muted/60 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const countryCode = String(formData.get("countryCode") || "+91");
-    const phone = normalizePhone(formData.get("phone"), countryCode);
-    const name = String(formData.get("name") || "").trim();
-    const concern = String(formData.get("concern") || "").trim();
-    const contactMethod = String(formData.get("contactMethod") || "Phone / WhatsApp");
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    submit
+  } = useAdvancedForm<BlogConsultationValues>({
+    schema: blogConsultationSchema,
+    defaultValues: {
+      name: "",
+      countryCode: "+91",
+      phone: "",
+      contactMethod: "Phone / WhatsApp",
+      concern: ""
+    },
+    async onValid({ name, phone, contactMethod, concern }) {
+      const payload = {
+        name,
+        phone,
+        service: "OPD",
+        contactMethod,
+        priority: category.toLowerCase().includes("bleeding") || articleTitle.toLowerCase().includes("blood") ? "Urgent symptoms" : "Routine",
+        symptoms: [category, relatedLabel].filter(Boolean),
+        message: `Blog consultation request\nArticle: ${articleTitle}\nConcern: ${concern || "-"}`
+      };
 
-    if (!name) {
-      setMessage("Please enter patient name.");
+      setMessage("Preparing request for reception...");
       setWhatsappLink("");
-      return;
+      setRequestId("");
+
+      let savedId = "";
+      try {
+        const response = await fetch("/api/appointment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.ok) savedId = result.appointment?.id ?? "";
+      } catch {
+        // WhatsApp handoff remains available for static previews.
+      }
+
+      const text = encodeURIComponent(
+        `Blog consultation request\nArticle: ${articleTitle}\nName: ${name}\nPhone: ${phone}\nPreferred contact: ${contactMethod}\nRelated care: ${relatedLabel}\nConcern: ${concern || "-"}${savedId ? `\nRequest ID: ${savedId}` : ""}`
+      );
+      setRequestId(savedId);
+      setWhatsappLink(`https://wa.me/${site.whatsapp}?text=${text}`);
+      setMessage(savedId ? `Request saved as ${savedId}. Send it on WhatsApp for faster reception follow-up.` : "Request prepared. Send it on WhatsApp so reception can guide you.");
     }
-    if (!isValidPhone(phone)) {
-      setMessage("Please enter a valid phone number with country code if outside India.");
-      setWhatsappLink("");
-      return;
-    }
-
-    const payload = {
-      name,
-      phone,
-      service: "OPD",
-      contactMethod,
-      priority: category.toLowerCase().includes("bleeding") || articleTitle.toLowerCase().includes("blood") ? "Urgent symptoms" : "Routine",
-      symptoms: [category, relatedLabel].filter(Boolean),
-      message: `Blog consultation request\nArticle: ${articleTitle}\nConcern: ${concern || "-"}`
-    };
-
-    setMessage("Preparing request for reception...");
-    setWhatsappLink("");
-    setRequestId("");
-
-    let savedId = "";
-    try {
-      const response = await fetch("/api/appointment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json().catch(() => ({}));
-      if (response.ok && result.ok) savedId = result.appointment?.id ?? "";
-    } catch {
-      // WhatsApp handoff remains available for static previews.
-    }
-
-    const text = encodeURIComponent(
-      `Blog consultation request\nArticle: ${articleTitle}\nName: ${name}\nPhone: ${phone}\nPreferred contact: ${contactMethod}\nRelated care: ${relatedLabel}\nConcern: ${concern || "-"}${savedId ? `\nRequest ID: ${savedId}` : ""}`
-    );
-    setRequestId(savedId);
-    setWhatsappLink(`https://wa.me/${site.whatsapp}?text=${text}`);
-    setMessage(savedId ? `Request saved as ${savedId}. Send it on WhatsApp for faster reception follow-up.` : "Request prepared. Send it on WhatsApp so reception can guide you.");
-  }
+  });
 
   return (
-    <form onSubmit={onSubmit} className={`rounded-xl border border-cyan-100/20 bg-[#082f36] p-4 text-white shadow-[0_24px_70px_rgba(8,64,84,0.22),inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}>
+    <form onSubmit={submit} noValidate className={`rounded-xl border border-cyan-100/20 bg-[#082f36] p-4 text-white shadow-[0_24px_70px_rgba(8,64,84,0.22),inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-cyan-100">Need help?</p>
@@ -114,22 +112,28 @@ export function BlogConsultationForm({
         <CalendarCheck className="shrink-0 text-cyan-200" size={28} />
       </div>
       <div className={`mt-5 grid gap-3 ${compact ? "" : "md:grid-cols-2"}`}>
-        <input name="name" required autoComplete="name" className={fieldClass} placeholder="Patient name" />
-        <div className="grid grid-cols-[5rem_1fr] gap-2">
-          <select name="countryCode" defaultValue="+91" autoComplete="tel-country-code" className={`${fieldClass} px-2`} aria-label="Country code">
-            {countryCodes.map((code) => <option key={code}>{code}</option>)}
-          </select>
-          <input name="phone" required type="tel" inputMode="tel" autoComplete="tel-national" className={fieldClass} placeholder="Mobile number" />
+        <div>
+          <input {...register("name")} autoComplete="name" className={fieldClass} placeholder="Patient name" />
+          {errors.name ? <p role="alert" className="mt-1.5 text-xs font-semibold text-red-300">{errors.name.message}</p> : null}
         </div>
-        <select name="contactMethod" className={fieldClass}>
+        <div>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <select {...register("countryCode")} autoComplete="tel-country-code" className={`${fieldClass} px-2`} aria-label="Country code">
+              {countryCodes.map((code) => <option key={code}>{code}</option>)}
+            </select>
+            <input {...register("phone")} type="tel" inputMode="tel" autoComplete="tel-national" className={fieldClass} placeholder="Mobile number" />
+          </div>
+          {errors.phone ? <p role="alert" className="mt-1.5 text-xs font-semibold text-red-300">{errors.phone.message}</p> : null}
+        </div>
+        <select {...register("contactMethod")} className={fieldClass}>
           <option>Phone / WhatsApp</option>
           <option>Call only</option>
           <option>WhatsApp only</option>
         </select>
-        <input name="concern" className={fieldClass} placeholder="Main symptom or concern" />
+        <input {...register("concern")} className={fieldClass} placeholder="Main symptom or concern" />
       </div>
-      <button type="submit" className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-black text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition hover:-translate-y-0.5">
-        <Send size={17} /> {buttonLabel}
+      <button type="submit" disabled={isSubmitting} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-black text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition hover:-translate-y-0.5 disabled:opacity-70">
+        <Send size={17} /> {isSubmitting ? "Sending…" : buttonLabel}
       </button>
       {message ? (
         <div className="mt-4 rounded-lg border border-white/14 bg-white/8 p-3">

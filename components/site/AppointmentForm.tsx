@@ -4,6 +4,7 @@ import { AlertTriangle, CalendarCheck, CheckCircle2, FileText, MapPin, MessageCi
 import { FormEvent, useRef, useState } from "react";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
 import type { AppointmentRecord } from "@/lib/appointment-types";
+import { isValidPhoneNumber, normalizePhoneNumber } from "@/lib/phone";
 import { opdWindows, site } from "@/lib/site-data";
 
 /** Display-only Hindi labels; the submitted symptom value stays English so records remain consistent. */
@@ -71,21 +72,6 @@ const urgentSymptoms = new Set([
   "Pancreatitis pain",
   "Liver swelling / ascites"
 ]);
-
-function normalizePhoneNumber(value: FormDataEntryValue | null | undefined, countryCode = "+91") {
-  const raw = String(value ?? "").trim();
-  const digits = raw.replace(/\D/g, "");
-  if (!digits) return "";
-  if (raw.startsWith("+")) return `+${digits}`;
-  if (countryCode === "+91" && digits.length === 11 && digits.startsWith("0") && /^[6-9]/.test(digits.slice(1))) return `+91 ${digits.slice(1)}`;
-  if (countryCode === "+91" && digits.length === 10 && /^[6-9]/.test(digits)) return `+91 ${digits}`;
-  return `${countryCode} ${digits}`;
-}
-
-function isValidPhoneNumber(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15;
-}
 
 function normalizePinCode(value: FormDataEntryValue | null | undefined) {
   return String(value ?? "").replace(/\D/g, "");
