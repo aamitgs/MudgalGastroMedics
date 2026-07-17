@@ -109,10 +109,10 @@ export function BlogArticleActions({ title, description, url, compact = false }:
     <div className={`rounded-xl border border-line bg-white p-4 shadow-soft ${compact ? "" : "md:p-5"}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand">Share / Save</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-dark">Share / Save</p>
           <h2 className={`${compact ? "text-lg" : "text-2xl"} mt-1 font-black text-ink`}>Use this guide later</h2>
         </div>
-        <Share2 className="text-brand" size={22} />
+        <Share2 className="text-brand-dark" size={22} />
       </div>
       <div className={`mt-4 grid gap-2 ${compact ? "" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
         {actions.map(({ label, href, icon: Icon, external }) => (
@@ -121,24 +121,24 @@ export function BlogArticleActions({ title, description, url, compact = false }:
             href={href}
             target={external ? "_blank" : undefined}
             rel={external ? "noreferrer" : undefined}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark"
           >
             <Icon size={16} /> {label}
           </a>
         ))}
-        <button type="button" onClick={copyLink} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand">
+        <button type="button" onClick={copyLink} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark">
           <Copy size={16} /> {copied ? "Copied" : "Copy Link"}
         </button>
-        <button type="button" onClick={openInstagram} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand">
+        <button type="button" onClick={openInstagram} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark">
           <ExternalLink size={16} /> Instagram
         </button>
-        <button type="button" onClick={nativeShare} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand">
+        <button type="button" onClick={nativeShare} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark">
           <Share2 size={16} /> Share
         </button>
-        <button type="button" onClick={printArticle} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand">
+        <button type="button" onClick={printArticle} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark">
           <Printer size={16} /> Print
         </button>
-        <button type="button" onClick={printArticle} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand">
+        <button type="button" onClick={printArticle} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-soft/45 px-3 text-sm font-black text-ink transition hover:border-brand hover:bg-white hover:text-brand-dark">
           <Download size={16} /> Save PDF
         </button>
       </div>

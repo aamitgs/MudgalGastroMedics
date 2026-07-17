@@ -4,11 +4,45 @@ import { CalendarCheck, Clock3, Languages, Moon, ShieldCheck, Stethoscope, UserR
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+import { fullAddress, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Dr. Dushyant Nagayach | Duty Doctor",
   description: "Profile, qualifications, registration, experience and duty timing for Dr. Dushyant Nagayach at Mudgal Gastromedics Hospital in Agra.",
   alternates: { canonical: "/duty-doctor" }
+};
+
+const dutyDoctorSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Physician",
+      name: "Dr. Dushyant Nagayach",
+      jobTitle: "Duty Medical Officer",
+      medicalSpecialty: ["General Medicine", "Gastroenterology"],
+      identifier: "H041809",
+      worksFor: {
+        "@type": "Hospital",
+        name: site.name,
+        address: fullAddress,
+        telephone: site.mobile
+      },
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: `${site.addressLine1}, ${site.addressLine2}`,
+        addressLocality: site.city,
+        addressRegion: site.region,
+        postalCode: site.postalCode,
+        addressCountry: site.country
+      },
+      url: `${site.url}/duty-doctor`
+    },
+    breadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "Duty Doctor", url: "/duty-doctor" }
+    ])
+  ]
 };
 
 const dutyDoctorSupport = [
@@ -21,6 +55,7 @@ const dutyDoctorSupport = [
 export default function DutyDoctorPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dutyDoctorSchema) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
@@ -67,7 +102,7 @@ export default function DutyDoctorPage() {
             <div className="border-t border-line p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Duty Medical Officer</p>
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Duty Medical Officer</p>
                   <h2 className="mt-2 text-3xl font-black">Dr. Dushyant Nagayach</h2>
                   <p className="mt-2 font-bold text-teal-dark">BHMS (RAU)</p>
                   <p className="mt-1 text-sm text-muted">Registration No. H041809</p>
@@ -80,7 +115,7 @@ export default function DutyDoctorPage() {
 
           <MotionReveal delay={0.08}>
           <div className="rounded border border-line bg-white p-6 shadow-soft">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Profile</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Profile</p>
             <h2 className="mt-2 text-4xl font-black leading-tight md:text-5xl">Duty doctor profile</h2>
             <p className="mt-5 text-muted">
               Dr. Dushyant Nagayach provides overnight duty doctor support and coordinates with the consultant gastroenterology team according to clinical need.
@@ -117,7 +152,7 @@ export default function DutyDoctorPage() {
           {dutyDoctorSupport.map(({ title, description, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
             <article className="group h-full rounded border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-              <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
+              <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark transition group-hover:bg-brand group-hover:text-white">
                 <Icon size={25} />
               </span>
               <h3 className="text-xl font-black">{title}</h3>
@@ -131,7 +166,7 @@ export default function DutyDoctorPage() {
       <Section>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Need assistance?</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Need assistance?</p>
             <h2 className="mt-2 text-3xl font-black">Call reception before visiting for duty availability.</h2>
             <p className="mt-2 max-w-2xl text-muted">Duty timing and immediate care needs should be confirmed with reception, especially for urgent symptoms or after-hours visits.</p>
           </div>

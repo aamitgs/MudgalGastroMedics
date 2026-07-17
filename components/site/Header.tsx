@@ -19,7 +19,7 @@ const navItems = [
       { href: "/about", label: "About MGM" },
       { href: "/dr-deepak-kumar-sharma-gastroenterologist-agra", label: "Doctor Profile" },
       { href: "/duty-doctor", label: "Duty Doctor" },
-      { href: "/#procedures", label: "Treatments" },
+      { href: "/procedures", label: "Treatments" },
       { href: "/about#why-choose", label: "Why Choose Us" },
       { href: "/gallery", label: "Our Facilities" },
       { href: "/patient-rights-responsibilities", label: "Patient Rights" },
@@ -66,9 +66,10 @@ const navItems = [
     ]
   },
   {
-    href: "/#procedures",
+    href: "/procedures",
     label: "Special Procedures",
     children: [
+      { href: "/procedures", label: "All Procedures" },
       { href: "/procedures/endoscopy", label: "Endoscopy" },
       { href: "/procedures/colonoscopy", label: "Colonoscopy" },
       { href: "/procedures/enteroscopy", label: "Enteroscopy" },
@@ -84,9 +85,10 @@ const navItems = [
     ]
   },
   {
-    href: "/#procedures",
+    href: "/procedures",
     label: "GI Diseases",
     children: [
+      { href: "/procedures", label: "All Conditions" },
       { href: "/procedures/gastrointestinal-bleeding-management", label: "GI Bleeding" },
       { href: "/procedures/varices", label: "Varices" },
       { href: "/procedures/liver-cirrhosis", label: "Liver Cirrhosis" },
@@ -285,7 +287,7 @@ export function Header() {
                 {item.children?.length ? (
                   <div className="invisible absolute left-0 top-full max-h-[70vh] min-w-64 translate-y-2 overflow-y-auto rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-[13px] font-semibold text-ink/78 hover:bg-soft hover:text-brand xl:text-[14px]">
+                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-[13px] font-semibold text-ink/78 hover:bg-soft hover:text-brand-dark xl:text-[14px]">
                         <NavLabel label={child.label} />
                       </Link>
                     ))}
@@ -304,7 +306,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="grid h-11 w-11 place-items-center rounded border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-[0_10px_24px_rgba(8,64,84,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 min-[1280px]:hidden"
+              className="grid h-11 w-11 place-items-center rounded border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-[0_10px_24px_rgba(8,64,84,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand-dark focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 min-[1280px]:hidden"
               aria-label="Open menu"
               aria-expanded={open}
             >
@@ -331,7 +333,7 @@ export function Header() {
                 {item.children?.length ? (
                   <div className="ml-3 grid border-l border-line pl-3">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand">
+                      <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand-dark">
                         <NavLabel label={child.label} />
                       </Link>
                     ))}

@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { CakeSlice, Camera, HeartHandshake, PartyPopper, Sparkles, Trophy, Users } from "lucide-react";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "Life@MGM",
   description: "Staff celebrations, birthdays, festivals, team events and workplace moments at Mudgal Gastromedics Hospital.",
   alternates: { canonical: "/life-at-mgm" }
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Life@MGM", url: "/life-at-mgm" }
+  ])
 };
 
 const celebrationCategories = [
@@ -50,6 +59,7 @@ const cultureValues = [
 export default function LifeAtMgmPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
@@ -96,7 +106,7 @@ export default function LifeAtMgmPage() {
           {celebrationCategories.map(({ title, titleHi, description, descriptionHi, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
             <article className="group h-full rounded border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-              <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
+              <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark transition group-hover:bg-brand group-hover:text-white">
                 <Icon size={24} />
               </span>
               <h2 className="inline-lang text-xl font-black">
@@ -142,7 +152,7 @@ export default function LifeAtMgmPage() {
               <p className="mt-2 text-muted" data-hi lang="hi">इस गैलरी में प्रकाशित करने के लिए स्वीकृत स्टाफ तस्वीरें जोड़ें।</p>
             </div>
             <div className="rounded border border-line bg-white p-6 shadow-soft">
-              <HeartHandshake className="mb-4 text-brand" size={32} />
+              <HeartHandshake className="mb-4 text-brand-dark" size={32} />
               <h2 className="inline-lang text-2xl font-black">
                 <span data-en>Human side of care</span>
                 <span data-hi lang="hi">देखभाल का मानवीय पक्ष</span>

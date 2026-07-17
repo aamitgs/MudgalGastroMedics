@@ -2,12 +2,21 @@ import type { Metadata } from "next";
 import { GalleryGrid } from "@/components/site/GalleryGrid";
 import { Section, SectionHead } from "@/components/site/Section";
 import { getPublicGalleryItems } from "@/lib/cms-public";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { equipment } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Gallery",
   description: "View hospital exterior, reception, consultation areas, endoscopy unit, HDU, patient rooms, equipment and facilities at Mudgal Gastromedics Hospital.",
   alternates: { canonical: "/gallery" }
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Gallery", url: "/gallery" }
+  ])
 };
 
 export default async function GalleryPage() {
@@ -98,6 +107,7 @@ export default async function GalleryPage() {
 
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">

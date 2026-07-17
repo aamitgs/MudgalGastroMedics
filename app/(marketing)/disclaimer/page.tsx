@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Disclaimer", url: "/disclaimer" }
+  ])
+};
 
 const disclaimerParagraphs = [
   "The information provided on the Mudgal Gastromedics Hospital website is intended solely for general informational and educational purposes.",
@@ -20,6 +29,7 @@ export const metadata: Metadata = {
 export default function DisclaimerPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Disclaimer</p>

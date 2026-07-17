@@ -43,7 +43,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             type="button"
             onClick={() => setFilter(category)}
             aria-pressed={filter === category}
-            className={`rounded-full border px-4 py-2 text-sm font-bold tracking-[0.01em] transition duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 ${filter === category ? "border-cyan-300/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_14px_34px_rgba(8,145,178,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]" : "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-sm hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand hover:shadow-soft"}`}
+            className={`rounded-full border px-4 py-2 text-sm font-bold tracking-[0.01em] transition duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60 ${filter === category ? "border-cyan-300/20 bg-[image:var(--site-brand-gradient)] text-white shadow-[0_14px_34px_rgba(8,145,178,0.3),inset_0_1px_0_rgba(255,255,255,0.22)]" : "border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] text-ink shadow-sm hover:-translate-y-0.5 hover:border-cyan-200 hover:text-brand-dark hover:shadow-soft"}`}
           >
             {category}
           </button>
@@ -62,7 +62,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             transition={{ duration: 0.25, delay: Math.min(index * 0.025, 0.18) }}
           >
             <span className="relative isolate block border-b border-line bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_32%),linear-gradient(135deg,#f7ffff,#e8fbfb)] p-5">
-              <span className="absolute right-4 top-4 z-10 rounded-full border border-brand/15 bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-sm backdrop-blur">
+              <span className="absolute right-4 top-4 z-10 rounded-full border border-brand/15 bg-white/90 px-3 py-1 text-xs font-semibold text-brand-dark shadow-sm backdrop-blur">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className="relative block aspect-[4/3] overflow-hidden rounded border border-cyan-100 bg-white shadow-[inset_0_0_0_1px_rgba(165,243,252,0.55)]">
@@ -82,7 +82,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
               </span>
               <b className="block text-2xl font-bold leading-tight text-ink">{item.title}</b>
               <span className="mt-3 block leading-relaxed text-muted">Preview this hospital area before your visit.</span>
-              <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-brand">
+              <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-brand-dark">
                 View image <Maximize2 size={15} className="transition group-hover:scale-110" />
               </span>
             </span>

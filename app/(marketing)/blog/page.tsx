@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Clock3, Search } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
@@ -6,6 +7,15 @@ import { BlogPostSearch } from "@/components/site/BlogPostSearch";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section } from "@/components/site/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" }
+  ])
+};
 
 const POSTS_PER_PAGE = 12;
 const campPostSlug = "stomach-intestine-liver-consultation-check-up-camp";
@@ -76,6 +86,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="relative overflow-hidden bg-mist px-4 py-8 text-white md:py-12">
         <div className="relative mx-auto w-[min(1280px,calc(100%-12px))] overflow-hidden rounded-[28px] border border-cyan-100/30 bg-ink shadow-[0_30px_90px_rgba(8,64,84,0.24)]">
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.86)_47%,rgba(8,145,178,0.36)_100%),url('/images/hospital/waitingarea-full-hero.png')] bg-cover bg-center" />
@@ -148,7 +159,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <div>
             <div className="mb-7 flex flex-col gap-4 rounded-lg border border-line bg-white p-5 shadow-soft md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Patient Education</p>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Patient Education</p>
                 <h2 className="mt-2 text-4xl font-black leading-tight text-ink md:text-5xl">{categoryTitle}</h2>
                 <p className="mt-3 max-w-2xl leading-relaxed text-muted">
                   Showing {visiblePosts.length} of {filteredPosts.length} guides. Use categories to browse focused gastroenterology, liver and procedure articles.
@@ -163,7 +174,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   <ArrowRight size={16} />
                 </Link>
               ) : (
-                <div className="rounded-full border border-line bg-soft px-5 py-2 text-sm font-black text-brand">
+                <div className="rounded-full border border-line bg-soft px-5 py-2 text-sm font-black text-brand-dark">
                   {sortedPosts.length} total guides
                 </div>
               )}
@@ -175,26 +186,29 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 className="group mb-6 block overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
               >
                 <div className="relative aspect-[2.1/1] overflow-hidden bg-ink">
-                  <img
+                  <Image
                     src={getBlogCoverImage(featuredPost)}
                     alt={`${featuredPost.title} article cover`}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(min-width: 1024px) 700px, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                    unoptimized
                   />
                 </div>
                 <article className="p-6 md:p-7">
                   <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-bold text-muted">
                     <span className="inline-flex items-center gap-2">
-                      <CalendarDays size={16} className="text-brand" />
+                      <CalendarDays size={16} className="text-brand-dark" />
                       {featuredPost.date}
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <Clock3 size={16} className="text-brand" />
+                      <Clock3 size={16} className="text-brand-dark" />
                       {featuredPost.readTime}
                     </span>
                   </div>
                   <h3 className="text-3xl font-black leading-tight text-ink md:text-4xl">{featuredPost.title}</h3>
                   <p className="mt-4 leading-relaxed text-muted">{featuredPost.description}</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-brand">
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-brand-dark">
                     Read featured guide <ArrowRight size={16} className="transition group-hover:translate-x-1" />
                   </span>
                 </article>
@@ -209,31 +223,34 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   className="group block overflow-hidden rounded-lg border border-line bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
                 >
                   <div className="relative aspect-[2.1/1] overflow-hidden bg-ink">
-                    <img
+                    <Image
                       src={getBlogCoverImage(post)}
                       alt={`${post.title} article cover`}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      fill
+                      sizes="(min-width: 1024px) 700px, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                      unoptimized
                     />
                   </div>
                   <article className="flex min-w-0 flex-col p-6 md:p-7">
                     <div className="mb-4 flex flex-wrap items-center gap-4 text-sm font-bold text-muted">
                       <span className="inline-flex items-center gap-2">
-                        <CalendarDays size={16} className="text-brand" />
+                        <CalendarDays size={16} className="text-brand-dark" />
                         {post.date}
                       </span>
                       <span className="inline-flex items-center gap-2">
-                        <Clock3 size={16} className="text-brand" />
+                        <Clock3 size={16} className="text-brand-dark" />
                         {post.readTime}
                       </span>
                     </div>
                     <h3 className="text-2xl font-black leading-tight text-ink md:text-3xl">{post.title}</h3>
                     <p className="mt-4 grow leading-relaxed text-muted">{post.description}</p>
                     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[#c9dddf] bg-[#eef7f7] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-brand">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[#c9dddf] bg-[#eef7f7] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
                         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: post.accent }} />
                         {post.category}
                       </span>
-                      <span className="inline-flex items-center gap-2 text-sm font-black text-brand">
+                      <span className="inline-flex items-center gap-2 text-sm font-black text-brand-dark">
                         Read guide <ArrowRight size={16} className="transition group-hover:translate-x-1" />
                       </span>
                     </div>
@@ -249,7 +266,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 className={`inline-flex h-11 items-center justify-center gap-2 rounded border px-5 text-sm font-black transition ${
                   currentPage <= 1
                     ? "pointer-events-none border-line bg-soft text-muted/55"
-                    : "border-line bg-white text-ink hover:border-brand hover:text-brand"
+                    : "border-line bg-white text-ink hover:border-brand hover:text-brand-dark"
                 }`}
               >
                 <ArrowLeft size={16} />
@@ -269,7 +286,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                           className={`grid h-10 min-w-10 place-items-center rounded border px-3 text-sm font-black transition ${
                             page === currentPage
                               ? "border-brand bg-brand text-white"
-                              : "border-line bg-white text-ink hover:border-brand hover:text-brand"
+                              : "border-line bg-white text-ink hover:border-brand hover:text-brand-dark"
                           }`}
                         >
                           {page}
@@ -284,7 +301,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 className={`inline-flex h-11 items-center justify-center gap-2 rounded border px-5 text-sm font-black transition ${
                   currentPage >= totalPages
                     ? "pointer-events-none border-line bg-soft text-muted/55"
-                    : "border-line bg-white text-ink hover:border-brand hover:text-brand"
+                    : "border-line bg-white text-ink hover:border-brand hover:text-brand-dark"
                 }`}
               >
                 Next
@@ -298,11 +315,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
             <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded bg-soft text-brand">
+                <div className="grid h-11 w-11 place-items-center rounded bg-soft text-brand-dark">
                   <Search size={20} />
                 </div>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Browse By</p>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Browse By</p>
                   <h3 className="text-2xl font-black text-ink">Categories</h3>
                 </div>
               </div>
@@ -321,11 +338,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             </div>
 
             <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Popular Guides</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Popular Guides</p>
               <div className="mt-4 divide-y divide-line">
                 {popularPosts.map((post) => (
                   <Link key={post.slug} href={`/blog/${post.slug}`} className="group block py-4 first:pt-0 last:pb-0">
-                    <p className="text-sm font-black leading-snug text-ink transition group-hover:text-brand">{post.title}</p>
+                    <p className="text-sm font-black leading-snug text-ink transition group-hover:text-brand-dark">{post.title}</p>
                     <p className="mt-2 text-xs font-bold text-muted">{post.category} · {post.readTime}</p>
                   </Link>
                 ))}
@@ -355,7 +372,7 @@ function CategoryLink({ href, label, count, active }: { href: string; label: str
       href={href}
       className={`flex items-center justify-between gap-3 rounded border px-4 py-3 text-sm font-black transition ${
         active
-          ? "border-brand bg-[#eaf8fa] text-brand"
+          ? "border-brand bg-[#eaf8fa] text-brand-dark"
           : "border-transparent bg-white text-ink hover:border-line hover:bg-soft"
       }`}
     >
@@ -363,7 +380,7 @@ function CategoryLink({ href, label, count, active }: { href: string; label: str
       <span className={`inline-flex min-w-8 justify-center rounded-full px-2 py-1 text-xs ${active ? "bg-brand text-white" : "bg-soft text-muted"}`}>
         {count}
       </span>
-      <ChevronRight size={15} className={active ? "text-brand" : "text-muted"} />
+      <ChevronRight size={15} className={active ? "text-brand-dark" : "text-muted"} />
     </Link>
   );
 }

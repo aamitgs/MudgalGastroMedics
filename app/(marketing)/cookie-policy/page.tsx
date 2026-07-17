@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Cookie Policy", url: "/cookie-policy" }
+  ])
+};
 
 const cookieSections = [
   {
@@ -54,6 +63,7 @@ export const metadata: Metadata = {
 export default function CookiePolicyPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Cookie Policy</p>
@@ -107,7 +117,7 @@ function ContactBlock() {
     <section className="border-t border-line pt-8">
       <h2 className="text-2xl font-black leading-tight text-ink md:text-3xl">Contact</h2>
       <div className="mt-5 rounded border border-line bg-soft/60 p-5">
-        <p className="text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand hover:text-brand-dark">+91-9828912257</a></p>
+        <p className="text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand-dark hover:text-brand-dark">+91-9828912257</a></p>
       </div>
     </section>
   );

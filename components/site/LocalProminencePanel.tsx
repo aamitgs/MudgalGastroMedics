@@ -17,7 +17,7 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
           <div className="flex items-center gap-4">
             <BrandIconTile className="h-14 w-14" />
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Local Trust Signals</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Local Trust Signals</p>
               <h2 className="mt-1 text-3xl font-black leading-tight text-ink">
                 Reviews, photos and verified location.
               </h2>
@@ -44,7 +44,7 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
             className="group rounded border border-[#bfe5ea] bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift"
           >
             <div className="flex items-start justify-between gap-4">
-              <span className="grid h-11 w-11 place-items-center rounded bg-[#ecfeff] text-brand">
+              <span className="grid h-11 w-11 place-items-center rounded bg-[#ecfeff] text-brand-dark">
                 <Star size={21} />
               </span>
               <Image
@@ -59,7 +59,7 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
             <p className="mt-2 text-sm leading-6 text-muted">
               Use Google to check patient review activity, route details, photos and current business profile information.
             </p>
-            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand">
+            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand-dark">
               View on Google <ArrowRight size={16} className="transition group-hover:translate-x-1" />
             </span>
           </a>
@@ -75,7 +75,7 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
             <p className="mt-2 text-sm leading-6 text-muted">
               Browse reception, consultation, endoscopy, HDU, rooms, pharmacy and equipment photos from the hospital.
             </p>
-            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand">
+            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand-dark">
               Open gallery <ArrowRight size={16} className="transition group-hover:translate-x-1" />
             </span>
           </Link>
@@ -86,12 +86,12 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
             rel="noreferrer"
             className="group rounded border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift"
           >
-            <span className="grid h-11 w-11 place-items-center rounded bg-[#ecfeff] text-brand">
+            <span className="grid h-11 w-11 place-items-center rounded bg-[#ecfeff] text-brand-dark">
               <MapPin size={21} />
             </span>
             <h3 className="mt-4 text-xl font-black text-ink">Verified visit route</h3>
             <p className="mt-2 text-sm leading-6 text-muted">{compact ? site.addressLine1 : fullAddress}</p>
-            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand">
+            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-brand-dark">
               Get directions <ArrowRight size={16} className="transition group-hover:translate-x-1" />
             </span>
           </a>
@@ -102,13 +102,13 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
             </span>
             <h3 className="mt-4 text-xl font-black text-ink">Active channels</h3>
             <div className="mt-4 grid gap-2">
-              <a href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand">
+              <a href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand-dark">
                 WhatsApp reception <ArrowRight size={15} />
               </a>
-              <a href={site.facebookUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand">
+              <a href={site.facebookUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand-dark">
                 Facebook page <ArrowRight size={15} />
               </a>
-              <a href={site.youtubeUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand">
+              <a href={site.youtubeUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-between rounded border border-line px-3 py-2 text-sm font-black text-ink transition hover:border-brand hover:text-brand-dark">
                 YouTube updates <PlayCircle size={15} />
               </a>
             </div>

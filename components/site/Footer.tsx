@@ -77,7 +77,7 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">Contact Us</h3>
             <div className="grid gap-3">
-              <ContactLine icon={<Phone size={16} />} label="Call" value={site.mobile} href={`tel:${site.mobile.replace(/\s/g, "")}`} />
+              <ContactLine icon={<Phone size={16} />} label="Landline" value={site.phone} href={`tel:${site.phone.replace(/\s/g, "")}`} />
               <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile}`} />
               <ContactLine icon={<MessageCircle size={16} />} label="WhatsApp" value={site.mobile} href={`https://wa.me/${site.whatsapp}`} />
             </div>
@@ -102,7 +102,7 @@ export function Footer() {
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Mudgal Gastromedics Hospital.</p>
           <div className="inline-flex w-fit items-center overflow-hidden rounded-full border border-white/10 bg-white/10 font-black uppercase tracking-wider">
-            <span className="inline-flex items-center gap-2 bg-brand px-3 py-1.5 text-white">
+            <span className="inline-flex items-center gap-2 bg-brand-dark px-3 py-1.5 text-white">
               <ShieldCheck size={15} /> Healthcare
             </span>
             <span className="px-3 py-1.5 text-white/60">Information Protected</span>

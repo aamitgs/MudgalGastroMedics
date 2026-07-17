@@ -125,7 +125,7 @@ export function BlogConsultationForm({
           </div>
           {errors.phone ? <p role="alert" className="mt-1.5 text-xs font-semibold text-red-300">{errors.phone.message}</p> : null}
         </div>
-        <select {...register("contactMethod")} className={fieldClass}>
+        <select {...register("contactMethod")} className={fieldClass} aria-label="Preferred contact method">
           <option>Phone / WhatsApp</option>
           <option>Call only</option>
           <option>WhatsApp only</option>

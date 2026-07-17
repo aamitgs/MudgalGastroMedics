@@ -11,12 +11,12 @@ import { servicePages } from "@/lib/service-pages";
 import { hospitalEntityId, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
-  title: `Gastroenterology Services in Agra | ${site.name}`,
+  title: "Digestive, Liver & Endoscopy Services in Agra",
   description:
     "Browse gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan, GI bleeding, pancreas, bowel, GERD, screening and weight management services at Mudgal Gastromedics Hospital, Agra.",
   alternates: { canonical: "/services" },
   openGraph: {
-    title: `Gastroenterology Services in Agra | ${site.name}`,
+    title: `Digestive, Liver & Endoscopy Services in Agra | ${site.name}`,
     description:
       "Find the right digestive, liver, endoscopy, diagnostic or preventive care service at Mudgal Gastromedics Hospital in Shaheed Nagar, Agra.",
     url: `${site.url}/services`,
@@ -99,7 +99,7 @@ export default function ServicesPage() {
     "@graph": [
       {
         "@type": "CollectionPage",
-        name: "Gastroenterology Services in Agra",
+        name: "Digestive, Liver & Endoscopy Services in Agra",
         url: `${site.url}/services`,
         description: metadata.description,
         about: ["Gastroenterology", "Hepatology", "Endoscopy", "Digestive disease care"],
@@ -181,10 +181,10 @@ export default function ServicesPage() {
             <section key={group.title} className="rounded-2xl border border-line bg-white p-5 shadow-soft md:p-6">
               <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">{group.title}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{group.title}</p>
                   <p className="mt-2 max-w-3xl text-muted">{group.text}</p>
                 </div>
-                <span className="w-fit rounded-full border border-line bg-soft px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-brand">
+                <span className="w-fit rounded-full border border-line bg-soft px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
                   {group.slugs.length} services
                 </span>
               </div>
@@ -199,9 +199,9 @@ export default function ServicesPage() {
                     >
                       <div className="mb-5 flex items-start justify-between gap-4">
                         <BrandIconTile className="h-12 w-12" />
-                        <ArrowRight className="text-brand transition group-hover:translate-x-1" size={20} />
+                        <ArrowRight className="text-brand-dark transition group-hover:translate-x-1" size={20} />
                       </div>
-                      <h2 className="text-2xl font-black leading-tight text-ink transition group-hover:text-brand">{service.shortTitle}</h2>
+                      <h2 className="text-2xl font-black leading-tight text-ink transition group-hover:text-brand-dark">{service.shortTitle}</h2>
                       <p className="mt-3 grow leading-relaxed text-muted">{service.description}</p>
                       <div className="mt-5 grid gap-2">
                         {service.highlights.slice(0, 3).map((highlight) => (
@@ -225,10 +225,10 @@ export default function ServicesPage() {
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {carePathways.map((pathway) => (
             <Link key={pathway.title} href={pathway.href} className="group rounded-xl border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-              <Stethoscope className="text-brand" size={30} />
+              <Stethoscope className="text-brand-dark" size={30} />
               <h2 className="mt-5 text-2xl font-black leading-tight text-ink">{pathway.title}</h2>
               <p className="mt-3 leading-relaxed text-muted">{pathway.text}</p>
-              <span className="mt-5 inline-flex items-center gap-2 font-black text-brand">
+              <span className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
                 Open service <ArrowRight size={17} className="transition group-hover:translate-x-1" />
               </span>
             </Link>
@@ -239,7 +239,7 @@ export default function ServicesPage() {
       <Section>
         <div className="grid gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Before You Visit</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Before You Visit</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-5xl">Bring reports and call early for urgent warning signs.</h2>
             <p className="mt-4 leading-relaxed text-muted">
               Bring old prescriptions, blood reports, ultrasound/CT/MRCP, endoscopy or colonoscopy reports. Call reception first for vomiting blood, black stools, severe pain, fever with jaundice or persistent vomiting.
@@ -250,7 +250,7 @@ export default function ServicesPage() {
             </div>
           </div>
           <div className="rounded-xl border border-line bg-soft/60 p-5">
-            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-brand">
+            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-brand-dark">
               <ClipboardList size={18} /> Common visit checklist
             </p>
             <div className="mt-5 grid gap-3">

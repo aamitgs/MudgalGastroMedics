@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, BookOpenText, CalendarDays, Clock, ShieldCheck } from "lucide-react";
+import { ArrowRight, BookOpenText, CalendarDays, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BlogArticleActions } from "@/components/site/BlogArticleActions";
 import { BlogConsultationForm } from "@/components/site/BlogConsultationForm";
@@ -83,7 +84,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   if (!post) return {};
 
   return {
-    title: `${post.title} | ${site.name}`,
+    title: post.title,
     description: post.description,
     keywords: post.keywords,
     alternates: { canonical: `/blog/${post.slug}` },
@@ -113,6 +114,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const coverImage = getBlogCoverImage(post);
   const articleUrl = `${site.url}/blog/${post.slug}`;
   const articleCta = getArticleCta(post);
+  const keyTakeaways = post.sections
+    .flatMap((section) => (section.items?.length ? section.items : [section.title]))
+    .slice(0, 5);
   const relatedPosts = seoBlogPosts
     .filter((item) => item.slug !== post.slug)
     .map((item) => {
@@ -136,14 +140,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         mainEntityOfPage: `${site.url}/blog/${post.slug}`,
         image: `${site.url}${post.ogImage ?? `/blog/${post.slug}/opengraph-image`}`,
         author: {
-          "@type": "Organization",
-          name: site.name,
-          url: site.url
+          "@type": "Person",
+          name: doctor.name,
+          jobTitle: doctor.designation,
+          url: `${site.url}/dr-deepak-kumar-sharma-gastroenterologist-agra`
         },
         publisher: {
           "@type": "Organization",
           name: site.name,
-          url: site.url
+          url: site.url,
+          logo: {
+            "@type": "ImageObject",
+            url: `${site.url}/mgm-logo.png`
+          }
         },
         keywords: post.keywords.join(", ")
       },
@@ -239,13 +248,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section className="relative z-10">
         <div className="mb-5 overflow-hidden rounded-lg border border-line/80 bg-white p-2 shadow-[0_24px_70px_rgba(8,64,84,0.14)]">
-          <img
+          <Image
             src={coverImage}
             alt={`${post.title} cover image`}
             width={1600}
             height={757}
             sizes="(min-width: 1180px) 1180px, calc(100vw - 32px)"
             className="aspect-[2.1/1] w-full rounded object-cover"
+            unoptimized
           />
         </div>
         <div className="grid gap-3 rounded-lg border border-line bg-white p-4 shadow-[0_24px_70px_rgba(8,64,84,0.12)] md:grid-cols-3">
@@ -255,7 +265,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             { label: "Related Care", value: post.relatedLabel }
           ].map((item) => (
             <div key={item.label} className="rounded border border-line bg-soft/60 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">{item.label}</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">{item.label}</p>
               <p className="mt-1 text-lg font-black text-ink">{item.value}</p>
             </div>
           ))}
@@ -263,18 +273,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="mt-5 rounded-xl border border-line bg-white p-5 shadow-[0_20px_55px_rgba(8,64,84,0.09)]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-4">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-brand/15 bg-soft text-brand shadow-sm">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-brand/15 bg-soft text-brand-dark shadow-sm">
                 <ShieldCheck size={28} />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Medical Review</p>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Medical Review</p>
                 <h2 className="mt-1 text-2xl font-black text-ink">Reviewed for patient education by {doctor.name}</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted">
                   This guide is written for general awareness and does not replace consultation, diagnosis or treatment advice from a qualified doctor.
                 </p>
               </div>
             </div>
-            <Link href="/dr-deepak-kumar-sharma-gastroenterologist-agra" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft">
+            <Link href="/dr-deepak-kumar-sharma-gastroenterologist-agra" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-black text-brand-dark shadow-sm transition hover:border-brand hover:bg-soft">
               Doctor Profile <ArrowRight size={16} />
             </Link>
           </div>
@@ -291,25 +301,38 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <article className="self-start rounded border border-line bg-white p-6 shadow-soft md:p-8">
             <div className="mb-8 rounded-xl border border-line bg-soft/35 p-5 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand">In this guide</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-dark">In this guide</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <span className="rounded border border-line bg-white px-4 py-3 text-sm font-black text-muted shadow-sm">{post.readTime}</span>
                 <span className="rounded border border-line bg-white px-4 py-3 text-sm font-black text-muted shadow-sm">{post.category}</span>
               </div>
-              <nav className="mt-5 grid gap-3">
+              <nav className="mt-5 grid gap-3" aria-label="In this guide">
                 {post.sections.map((section, index) => (
                   <a
                     key={section.title}
                     href={`#${sectionId(section.title)}`}
-                    className="flex min-h-14 items-center gap-4 rounded-lg border border-line bg-white px-4 py-3 text-base font-black text-muted shadow-sm transition hover:border-brand hover:text-brand"
+                    className="flex min-h-14 items-center gap-4 rounded-lg border border-line bg-white px-4 py-3 text-base font-black text-muted shadow-sm transition hover:border-brand hover:text-brand-dark"
                   >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-brand shadow-md">{index + 1}</span>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-brand-dark shadow-md">{index + 1}</span>
                     {section.title}
                   </a>
                 ))}
               </nav>
             </div>
             <p className="text-xl leading-relaxed text-muted">{post.intro}</p>
+            {keyTakeaways.length ? (
+              <div className="mt-6 rounded-xl border border-line bg-soft/40 p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Key Takeaways</p>
+                <ul className="mt-3 grid gap-2">
+                  {keyTakeaways.map((point) => (
+                    <li key={point} className="flex gap-3 text-muted">
+                      <CheckCircle2 className="mt-0.5 shrink-0 text-teal" size={18} />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="mt-8 grid gap-7">
               {post.sections.map((section) => (
                 <section key={section.title} id={sectionId(section.title)} className="scroll-mt-32">
@@ -344,12 +367,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </a>
             </div>
             <div className="rounded border border-line bg-white p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Related Service</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">Related Service</p>
               <h2 className="mt-2 text-2xl font-black">{post.relatedLabel}</h2>
               <p className="mt-3 text-sm leading-relaxed text-muted">
                 Learn about symptoms, preparation, safety and treatment planning at {site.name}.
               </p>
-              <Link href={post.relatedHref} className="mt-5 inline-flex items-center gap-2 font-black text-brand">
+              <Link href={post.relatedHref} className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
                 Open service page <ArrowRight size={17} />
               </Link>
             </div>
@@ -358,7 +381,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <AppointmentCtaPanel className="mt-4" layout="stacked" />
             </div>
             <div className="rounded border border-line bg-white p-5 shadow-soft">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Topics</p>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">Topics</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {post.keywords.map((keyword) => (
                   <span key={keyword} className="rounded-full border border-[#c9dddf] bg-[#eef7f7] px-3 py-1 text-xs font-black text-teal-dark">
@@ -392,10 +415,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="grid gap-5 md:grid-cols-3">
           {relatedPosts.map((related) => (
             <Link key={related.slug} href={`/blog/${related.slug}`} className="group rounded-xl border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lift">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand">{related.category}</p>
-              <h2 className="mt-3 text-xl font-black leading-tight text-ink transition group-hover:text-brand">{related.title}</h2>
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-dark">{related.category}</p>
+              <h2 className="mt-3 text-xl font-black leading-tight text-ink transition group-hover:text-brand-dark">{related.title}</h2>
               <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">{related.description}</p>
-              <div className="mt-5 inline-flex items-center gap-2 text-sm font-black text-brand">
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-black text-brand-dark">
                 Read guide <ArrowRight size={16} />
               </div>
             </Link>
@@ -441,7 +464,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 ))}
               </ul>
               {block.href ? (
-                <Link href={block.href} className="mt-5 inline-flex items-center gap-2 font-black text-brand">
+                <Link href={block.href} className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
                   Open related page <ArrowRight size={16} />
                 </Link>
               ) : null}
@@ -466,7 +489,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="rounded-2xl border border-line bg-white p-6 shadow-lift md:p-8">
           <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand">Local Care Areas</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-dark">Local Care Areas</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-4xl">Gastroenterology care for Agra and nearby cities</h2>
               <p className="mt-4 leading-relaxed text-muted">
                 Patients looking for a gastroenterologist, liver specialist, endoscopy or colonoscopy care in Agra commonly visit from these local areas and nearby cities.
@@ -484,7 +507,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </div>
                 {agraLocalAreas.length > 12 ? (
                   <details className="group mt-3">
-                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-line bg-white px-5 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-line bg-white px-5 text-sm font-black text-brand-dark shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
                       <span className="group-open:hidden">Show more areas</span>
                       <span className="hidden group-open:inline">Show fewer areas</span>
                     </summary>
@@ -509,7 +532,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </div>
                 {nearbyServiceCities.length > 10 ? (
                   <details className="group mt-3">
-                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-line bg-white px-5 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-line bg-white px-5 text-sm font-black text-brand-dark shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
                       <span className="group-open:hidden">Show more cities</span>
                       <span className="hidden group-open:inline">Show fewer cities</span>
                     </summary>
@@ -535,7 +558,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <Section>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Need medical guidance?</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Need medical guidance?</p>
             <h2 className="mt-2 text-3xl font-black">Call reception before planning your visit.</h2>
             <p className="mt-2 max-w-2xl text-muted">
               Share symptoms, current medicines and previous reports so the hospital team can guide appointment planning.

@@ -43,7 +43,7 @@ export function BlogPostSearch({ posts }: { posts: BlogSearchPost[] }) {
           setStatus("No matching article found");
         }}
       >
-        <Search size={22} className="shrink-0 text-brand" />
+        <Search size={22} className="shrink-0 text-brand-dark" />
         <label htmlFor={inputId} className="sr-only">Search blog posts</label>
         <input
           id={inputId}

@@ -7,7 +7,7 @@ type BrandIconTileProps = {
 
 export function BrandIconTile({ className = "", imageClassName = "" }: BrandIconTileProps) {
   return (
-    <span className={`grid place-items-center rounded bg-soft text-brand ${className}`}>
+    <span className={`grid place-items-center rounded bg-soft text-brand-dark ${className}`}>
       <Image
         src="/mgm-icon.png"
         alt=""

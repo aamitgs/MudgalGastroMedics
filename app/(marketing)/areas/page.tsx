@@ -10,7 +10,7 @@ import { breadcrumbSchema } from "@/lib/seo-schema";
 import { fullAddress, hospitalEntityId, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
-  title: `Local Gastroenterology Care Areas | ${site.name}`,
+  title: "Local Gastroenterology Care Areas",
   description:
     "Find local gastroenterology, liver care, endoscopy, colonoscopy, ERCP and FibroScan guidance pages for Agra, Shaheed Nagar, Fatehabad Road, Tajganj, Agra Cantt and nearby areas.",
   alternates: { canonical: "/areas" },
@@ -126,11 +126,11 @@ export default function AreasHubPage() {
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <BrandIconTile className="h-11 w-11" />
-                <span className="rounded-full border border-line bg-soft px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-brand">
+                <span className="rounded-full border border-line bg-soft px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-brand-dark">
                   {page.primaryService}
                 </span>
               </div>
-              <h2 className="text-2xl font-black leading-tight text-ink transition group-hover:text-brand">{page.title}</h2>
+              <h2 className="text-2xl font-black leading-tight text-ink transition group-hover:text-brand-dark">{page.title}</h2>
               <p className="mt-3 grow leading-relaxed text-muted">{page.description}</p>
               <div className="mt-5 grid gap-2">
                 {page.patientIntent.slice(0, 3).map((item) => (
@@ -140,7 +140,7 @@ export default function AreasHubPage() {
                   </span>
                 ))}
               </div>
-              <span className="mt-6 inline-flex items-center gap-2 font-black text-brand">
+              <span className="mt-6 inline-flex items-center gap-2 font-black text-brand-dark">
                 Open local guide <ArrowRight size={17} className="transition group-hover:translate-x-1" />
               </span>
             </Link>
@@ -155,7 +155,7 @@ export default function AreasHubPage() {
       <Section muted>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Need Help Choosing?</span>
               <span data-hi lang="hi">चुनने में मदद चाहिए?</span>
             </p>

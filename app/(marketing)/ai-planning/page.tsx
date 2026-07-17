@@ -4,6 +4,15 @@ import { ButtonLink } from "@/components/site/ButtonLink";
 import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
 import { Section } from "@/components/site/Section";
 import { aiPlanningFeatures } from "@/lib/platform-data";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "AI Planning", url: "/ai-planning" }
+  ])
+};
 
 export const metadata: Metadata = {
   title: "AI Planning",
@@ -41,6 +50,7 @@ const aiModules = [
 export default function AiPlanningPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_1fr]">
           <div>
@@ -81,7 +91,7 @@ export default function AiPlanningPage() {
       <Section>
         <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">AI Modules</p>
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">AI Modules</p>
             <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">Useful support without unsafe automation.</h2>
           </div>
           <p className="text-lg leading-relaxed text-muted">
@@ -98,7 +108,7 @@ export default function AiPlanningPage() {
       <Section muted>
         <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
           <div className="rounded border border-line/80 bg-white p-7 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
-            <span className="grid h-14 w-14 place-items-center rounded bg-soft text-brand"><BrainCircuit size={25} /></span>
+            <span className="grid h-14 w-14 place-items-center rounded bg-soft text-brand-dark"><BrainCircuit size={25} /></span>
             <h2 className="mt-6 text-4xl font-bold leading-tight text-ink">AI planning scope</h2>
             <p className="mt-4 leading-relaxed text-muted">
               These are the safe first-use cases before deeper integration with hospital operations records and doctor workflows.
@@ -107,7 +117,7 @@ export default function AiPlanningPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             {aiPlanningFeatures.map((feature) => (
               <div key={feature} className="flex gap-3 rounded border border-line/80 bg-white p-4 shadow-sm">
-                <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-soft text-brand">
+                <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-soft text-brand-dark">
                   {feature.startsWith("No ") ? <ShieldCheck size={15} /> : <Sparkles size={15} />}
                 </span>
                 <span className="font-semibold leading-relaxed text-ink">{feature}</span>

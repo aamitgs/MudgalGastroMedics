@@ -7,6 +7,7 @@ import { BrandIconTile } from "@/components/site/BrandIconTile";
 import { LocalCareLinks } from "@/components/site/LocalCareLinks";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { seoBlogPosts } from "@/lib/blog-posts";
 import { breadcrumbSchema } from "@/lib/seo-schema";
 import { getServicePage, servicePages } from "@/lib/service-pages";
 import { fullAddress, site } from "@/lib/site-data";
@@ -147,7 +148,8 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   const page = getServicePage(slug);
   if (!page) return {};
 
-  const title = `${page.title} | ${site.name}`;
+  const title = page.title;
+  const fullTitle = `${page.title} | ${site.name}`;
   const url = `${site.url}/services/${page.slug}`;
 
   return {
@@ -158,7 +160,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
       canonical: url
     },
     openGraph: {
-      title,
+      title: fullTitle,
       description: page.description,
       url,
       siteName: site.name,
@@ -167,7 +169,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: fullTitle,
       description: page.description,
       images: [`/services/${page.slug}/opengraph-image`]
     }
@@ -179,6 +181,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
   const page = getServicePage(slug);
   if (!page) notFound();
   const guide = getServiceGuide(page);
+  const relatedBlogPosts = seoBlogPosts.filter((post) => post.relatedHref === `/services/${page.slug}`);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -262,7 +265,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   <ul className="mt-5 grid gap-3">
                     {section.items.map((item) => (
                       <li key={item} className="flex gap-3 text-sm font-semibold text-ink/78">
-                        <CheckCircle2 className="mt-0.5 shrink-0 text-brand" size={17} />
+                        <CheckCircle2 className="mt-0.5 shrink-0 text-brand-dark" size={17} />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -283,7 +286,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             <Link
               key={link.href}
               href={link.href}
-              className="group flex min-h-28 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand"
+              className="group flex min-h-28 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand-dark"
             >
               <span>{link.label}</span>
               <ArrowRight className="shrink-0 transition group-hover:translate-x-1" size={20} />
@@ -369,6 +372,28 @@ export default async function ServicePage({ params }: ServicePageProps) {
         </div>
       </Section>
 
+      {relatedBlogPosts.length ? (
+        <Section muted>
+          <SectionHead eyebrow="Related Reading" title={`Patient guides for ${page.shortTitle}`} />
+          <div className="grid gap-5 md:grid-cols-2">
+            {relatedBlogPosts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group rounded border border-line bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
+              >
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">{post.category}</p>
+                <h3 className="mt-3 text-2xl font-black leading-tight text-ink">{post.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{post.description}</p>
+                <span className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
+                  Read guide <ArrowRight size={17} className="transition group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
       <Section>
         <LocalCareLinks />
       </Section>
@@ -378,7 +403,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal" />
           <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">Mudgal Gastromedics Hospital</p>
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Mudgal Gastromedics Hospital</p>
               <h2 className="max-w-3xl text-3xl font-black leading-tight text-ink md:text-5xl">Need help choosing the right service?</h2>
               <p className="mt-4 max-w-4xl text-base font-semibold leading-8 text-ink/82">
                 Call reception at {site.mobile} or visit {fullAddress}. For urgent symptoms such as vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty, call before visiting.

@@ -31,7 +31,12 @@ export async function generateMetadata({ params }: LocalAreaPageProps): Promise<
   const page = getLocalSeoPage(slug);
   if (!page) return {};
 
-  const title = `${page.title} | ${site.name}`;
+  // Suffixed so the <title> tag never collides byte-for-byte with a procedure
+  // or service page that shares the same core phrase (e.g. "Colonoscopy in
+  // Agra" is both an area-page title and the default /procedures/colonoscopy
+  // title) — the on-page <h1> still uses the bare page.title, unaffected.
+  const title = `${page.title} - Local Care Guide`;
+  const fullTitle = `${title} | ${site.name}`;
   const url = `${site.url}/areas/${page.slug}`;
 
   return {
@@ -40,7 +45,7 @@ export async function generateMetadata({ params }: LocalAreaPageProps): Promise<
     keywords: page.keywords,
     alternates: { canonical: url },
     openGraph: {
-      title,
+      title: fullTitle,
       description: page.description,
       url,
       siteName: site.name,
@@ -49,7 +54,7 @@ export async function generateMetadata({ params }: LocalAreaPageProps): Promise<
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: fullTitle,
       description: page.description,
       images: [`/areas/${page.slug}/opengraph-image`]
     }
@@ -206,17 +211,17 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
           </article>
 
           <aside className="rounded border border-line bg-white p-6 shadow-soft">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Hospital Location</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Hospital Location</p>
             <h2 className="mt-3 text-2xl font-black text-ink">Shaheed Nagar, Agra</h2>
             <p className="mt-3 leading-7 text-muted">{fullAddress}</p>
             {detail ? (
               <div className="mt-5 flex items-start gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
-                <Route className="mt-1 shrink-0 text-brand" size={20} />
+                <Route className="mt-1 shrink-0 text-brand-dark" size={20} />
                 <span>{detail.routeContext}</span>
               </div>
             ) : null}
             <div className="mt-5 flex items-start gap-3 rounded border border-line bg-soft/55 p-4 text-muted">
-              <MapPin className="mt-1 shrink-0 text-brand" size={20} />
+              <MapPin className="mt-1 shrink-0 text-brand-dark" size={20} />
               <span>Call reception before visiting for urgent symptoms such as vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty.</span>
             </div>
           </aside>
@@ -248,7 +253,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
             <Link
               key={link.href}
               href={link.href}
-              className="group flex min-h-28 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand"
+              className="group flex min-h-28 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand-dark"
             >
               <span>{link.label}</span>
               <ArrowRight className="shrink-0 transition group-hover:translate-x-1" size={20} />
@@ -277,7 +282,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
             {detail.faqs.map((faq) => (
               <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
                 <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
-                  <HelpCircle className="mt-1 shrink-0 text-brand" size={18} />
+                  <HelpCircle className="mt-1 shrink-0 text-brand-dark" size={18} />
                   <span>{faq.question}</span>
                 </summary>
                 <p className="mt-3 pl-8 leading-relaxed text-muted">{faq.answer}</p>
@@ -294,7 +299,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
       <Section muted>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Book / Call / Directions</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Book / Call / Directions</p>
             <h2 className="mt-2 text-3xl font-black text-ink">Need help choosing the right next step?</h2>
             <p className="mt-3 max-w-3xl text-muted">
               Share symptoms, previous reports and current medicines with reception. The team can guide appointment timing, preparation and whether urgent review is needed.

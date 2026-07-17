@@ -291,10 +291,10 @@ export function PatientPortalAccess() {
     <>
     <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
       <div className="rounded border border-line/80 bg-white p-6 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
-        <span className="grid h-12 w-12 place-items-center rounded bg-soft text-brand">
+        <span className="grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark">
           <ShieldCheck size={22} />
         </span>
-        <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-brand">Patient Access</p>
+        <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Patient Access</p>
         <h2 className="mt-2 text-4xl font-bold leading-tight text-ink"><span data-en>Your health dashboard</span><span data-hi lang="hi">आपका हेल्थ डैशबोर्ड</span></h2>
 
         {!signedIn ? (
@@ -308,14 +308,14 @@ export function PatientPortalAccess() {
               <button
                 type="button"
                 onClick={() => { setStep("phone"); setStatus(""); }}
-                className={`min-h-10 rounded border px-3 text-sm font-bold transition ${step !== "email" ? "border-brand bg-soft text-brand" : "border-line bg-white text-muted hover:border-brand hover:text-brand"}`}
+                className={`min-h-10 rounded border px-3 text-sm font-bold transition ${step !== "email" ? "border-brand bg-soft text-brand-dark" : "border-line bg-white text-muted hover:border-brand hover:text-brand-dark"}`}
               >
                 <span data-en>Mobile OTP</span><span data-hi lang="hi">मोबाइल OTP</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setStep("email"); setStatus(""); }}
-                className={`min-h-10 rounded border px-3 text-sm font-bold transition ${step === "email" ? "border-brand bg-soft text-brand" : "border-line bg-white text-muted hover:border-brand hover:text-brand"}`}
+                className={`min-h-10 rounded border px-3 text-sm font-bold transition ${step === "email" ? "border-brand bg-soft text-brand-dark" : "border-line bg-white text-muted hover:border-brand hover:text-brand-dark"}`}
               >
                 <span data-en>Email</span><span data-hi lang="hi">ईमेल</span>
               </button>
@@ -363,7 +363,7 @@ export function PatientPortalAccess() {
                 <button type="submit" disabled={loading} className={primaryButton}>
                   <KeyRound size={18} /> {loading ? <span>...</span> : <><span data-en>Verify &amp; Open Dashboard</span><span data-hi lang="hi">OTP जांचें और डैशबोर्ड खोलें</span></>}
                 </button>
-                <button type="button" onClick={() => setStep("phone")} className="text-sm font-semibold text-brand hover:underline">
+                <button type="button" onClick={() => setStep("phone")} className="text-sm font-semibold text-brand-dark hover:underline">
                   <span data-en>Use a different number</span><span data-hi lang="hi">दूसरा नंबर इस्तेमाल करें</span>
                 </button>
               </form>
@@ -382,7 +382,7 @@ export function PatientPortalAccess() {
                 <button type="submit" disabled={loading} className={primaryButton}>
                   <KeyRound size={18} /> {loading ? "Signing in..." : "Sign in"}
                 </button>
-                <button type="button" onClick={() => void requestMagicLink()} className="text-sm font-semibold text-brand hover:underline">
+                <button type="button" onClick={() => void requestMagicLink()} className="text-sm font-semibold text-brand-dark hover:underline">
                   Email me a sign-in link instead
                 </button>
                 {magicNotice ? <p className="rounded border border-line bg-soft/60 p-3 text-sm font-semibold text-muted">{magicNotice}</p> : null}
@@ -401,7 +401,7 @@ export function PatientPortalAccess() {
               <button
                 type="button"
                 onClick={() => setShowProfileForm((value) => !value)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand-dark"
               >
                 <KeyRound size={16} /> Enable email sign-in
               </button>
@@ -417,7 +417,7 @@ export function PatientPortalAccess() {
             <button
               type="button"
               onClick={() => void signOut()}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand-dark"
             >
               <LogOut size={16} /> <span data-en>Sign out</span><span data-hi lang="hi">साइन आउट</span>
             </button>
@@ -426,7 +426,7 @@ export function PatientPortalAccess() {
 
         {status ? <p className="mt-4 rounded border border-coral/20 bg-coral/10 p-3 text-sm font-semibold text-coral">{status}</p> : null}
         <div className="mt-5 grid gap-2">
-          <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand">
+          <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line bg-white px-4 font-bold text-ink transition hover:border-brand hover:text-brand-dark">
             <Phone size={17} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
           </a>
           <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-4 font-bold text-white">
@@ -439,7 +439,7 @@ export function PatientPortalAccess() {
         {!signedIn ? (
           <div className="grid h-full place-items-center rounded border border-dashed border-line bg-soft/60 p-8 text-center">
             <div>
-              <CalendarCheck className="mx-auto text-brand" size={34} />
+              <CalendarCheck className="mx-auto text-brand-dark" size={34} />
               <p className="mt-4 text-xl font-bold text-ink"><span data-en>Your health dashboard will appear here.</span><span data-hi lang="hi">आपका हेल्थ डैशबोर्ड यहाँ दिखेगा।</span></p>
               <p className="mt-2 text-muted"><span data-en>Sign in with your mobile number to see your timeline, prescriptions, bills and more.</span><span data-hi lang="hi">अपनी टाइमलाइन, पर्चे और बिल देखने के लिए मोबाइल नंबर से साइन इन करें।</span></p>
               <div className="mt-6 border-t border-line/70 pt-6">

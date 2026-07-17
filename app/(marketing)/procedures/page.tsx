@@ -11,7 +11,7 @@ import { breadcrumbSchema } from "@/lib/seo-schema";
 import { hospitalEntityId, site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
-  title: `Gastroenterology Procedures in Agra | ${site.name}`,
+  title: "Gastroenterology Procedures in Agra",
   description:
     "Browse endoscopy, colonoscopy, ERCP, FibroScan and other gastroenterology and liver procedures at Mudgal Gastromedics Hospital, Agra — what each involves, preparation notes and when it's advised.",
   alternates: { canonical: "/procedures" },
@@ -161,9 +161,9 @@ export default async function ProceduresPage() {
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <BrandIconTile className="h-11 w-11" />
-                <ArrowRight className="text-brand transition group-hover:translate-x-1" size={20} />
+                <ArrowRight className="text-brand-dark transition group-hover:translate-x-1" size={20} />
               </div>
-              <h2 className="inline-lang text-2xl font-black leading-tight text-ink transition group-hover:text-brand">
+              <h2 className="inline-lang text-2xl font-black leading-tight text-ink transition group-hover:text-brand-dark">
                 <span data-en>{procedure.title}</span>
                 <span data-hi lang="hi">{procedure.hiTitle}</span>
               </h2>
@@ -175,9 +175,38 @@ export default async function ProceduresPage() {
       </Section>
 
       <Section muted>
+        <SectionHead eyebrow="Quick Reference" title="All procedures at a glance">
+          <p data-en>A scannable summary of every procedure and condition covered on this page.</p>
+          <p data-hi lang="hi">इस पेज पर शामिल हर प्रक्रिया और स्थिति का एक संक्षिप्त सारांश।</p>
+        </SectionHead>
+        <div className="overflow-x-auto rounded-xl border border-line bg-white shadow-soft">
+          <table className="w-full min-w-[640px] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-line bg-soft/60">
+                <th scope="col" className="p-4 text-xs font-black uppercase tracking-wider text-muted">Procedure</th>
+                <th scope="col" className="p-4 text-xs font-black uppercase tracking-wider text-muted">What it involves</th>
+              </tr>
+            </thead>
+            <tbody>
+              {procedures.map((procedure) => (
+                <tr key={procedure.slug} className="border-b border-line last:border-0 hover:bg-soft/40">
+                  <th scope="row" className="whitespace-nowrap p-4 align-top font-black text-ink">
+                    <Link href={`/procedures/${procedure.slug}`} className="hover:text-brand-dark">
+                      {procedure.title}
+                    </Link>
+                  </th>
+                  <td className="p-4 align-top text-muted">{procedure.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
+      <Section muted>
         <div className="grid gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Before Your Procedure</p>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Before Your Procedure</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-5xl">Bring reports and follow preparation instructions.</h2>
             <p className="mt-4 leading-relaxed text-muted">
               Bring old prescriptions, blood reports and any related scans. Follow fasting or preparation instructions if advised, and arrange an attendant if sedation is planned.
@@ -188,7 +217,7 @@ export default async function ProceduresPage() {
             </div>
           </div>
           <div className="rounded-xl border border-line bg-soft/60 p-5">
-            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-brand">
+            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-brand-dark">
               <ClipboardList size={18} /> Common visit checklist
             </p>
             <div className="mt-5 grid gap-3">

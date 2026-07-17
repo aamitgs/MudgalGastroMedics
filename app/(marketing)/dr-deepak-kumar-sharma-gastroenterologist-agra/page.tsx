@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
+import { ArrowRight, Award, CheckCircle2, GraduationCap, HeartPulse, HelpCircle, MapPin, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { seoBlogPosts } from "@/lib/blog-posts";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { doctor, fullAddress, site } from "@/lib/site-data";
+
+const relatedBlogPosts = seoBlogPosts.filter(
+  (post) => post.relatedHref === "/dr-deepak-kumar-sharma-gastroenterologist-agra"
+);
 
 const pageTitle = "Dr. Deepak Kumar Sharma | Gastroenterologist & Liver Specialist in Agra";
 const pageDescription =
@@ -312,7 +319,11 @@ export default function DoctorProfilePage() {
           name: question,
           acceptedAnswer: { "@type": "Answer", text: answer }
         }))
-      }
+      },
+      breadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: "Doctor Profile", url: "/dr-deepak-kumar-sharma-gastroenterologist-agra" }
+      ])
     ]
   };
 
@@ -370,7 +381,7 @@ export default function DoctorProfilePage() {
         <div className="grid gap-10 lg:grid-cols-[0.72fr_1fr]">
           <MotionReveal>
             <div className="sticky top-32 rounded border border-line bg-white p-6 shadow-soft">
-              <p className="inline-lang text-xs font-black uppercase tracking-[0.16em] text-brand">
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
                 <span data-en>Profile Summary</span>
                 <span data-hi lang="hi">प्रोफ़ाइल सारांश</span>
               </p>
@@ -592,7 +603,7 @@ export default function DoctorProfilePage() {
             { title: "Follow-up", titleHi: "फॉलो-अप", text: "Treatment response, reports, diet, lifestyle and warning signs are discussed for ongoing care.", textHi: "निरंतर देखभाल के लिए उपचार की प्रतिक्रिया, रिपोर्ट, आहार, जीवनशैली और चेतावनी संकेतों पर चर्चा की जाती है।", icon: ShieldCheck }
           ].map(({ title, titleHi, text, textHi, icon: Icon }) => (
             <article key={title} className="rounded border border-line bg-white p-6 shadow-soft">
-              <span className="mb-4 grid h-11 w-11 place-items-center rounded bg-soft text-brand">
+              <span className="mb-4 grid h-11 w-11 place-items-center rounded bg-soft text-brand-dark">
                 <Icon size={21} />
               </span>
               <h2 className="inline-lang text-xl font-black text-ink">
@@ -614,7 +625,7 @@ export default function DoctorProfilePage() {
           {faqs.map(({ question, questionHi, answer, answerHi }) => (
             <details key={question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
-                <HelpCircle className="mt-1 shrink-0 text-brand" size={18} />
+                <HelpCircle className="mt-1 shrink-0 text-brand-dark" size={18} />
                 <span className="inline-lang">
                   <span data-en>{question}</span>
                   <span data-hi lang="hi">{questionHi}</span>
@@ -628,6 +639,28 @@ export default function DoctorProfilePage() {
           ))}
         </div>
       </Section>
+
+      {relatedBlogPosts.length ? (
+        <Section muted>
+          <SectionHead eyebrow="Related Reading" title="Patient guides from Dr. Deepak Kumar Sharma" />
+          <div className="grid gap-5 md:grid-cols-2">
+            {relatedBlogPosts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group rounded border border-line bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
+              >
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">{post.category}</p>
+                <h3 className="mt-3 text-2xl font-black leading-tight text-ink">{post.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{post.description}</p>
+                <span className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
+                  Read guide <ArrowRight size={17} className="transition group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      ) : null}
     </main>
   );
 }
@@ -635,7 +668,7 @@ export default function DoctorProfilePage() {
 function InfoLine({ icon, text }: { icon: ReactNode; text: ReactNode }) {
   return (
     <div className="flex gap-3">
-      <span className="mt-0.5 text-brand">{icon}</span>
+      <span className="mt-0.5 text-brand-dark">{icon}</span>
       <span className="leading-relaxed">{text}</span>
     </div>
   );
@@ -654,7 +687,7 @@ function ArticleCard({ eyebrow, title, text, items }: { eyebrow: string; title: 
   return (
     <MotionReveal>
       <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
-        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">{eyebrow}</p>
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{eyebrow}</p>
         <h2 className="mt-3 text-3xl font-black leading-tight text-ink">{title}</h2>
         <p className="inline-lang mt-4 leading-relaxed text-muted">{text}</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">

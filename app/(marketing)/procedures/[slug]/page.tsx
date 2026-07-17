@@ -1037,7 +1037,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
               <Image src={heroImage} alt={`${procedure.title} facility at Mudgal Gastromedics Hospital`} fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
             </div>
             <div className="p-6">
-              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
                 <span data-en>{isDisease ? "Care Overview" : "Procedure Overview"}</span>
                 <span data-hi lang="hi">{isDisease ? "देखभाल अवलोकन" : "प्रक्रिया अवलोकन"}</span>
               </p>
@@ -1206,10 +1206,10 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
                 href={`/blog/${post.slug}`}
                 className="group rounded border border-line bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-lift"
               >
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">{post.category}</p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">{post.category}</p>
                 <h3 className="mt-3 text-2xl font-black leading-tight text-ink">{post.title}</h3>
                 <p className="mt-3 leading-relaxed text-muted">{post.description}</p>
-                <span className="mt-5 inline-flex items-center gap-2 font-black text-brand">
+                <span className="mt-5 inline-flex items-center gap-2 font-black text-brand-dark">
                   Read guide <ArrowRight size={17} className="transition group-hover:translate-x-1" />
                 </span>
               </Link>
@@ -1225,7 +1225,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
       <Section>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Need guidance?</span>
               <span data-hi lang="hi">मार्गदर्शन चाहिए?</span>
             </p>

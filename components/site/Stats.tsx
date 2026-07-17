@@ -59,11 +59,11 @@ export function Stats() {
             <div aria-hidden="true" className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),transparent)]" />
             <div aria-hidden="true" className="absolute inset-3 rounded-[19px] border border-white/45" />
             <div className="relative mb-8 flex items-center justify-between gap-3">
-              <span className="grid h-12 w-12 place-items-center rounded-[18px] border border-cyan-100/80 bg-cyan-50/70 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_rgba(8,64,84,0.08)] transition group-hover:border-brand/30 group-hover:bg-white group-hover:text-teal-dark">
+              <span className="grid h-12 w-12 place-items-center rounded-[18px] border border-cyan-100/80 bg-cyan-50/70 text-brand-dark shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_rgba(8,64,84,0.08)] transition group-hover:border-brand/30 group-hover:bg-white group-hover:text-teal-dark">
                 <Icon size={19} />
               </span>
             </div>
-            <strong className="relative block text-5xl font-black leading-none tracking-tight text-brand md:text-6xl">
+            <strong className="relative block text-5xl font-black leading-none tracking-tight text-brand-dark md:text-6xl">
               <Counter target={target} />
             </strong>
             <span className="relative mt-5 block text-lg font-black leading-snug text-ink">{label}</span>

@@ -16,7 +16,7 @@ export function Section({ children, className = "", muted = false, id }: Section
 }
 
 export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-brand">{children}</p>;
+  return <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-brand-dark">{children}</p>;
 }
 
 export function SectionHead({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: ReactNode }) {

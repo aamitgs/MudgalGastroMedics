@@ -4,6 +4,15 @@ import { ButtonLink } from "@/components/site/ButtonLink";
 import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
 import { Section } from "@/components/site/Section";
 import { implementationPhases, platformModules } from "@/lib/platform-data";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Digital Hospital Platform", url: "/platform" }
+  ])
+};
 
 export const metadata: Metadata = {
   title: "Digital Hospital Platform",
@@ -16,6 +25,7 @@ const moduleIcons = [Globe2, ClipboardList, Smartphone, Building2, BrainCircuit]
 export default function PlatformPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg overflow-hidden py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
           <div>
@@ -69,7 +79,7 @@ export default function PlatformPage() {
       <Section>
         <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">
+            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Connected Modules</span>
               <span data-hi lang="hi">जुड़े हुए मॉड्यूल</span>
             </p>
@@ -95,7 +105,7 @@ export default function PlatformPage() {
       <Section muted>
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div className="sticky top-28 rounded border border-line/80 bg-white p-7 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
-            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">
+            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Architecture</span>
               <span data-hi lang="hi">आर्किटेक्चर</span>
             </p>
@@ -117,7 +127,7 @@ export default function PlatformPage() {
                 [Activity, "AI assists routing and summaries, never final diagnosis", "एआई रूटिंग और सारांश में सहायता करता है, कभी अंतिम निदान नहीं करता"]
               ].map(([Icon, text, textHi]) => (
                 <div key={text as string} className="flex items-center gap-3 rounded border border-line bg-soft/70 p-3">
-                  <Icon className="text-brand" size={19} />
+                  <Icon className="text-brand-dark" size={19} />
                   <span className="inline-lang font-semibold text-ink">
                     <span data-en>{text as string}</span>
                     <span data-hi lang="hi">{textHi as string}</span>
@@ -129,7 +139,7 @@ export default function PlatformPage() {
           <div className="grid gap-4">
             {implementationPhases.map((phase) => (
               <article key={phase.phase} className="rounded border border-line/80 bg-white p-6 shadow-sm">
-                <span className="text-xs font-black uppercase tracking-[0.16em] text-brand">{phase.phase}</span>
+                <span className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{phase.phase}</span>
                 <h3 className="mt-3 text-2xl font-bold text-ink">{phase.title}</h3>
                 <p className="mt-2 leading-relaxed text-muted">{phase.text}</p>
               </article>

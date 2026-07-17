@@ -274,7 +274,7 @@ export function AppointmentForm() {
             <button
               type="button"
               onClick={lookupReturningPatient}
-              className="mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-full border border-brand/15 bg-soft/55 px-3 text-[11px] font-black uppercase tracking-[0.1em] text-brand shadow-sm transition hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white"
+              className="mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-full border border-brand/15 bg-soft/55 px-3 text-[11px] font-black uppercase tracking-[0.1em] text-brand-dark shadow-sm transition hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white"
             >
               <CheckCircle2 size={13} /> {isLookingUp ? "Checking" : "Autofill"}
             </button>
@@ -379,7 +379,7 @@ export function AppointmentForm() {
           {appointmentFor === "IPD" ? (
             <div className="grid gap-4 rounded-xl border border-brand/15 bg-soft/55 p-4 lg:col-span-12 lg:grid-cols-12">
               <div className="lg:col-span-12">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-brand">IPD admission details</p>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-brand-dark">IPD admission details</p>
                 <p className="mt-1 text-sm text-muted">These details help reception prepare admission support before calling you.</p>
               </div>
               <label className="lg:col-span-5">
@@ -402,7 +402,7 @@ export function AppointmentForm() {
             </div>
           ) : appointmentFor === "OPD" ? (
             <div className="rounded-xl border border-brand/15 bg-soft/55 p-4 lg:col-span-12">
-              <p className="text-sm font-black uppercase tracking-[0.16em] text-brand">OPD visit details</p>
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-brand-dark">OPD visit details</p>
               <p className="mt-1 text-sm text-muted">Select symptoms and preferred time below so reception can route the request faster.</p>
             </div>
           ) : null}
@@ -454,7 +454,7 @@ export function AppointmentForm() {
                     <p className="mt-1 text-sm leading-relaxed text-muted">For vomiting blood, black stools, severe pain, jaundice with fever, persistent vomiting, breathing difficulty or rapid worsening, call reception before visiting.</p>
                   </div>
                 </div>
-                <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_14px_32px_rgba(8,64,84,0.14)] transition hover:-translate-y-0.5 hover:text-brand">
+                <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_14px_32px_rgba(8,64,84,0.14)] transition hover:-translate-y-0.5 hover:text-brand-dark">
                   <Phone size={17} /> Call now
                 </a>
               </div>
@@ -500,7 +500,7 @@ export function AppointmentForm() {
           <label className="block lg:col-span-6">
             <span className="mb-2 block text-sm font-semibold text-ink">Attach Report</span>
             <span className="flex min-h-[76px] cursor-pointer items-center gap-3 rounded-lg border border-dashed border-line bg-soft/45 px-4 py-3 text-muted shadow-sm transition hover:border-brand hover:bg-soft">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-brand shadow-sm">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white text-brand-dark shadow-sm">
                 {selectedReport ? <FileText size={20} /> : <Paperclip size={20} />}
               </span>
               <span className="grid flex-1 gap-0.5">
@@ -515,7 +515,7 @@ export function AppointmentForm() {
                     setSelectedReport("");
                     if (reportInputRef.current) reportInputRef.current.value = "";
                   }}
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-white text-muted transition hover:border-brand hover:text-brand"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-white text-muted transition hover:border-brand hover:text-brand-dark"
                   aria-label="Remove selected report"
                 >
                   <X size={16} />
@@ -556,7 +556,7 @@ export function AppointmentForm() {
             ["Report", selectedReport || "No report attached"]
           ].map(([label, value]) => (
             <div key={label} className="rounded-lg border border-line bg-soft/35 p-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand">{label}</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-dark">{label}</p>
               <p className="mt-1 font-bold text-ink">{value}</p>
             </div>
           ))}
@@ -569,7 +569,7 @@ export function AppointmentForm() {
         <a href={`https://wa.me/${site.whatsapp}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(5,150,105,0.28),inset_0_1px_0_rgba(255,255,255,0.2)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(5,150,105,0.34),inset_0_1px_0_rgba(255,255,255,0.26)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <MessageCircle size={18} /> WhatsApp Now
         </a>
-        <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-5 font-bold tracking-[0.01em] text-ink shadow-[0_18px_42px_rgba(8,64,84,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
+        <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/55 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-5 font-bold tracking-[0.01em] text-ink shadow-[0_18px_42px_rgba(8,64,84,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:text-brand-dark active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <Phone size={18} /> <span data-en>Call Reception</span><span data-hi lang="hi">रिसेप्शन को कॉल करें</span>
         </a>
       </div>
@@ -593,10 +593,10 @@ export function AppointmentForm() {
             <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-teal/25 bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-4 font-black text-white shadow-[0_18px_42px_rgba(5,150,105,0.26),inset_0_1px_0_rgba(255,255,255,0.2)] transition hover:-translate-y-0.5">
               <MessageCircle size={17} /> WhatsApp
             </a>
-            <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] transition hover:-translate-y-0.5 hover:text-brand">
+            <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] transition hover:-translate-y-0.5 hover:text-brand-dark">
               <Phone size={17} /> Call Reception
             </a>
-            <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] transition hover:-translate-y-0.5 hover:text-brand">
+            <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/65 bg-[linear-gradient(180deg,#ffffff,#f3f7f8)] px-4 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] transition hover:-translate-y-0.5 hover:text-brand-dark">
               <MapPin size={17} /> Get Directions
             </a>
           </div>

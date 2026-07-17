@@ -31,10 +31,10 @@ export default function PatientPortalPage() {
             <div className="rounded bg-white p-5 text-ink">
               <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Portal Preview</p>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Portal Preview</p>
                   <h2 className="mt-1 text-2xl font-bold">Patient dashboard</h2>
                 </div>
-                <span className="grid h-11 w-11 place-items-center rounded bg-soft text-brand"><KeyRound size={20} /></span>
+                <span className="grid h-11 w-11 place-items-center rounded bg-soft text-brand-dark"><KeyRound size={20} /></span>
               </div>
               <div className="mt-5 grid gap-3">
                 {[
@@ -57,7 +57,7 @@ export default function PatientPortalPage() {
       <Section>
         <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">Portal Features</p>
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Portal Features</p>
             <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">Patient-friendly, not complicated.</h2>
           </div>
           <p className="text-lg leading-relaxed text-muted">
@@ -67,7 +67,7 @@ export default function PatientPortalPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {portalFeatures.map((feature, index) => (
             <div key={feature} className="rounded border border-line/80 bg-white p-5 shadow-sm">
-              <span className="text-xs font-black uppercase tracking-[0.16em] text-brand">{String(index + 1).padStart(2, "0")}</span>
+              <span className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{String(index + 1).padStart(2, "0")}</span>
               <p className="mt-3 text-lg font-bold text-ink">{feature}</p>
             </div>
           ))}
@@ -84,7 +84,7 @@ export default function PatientPortalPage() {
             [MessageCircle, "Reception Handoff", "Every portal action can still hand off to reception when staff help is needed."]
           ].map(([Icon, title, text]) => (
             <article key={title as string} className="rounded border border-line/80 bg-white p-6 shadow-soft">
-              <span className="grid h-12 w-12 place-items-center rounded bg-soft text-brand"><Icon size={21} /></span>
+              <span className="grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark"><Icon size={21} /></span>
               <h3 className="mt-5 text-2xl font-bold text-ink">{title as string}</h3>
               <p className="mt-3 leading-relaxed text-muted">{text as string}</p>
             </article>

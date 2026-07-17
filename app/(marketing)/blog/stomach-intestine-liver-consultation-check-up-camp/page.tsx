@@ -194,7 +194,7 @@ export default function CampBlogPostPage() {
         <div className="grid gap-8 lg:grid-cols-[0.68fr_0.32fr] lg:items-start">
           <article className="grid gap-6">
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm md:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">English Details</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">English Details</p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-ink md:text-5xl">{title}</h2>
               <div className="mt-6 grid gap-3 text-lg leading-relaxed text-muted">
                 <p><span className="font-bold text-ink">Date:</span> {campDateDisplay}</p>
@@ -232,7 +232,7 @@ export default function CampBlogPostPage() {
             </div>
 
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm md:p-8" lang="hi">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Hindi Details</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">Hindi Details</p>
               <h2 className="mt-3 text-3xl font-bold leading-tight text-ink md:text-5xl">{hindiTitle}</h2>
               <div className="mt-6 grid gap-3 text-lg leading-relaxed text-muted">
                 <p><span className="font-bold text-ink">दिनांक:</span> {hindiCampDateDisplay}</p>
@@ -257,7 +257,7 @@ export default function CampBlogPostPage() {
             <BlogPostSearch posts={seoBlogPosts} />
 
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Camp Completed</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">Camp Completed</p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
                 This camp is archived. For current consultation, appointment or future camp information, contact reception.
               </p>
@@ -265,7 +265,7 @@ export default function CampBlogPostPage() {
             </div>
 
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Venue</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">Venue</p>
               <h3 className="mt-2 text-xl font-bold text-ink">{site.name}</h3>
               <p className="mt-3 leading-relaxed text-muted">{fullAddress}</p>
               <p className="mt-2 leading-relaxed text-muted">{site.addressLine2}</p>

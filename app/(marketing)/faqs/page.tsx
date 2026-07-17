@@ -25,7 +25,8 @@ type FaqCategory = {
 };
 
 const pageUrl = `${site.url}/faqs`;
-const pageTitle = `Gastroenterology, Liver Care & Endoscopy FAQs | ${site.name}`;
+const pageTitle = "Gastroenterology, Liver Care & Endoscopy FAQs";
+const pageFullTitle = `${pageTitle} | ${site.name}`;
 const pageDescription =
   "Patient FAQs for gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan, OPD timing, warning symptoms and visit preparation at Mudgal Gastromedics Hospital, Agra.";
 
@@ -620,7 +621,7 @@ export const metadata: Metadata = {
   keywords: faqKeywords,
   alternates: { canonical: "/faqs" },
   openGraph: {
-    title: pageTitle,
+    title: pageFullTitle,
     description: pageDescription,
     url: pageUrl,
     siteName: site.name,
@@ -629,7 +630,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: pageTitle,
+    title: pageFullTitle,
     description: pageDescription,
     images: ["/mgm-logo.png"]
   }
@@ -644,7 +645,7 @@ export default function FaqsPage() {
         "@type": "WebPage",
         "@id": `${pageUrl}#webpage`,
         url: pageUrl,
-        name: pageTitle,
+        name: pageFullTitle,
         description: pageDescription,
         inLanguage: "en-IN",
         isPartOf: {
@@ -665,7 +666,11 @@ export default function FaqsPage() {
         ],
         specialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
         primaryImageOfPage: `${site.url}/mgm-logo.png`,
-        significantLink: relatedFaqLinks.map((link) => `${site.url}${link.href}`)
+        significantLink: relatedFaqLinks.map((link) => `${site.url}${link.href}`),
+        speakable: {
+          "@type": "SpeakableSpecification",
+          cssSelector: ["[data-speakable=\"faq\"]"]
+        }
       },
       {
         "@type": "FAQPage",
@@ -723,7 +728,7 @@ export default function FaqsPage() {
               ओपीडी समय, परामर्श, एंडोस्कोपी, कोलोनोस्कोपी, लिवर देखभाल, फाइब्रोस्कैन, चेतावनी लक्षण और विज़िट तैयारी के बारे में सामान्य प्रश्न।
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/portal#appointment" className="inline-lang inline-flex min-h-12 items-center justify-center gap-2 rounded border border-cyan-200/40 bg-white px-5 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.2)] transition hover:-translate-y-1 hover:text-brand">
+              <Link href="/portal#appointment" className="inline-lang inline-flex min-h-12 items-center justify-center gap-2 rounded border border-cyan-200/40 bg-white px-5 font-black text-ink shadow-[0_18px_42px_rgba(8,64,84,0.2)] transition hover:-translate-y-1 hover:text-brand-dark">
                 <span data-en>Book appointment</span>
                 <span data-hi lang="hi">अपॉइंटमेंट बुक करें</span> <ArrowRight size={18} />
               </Link>
@@ -760,7 +765,7 @@ export default function FaqsPage() {
 
       <Section className="pt-0">
         <div className="rounded border border-line bg-white p-6 shadow-soft md:p-8">
-          <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+          <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
             <span data-en>Gastro & Liver Help Topics</span>
             <span data-hi lang="hi">गैस्ट्रो और लिवर सहायता विषय</span>
           </p>
@@ -779,7 +784,7 @@ export default function FaqsPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex min-h-11 items-center gap-2 rounded border border-line bg-soft px-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:border-brand hover:text-brand"
+                className="inline-flex min-h-11 items-center gap-2 rounded border border-line bg-soft px-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:border-brand hover:text-brand-dark"
               >
                 {link.label} <ArrowRight size={15} />
               </Link>
@@ -799,7 +804,7 @@ export default function FaqsPage() {
             return (
             <section key={category.title} id={toAnchor(category.title)} className="scroll-mt-32 rounded border border-line bg-white p-5 shadow-soft md:p-7">
               <div className="mb-5 flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[#ecfeff] text-brand">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[#ecfeff] text-brand-dark">
                   <Icon size={22} />
                 </span>
                 <div>
@@ -815,13 +820,13 @@ export default function FaqsPage() {
               </div>
               <div className="grid gap-3">
                 {category.items.map((faq) => (
-                  <details key={faq.question} className="group rounded border border-line bg-soft/45 p-4 transition open:bg-white open:shadow-sm">
+                  <details key={faq.question} data-speakable="faq" className="group rounded border border-line bg-soft/45 p-4 transition open:bg-white open:shadow-sm">
                     <summary className="flex cursor-pointer list-none items-start justify-between gap-4 font-black text-ink">
                       <span className="inline-lang">
                         <span data-en>{faq.question}</span>
                         <span data-hi lang="hi">{faq.questionHi}</span>
                       </span>
-                      <ArrowRight size={18} className="mt-1 shrink-0 text-brand transition group-open:rotate-90" />
+                      <ArrowRight size={18} className="mt-1 shrink-0 text-brand-dark transition group-open:rotate-90" />
                     </summary>
                     <p className="mt-3 leading-7 text-muted" data-en>{faq.answer}</p>
                     <p className="mt-3 leading-7 text-muted" data-hi lang="hi">{faq.answerHi}</p>
@@ -844,7 +849,7 @@ export default function FaqsPage() {
             <Link
               key={link.href}
               href={link.href}
-              className="group flex min-h-24 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand"
+              className="group flex min-h-24 items-center justify-between gap-4 rounded border border-line bg-white p-5 text-lg font-black text-ink shadow-soft transition hover:-translate-y-1 hover:border-cyan-200 hover:text-brand-dark"
             >
               <span>{link.label}</span>
               <ArrowRight className="shrink-0 transition group-hover:translate-x-1" size={20} />
@@ -856,7 +861,7 @@ export default function FaqsPage() {
       <Section muted>
         <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+            <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Still Need Help?</span>
               <span data-hi lang="hi">अभी भी मदद चाहिए?</span>
             </p>

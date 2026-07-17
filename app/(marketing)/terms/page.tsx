@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Terms & Conditions", url: "/terms" }
+  ])
+};
 
 const termsSections = [
   {
@@ -63,7 +72,7 @@ const termsSections = [
     custom: (
       <p className="mt-4 leading-relaxed text-muted">
         Your use of this website is also governed by our{" "}
-        <Link href="/privacy" className="font-semibold text-brand hover:text-brand-dark">
+        <Link href="/privacy" className="font-semibold text-brand-dark hover:text-brand-dark">
           Privacy Policy
         </Link>
         .
@@ -87,6 +96,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Terms & Conditions</p>
@@ -126,7 +136,7 @@ export default function TermsPage() {
               <div className="mt-5 rounded border border-line bg-soft/60 p-5">
                 <p className="font-black text-ink">Mudgal Gastromedics Hospital</p>
                 <p className="mt-2 text-muted">16, H.I.G., Behind Police Chowki, Shaheed Nagar, Agra, Uttar Pradesh, India</p>
-                <p className="mt-2 text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand hover:text-brand-dark">+91-9828912257</a></p>
+                <p className="mt-2 text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand-dark hover:text-brand-dark">+91-9828912257</a></p>
               </div>
             </section>
           </div>

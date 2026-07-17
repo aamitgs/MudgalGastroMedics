@@ -4,6 +4,15 @@ import { ButtonLink } from "@/components/site/ButtonLink";
 import { PlatformFeatureCard } from "@/components/site/PlatformFeatureCard";
 import { Section } from "@/components/site/Section";
 import { operationsFeatures } from "@/lib/platform-data";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Enterprise Healthcare Platform", url: "/operations" }
+  ])
+};
 
 export const metadata: Metadata = {
   title: "Enterprise Healthcare Platform",
@@ -53,6 +62,7 @@ const coreModules = [
 export default function OperationsPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_1fr]">
           <div>
@@ -92,7 +102,7 @@ export default function OperationsPage() {
       <Section>
         <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">
+            <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Core Modules</span>
               <span data-hi lang="hi">मुख्य मॉड्यूल</span>
             </p>
@@ -117,7 +127,7 @@ export default function OperationsPage() {
 
       <Section muted>
         <div className="rounded border border-line/80 bg-white p-6 shadow-[0_24px_70px_rgba(8,64,84,0.1)] md:p-8">
-          <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand">
+          <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
             <span data-en>Operations Checklist</span>
             <span data-hi lang="hi">ऑपरेशन्स चेकलिस्ट</span>
           </p>

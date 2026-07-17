@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Patient Rights & Responsibilities", url: "/patient-rights-responsibilities" }
+  ])
+};
 
 const patientRights = [
   "Receive respectful, dignified, and non-discriminatory care.",
@@ -33,6 +42,7 @@ export const metadata: Metadata = {
 export default function PatientRightsResponsibilitiesPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Patient Information</p>

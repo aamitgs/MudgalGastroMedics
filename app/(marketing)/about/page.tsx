@@ -12,7 +12,16 @@ import {
 } from "lucide-react";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { agraLocalAreas, nearbyServiceCities, site } from "@/lib/site-data";
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "About", url: "/about" }
+  ])
+};
 
 export const metadata: Metadata = {
   title: "About Mudgal Gastromedics Hospital",
@@ -169,6 +178,7 @@ const whyChoose = [
 export default function AboutPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
@@ -214,7 +224,7 @@ export default function AboutPage() {
       <Section className="-mt-10 relative z-10 pt-0">
         <MotionReveal>
           <article className="rounded border border-line bg-white p-7 shadow-lift md:p-9">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">About Mudgal Gastromedics Hospital</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">About Mudgal Gastromedics Hospital</p>
             <h2 className="mt-2 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">Comprehensive digestive healthcare with clinical excellence and compassion</h2>
             <div className="mt-6 grid gap-5 text-muted lg:grid-cols-3">
               <p className="leading-relaxed">
@@ -238,7 +248,7 @@ export default function AboutPage() {
               <span className="mb-5 grid h-14 w-14 place-items-center rounded bg-brand text-white">
                 <Target size={26} />
               </span>
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Our Vision</p>
+              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Our Vision</p>
               <h2 className="mt-2 text-3xl font-black leading-tight text-ink">To be the most trusted and preferred center for digestive healthcare</h2>
               <p className="mt-4 leading-relaxed text-muted">
                 To become the most trusted and preferred center for gastroenterology, hepatology, digestive health, and advanced endoscopic care in Agra and North India by delivering exceptional patient care, clinical excellence, innovation, and ethical medical practice.
@@ -253,7 +263,7 @@ export default function AboutPage() {
               <span className="mb-5 grid h-14 w-14 place-items-center rounded bg-teal text-white">
                 <Stethoscope size={26} />
               </span>
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Our Mission</p>
+              <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Our Mission</p>
               <h2 className="mt-2 text-3xl font-black leading-tight text-ink">Patient-centered digestive healthcare through advanced expertise</h2>
               <p className="mt-4 leading-relaxed text-muted">
                 Our mission is to provide comprehensive, patient-centered digestive healthcare through advanced medical expertise, state-of-the-art technology, and evidence-based treatment.
@@ -310,7 +320,7 @@ export default function AboutPage() {
           {coreValues.map(({ title, description, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.03, 0.2)}>
               <article className="group h-full rounded border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
-                <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand transition group-hover:bg-brand group-hover:text-white">
+                <span className="mb-5 grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark transition group-hover:bg-brand group-hover:text-white">
                   <Icon size={24} />
                 </span>
                 <h2 className="text-lg font-black text-ink">{title}</h2>
@@ -395,7 +405,7 @@ export default function AboutPage() {
           ].map((item, index) => (
             <MotionReveal key={item.eyebrow} className="h-full" delay={Math.min(index * 0.06, 0.18)}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">{item.eyebrow}</p>
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">{item.eyebrow}</p>
                 <h2 className="mt-2 text-2xl font-black leading-tight text-ink">{item.title}</h2>
                 <p className="mt-4 leading-relaxed text-muted">{item.text}</p>
               </article>
@@ -419,7 +429,7 @@ export default function AboutPage() {
               </div>
               {agraLocalAreas.length > 15 ? (
                 <details className="group mt-3">
-                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand-dark shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
                     <span className="group-open:hidden">Show more Agra areas</span>
                     <span className="hidden group-open:inline">Show fewer Agra areas</span>
                   </summary>
@@ -442,7 +452,7 @@ export default function AboutPage() {
               </div>
               {nearbyServiceCities.length > 12 ? (
                 <details className="group mt-3">
-                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
+                  <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-full border border-line bg-white px-4 text-sm font-black text-brand-dark shadow-sm transition hover:border-brand hover:bg-soft [&::-webkit-details-marker]:hidden">
                     <span className="group-open:hidden">Show more nearby cities</span>
                     <span className="hidden group-open:inline">Show fewer nearby cities</span>
                   </summary>
@@ -461,7 +471,7 @@ export default function AboutPage() {
       <Section muted>
         <MotionReveal>
           <div className="rounded border border-line bg-white p-8 text-center shadow-lift md:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Your Digestive Health is Our Priority</p>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Your Digestive Health is Our Priority</p>
             <h2 className="mx-auto mt-3 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">
               Experience trusted gastroenterology, advanced liver care, and modern endoscopic treatment at Mudgal Gastromedics Hospital.
             </h2>

@@ -6,12 +6,21 @@ import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Book an appointment at Mudgal Gastromedics Hospital, 16 HIG Shaheed Nagar, Agra. Call or WhatsApp +91 9828912257.",
   alternates: { canonical: "/contact" }
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Contact", url: "/contact" }
+  ])
 };
 
 export default function ContactPage() {
@@ -34,6 +43,7 @@ export default function ContactPage() {
 
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
         <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
@@ -80,7 +90,7 @@ export default function ContactPage() {
         <MotionReveal>
           <div id="appointment" className="mx-auto max-w-2xl overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="border-b border-line bg-[linear-gradient(135deg,#ecfeff,#ffffff)] p-6">
-              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
                 <span data-en>Get in Touch</span>
                 <span data-hi lang="hi">संपर्क करें</span>
               </p>
@@ -89,10 +99,10 @@ export default function ContactPage() {
                 <span data-hi lang="hi">हमें संदेश भेजें</span>
               </h2>
               <p className="mt-2 text-muted" data-en>
-                Looking to book a visit? Use the <a href="/portal" className="font-semibold text-brand hover:underline">Patient Portal</a> for the full appointment form — this is for general questions.
+                Looking to book a visit? Use the <a href="/portal" className="font-semibold text-brand-dark hover:underline">Patient Portal</a> for the full appointment form — this is for general questions.
               </p>
               <p className="mt-2 text-muted" data-hi lang="hi">
-                विज़िट बुक करनी है? पूरे अपॉइंटमेंट फॉर्म के लिए <a href="/portal" className="font-semibold text-brand hover:underline">पेशेंट पोर्टल</a> का उपयोग करें — यह सामान्य प्रश्नों के लिए है।
+                विज़िट बुक करनी है? पूरे अपॉइंटमेंट फॉर्म के लिए <a href="/portal" className="font-semibold text-brand-dark hover:underline">पेशेंट पोर्टल</a> का उपयोग करें — यह सामान्य प्रश्नों के लिए है।
               </p>
             </div>
             <div className="p-6">
@@ -106,7 +116,7 @@ export default function ContactPage() {
         <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr] lg:items-stretch">
           <MotionReveal>
             <div className="h-full rounded border border-line bg-white p-6 shadow-soft">
-              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand">
+              <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
                 <span data-en>Visit MGM</span>
                 <span data-hi lang="hi">एमजीएम आएं</span>
               </p>
@@ -121,6 +131,13 @@ export default function ContactPage() {
                   hiTitle="पता"
                   text="16 HIG, Shaheed Nagar, Behind Shaheed Nagar Police Chowki, Agra, Uttar Pradesh 282001"
                   hiText="16 एचआईजी, शहीद नगर, शहीद नगर पुलिस चौकी के पीछे, आगरा, उत्तर प्रदेश 282001"
+                />
+                <InfoLine
+                  icon={<Phone size={20} />}
+                  title="Landline"
+                  hiTitle="लैंडलाइन"
+                  text={site.phone}
+                  hiText={site.phone}
                 />
                 <InfoLine
                   icon={<Clock size={20} />}
@@ -198,7 +215,7 @@ export default function ContactPage() {
 function InfoLine({ icon, title, hiTitle, text, hiText }: { icon: React.ReactNode; title: string; hiTitle: string; text: string; hiText: string }) {
   return (
     <div className="flex gap-3 rounded border border-line bg-soft/70 p-4">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded bg-white text-brand shadow-sm">{icon}</span>
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded bg-white text-brand-dark shadow-sm">{icon}</span>
       <span>
         <span className="inline-lang block font-black text-ink">
           <span data-en>{title}</span>

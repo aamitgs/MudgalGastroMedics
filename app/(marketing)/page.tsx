@@ -220,7 +220,7 @@ export default async function Home() {
                           />
                         </div>
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Lead Gastroenterologist</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">Lead Gastroenterologist</p>
                           <h2 className="mt-2 text-3xl font-bold leading-tight">{doctor.name}</h2>
                           <p className="mt-2 text-base leading-relaxed text-muted">{doctor.designation}</p>
                         </div>
@@ -252,7 +252,7 @@ export default async function Home() {
               <div aria-hidden="true" className="absolute -left-8 top-8 hidden h-32 w-1 rounded-full bg-gradient-to-b from-gold via-brand to-teal lg:block" />
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-4 py-2 shadow-sm backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-gold" />
-                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
                   <span data-en>Doctor Profile</span>
                   <span data-hi lang="hi">डॉक्टर प्रोफ़ाइल</span>
                 </span>
@@ -278,7 +278,7 @@ export default async function Home() {
               <div className="mt-8 grid gap-3 border-l-2 border-brand/30 pl-5 text-muted">
                 {doctor.education.slice(0, 2).map((item) => (
                   <div key={item} className="flex gap-3">
-                    <GraduationCap className="mt-1 shrink-0 text-brand" size={18} />
+                    <GraduationCap className="mt-1 shrink-0 text-brand-dark" size={18} />
                     <p className="font-medium leading-relaxed">{item}</p>
                   </div>
                 ))}
@@ -316,7 +316,7 @@ export default async function Home() {
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-gold" />
-                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+                <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">
                   <span data-en>Treatments</span>
                   <span data-hi lang="hi">उपचार</span>
                 </span>
@@ -340,7 +340,7 @@ export default async function Home() {
                   [FileText, "Report guidance", "रिपोर्ट मार्गदर्शन"]
                 ].map(([Icon, label, labelHi]) => (
                   <div key={label as string} className="flex items-center gap-3 rounded-full border border-line bg-white/85 px-4 py-3 text-sm font-semibold text-teal-dark shadow-sm">
-                    <Icon className="text-brand" size={18} />
+                    <Icon className="text-brand-dark" size={18} />
                     <span className="inline-lang">
                       <span data-en>{label as string}</span>
                       <span data-hi lang="hi">{labelHi as string}</span>
@@ -372,7 +372,7 @@ export default async function Home() {
                     </h3>
                     <p className="mt-4 leading-relaxed text-muted" data-en>{procedure.summary}</p>
                     <p className="mt-4 leading-relaxed text-muted" data-hi lang="hi">{procedure.hiSummary}</p>
-                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-brand">
+                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-brand-dark">
                       View patient guide <ArrowRight size={16} className="transition group-hover:translate-x-1" />
                     </span>
                   </div>
@@ -389,21 +389,21 @@ export default async function Home() {
                 </h3>
                 <div className="mt-4 grid gap-2">
                   {group.links.slice(0, 4).map((procedure) => (
-                    <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
+                    <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand-dark">
                       <span>{procedure.title}</span>
                       <ArrowRight size={14} className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
                     </Link>
                   ))}
                   {group.links.length > 4 ? (
                     <details className="group/details">
-                      <summary className="mt-1 flex cursor-pointer list-none items-center justify-between rounded border border-line bg-white px-3 py-2 text-sm font-bold text-brand transition hover:border-brand">
+                      <summary className="mt-1 flex cursor-pointer list-none items-center justify-between rounded border border-line bg-white px-3 py-2 text-sm font-bold text-brand-dark transition hover:border-brand">
                         <span className="group-open/details:hidden">Show more</span>
                         <span className="hidden group-open/details:inline">Show less</span>
                         <ArrowRight size={14} className="transition group-open/details:rotate-90" />
                       </summary>
                       <div className="mt-2 grid gap-2">
                         {group.links.slice(4).map((procedure) => (
-                          <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand">
+                          <Link key={procedure.slug} href={`/procedures/${procedure.slug}`} className="group flex items-center justify-between rounded border border-transparent px-3 py-2 text-sm font-medium text-muted transition hover:border-line hover:bg-white hover:text-brand-dark">
                             <span>{procedure.title}</span>
                             <ArrowRight size={14} className="opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
                           </Link>
@@ -496,7 +496,7 @@ export default async function Home() {
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-gold" />
-              <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+              <span className="inline-lang text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">
                 <span data-en>Care Pathway</span>
                 <span data-hi lang="hi">देखभाल पथ</span>
               </span>
@@ -521,7 +521,7 @@ export default async function Home() {
                     <BrandIconTile className="relative z-10 h-12 w-12 rounded-full border border-line shadow-sm" />
                     <div>
                       <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                        <span className="inline-lang text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
                           <span data-en>Care step</span>
                           <span data-hi lang="hi">देखभाल चरण</span>
                         </span>

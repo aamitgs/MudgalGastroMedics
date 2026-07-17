@@ -21,7 +21,7 @@ export function ProcedurePrepChecklist({ slug, title, checklist }: ProcedurePrep
             <li key={`${item.timing}-${index}`} className="flex gap-4 rounded border border-line bg-soft/50 p-4">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-black text-white">{index + 1}</span>
               <div>
-                <p className="inline-lang text-xs font-black uppercase tracking-[0.1em] text-brand">
+                <p className="inline-lang text-xs font-black uppercase tracking-[0.1em] text-brand-dark">
                   <span data-en>{item.timing}</span>
                   <span data-hi lang="hi">{item.timingHi}</span>
                 </p>
@@ -41,7 +41,7 @@ export function ProcedurePrepChecklist({ slug, title, checklist }: ProcedurePrep
       <div className="grid gap-4">
         <a
           href={`/api/pdf/procedure-prep?slug=${slug}`}
-          className="inline-flex min-h-13 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-base font-black text-white shadow-[0_18px_46px_rgba(8,145,178,0.34)] transition hover:opacity-90"
+          className="inline-flex min-h-13 items-center justify-center gap-2 rounded-lg bg-brand-dark px-5 text-base font-black text-white shadow-[0_18px_46px_rgba(8,145,178,0.34)] transition hover:opacity-90"
         >
           <Download size={19} />
           <span className="inline-lang">

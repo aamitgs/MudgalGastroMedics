@@ -147,7 +147,7 @@ export function HeroOpdTimingCard() {
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),transparent)]" />
           <div aria-hidden="true" className="absolute inset-3 rounded-[26px] border border-white/55" />
           <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100/80 bg-white/65 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)] backdrop-blur-xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100/80 bg-white/65 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-brand-dark shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)] backdrop-blur-xl">
               <Clock3 size={15} /> Live India Time
             </div>
 
@@ -233,11 +233,11 @@ export function HeroOpdTimingCard() {
             <div className="mt-5 rounded-[24px] border border-cyan-100/80 bg-white/62 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_18px_42px_rgba(8,64,84,0.09)] backdrop-blur-xl">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[18px] border border-cyan-100/80 bg-cyan-50/70 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)]">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[18px] border border-cyan-100/80 bg-cyan-50/70 text-brand-dark shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)]">
                     <CloudSun size={24} />
                   </span>
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand">Agra Weather</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-dark">Agra Weather</p>
                     <p className="mt-0.5 text-sm font-bold text-muted">
                       {weather ? getWeatherSummary(weather.code) : weatherError ? "Weather unavailable" : "Updating weather"}
                     </p>
@@ -256,10 +256,10 @@ export function HeroOpdTimingCard() {
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className="flex items-center justify-center gap-2 rounded-[16px] border border-cyan-100/70 bg-white/60 px-3 py-2 text-xs font-black text-muted">
-                  <Droplets size={15} className="text-brand" /> {weather ? `${Math.round(weather.humidity)}% humidity` : "Humidity --"}
+                  <Droplets size={15} className="text-brand-dark" /> {weather ? `${Math.round(weather.humidity)}% humidity` : "Humidity --"}
                 </div>
                 <div className="flex items-center justify-center gap-2 rounded-[16px] border border-cyan-100/70 bg-white/60 px-3 py-2 text-xs font-black text-muted">
-                  <Wind size={15} className="text-brand" /> {weather ? `${Math.round(weather.windSpeed)} km/h` : "Wind --"}
+                  <Wind size={15} className="text-brand-dark" /> {weather ? `${Math.round(weather.windSpeed)} km/h` : "Wind --"}
                 </div>
               </div>
             </div>
@@ -301,7 +301,7 @@ export function HeroOpdTimingCard() {
           <div aria-hidden="true" className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full bg-teal/15 blur-3xl" />
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),transparent)]" />
           <div className="flex items-center gap-3">
-            <span className="grid h-14 w-14 place-items-center rounded-[20px] border border-cyan-100/80 bg-white/65 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)] backdrop-blur-xl">
+            <span className="grid h-14 w-14 place-items-center rounded-[20px] border border-cyan-100/80 bg-white/65 text-brand-dark shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_12px_30px_rgba(8,64,84,0.08)] backdrop-blur-xl">
               <Image src="/mgm-icon.png" alt="" width={40} height={40} className="h-9 w-9 object-contain" />
             </span>
             <div>
@@ -319,7 +319,7 @@ export function HeroOpdTimingCard() {
               <p className="mt-1 font-black text-ink">OPD & Procedures</p>
             </div>
             <div className="rounded-[22px] border border-cyan-100/70 bg-white/60 p-4 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_34px_rgba(8,64,84,0.08)] backdrop-blur-xl">
-              <Moon className="mb-3 text-brand" size={22} />
+              <Moon className="mb-3 text-brand-dark" size={22} />
               <p className="text-xs font-black uppercase tracking-[0.14em] text-muted">After Hours</p>
               <p className="mt-1 font-black text-ink">Hospital Support</p>
             </div>
