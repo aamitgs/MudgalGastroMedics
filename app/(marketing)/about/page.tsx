@@ -10,6 +10,7 @@ import {
   Target,
   Users
 } from "lucide-react";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { breadcrumbSchema } from "@/lib/seo-schema";
@@ -221,7 +222,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <Section className="-mt-10 relative z-10 pt-0">
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
+
+      <Section className="relative z-10 pt-0">
         <MotionReveal>
           <article className="rounded border border-line bg-white p-7 shadow-lift md:p-9">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">About Mudgal Gastromedics Hospital</p>

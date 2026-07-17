@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CakeSlice, Camera, HeartHandshake, PartyPopper, Sparkles, Trophy, Users } from "lucide-react";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { breadcrumbSchema } from "@/lib/seo-schema";
@@ -96,7 +97,11 @@ export default function LifeAtMgmPage() {
         </div>
       </section>
 
-      <Section className="-mt-10 relative z-10 pt-0">
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
+
+      <Section className="relative z-10 pt-0">
         <SectionHead eyebrow="Celebration Gallery" title="Life beyond clinical care">
           <p data-en>Designed as a premium gallery surface for approved staff photographs as they are added.</p>
           <p data-hi lang="hi">यह एक प्रीमियम गैलरी स्थान के रूप में डिज़ाइन किया गया है, जहां स्वीकृत स्टाफ तस्वीरें जोड़ी जाएंगी।</p>

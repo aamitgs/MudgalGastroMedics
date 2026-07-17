@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, CheckCircle2, ClipboardList, FileText, HeartPulse, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { LocalCareLinks } from "@/components/site/LocalCareLinks";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
@@ -212,7 +213,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
   };
 
   return (
-    <>
+    <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
@@ -249,6 +250,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
           </MotionReveal>
         </div>
       </section>
+
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
 
       <Section>
         <SectionHead eyebrow="Patient care pathway" title={`About ${page.shortTitle}`}>
@@ -413,6 +418,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
           </div>
         </div>
       </Section>
-    </>
+    </main>
   );
 }

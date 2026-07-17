@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, MapPin } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BrandIconTile } from "@/components/site/BrandIconTile";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { LocalProminencePanel } from "@/components/site/LocalProminencePanel";
 import { Section, SectionHead } from "@/components/site/Section";
 import { localSeoPages } from "@/lib/local-seo-pages";
@@ -111,6 +112,10 @@ export default function AreasHubPage() {
           </div>
         </div>
       </section>
+
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
 
       <Section>
         <SectionHead eyebrow="Browse Local Guides" title="Choose the care page closest to your search">

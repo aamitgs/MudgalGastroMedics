@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GalleryGrid } from "@/components/site/GalleryGrid";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section, SectionHead } from "@/components/site/Section";
 import { getPublicGalleryItems } from "@/lib/cms-public";
 import { breadcrumbSchema } from "@/lib/seo-schema";
@@ -126,6 +127,11 @@ export default async function GalleryPage() {
           </p>
         </div>
       </section>
+
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
+
       <Section id="hospital-gallery">
         <SectionHead eyebrow="Hospital Gallery" title="All facilities in one place">
           <p data-en>Browse all hospital spaces, patient areas, clinical units and equipment together.</p>

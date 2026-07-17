@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { CalendarCheck, Clock3, HelpCircle, Languages, Moon, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
+import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { breadcrumbSchema } from "@/lib/seo-schema";
@@ -118,7 +119,11 @@ export default function DutyDoctorPage() {
         </div>
       </section>
 
-      <Section className="-mt-10 relative z-10 pt-0">
+      <Section className="overflow-hidden">
+        <HeroOpdTimingCard />
+      </Section>
+
+      <Section className="relative z-10 pt-0">
         <div className="grid items-start gap-8 lg:grid-cols-[0.88fr_1.12fr]">
           <MotionReveal>
           <article className="overflow-hidden rounded border border-line bg-white shadow-lift">
