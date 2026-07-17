@@ -368,7 +368,7 @@ export const additionalSeoBlogPosts: BlogPost[] = [
     description: "Portal hypertension in liver disease can cause varices, ascites, low platelets and bleeding. Learn symptoms, tests and prevention.",
     date: "December 20, 2025",
     accent: "#dc2626",
-    relatedHref: "/procedures/esophageal-varices",
+    relatedHref: "/procedures/varices",
     relatedLabel: "Varices and Liver Care",
     keywords: ["Portal Hypertension", "Esophageal Varices", "Ascites Treatment", "Liver Cirrhosis Symptoms"],
     intro: "Portal hypertension means high pressure in the liver blood flow system, commonly due to cirrhosis. It can lead to varices, ascites, enlarged spleen and bleeding risk.",
