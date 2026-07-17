@@ -13,10 +13,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/blog",
     "/blog/stomach-intestine-liver-consultation-check-up-camp",
     "/services",
+    "/procedures",
     "/faqs",
     "/gallery",
     "/life-at-mgm",
     "/duty-doctor",
+    "/dr-deepak-kumar-sharma-gastroenterologist-agra",
     "/contact",
     "/cookie-policy",
     "/disclaimer",
@@ -24,7 +26,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/portal",
     "/privacy",
     "/refund-cancellation-policy",
-    "/terms"
+    "/terms",
+    "/operations",
+    "/platform",
+    "/ai-planning"
   ];
   const staticEntries = staticRoutes.map((route) => ({ route, lastModified: new Date() }));
   const serviceEntries = servicePages.map((page) => ({ route: `/services/${page.slug}`, lastModified: new Date() }));

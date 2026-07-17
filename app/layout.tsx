@@ -4,7 +4,7 @@ import { MotionConfig } from "framer-motion";
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
 import "./globals.css";
-import { hospitalSchema, site } from "@/lib/site-data";
+import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -46,10 +46,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" data-scroll-behavior="smooth" className="font-sans">
       <body id="top" className={`${GeistSans.variable} font-sans antialiased`} suppressHydrationWarning>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(hospitalSchema()) }}
-        />
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-58TTM878"
