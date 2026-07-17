@@ -35,6 +35,15 @@ import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { useThemeStore } from "@/stores/theme-store";
 
+// Dashboard-only anchor sections (Dashboard, Patients, Notifications sidebar
+// entries), top-to-bottom in real DOM order — #realtime-feed renders nested
+// inside #analytics's own section (DashboardOverview's second card), not as
+// a separate sibling, so a naive "any part visible" check would flag both
+// at once. Scroll-spy below picks whichever section's top has most recently
+// scrolled past the threshold, which resolves that correctly regardless of
+// the nesting.
+const dashboardSectionIds = ["analytics", "realtime-feed", "operations-table"];
+
 const searchCategoryEntity: Record<SearchCategory, CommandRecord["entity"]> = {
   Patients: "Patient",
   Appointments: "Appointment",
@@ -125,6 +134,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState<CommandRecord[]>([]);
+  const [activeDashboardSection, setActiveDashboardSection] = useState(dashboardSectionIds[0]);
   const navRef = useRef<HTMLElement | null>(null);
 
   // Live entity search (/api/search) — the server already gates each category
@@ -243,6 +253,48 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem("hospital-os-sidebar", sidebarCollapsed ? "collapsed" : "expanded");
   }, [sidebarCollapsed]);
+
+  // Scroll-spy for the dashboard's own Dashboard/Patients/Notifications
+  // sidebar entries (Track 4.15): they all point at the single dashboard
+  // page via #hash, so pathname alone can't tell them apart. A no-op on
+  // every other route, since none of these ids exist there.
+  useEffect(() => {
+    if (pathname !== "/mudgalgastromedics-os") return;
+    let frame = 0;
+    function updateActiveSection() {
+      // Viewport-relative, not a fixed pixel value — #operations-table sits
+      // near the bottom of a short page and can never scroll closer to the
+      // top than its own remaining scroll room allows, so a small fixed
+      // threshold would never trigger for it.
+      const threshold = window.innerHeight * 0.5;
+      const tops = Object.fromEntries(
+        dashboardSectionIds.map((id) => [id, document.getElementById(id)?.getBoundingClientRect().top ?? Infinity])
+      );
+      let current = dashboardSectionIds[0];
+      for (const id of dashboardSectionIds) {
+        if (tops[id] > threshold) continue;
+        // #realtime-feed renders as DashboardOverview's second card inside
+        // #analytics's own section, side-by-side with it in a 2-column grid
+        // at xl+ widths (grid-cols-[1fr_420px]) — their tops are identical
+        // there at every scroll position, not just on load, so "Dashboard"
+        // keeps priority until they genuinely diverge (a narrower, stacked
+        // layout where #realtime-feed's card has scrolled independently).
+        if (id === "realtime-feed" && Math.abs(tops[id] - tops.analytics) < 2) continue;
+        current = id;
+      }
+      setActiveDashboardSection(current);
+    }
+    function onScroll() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateActiveSection);
+    }
+    updateActiveSection();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -420,7 +472,10 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                       <p className="px-3 pb-0.5 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--hos-muted-text)]/70">{group}</p>
                     ) : null}
                     {items.map(({ label, icon: Icon, badge, href }) => {
-                      const isCurrentPage = !href.startsWith("#") && pathname === href;
+                      const [hrefPath, hrefHash] = href.split("#");
+                      const isCurrentPage = hrefHash
+                        ? pathname === hrefPath && activeDashboardSection === hrefHash
+                        : pathname === href;
                       return (
                         <a
                           href={href}

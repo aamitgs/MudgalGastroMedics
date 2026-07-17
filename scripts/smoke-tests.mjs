@@ -501,3 +501,17 @@ test("Hospital OS sidebar has no duplicate nav entries pointing at the same rout
   }
   assert.doesNotMatch(data, /label: "Doctors"/);
 });
+
+test("dashboard's own anchor nav entries (Dashboard/Patients/Notifications) get scroll-spy active state", () => {
+  // pathname === href can never match an href with a #hash (usePathname()
+  // never includes one), so these three sidebar entries never highlighted
+  // as active even while genuinely viewing that section. Fixed with a
+  // scroll-spy effect that special-cases #realtime-feed, which renders
+  // beside #analytics in the same grid row at xl+ widths (identical top at
+  // every scroll position there, not just on load) — Dashboard keeps
+  // priority until it genuinely diverges in a narrower, stacked layout.
+  const shell = read("components/hospital-os/HospitalOsShell.tsx");
+  assert.match(shell, /activeDashboardSection/);
+  assert.match(shell, /dashboardSectionIds/);
+  assert.match(shell, /hrefHash\s*\?\s*\n?\s*pathname === hrefPath && activeDashboardSection === hrefHash/);
+});
