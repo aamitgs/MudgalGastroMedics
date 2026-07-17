@@ -27,13 +27,10 @@ import {
   ScanLine,
   Settings,
   ShieldCheck,
-  Sparkles,
-  Stethoscope,
   Syringe,
   UserRound,
   UsersRound,
-  Utensils,
-  WalletCards
+  Utensils
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { roleHasPermission, type AccessAction, type AccessResource, type AccessRole } from "@/lib/access/matrix";
@@ -59,7 +56,7 @@ export type NavItem = {
   /** IA group this item belongs to. */
   group: NavGroup;
   badge?: string;
-  /** Extra search aliases for the command palette (e.g. a module's registry name when the sidebar label differs, like "Finance" for "Insurance"/"Accounts"). */
+  /** Extra search aliases for the command palette (e.g. alternate names staff might search for, like "insurance"/"accounts" for the "Finance" module). */
   keywords?: string[];
 };
 
@@ -237,29 +234,34 @@ export const navItems: NavItem[] = [
   // /mudgalgastromedics-os/patients page — genuinely different views, both kept.
   { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
   { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
-  { label: "Doctors", group: "Clinical", href: "/mudgalgastromedics-os/doctor-workflow", icon: Stethoscope, roles: rolesWithPermission("appointments") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },
   { label: "OPD", group: "Clinical", href: "/mudgalgastromedics-os/opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },
   { label: "Procedures", group: "Clinical", href: "/mudgalgastromedics-os/procedures", icon: Syringe, roles: rolesWithPermission("appointments") },
   { label: "IPD", group: "Clinical", href: "/mudgalgastromedics-os/ipd", icon: Bed, roles: rolesWithPermission("beds") },
   { label: "Doctor Workflow", group: "Clinical", href: "/mudgalgastromedics-os/doctor-workflow", icon: NotebookPen, roles: rolesWithPermission("prescriptions") },
-  { label: "Prescriptions", group: "Clinical", href: "/mudgalgastromedics-os/doctor-portal", icon: FileText, roles: rolesWithPermission("prescriptions") },
+  // Hardcoded roles, not rolesWithPermission(): the Doctor Portal's real
+  // gate (canOpenDoctorWorkspace) is main-doctor/duty-doctor/super-admin
+  // only, a role check with no matching resource permission — the previous
+  // "Prescriptions" and "AI Assistant" entries both linked here gated by
+  // resource permissions (prescriptions, patients) that admin, nurse,
+  // pharmacist, reception and lab-technician all also hold, so those roles
+  // saw a working-looking link that silently redirected them away. "Doctor"
+  // already covers both main-doctor and duty-doctor sessions here (see
+  // accessRoleToHospitalRole) — super-admin loses this one sidebar
+  // shortcut, which is a safe tradeoff against showing a broken link.
+  { label: "Doctor Portal", group: "Clinical", href: "/mudgalgastromedics-os/doctor-portal", icon: FileText, roles: ["Doctor"] },
   { label: "Pharmacy", group: "Operations", href: "/mudgalgastromedics-os/pharmacy", icon: Pill, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Laboratory", group: "Diagnostics", href: "/mudgalgastromedics-os/lab", icon: FlaskConical, roles: rolesWithPermission("lab-orders") },
   { label: "Radiology & Pathology", group: "Diagnostics", href: "/mudgalgastromedics-os/radiology-pathology", icon: ScanLine, roles: rolesWithPermission("lab-orders") },
   { label: "Billing", group: "Finance", href: "/mudgalgastromedics-os/billing", icon: Receipt, roles: rolesWithPermission("billing") },
-  { label: "Insurance", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: ShieldCheck, roles: rolesWithPermission("insurance"), keywords: ["finance"] },
-  { label: "Accounts", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: WalletCards, roles: rolesWithPermission("billing"), keywords: ["finance"] },
+  { label: "Finance", group: "Finance", href: "/mudgalgastromedics-os/finance", icon: ShieldCheck, roles: rolesWithPermission("insurance"), keywords: ["insurance", "accounts"] },
   { label: "HR", group: "Administration", href: "/mudgalgastromedics-os/hr", icon: UserRound, roles: rolesWithPermission("hr-records") },
   { label: "Inventory", group: "Operations", href: "/mudgalgastromedics-os/inventory", icon: Package, roles: rolesWithPermission("pharmacy-inventory") },
   { label: "Reports", group: "Administration", href: "/mudgalgastromedics-os/reports", icon: BarChart3, roles: rolesWithPermission("reports") },
   { label: "CMS", group: "Administration", href: "/mudgalgastromedics-os/cms", icon: Activity, roles: rolesWithPermission("cms") },
   { label: "Settings", group: "Administration", href: "/mudgalgastromedics-os/settings", icon: Settings, roles: rolesWithPermission("system-settings") },
   { label: "Notifications", group: "Overview", href: `${dashboardPath}#realtime-feed`, icon: Bell, roles: rolesWithPermission(null) },
-  // Real AI features (patient summary, visit assistant, discharge/referral/
-  // certificate drafting) live inside the Doctor Portal, not a standalone page.
-  { label: "AI Assistant", group: "Overview", href: "/mudgalgastromedics-os/doctor-portal", icon: Sparkles, roles: rolesWithPermission("patients") },
   { label: "Readiness", group: "Administration", href: "/mudgalgastromedics-os/readiness", icon: Gauge, roles: rolesWithPermission("system-settings") },
   { label: "Audit", group: "Administration", href: "/mudgalgastromedics-os/audit", icon: History, roles: rolesWithPermission("audit-logs") },
   { label: "Analytics", group: "Administration", href: "/mudgalgastromedics-os/analytics", icon: LineChart, roles: rolesWithPermission("reports") },

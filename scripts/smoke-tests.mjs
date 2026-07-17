@@ -482,3 +482,22 @@ test("Hospital OS TopNav has no unwired buttons", () => {
   assert.doesNotMatch(topNav, /aria-label="Messages"/);
   assert.doesNotMatch(topNav, /MessageSquare/);
 });
+
+test("Hospital OS sidebar has no duplicate nav entries pointing at the same route", () => {
+  // "Doctors" and "Doctor Workflow" both linked to
+  // /mudgalgastromedics-os/doctor-workflow, so the sidebar highlighted both
+  // as active on that page at once. Worse, "Doctors" was gated by the
+  // "appointments" permission while the page itself only requires
+  // "prescriptions" (lib/access/admin-modules.ts) — a role with appointments
+  // but not prescriptions would see a working-looking link that the page's
+  // own access check then rejected. Removed the redundant "Doctors" entry.
+  const data = read("lib/hospital-os-data.ts");
+  const hrefCounts = new Map();
+  for (const match of data.matchAll(/href: "(\/mudgalgastromedics-os\/[\w-]+)"/g)) {
+    hrefCounts.set(match[1], (hrefCounts.get(match[1]) ?? 0) + 1);
+  }
+  for (const [href, count] of hrefCounts) {
+    assert.equal(count, 1, `${href} should appear as a nav destination exactly once, found ${count}`);
+  }
+  assert.doesNotMatch(data, /label: "Doctors"/);
+});
