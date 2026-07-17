@@ -220,6 +220,132 @@ export const localSeoPages: LocalSeoPage[] = [
       { label: "Contact & Directions", href: "/contact" }
     ],
     nearbyAreas: ["Shaheed Nagar", "Rajpur Chungi", "Kaveri Vihar", "Panchvati", "Fatehabad Road", "Tajganj", "Agra Cantt", "Mathura", "Firozabad"]
+  },
+  {
+    slug: "gastroenterologist-in-mathura",
+    title: "Gastroenterologist in Mathura",
+    shortTitle: "Mathura Gastro Care",
+    description: "Gastroenterologist for patients travelling from Mathura to Agra for acidity, abdominal pain, IBS, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients travelling from Mathura can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 55-60 km away via NH-19, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Mathura, Vrindavan, Chhata, Goverdhan and nearby Mathura-district towns travel to Agra for gastroenterology consultation, liver care and endoscopy-related procedures.",
+    keywords: ["Gastroenterologist in Mathura", "Gastro doctor near Mathura", "Liver specialist near Mathura", "Endoscopy near Mathura"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Mathura", "Vrindavan", "Chhata", "Goverdhan", "Raya", "Baldeo", "Mahavan", "Kosi Kalan"]
+  },
+  {
+    slug: "gastroenterologist-in-vrindavan",
+    title: "Gastroenterologist in Vrindavan",
+    shortTitle: "Vrindavan Gastro Care",
+    description: "Gastroenterologist for patients and visitors travelling from Vrindavan to Agra for digestive symptoms, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients and visitors travelling from Vrindavan can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 60-65 km away via NH-19, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Residents and visitors travelling from Vrindavan, Mathura, Chhata and Goverdhan visit Agra for gastroenterology consultation, endoscopy and liver-related care.",
+    keywords: ["Gastroenterologist in Vrindavan", "Gastro doctor near Vrindavan", "Liver specialist near Vrindavan", "Stomach doctor near Vrindavan"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Vrindavan", "Mathura", "Chhata", "Goverdhan", "Baldeo", "Mahavan"]
+  },
+  {
+    slug: "gastroenterologist-in-firozabad",
+    title: "Gastroenterologist in Firozabad",
+    shortTitle: "Firozabad Gastro Care",
+    description: "Gastroenterologist for patients travelling from Firozabad to Agra for acidity, abdominal pain, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients from Firozabad can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 40 km away, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Firozabad, Tundla, Shikohabad, Sirsaganj and Jasrana travel to Agra for gastroenterology consultation, liver care and procedure planning.",
+    keywords: ["Gastroenterologist in Firozabad", "Gastro doctor near Firozabad", "Liver specialist near Firozabad", "Endoscopy near Firozabad"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Firozabad", "Tundla", "Shikohabad", "Sirsaganj", "Jasrana"]
+  },
+  {
+    slug: "gastroenterologist-in-bharatpur",
+    title: "Gastroenterologist in Bharatpur",
+    shortTitle: "Bharatpur Gastro Care",
+    description: "Gastroenterologist for patients travelling from Bharatpur, Rajasthan to Agra for digestive symptoms, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients travelling from Bharatpur can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 55 km away, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Bharatpur, Deeg, Kumher, Weir and Bayana in Rajasthan travel to Agra for gastroenterology consultation, liver care and procedure planning.",
+    keywords: ["Gastroenterologist in Bharatpur", "Gastro doctor near Bharatpur", "Liver specialist near Bharatpur", "Endoscopy near Bharatpur"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Bharatpur", "Deeg", "Kumher", "Weir", "Bayana", "Roopbas"]
+  },
+  {
+    slug: "gastroenterologist-in-dholpur",
+    title: "Gastroenterologist in Dholpur",
+    shortTitle: "Dholpur Gastro Care",
+    description: "Gastroenterologist for patients travelling from Dholpur, Rajasthan to Agra for digestive symptoms, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients travelling from Dholpur can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 55 km away via the Agra-Gwalior road, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Dholpur, Bari and Rajakhera in Rajasthan travel to Agra for gastroenterology consultation, liver care and procedure planning.",
+    keywords: ["Gastroenterologist in Dholpur", "Gastro doctor near Dholpur", "Liver specialist near Dholpur", "Endoscopy near Dholpur"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Dholpur", "Bari", "Rajakhera", "Bharatpur"]
+  },
+  {
+    slug: "gastroenterologist-in-morena",
+    title: "Gastroenterologist in Morena",
+    shortTitle: "Morena Gastro Care",
+    description: "Gastroenterologist for patients travelling from Morena, Madhya Pradesh to Agra for digestive symptoms, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients travelling from Morena can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 95 km away via the Agra-Gwalior road, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Morena, Ambah, Porsa, Sabalgarh and Joura in Madhya Pradesh travel to Agra for gastroenterology consultation, liver care and procedure planning.",
+    keywords: ["Gastroenterologist in Morena", "Gastro doctor near Morena", "Liver specialist near Morena", "Endoscopy near Morena"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Morena", "Ambah", "Porsa", "Sabalgarh", "Joura", "Dimani"]
+  },
+  {
+    slug: "gastroenterologist-in-gwalior",
+    title: "Gastroenterologist in Gwalior",
+    shortTitle: "Gwalior Gastro Care",
+    description: "Gastroenterologist for patients travelling from Gwalior, Madhya Pradesh to Agra for digestive symptoms, liver reports, endoscopy and colonoscopy care.",
+    hero: "Patients travelling from Gwalior can consult Mudgal Gastromedics Hospital in Shaheed Nagar, Agra, roughly 120 km away via the Agra-Gwalior road, for gastroenterology, liver and endoscopy care.",
+    localFocus: "Patients from Gwalior and nearby Morena travel to Agra for gastroenterology consultation, liver care and endoscopy or colonoscopy-related procedures.",
+    keywords: ["Gastroenterologist in Gwalior", "Gastro doctor near Gwalior", "Liver specialist near Gwalior", "Endoscopy near Gwalior"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Acidity, reflux or stomach burning", "Abdominal pain, bloating or vomiting", "Constipation, diarrhea or IBS symptoms", "Blood in stool, black stools or anemia"],
+    relatedLinks: [
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Endoscopy", href: "/procedures/endoscopy" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "IBS", href: "/procedures/ibs" }
+    ],
+    nearbyAreas: ["Gwalior", "Morena", "Agra"]
   }
 ];
 
@@ -387,6 +513,111 @@ export const localSeoPageDetails: Record<string, LocalSeoPageDetail> = {
       { question: "What services are available at the gastro hospital?", answer: "Gastroenterology consultation, liver care, endoscopy, colonoscopy, ERCP, FibroScan-related care and selected therapeutic procedures are available." },
       { question: "Where is the hospital located?", answer: `${site.name} is at ${fullAddress}.` },
       { question: "Should I call before visiting for urgent symptoms?", answer: "Yes. Call before visiting for vomiting blood, black stools, severe pain, fever with jaundice or breathing difficulty." }
+    ]
+  },
+  "gastroenterologist-in-mathura": {
+    routeContext: "Mudgal Gastromedics Hospital is located in Shaheed Nagar, Agra, roughly 55-60 km from Mathura via NH-19 (Agra-Mathura road) - commonly a little over an hour by road depending on traffic. This page is for Mathura-area patients planning a gastroenterology, liver or endoscopy visit.",
+    careDifference: "Because the visit involves travel, the first consultation is usually planned to review symptoms and existing reports together, so onward tests such as endoscopy, colonoscopy or liver evaluation can be scheduled on the same trip when clinically appropriate.",
+    preparationNotes: ["Call reception before travelling to confirm appointment timing.", "Carry old prescriptions, blood reports and any ultrasound or endoscopy reports.", "Ask whether fasting is needed if a procedure may be planned the same day.", "For vomiting blood, black stools, severe pain or fainting, call before travelling rather than waiting."],
+    localHighlights: [
+      { title: "Single-trip planning", text: "Consultation and possible same-day testing can be discussed with reception to reduce repeat travel from Mathura." },
+      { title: "Liver and endoscopy access", text: "Patients travelling for fatty liver, high SGPT/SGOT or endoscopy-related symptoms can plan the visit around report review." },
+      { title: "Clear travel guidance", text: "Reception can advise timing so patients from Mathura and nearby areas avoid an unnecessary second visit." }
+    ],
+    faqs: [
+      { question: "How far is Mudgal Gastromedics Hospital from Mathura?", answer: "The hospital is in Shaheed Nagar, Agra, approximately 55-60 km from Mathura via NH-19, typically a little over an hour by road depending on traffic." },
+      { question: "Can I get an endoscopy or colonoscopy on the same visit if travelling from Mathura?", answer: "This depends on fasting status and clinical assessment. Call reception before travelling so timing and preparation can be planned in advance." },
+      { question: "Do I need a referral to consult from Mathura?", answer: "No referral is required. Patients can call or use the appointment form to plan a gastroenterology consultation." }
+    ]
+  },
+  "gastroenterologist-in-vrindavan": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 60-65 km from Vrindavan via NH-19 through Mathura - usually around 1.5 hours by road depending on traffic. Many patients and visitors travelling through Vrindavan and Mathura plan a gastroenterology or liver visit here.",
+    careDifference: "For patients travelling a longer distance, especially visitors with a limited stay in the region, the visit is planned around symptom review and report assessment first, with procedures scheduled once fasting and preparation can be confirmed.",
+    preparationNotes: ["Call ahead if you are visiting Vrindavan for a limited number of days and want to plan the same trip.", "Carry prior prescriptions, blood reports and any prior endoscopy or ultrasound reports.", "Confirm fasting instructions in advance if a procedure may be needed.", "For bleeding, severe pain or persistent vomiting, call before travelling rather than waiting."],
+    localHighlights: [
+      { title: "Visitor-friendly planning", text: "Useful for visitors staying in Vrindavan who want a gastroenterology opinion during their trip." },
+      { title: "Liver and digestive care", text: "Covers fatty liver, acidity, bowel symptoms and endoscopy-related concerns in one consultation." },
+      { title: "Advance coordination", text: "Reception can help plan timing so travel from Vrindavan is not wasted on an incomplete visit." }
+    ],
+    faqs: [
+      { question: "How far is the hospital from Vrindavan?", answer: "Approximately 60-65 km via NH-19 through Mathura, usually around 1.5 hours by road depending on traffic." },
+      { question: "Can visitors staying temporarily in Vrindavan consult here?", answer: "Yes. Patients and visitors can call ahead to plan a consultation, and testing if clinically needed, within their stay." },
+      { question: "What should I carry when travelling from Vrindavan?", answer: "Carry any previous prescriptions, blood reports, ultrasound or endoscopy reports so the visit can be more useful." }
+    ]
+  },
+  "gastroenterologist-in-firozabad": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 40 km from Firozabad - usually under an hour by road. This page is for patients from Firozabad and nearby towns such as Tundla and Shikohabad.",
+    careDifference: "Given the relatively short distance, same-day consultation and testing can often be planned together after reception confirms fasting and preparation requirements.",
+    preparationNotes: ["Call reception to confirm timing before travelling from Firozabad.", "Carry old prescriptions, blood reports and prior ultrasound or endoscopy reports.", "Ask about fasting if endoscopy, colonoscopy or FibroScan may be planned.", "Call urgently for vomiting blood, black stools or severe abdominal pain rather than waiting."],
+    localHighlights: [
+      { title: "Short-distance access", text: "Firozabad's proximity to Agra makes same-day consultation and testing more practical for many patients." },
+      { title: "Liver and endoscopy pathway", text: "Covers fatty liver, abnormal LFT, acidity and endoscopy or colonoscopy-related symptoms." },
+      { title: "Tundla and Shikohabad access", text: "Patients travelling via Tundla or Shikohabad can plan the visit around the same route." }
+    ],
+    faqs: [
+      { question: "How far is Agra from Firozabad for a gastro consultation?", answer: "Mudgal Gastromedics Hospital is approximately 40 km from Firozabad, usually under an hour by road." },
+      { question: "Can I get tests done the same day travelling from Firozabad?", answer: "This depends on fasting and clinical assessment. Call reception in advance to plan the visit." },
+      { question: "Does this hospital treat patients from Tundla and Shikohabad?", answer: "Yes. Patients from Tundla, Shikohabad, Sirsaganj and Jasrana regularly travel here for gastroenterology and liver care." }
+    ]
+  },
+  "gastroenterologist-in-bharatpur": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 55 km from Bharatpur, Rajasthan - usually around an hour to 90 minutes by road. This page is for patients from Bharatpur and nearby towns such as Deeg, Kumher and Bayana.",
+    careDifference: "For patients crossing the Uttar Pradesh-Rajasthan border for care, the visit is planned to combine consultation with report review, so onward testing can be scheduled without unnecessary repeat travel.",
+    preparationNotes: ["Call reception to confirm appointment timing before travelling from Bharatpur.", "Carry prior prescriptions, blood reports and any ultrasound or endoscopy reports.", "Confirm fasting instructions if a procedure may be planned the same day.", "Call urgently for jaundice with fever, vomiting blood or severe abdominal pain."],
+    localHighlights: [
+      { title: "Cross-border travel planning", text: "Reception can help plan timing for patients travelling from Bharatpur district into Agra." },
+      { title: "Liver and endoscopy access", text: "Covers fatty liver, abnormal liver tests, acidity and endoscopy or colonoscopy-related concerns." },
+      { title: "Deeg and Kumher access", text: "Patients from Deeg, Kumher, Weir and Bayana can plan visits along the same route." }
+    ],
+    faqs: [
+      { question: "How far is Mudgal Gastromedics Hospital from Bharatpur?", answer: "Approximately 55 km, usually around an hour to 90 minutes by road depending on traffic and the border crossing." },
+      { question: "Can patients from Rajasthan consult at this hospital?", answer: "Yes. Patients from Bharatpur, Deeg, Kumher, Weir and Bayana regularly travel to Agra for gastroenterology and liver care." },
+      { question: "What reports should I bring from Bharatpur?", answer: "Bring previous prescriptions, blood tests, ultrasound and any endoscopy or colonoscopy reports if available." }
+    ]
+  },
+  "gastroenterologist-in-dholpur": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 55 km from Dholpur via the Agra-Gwalior road (NH44) - usually around 1-1.5 hours by road. This page is for patients from Dholpur and nearby towns such as Bari and Rajakhera.",
+    careDifference: "For patients travelling along the Agra-Gwalior highway, the first visit is usually planned around symptom and report review, with endoscopy, colonoscopy or liver testing scheduled once preparation is confirmed.",
+    preparationNotes: ["Call reception to confirm timing before travelling from Dholpur.", "Carry prior prescriptions, blood reports and any ultrasound or endoscopy reports.", "Ask about fasting requirements if a procedure may be planned.", "Call urgently for black stools, vomiting blood, severe pain or jaundice with fever."],
+    localHighlights: [
+      { title: "NH44 highway access", text: "Dholpur's location on the Agra-Gwalior highway makes travel for consultation and testing straightforward." },
+      { title: "Liver and endoscopy pathway", text: "Covers fatty liver, abnormal LFT, acidity, bowel symptoms and endoscopy-related concerns." },
+      { title: "Bari and Rajakhera access", text: "Patients from Bari and Rajakhera can plan the visit along the same highway route." }
+    ],
+    faqs: [
+      { question: "How far is Agra from Dholpur for a gastro consultation?", answer: "Approximately 55 km via the Agra-Gwalior road (NH44), usually around 1-1.5 hours by road." },
+      { question: "Does this hospital see patients from Rajasthan border towns like Dholpur?", answer: "Yes. Patients from Dholpur, Bari and Rajakhera regularly travel to Agra for gastroenterology and liver care." },
+      { question: "Can I combine consultation and testing in one visit from Dholpur?", answer: "This depends on fasting and clinical assessment. Call reception in advance to plan the visit efficiently." }
+    ]
+  },
+  "gastroenterologist-in-morena": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 95 km from Morena via the Agra-Gwalior road (NH44) - usually around 2 hours by road depending on traffic. This page is for patients from Morena and nearby towns such as Ambah, Porsa and Sabalgarh.",
+    careDifference: "For patients travelling a longer distance from Madhya Pradesh, the visit is planned to make the most of a single trip - reviewing symptoms and reports together and scheduling further testing when it can be arranged the same day.",
+    preparationNotes: ["Call reception in advance to plan a same-day visit where possible.", "Carry prior prescriptions, blood reports and any ultrasound, endoscopy or FibroScan reports.", "Confirm fasting instructions before travelling if a procedure may be needed.", "For jaundice with fever, vomiting blood, black stools or severe pain, call before travelling."],
+    localHighlights: [
+      { title: "Longer-distance trip planning", text: "Reception can help plan timing so a single visit from Morena covers consultation and, where possible, testing." },
+      { title: "Liver care focus", text: "Covers fatty liver, abnormal LFT, jaundice and liver monitoring for patients travelling from Madhya Pradesh." },
+      { title: "Ambah and Porsa access", text: "Patients from Ambah, Porsa, Sabalgarh and Joura can plan the visit along the same NH44 route." }
+    ],
+    faqs: [
+      { question: "How far is Mudgal Gastromedics Hospital from Morena?", answer: "Approximately 95 km via the Agra-Gwalior road (NH44), usually around 2 hours by road depending on traffic." },
+      { question: "Can patients from Madhya Pradesh consult at this hospital?", answer: "Yes. Patients from Morena, Ambah, Porsa, Sabalgarh and Joura regularly travel to Agra for gastroenterology and liver care." },
+      { question: "What should I bring for a liver consultation from Morena?", answer: "Bring LFT, ultrasound, prior FibroScan reports and any hepatitis or diabetes-related test results if available." }
+    ]
+  },
+  "gastroenterologist-in-gwalior": {
+    routeContext: "Mudgal Gastromedics Hospital is in Shaheed Nagar, Agra, roughly 120 km from Gwalior via the Agra-Gwalior road (NH44) - usually around 2.5 hours by road depending on traffic. This page is for patients from Gwalior planning a gastroenterology, liver or endoscopy visit to Agra.",
+    careDifference: "Given the longer travel distance, patients from Gwalior are encouraged to call ahead so consultation, report review and any same-day testing can be planned together, reducing the need for a repeat trip.",
+    preparationNotes: ["Call reception in advance to plan a same-day visit where clinically possible.", "Carry prior prescriptions, blood reports, ultrasound and any endoscopy or FibroScan reports.", "Confirm fasting instructions before travelling if a procedure may be needed.", "For vomiting blood, black stools, jaundice with fever or severe pain, call before travelling rather than waiting."],
+    localHighlights: [
+      { title: "Long-distance visit planning", text: "Reception can help coordinate timing so a trip from Gwalior can cover consultation and, where possible, testing." },
+      { title: "Liver and endoscopy pathway", text: "Covers fatty liver, abnormal LFT, jaundice, acidity and endoscopy or colonoscopy-related symptoms." },
+      { title: "Route via Morena", text: "Patients travelling via Morena can plan the visit along the same NH44 route." }
+    ],
+    faqs: [
+      { question: "How far is Agra from Gwalior for a gastroenterology consultation?", answer: "Approximately 120 km via the Agra-Gwalior road (NH44), usually around 2.5 hours by road depending on traffic." },
+      { question: "Can I plan consultation and endoscopy together travelling from Gwalior?", answer: "This depends on fasting and clinical assessment. Call reception in advance so the visit can be planned efficiently." },
+      { question: "Does this hospital treat patients travelling from Madhya Pradesh?", answer: "Yes. Patients from Gwalior, Morena and nearby towns regularly travel to Agra for gastroenterology and liver care." }
     ]
   }
 };
