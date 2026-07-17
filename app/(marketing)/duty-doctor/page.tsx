@@ -1,11 +1,38 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CalendarCheck, Clock3, Languages, Moon, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
+import { CalendarCheck, Clock3, HelpCircle, Languages, Moon, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { MotionReveal } from "@/components/site/MotionReveal";
 import { Section, SectionHead } from "@/components/site/Section";
 import { breadcrumbSchema } from "@/lib/seo-schema";
 import { fullAddress, site } from "@/lib/site-data";
+
+const dutyDoctorFaqs = [
+  {
+    question: "Who is the duty doctor at Mudgal Gastromedics Hospital?",
+    answer: "Dr. Dushyant Nagayach (BHMS, RAU) is the Duty Medical Officer at Mudgal Gastromedics Hospital, Agra, with 4-5 years of experience in general medicine and gastroenterology care coordination."
+  },
+  {
+    question: "What are the duty doctor's hours?",
+    answer: "Dr. Dushyant Nagayach is scheduled from 8:00 PM to 9:00 AM. Contact reception to confirm availability before visiting."
+  },
+  {
+    question: "What does the duty doctor do?",
+    answer: "The duty doctor provides overnight initial assessment, inpatient coordination and escalation to the treating consultant when required, and guides patients and attendants on the next appropriate clinical step."
+  },
+  {
+    question: "What is Dr. Dushyant Nagayach's registration number?",
+    answer: "Registration No. H041809."
+  },
+  {
+    question: "What languages does the duty doctor speak?",
+    answer: "Hindi and English."
+  },
+  {
+    question: "Should I call before visiting for urgent overnight symptoms?",
+    answer: "Yes. Duty timing and immediate care needs should be confirmed with reception, especially for urgent symptoms or after-hours visits."
+  }
+];
 
 export const metadata: Metadata = {
   title: "Dr. Dushyant Nagayach | Duty Doctor",
@@ -37,6 +64,14 @@ const dutyDoctorSchema = {
         addressCountry: site.country
       },
       url: `${site.url}/duty-doctor`
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: dutyDoctorFaqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer }
+      }))
     },
     breadcrumbSchema([
       { name: "Home", url: "/" },
@@ -159,6 +194,21 @@ export default function DutyDoctorPage() {
               <p className="mt-2 text-sm text-muted">{description}</p>
             </article>
             </MotionReveal>
+          ))}
+        </div>
+      </Section>
+
+      <Section muted>
+        <SectionHead eyebrow="FAQs" title="Frequently asked questions about the duty doctor" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {dutyDoctorFaqs.map((faq) => (
+            <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
+              <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
+                <HelpCircle className="mt-1 shrink-0 text-brand-dark" size={18} />
+                <span>{faq.question}</span>
+              </summary>
+              <p className="mt-3 pl-8 leading-relaxed text-muted">{faq.answer}</p>
+            </details>
           ))}
         </div>
       </Section>

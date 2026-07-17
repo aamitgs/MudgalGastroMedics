@@ -36,7 +36,8 @@ const supportLinks = [
   { href: "/patient-rights-responsibilities", label: "Patient Rights" },
   { href: "/refund-cancellation-policy", label: "Refund Policy" },
   { href: "/disclaimer", label: "Disclaimer" },
-  { href: "/terms", label: "Terms" }
+  { href: "/terms", label: "Terms" },
+  { href: "/editorial-policy", label: "Editorial Policy" }
 ];
 
 const areaLinks = [
