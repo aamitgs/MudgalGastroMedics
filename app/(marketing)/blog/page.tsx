@@ -89,7 +89,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="relative overflow-hidden bg-mist px-4 py-8 text-white md:py-12">
         <div className="relative mx-auto w-[min(1280px,calc(100%-12px))] overflow-hidden rounded-[28px] border border-cyan-100/30 bg-ink shadow-[0_30px_90px_rgba(8,64,84,0.24)]">
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.86)_47%,rgba(8,145,178,0.36)_100%),url('/images/hospital/waitingarea-full-hero.png')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.86)_47%,rgba(8,145,178,0.36)_100%),url('/images/hospital/waitingarea-full-hero.webp')] bg-cover bg-center" />
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.62),rgba(2,22,29,0.12)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.28))]" />
           <div className="relative grid min-h-[580px] gap-10 px-6 py-12 md:px-14 lg:grid-cols-[0.92fr_1.08fr] lg:px-20 lg:py-16">

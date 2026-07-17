@@ -116,7 +116,7 @@ export default function CampBlogPostPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
-      <section className="relative overflow-hidden bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.84)_52%,rgba(8,145,178,0.38)_100%),url('/images/hospital/waitingarea-full-hero.png')] bg-cover bg-center py-16 text-white md:py-24">
+      <section className="relative overflow-hidden bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.84)_52%,rgba(8,145,178,0.38)_100%),url('/images/hospital/waitingarea-full-hero.webp')] bg-cover bg-center py-16 text-white md:py-24">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.52),rgba(2,22,29,0.08)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.26))]" />
         <div className="relative mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1fr_auto]">
