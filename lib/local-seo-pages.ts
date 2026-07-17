@@ -346,6 +346,60 @@ export const localSeoPages: LocalSeoPage[] = [
       { label: "IBS", href: "/procedures/ibs" }
     ],
     nearbyAreas: ["Gwalior", "Morena", "Agra"]
+  },
+  {
+    slug: "fatty-liver-treatment-in-agra",
+    title: "Fatty Liver Treatment in Agra",
+    shortTitle: "Fatty Liver Treatment",
+    description: "Fatty liver treatment in Agra for high SGPT/SGOT, metabolic risk, diabetes-related fatty liver and lifestyle-based liver care planning.",
+    hero: "Assessment and treatment planning for fatty liver disease at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    localFocus: "Patients from across Agra and nearby areas visit for fatty liver evaluation, FibroScan-related assessment and lifestyle-based treatment planning.",
+    keywords: ["Fatty Liver Treatment in Agra", "Fatty Liver Doctor Agra", "NAFLD Treatment Agra", "High SGPT Doctor Agra"],
+    primaryService: "Hepatology / Liver Care",
+    patientIntent: ["Fatty liver reported on ultrasound", "High SGPT/SGOT or abnormal LFT", "Diabetes, obesity or high cholesterol", "FibroScan or liver stiffness assessment"],
+    relatedLinks: [
+      { label: "Fatty Liver", href: "/procedures/fatty-liver" },
+      { label: "Hepatology / Liver Care", href: "/services/hepatology-liver-care" },
+      { label: "FibroScan", href: "/procedures/fibroscan" },
+      { label: "Liver Specialist in Agra", href: "/areas/liver-specialist-in-agra" }
+    ],
+    nearbyAreas: ["Shaheed Nagar", "Tajganj", "Fatehabad Road", "Sikandra", "Kamla Nagar", "Civil Lines"]
+  },
+  {
+    slug: "ibs-treatment-in-agra",
+    title: "IBS Treatment in Agra",
+    shortTitle: "IBS Treatment",
+    description: "IBS treatment in Agra for abdominal pain, bloating, constipation, diarrhea and recurrent bowel habit changes.",
+    hero: "Evaluation and treatment planning for irritable bowel syndrome at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    localFocus: "Patients from across Agra and nearby areas visit for IBS symptom evaluation, bowel-habit review and treatment planning.",
+    keywords: ["IBS Treatment in Agra", "IBS Doctor Agra", "Irritable Bowel Syndrome Agra", "Bowel Habit Change Doctor Agra"],
+    primaryService: "Gastroenterology",
+    patientIntent: ["Recurrent abdominal pain or cramping", "Bloating, gas or altered bowel habits", "Chronic constipation or diarrhea", "Symptoms linked with stress or specific foods"],
+    relatedLinks: [
+      { label: "IBS", href: "/procedures/ibs" },
+      { label: "Gastroenterology Services", href: "/services/gastroenterology" },
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "Gastroenterologist in Agra", href: "/areas/gastroenterologist-in-agra" }
+    ],
+    nearbyAreas: ["Shaheed Nagar", "Tajganj", "Fatehabad Road", "Agra Cantt", "Civil Lines", "Kamla Nagar"]
+  },
+  {
+    slug: "weight-management-clinic-in-agra",
+    title: "Weight Management Clinic in Agra",
+    shortTitle: "Weight Management",
+    description: "Medical weight management clinic in Agra with gastroenterology-led evaluation for obesity, fatty liver and metabolic risk.",
+    hero: "Gastroenterology-led medical weight management at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    localFocus: "Patients from across Agra and nearby areas visit for obesity evaluation, fatty liver-linked weight concerns and diet-planning guidance.",
+    keywords: ["Weight Management Clinic in Agra", "Obesity Treatment Agra", "Medical Weight Loss Agra", "Endoscopic Weight Loss Agra"],
+    primaryService: "Medical Weight Management",
+    patientIntent: ["Obesity with metabolic risk factors", "Fatty liver linked with weight gain", "Diabetes or high cholesterol needing weight review", "Interest in medical or endoscopic weight-loss options"],
+    relatedLinks: [
+      { label: "Medical Weight Management", href: "/services/medical-weight-management" },
+      { label: "Fatty Liver", href: "/procedures/fatty-liver" },
+      { label: "Intragastric Balloon Placement", href: "/procedures/intragastric-balloon-placement" },
+      { label: "Hepatology / Liver Care", href: "/services/hepatology-liver-care" }
+    ],
+    nearbyAreas: ["Shaheed Nagar", "Tajganj", "Fatehabad Road", "Sikandra", "Kamla Nagar", "Civil Lines"]
   }
 ];
 
@@ -618,6 +672,51 @@ export const localSeoPageDetails: Record<string, LocalSeoPageDetail> = {
       { question: "How far is Agra from Gwalior for a gastroenterology consultation?", answer: "Approximately 120 km via the Agra-Gwalior road (NH44), usually around 2.5 hours by road depending on traffic." },
       { question: "Can I plan consultation and endoscopy together travelling from Gwalior?", answer: "This depends on fasting and clinical assessment. Call reception in advance so the visit can be planned efficiently." },
       { question: "Does this hospital treat patients travelling from Madhya Pradesh?", answer: "Yes. Patients from Gwalior, Morena and nearby towns regularly travel to Agra for gastroenterology and liver care." }
+    ]
+  },
+  "fatty-liver-treatment-in-agra": {
+    routeContext: "This page is for Agra-area patients with fatty liver reported on ultrasound, high SGPT/SGOT or metabolic risk factors such as diabetes and obesity, planning a liver evaluation at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    careDifference: "Fatty liver treatment depends on cause and severity. The pathway usually involves reviewing liver tests, ultrasound findings, metabolic risk factors and, where useful, FibroScan-based liver stiffness assessment before lifestyle and medical planning.",
+    preparationNotes: ["Bring LFT, ultrasound and any prior FibroScan reports.", "Mention diabetes, weight, cholesterol and alcohol intake clearly.", "Ask whether FibroScan is advised at this visit.", "Call urgently for jaundice, severe fatigue or abdominal swelling."],
+    localHighlights: [
+      { title: "Risk-based evaluation", text: "Fatty liver risk is reviewed alongside diabetes, obesity and cholesterol rather than in isolation." },
+      { title: "FibroScan-linked planning", text: "Liver stiffness assessment can be discussed as part of the same care pathway when clinically useful." },
+      { title: "Lifestyle-first approach", text: "Weight, diet and activity guidance are central to early fatty liver management." }
+    ],
+    faqs: [
+      { question: "Can fatty liver be treated without medicines?", answer: "In many early cases, weight loss, exercise, diabetes control and diet changes can improve fatty liver. Some patients also need medical management depending on severity." },
+      { question: "Do I need FibroScan for fatty liver treatment?", answer: "Not always. FibroScan may be advised when liver fibrosis risk needs closer assessment." },
+      { question: "Is fatty liver treatment available in Agra?", answer: "Yes. Fatty liver assessment and treatment planning are available at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra." }
+    ]
+  },
+  "ibs-treatment-in-agra": {
+    routeContext: "This page is for Agra-area patients with recurrent abdominal pain, bloating, constipation, diarrhea or bowel-habit changes suggestive of IBS, planning a gastroenterology visit at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    careDifference: "IBS care focuses on symptom pattern, trigger identification and ruling out warning signs before treatment planning, since IBS is diagnosed after other causes of similar symptoms are reasonably excluded.",
+    preparationNotes: ["Note which foods, stress or routines seem to trigger symptoms.", "Bring any prior blood, stool or colonoscopy reports.", "Mention weight loss, blood in stool or night-time symptoms clearly, as these are not typical of IBS.", "Call reception if symptoms are accompanied by bleeding, fever or unintended weight loss."],
+    localHighlights: [
+      { title: "Symptom-pattern review", text: "IBS evaluation looks at pain pattern, bowel habit and trigger foods rather than a single test result." },
+      { title: "Warning-sign screening", text: "Blood in stool, weight loss or night symptoms are reviewed separately since they need their own evaluation." },
+      { title: "Ongoing management", text: "Diet, lifestyle and medicine adjustments are typically reviewed over more than one visit." }
+    ],
+    faqs: [
+      { question: "Is IBS treatment available in Agra?", answer: "Yes. IBS evaluation and treatment planning are available at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra." },
+      { question: "Can IBS be cured completely?", answer: "IBS is usually managed rather than permanently cured, with diet, lifestyle and medicine adjustments controlling symptoms for most patients." },
+      { question: "When should IBS-like symptoms be checked urgently?", answer: "Blood in stool, unexplained weight loss, fever or symptoms that wake you at night should be evaluated promptly rather than assumed to be IBS." }
+    ]
+  },
+  "weight-management-clinic-in-agra": {
+    routeContext: "This page is for Agra-area patients with obesity, fatty liver linked to weight or metabolic risk factors, planning a medical weight management evaluation at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra.",
+    careDifference: "Medical weight management here is gastroenterology-led, connecting weight evaluation with fatty liver, diabetes and metabolic risk review rather than treating weight as a standalone concern.",
+    preparationNotes: ["Bring recent weight, height, blood sugar and cholesterol readings if available.", "Mention prior weight-loss attempts and any related medical conditions.", "Bring liver reports or ultrasound findings if fatty liver has been noted previously.", "Discuss expectations so a realistic plan can be made."],
+    localHighlights: [
+      { title: "Metabolic risk focus", text: "Weight evaluation is connected with fatty liver, diabetes and cholesterol review." },
+      { title: "Range of options", text: "Diet and lifestyle planning are reviewed first; selected endoscopic options may be discussed when clinically appropriate." },
+      { title: "Ongoing follow-up", text: "Weight management is typically followed up over multiple visits rather than a single consultation." }
+    ],
+    faqs: [
+      { question: "Is medical weight management available in Agra?", answer: "Yes. Gastroenterology-led medical weight management is available at Mudgal Gastromedics Hospital, Shaheed Nagar, Agra." },
+      { question: "Is weight management linked to fatty liver treatment here?", answer: "Yes. Weight, metabolic risk and fatty liver are often reviewed together since they are closely related." },
+      { question: "Are endoscopic weight-loss options available?", answer: "Selected endoscopic options such as intragastric balloon placement may be discussed when clinically appropriate after evaluation." }
     ]
   }
 };
