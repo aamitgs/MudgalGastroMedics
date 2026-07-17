@@ -68,7 +68,6 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
     return () => {
       mountedRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   async function signOut() {

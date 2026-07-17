@@ -515,3 +515,11 @@ test("dashboard's own anchor nav entries (Dashboard/Patients/Notifications) get 
   assert.match(shell, /dashboardSectionIds/);
   assert.match(shell, /hrefHash\s*\?\s*\n?\s*pathname === hrefPath && activeDashboardSection === hrefHash/);
 });
+
+test("AI Planning Note's reception-script copy button confirms the copy", () => {
+  // copyScript() wrote to the clipboard with zero user feedback — clicking
+  // "Copy" looked like it did nothing. The equivalent copySummary() in
+  // AdminDoctorWorkflow.tsx already calls notify.success after its clipboard
+  // write; copyScript was just missing the same line.
+  assert.match(read("components/appointments/AdminAppointments.tsx"), /await navigator\.clipboard\.writeText\(scriptText\);\s*\n\s*notify\.success/);
+});

@@ -360,6 +360,7 @@ function PlanningNote({ appointment, onClose }: { appointment: AppointmentRecord
 
   async function copyScript() {
     await navigator.clipboard.writeText(scriptText);
+    notify.success("Reception script copied");
   }
 
   return (
