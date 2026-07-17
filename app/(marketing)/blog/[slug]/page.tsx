@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import QRCode from "qrcode";
 import { ArrowRight, BookOpenText, CalendarDays, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { AppointmentCtaPanel } from "@/components/site/AppointmentCtaPanel";
 import { BlogArticleActions } from "@/components/site/BlogArticleActions";
@@ -113,6 +114,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const showOpdTimingCard = opdTimingBlogSlugs.has(post.slug);
   const coverImage = getBlogCoverImage(post);
   const articleUrl = `${site.url}/blog/${post.slug}`;
+  const articleQrSvg = await QRCode.toString(articleUrl, {
+    type: "svg",
+    margin: 1,
+    color: { dark: "#0e7490", light: "#ffffff" }
+  });
   const articleCta = getArticleCta(post);
   const keyTakeaways = post.sections
     .flatMap((section) => (section.items?.length ? section.items : [section.title]))
@@ -396,6 +402,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section>
         <div className="grid gap-6">
+          <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-white p-4 shadow-soft">
+            <div
+              aria-hidden="true"
+              className="h-24 w-24 shrink-0 [&_svg]:h-full [&_svg]:w-full"
+              dangerouslySetInnerHTML={{ __html: articleQrSvg }}
+            />
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-brand-dark">Scan to Open</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">Scan with your phone camera to reopen this guide, or after printing it for your appointment.</p>
+            </div>
+          </div>
           <BlogArticleActions title={post.title} description={post.description} url={articleUrl} />
           <BlogConsultationForm
             articleTitle={post.title}
