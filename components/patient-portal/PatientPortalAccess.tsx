@@ -1,18 +1,35 @@
 "use client";
 
 import { CalendarCheck, KeyRound, LogOut, MessageCircle, Phone, ShieldCheck, Smartphone } from "lucide-react";
+import dynamic from "next/dynamic";
 import { FormEvent, useEffect, useState } from "react";
 import { LiveClockWeather } from "@/components/design-system/LiveClockWeather";
 import { PatientFeedbackWidget } from "@/components/patient-portal/PatientFeedbackWidget";
-import {
-  PatientHealthDashboard,
-  type PatientAppointmentSummary,
-  type PatientIpdAdmissionSummary,
-  type PatientInsuranceClaimSummary,
-  type PatientLabOrderSummary,
-  type PatientVisitSummary,
-  type PatientVitalsPoint
+import type {
+  PatientAppointmentSummary,
+  PatientIpdAdmissionSummary,
+  PatientInsuranceClaimSummary,
+  PatientLabOrderSummary,
+  PatientVisitSummary,
+  PatientVitalsPoint
 } from "@/components/patient-portal/PatientHealthDashboard";
+
+// Pulls in recharts (a heavy chart library only this dashboard needs), so it's
+// loaded on demand rather than bundled into every page that prefetches /portal
+// via the site-wide "Book Appointment" link (Next prefetches linked routes'
+// JS by default) — this component only ever renders post-authentication
+// anyway, so there's no meaningful SSR content to lose by deferring it.
+const PatientHealthDashboard = dynamic(
+  () => import("@/components/patient-portal/PatientHealthDashboard").then((mod) => mod.PatientHealthDashboard),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid place-items-center rounded border border-dashed border-line bg-soft/60 p-8 text-center text-muted">
+        Loading your health dashboard…
+      </div>
+    )
+  }
+);
 import type { FamilyMember } from "@/lib/family-types";
 import { site } from "@/lib/site-data";
 
