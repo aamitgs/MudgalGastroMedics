@@ -46,11 +46,13 @@ const areaLinks = [
   ...localSeoPages.slice(0, 5).map((page) => ({ href: `/areas/${page.slug}`, label: page.title }))
 ];
 
-const socialLinks = {
-  whatsappChannel: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d",
-  facebook: "https://www.facebook.com/MudgalGastromedics",
-  youtube: "https://www.youtube.com/@mudgalgastromedics9355"
-};
+const socialLinks = [
+  { label: "WhatsApp Channel", href: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d", color: "#25D366" },
+  { label: "Facebook", href: "https://www.facebook.com/MudgalGastromedics", color: "#1877F2" },
+  { label: "Instagram", href: "https://www.instagram.com/explore/locations/616704098791502/mudgal-gastromedics/", color: "#E1306C" },
+  { label: "X", href: "https://x.com/gastromedics", color: "#FFFFFF" },
+  { label: "YouTube", href: "https://www.youtube.com/@mudgalgastromedics9355", color: "#FF0000" }
+];
 
 export function Footer() {
   return (
@@ -95,10 +97,19 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-          <SocialPill href={socialLinks.whatsappChannel} label="WhatsApp Channel" tone="whatsapp" icon={<MessageCircle size={16} />} />
-          <SocialPill href={socialLinks.facebook} label="Facebook" tone="facebook" icon="f" />
-          <SocialPill href={socialLinks.youtube} label="YouTube" tone="youtube" icon="YT" />
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {socialLinks.map((social) => (
+            <a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: social.color }}
+              className="text-sm font-black tracking-wide transition hover:opacity-80"
+            >
+              {social.label}
+            </a>
+          ))}
         </div>
 
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs md:flex-row md:items-center md:justify-between">
@@ -174,26 +185,6 @@ function ContactLine({ icon, label, value, href }: { icon: React.ReactNode; labe
         <a href={href} className="text-[13px] hover:text-white">{value}</a>
       </div>
     </div>
-  );
-}
-
-function SocialPill({ href, label, icon, tone }: { href: string; label: string; icon?: React.ReactNode; tone: "whatsapp" | "facebook" | "youtube" }) {
-  const tones = {
-    whatsapp: "border-teal/30 bg-[linear-gradient(135deg,rgba(5,150,105,0.22),rgba(255,255,255,0.04))] text-cyan-50 hover:border-teal/70 hover:bg-[linear-gradient(135deg,rgba(5,150,105,0.34),rgba(255,255,255,0.08))] [&_span]:bg-teal/18 [&_span]:text-cyan-100",
-    facebook: "border-brand/28 bg-[linear-gradient(135deg,rgba(8,145,178,0.22),rgba(255,255,255,0.04))] text-cyan-50 hover:border-brand/70 hover:bg-[linear-gradient(135deg,rgba(8,145,178,0.34),rgba(255,255,255,0.08))] [&_span]:bg-brand/18 [&_span]:text-cyan-100",
-    youtube: "border-coral/28 bg-[linear-gradient(135deg,rgba(220,38,38,0.18),rgba(255,255,255,0.04))] text-cyan-50 hover:border-coral/70 hover:bg-[linear-gradient(135deg,rgba(220,38,38,0.3),rgba(255,255,255,0.08))] [&_span]:bg-coral/18 [&_span]:text-cyan-100"
-  };
-
-  return (
-    <a
-      href={href}
-      target={href === "#" ? undefined : "_blank"}
-      rel={href === "#" ? undefined : "noreferrer"}
-      className={`group inline-flex min-h-11 items-center gap-3 rounded-full border px-4 py-2 text-[13px] font-black shadow-[0_18px_44px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.12)] transition duration-300 hover:-translate-y-1 hover:text-white hover:shadow-[0_24px_60px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.18)] ${tones[tone]}`}
-    >
-      <span className="grid h-8 w-8 place-items-center rounded-full text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:scale-105">{icon ?? "G"}</span>
-      {label}
-    </a>
   );
 }
 
