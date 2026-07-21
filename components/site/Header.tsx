@@ -279,7 +279,7 @@ export function Header() {
 
   return (
     <>
-      <section ref={topBarRef} aria-label="Hospital contact details" className="border-b border-line bg-ink text-sm text-white">
+      <section ref={topBarRef} aria-label="Hospital contact details" className="hidden border-b border-line bg-ink text-sm text-white md:block">
         <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-col justify-between gap-2 py-2 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex items-center gap-1.5 hover:text-cyan-200">
