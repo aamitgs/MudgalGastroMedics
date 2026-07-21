@@ -57,7 +57,7 @@ export function Footer() {
     <footer className="relative overflow-hidden bg-[#111111] px-5 pb-16 pt-14 text-[13px] text-[#969696] md:px-8 md:pb-20">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid grid-cols-2 items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
-          <div className="col-span-2 lg:col-span-1">
+          <div>
             <div className="w-fit rounded border border-brand/25 bg-white p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
@@ -85,13 +85,13 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="text-center lg:text-left">
+          <div className="col-span-2 flex flex-col items-center text-center lg:col-span-1 lg:block lg:text-left">
             <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">Check Us Out On Google</h3>
-            <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="mx-auto block w-fit lg:mx-0" aria-label="Open MGM on Google Maps">
+            <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="block w-fit" aria-label="Open MGM on Google Maps">
               <GoogleQr />
             </a>
             <p className="mt-4 text-sm">Scan to view reviews</p>
-            <p className="mx-auto mt-2 max-w-56 text-xs leading-5 lg:mx-0">Mudgal Gastromedics Hospital, Shaheed Nagar, Agra</p>
+            <p className="mt-2 max-w-56 text-xs leading-5">Mudgal Gastromedics Hospital, Shaheed Nagar, Agra</p>
           </div>
         </div>
 
