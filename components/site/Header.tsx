@@ -243,9 +243,14 @@ function NavLabel({ label }: { label: string }) {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
   const headerRef = useRef<HTMLElement>(null);
   const topBarRef = useRef<HTMLElement>(null);
+
+  function toggleSection(key: string) {
+    setOpenSection((current) => (current === key ? null : key));
+  }
 
   useEffect(() => {
     const headerEl = headerRef.current;
@@ -360,23 +365,47 @@ export function Header() {
             <div className="mb-2 flex justify-end">
               <LanguageToggle compact />
             </div>
-            {navItems.map((item) => (
-              <div key={`${item.href}-${item.label}`}>
-                <Link href={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between rounded px-2 py-3 hover:bg-soft">
-                  <NavLabel label={item.label} />
-                  {item.children?.length ? <ChevronDown size={18} /> : null}
-                </Link>
-                {item.children?.length ? (
-                  <div className="ml-3 grid border-l border-line pl-3">
-                    {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand-dark">
-                        <NavLabel label={child.label} />
-                      </Link>
-                    ))}
+            {navItems.map((item) => {
+              const key = `${item.href}-${item.label}`;
+              const isOpen = openSection === key;
+              return (
+                <div key={key}>
+                  <div className="flex items-center justify-between rounded hover:bg-soft">
+                    <Link href={item.href} onClick={() => setOpen(false)} className="flex-1 py-3 pl-2">
+                      <NavLabel label={item.label} />
+                    </Link>
+                    {item.children?.length ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(key)}
+                        aria-expanded={isOpen}
+                        aria-label={`${isOpen ? "Collapse" : "Expand"} ${item.label} submenu`}
+                        className="grid h-11 w-11 shrink-0 place-items-center text-ink/60"
+                      >
+                        <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                      </button>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-            ))}
+                  <AnimatePresence initial={false}>
+                    {item.children?.length && isOpen ? (
+                      <motion.div
+                        initial={reducedMotion ? false : { height: 0, opacity: 0 }}
+                        animate={reducedMotion ? undefined : { height: "auto", opacity: 1 }}
+                        exit={reducedMotion ? undefined : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="ml-3 overflow-hidden border-l border-line pl-3"
+                      >
+                        {item.children.map((child) => (
+                          <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="block rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand-dark">
+                            <NavLabel label={child.label} />
+                          </Link>
+                        ))}
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
             <ButtonLink href="/portal#appointment" className="mt-2">
               Book Appointment
             </ButtonLink>
