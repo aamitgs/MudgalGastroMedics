@@ -50,17 +50,17 @@ const socialLinks = [
   { label: "WhatsApp Channel", href: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d", color: "#25D366" },
   { label: "Facebook", href: "https://www.facebook.com/MudgalGastromedics", color: "#1877F2" },
   { label: "Instagram", href: "https://www.instagram.com/explore/locations/616704098791502/mudgal-gastromedics/", color: "#E1306C" },
-  { label: "X", href: "https://x.com/gastromedics", color: "#FFFFFF" },
+  { label: "X", href: "https://x.com/gastromedics", color: "#000000" },
   { label: "YouTube", href: "https://www.youtube.com/@mudgalgastromedics9355", color: "#FF0000" }
 ];
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#111111] px-5 pb-16 pt-14 text-[13px] text-[#969696] md:px-8 md:pb-20">
+    <footer className="relative overflow-hidden bg-white px-5 pb-16 pt-14 text-[13px] text-muted md:px-8 md:pb-20">
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid grid-cols-2 items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
-            <div className="w-fit rounded border border-brand/25 bg-white p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+            <div className="w-fit rounded border border-brand/25 bg-white p-3">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
             <p className="mt-5 max-w-sm leading-5">
@@ -79,7 +79,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">Contact Us</h3>
+            <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-ink">Contact Us</h3>
             <div className="grid gap-3">
               <ContactLine icon={<Phone size={16} />} label="Landline" value={site.phone} href={`tel:${site.phone.replace(/\s/g, "")}`} />
               <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile}`} />
@@ -88,7 +88,7 @@ export function Footer() {
           </div>
 
           <div className="col-span-2 flex flex-col items-center text-center lg:col-span-1 lg:block lg:text-left">
-            <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">Check Us Out On Google</h3>
+            <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-ink">Check Us Out On Google</h3>
             <a href={site.directionsUrl} target="_blank" rel="noreferrer" className="block w-fit" aria-label="Open MGM on Google Maps">
               <GoogleQr />
             </a>
@@ -112,17 +112,17 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs md:flex-row md:items-center md:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 text-xs md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Mudgal Gastromedics Hospital.</p>
-          <div className="inline-flex w-fit items-center overflow-hidden rounded-full border border-white/10 bg-white/10 font-black uppercase tracking-wider">
+          <div className="inline-flex w-fit items-center overflow-hidden rounded-full border border-line bg-soft font-black uppercase tracking-wider">
             <span className="inline-flex items-center gap-2 bg-brand-dark px-3 py-1.5 text-white">
               <ShieldCheck size={15} /> Healthcare
             </span>
-            <span className="px-3 py-1.5 text-white/60">Information Protected</span>
+            <span className="px-3 py-1.5 text-muted">Information Protected</span>
           </div>
           <p>
             Made by{" "}
-            <a href="https://www.edata4you.com/" target="_blank" rel="noreferrer" className="font-bold text-white hover:text-cyan-200">
+            <a href="https://www.edata4you.com/" target="_blank" rel="noreferrer" className="font-bold text-ink hover:text-brand-dark">
               eData4You
             </a>{" "}
             with ❤️ in Delhi,India.
@@ -141,14 +141,14 @@ function FooterColumn({ title, links, limit }: { title: string; links: Array<{ h
 
   return (
     <div>
-      <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-white">{title}</h3>
+      <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-ink">{title}</h3>
       <div className="grid gap-1.5 text-[13px] leading-5">
         {visibleLinks.map((link) => (
           <FooterLink key={link.label} link={link} />
         ))}
         {hiddenLinks.length ? (
           <details className="group/show-more">
-            <summary className="mt-1 inline-flex cursor-pointer list-none items-center text-[13px] font-semibold text-white/70 transition hover:text-white [&::-webkit-details-marker]:hidden">
+            <summary className="mt-1 inline-flex cursor-pointer list-none items-center text-[13px] font-semibold text-muted transition hover:text-brand-dark [&::-webkit-details-marker]:hidden">
               <span className="group-open/show-more:hidden">Show more</span>
               <span className="hidden group-open/show-more:inline">Show fewer</span>
             </summary>
@@ -166,11 +166,11 @@ function FooterColumn({ title, links, limit }: { title: string; links: Array<{ h
 
 function FooterLink({ link }: { link: { href: string; label: string } }) {
   return link.href.startsWith("http") ? (
-    <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-white">
+    <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-brand-dark">
       {link.label}
     </a>
   ) : (
-    <Link href={link.href} className="hover:text-white">
+    <Link href={link.href} className="hover:text-brand-dark">
       {link.label}
     </Link>
   );
@@ -179,10 +179,10 @@ function FooterLink({ link }: { link: { href: string; label: string } }) {
 function ContactLine({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href: string }) {
   return (
     <div className="flex gap-2">
-      <span className="mt-1 shrink-0 text-white/45">{icon}</span>
+      <span className="mt-1 shrink-0 text-muted">{icon}</span>
       <div>
-        <p className="text-xs font-black uppercase tracking-wider text-white/45">{label}</p>
-        <a href={href} className="text-[13px] hover:text-white">{value}</a>
+        <p className="text-xs font-black uppercase tracking-wider text-muted">{label}</p>
+        <a href={href} className="text-[13px] hover:text-brand-dark">{value}</a>
       </div>
     </div>
   );
