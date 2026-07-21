@@ -68,7 +68,7 @@ export function Footer() {
             </p>
           </div>
 
-          <FooterColumn title="Mudgalgastromedics" links={companyLinks} />
+          <FooterColumn title="MGM" links={companyLinks} />
 
           <FooterColumn title="Services" links={serviceLinks} limit={6} />
 
