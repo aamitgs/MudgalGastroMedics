@@ -333,7 +333,7 @@ export function Header() {
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <div className="hidden min-[1280px]:block">
-              <LanguageToggle compact className="h-12 min-w-[98px] rounded px-4 text-[15px] xl:h-[52px] xl:min-w-[108px]" />
+              <LanguageToggle compact className="h-9 min-w-[72px] rounded px-3 text-xs xl:h-10 xl:min-w-[80px] xl:text-sm" />
             </div>
             <div className="hidden md:block">
               <ButtonLink href="/portal#appointment" className="min-w-[144px] whitespace-nowrap border-coral bg-coral px-3.5 text-[13px] hover:bg-brand-dark xl:min-w-[156px] xl:text-sm">
