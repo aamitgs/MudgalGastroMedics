@@ -64,7 +64,7 @@ export function Footer() {
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
             <p className="mt-5 max-w-sm leading-5">
-              Advanced gastroenterology, hepatology and endoscopy care in Agra with specialized treatment for digestive and liver diseases.
+              Agra&apos;s gastro and liver superspeciality centre — expert diagnosis and treatment for digestive, liver and pancreatic conditions.
             </p>
           </div>
 
