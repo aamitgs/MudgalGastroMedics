@@ -60,7 +60,7 @@ export function Footer() {
       <div className="mx-auto w-[min(1500px,calc(100%-24px))]">
         <div className="grid grid-cols-2 items-start gap-9 lg:grid-cols-[1.25fr_0.68fr_0.68fr_0.78fr_0.86fr_1fr_1fr]">
           <div>
-            <div className="w-fit rounded border border-brand/25 bg-white p-3">
+            <div className="w-fit rounded bg-white p-3">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
             <p className="mt-5 max-w-sm leading-5">
