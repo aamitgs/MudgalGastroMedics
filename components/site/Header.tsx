@@ -321,7 +321,7 @@ export function Header() {
                 {item.children?.length ? (
                   <div className="invisible absolute left-0 top-full max-h-[70vh] min-w-64 translate-y-2 overflow-y-auto rounded border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {item.children.map((child) => (
-                      <Link key={child.href + child.label} href={child.href} className="block rounded px-4 py-2.5 text-[13px] font-semibold text-ink/78 hover:bg-soft hover:text-brand-dark xl:text-[14px]">
+                      <Link key={child.href + child.label} href={child.href} prefetch={false} className="block rounded px-4 py-2.5 text-[13px] font-semibold text-ink/78 hover:bg-soft hover:text-brand-dark xl:text-[14px]">
                         <NavLabel label={child.label} />
                       </Link>
                     ))}
@@ -396,7 +396,7 @@ export function Header() {
                         className="ml-3 overflow-hidden border-l border-line pl-3"
                       >
                         {item.children.map((child) => (
-                          <Link key={child.href + child.label} href={child.href} onClick={() => setOpen(false)} className="block rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand-dark">
+                          <Link key={child.href + child.label} href={child.href} prefetch={false} onClick={() => setOpen(false)} className="block rounded px-2 py-2 text-sm text-ink/70 hover:bg-soft hover:text-brand-dark">
                             <NavLabel label={child.label} />
                           </Link>
                         ))}

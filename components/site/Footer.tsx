@@ -167,7 +167,7 @@ function FooterLink({ link }: { link: { href: string; label: string } }) {
       {link.label}
     </a>
   ) : (
-    <Link href={link.href} className="hover:text-brand-dark">
+    <Link href={link.href} prefetch={false} className="hover:text-brand-dark">
       {link.label}
     </Link>
   );

@@ -121,6 +121,7 @@ export function PublicCareSearch({ placement = "fixed", className = "" }: Public
                       <Link
                         key={`${item.href}-${item.label}`}
                         href={item.href}
+                        prefetch={false}
                         onClick={() => setOpen(false)}
                         className="group inline-flex min-h-12 items-center gap-3 rounded-full border border-cyan-100/16 bg-white/10 px-5 text-sm font-black text-cyan-50/78 transition hover:-translate-y-0.5 hover:border-cyan-100/45 hover:bg-white/16 hover:text-white"
                       >
@@ -144,6 +145,7 @@ export function PublicCareSearch({ placement = "fixed", className = "" }: Public
                       <Link
                         key={`${item.href}-${item.label}`}
                         href={item.href}
+                        prefetch={false}
                         onClick={() => setOpen(false)}
                         className="group inline-flex min-h-12 items-center gap-3 rounded-full border border-cyan-100/16 bg-white/10 px-5 text-sm font-black text-cyan-50/78 transition hover:-translate-y-0.5 hover:border-cyan-100/45 hover:bg-white/16 hover:text-white"
                       >
@@ -161,6 +163,7 @@ export function PublicCareSearch({ placement = "fixed", className = "" }: Public
                       <Link
                         key={`${item.href}-${item.label}`}
                         href={item.href}
+                        prefetch={false}
                         onClick={() => setOpen(false)}
                         className="group inline-flex min-h-12 items-center gap-3 rounded-full border border-cyan-100/16 bg-white/10 px-5 text-sm font-black text-cyan-50/78 transition hover:-translate-y-0.5 hover:border-cyan-100/45 hover:bg-white/16 hover:text-white"
                       >
