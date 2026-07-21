@@ -7,45 +7,6 @@ import type { AppointmentRecord } from "@/lib/appointment-types";
 import { isValidPhoneNumber, normalizePhoneNumber } from "@/lib/phone";
 import { opdWindows, site } from "@/lib/site-data";
 
-/** Display-only Hindi labels; the submitted symptom value stays English so records remain consistent. */
-const symptomHindi: Record<string, string> = {
-  "Acidity / reflux": "एसिडिटी / रिफ्लक्स",
-  "Abdominal pain": "पेट दर्द",
-  "Vomiting": "उल्टी",
-  "Loose motion": "दस्त",
-  "Constipation": "कब्ज़",
-  "Jaundice": "पीलिया",
-  "Blood in stool": "मल में खून",
-  "Black stool": "काला मल",
-  "Weight loss": "वज़न घटना",
-  "Bloating / gas": "पेट फूलना / गैस",
-  "Loss of appetite": "भूख न लगना",
-  "Difficulty swallowing": "निगलने में कठिनाई",
-  "Nausea": "जी मिचलाना",
-  "Fatty liver concern": "फैटी लिवर की चिंता",
-  "Pancreatitis pain": "पैंक्रियास (अग्न्याशय) दर्द",
-  "Liver swelling / ascites": "लिवर सूजन / पेट में पानी"
-};
-
-const commonSymptoms = [
-  "Acidity / reflux",
-  "Abdominal pain",
-  "Vomiting",
-  "Loose motion",
-  "Constipation",
-  "Jaundice",
-  "Blood in stool",
-  "Black stool",
-  "Weight loss",
-  "Bloating / gas",
-  "Loss of appetite",
-  "Difficulty swallowing",
-  "Nausea",
-  "Fatty liver concern",
-  "Pancreatitis pain",
-  "Liver swelling / ascites"
-];
-
 const appointmentServices = ["OPD", "IPD"];
 
 const countryCodes = [
@@ -62,16 +23,6 @@ const countryCodes = [
   { code: "+977", label: "Nepal" },
   { code: "+880", label: "Bangladesh" }
 ];
-
-const urgentSymptoms = new Set([
-  "Vomiting",
-  "Jaundice",
-  "Blood in stool",
-  "Black stool",
-  "Weight loss",
-  "Pancreatitis pain",
-  "Liver swelling / ascites"
-]);
 
 function normalizePinCode(value: FormDataEntryValue | null | undefined) {
   return String(value ?? "").replace(/\D/g, "");
@@ -121,7 +72,6 @@ export function AppointmentForm() {
   const [whatsappLink, setWhatsappLink] = useState("");
   const [selectedReport, setSelectedReport] = useState("");
   const [appointmentFor, setAppointmentFor] = useState("");
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [lookupMessage, setLookupMessage] = useState("");
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -130,14 +80,12 @@ export function AppointmentForm() {
   const reportInputRef = useRef<HTMLInputElement>(null);
   const fieldClass = "min-h-14 w-full rounded-lg border border-line bg-white px-4 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] transition placeholder:text-muted/65 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
   const optionClass = "flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-sm transition hover:border-brand hover:bg-soft/45";
-  const urgentSelected = draft.priority === "Urgent symptoms" || selectedSymptoms.some((symptom) => urgentSymptoms.has(symptom));
+  const urgentSelected = draft.priority === "Urgent symptoms";
 
   function syncDraft(form: HTMLFormElement) {
     const nextData = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
-    const symptoms = new FormData(form).getAll("symptoms").map(String).filter(Boolean);
     setDraft(nextData);
     setAppointmentFor(nextData.service ?? "");
-    setSelectedSymptoms(symptoms);
   }
 
   function applyAutofill(match: Record<string, string>) {
@@ -475,17 +423,6 @@ export function AppointmentForm() {
             <span className="mb-2 block text-sm font-semibold text-ink">Current Medicines / Allergies</span>
             <input name="medicines" className={fieldClass} placeholder="Medicine names, allergies, or leave blank" />
           </label>
-          <div className="lg:col-span-12">
-            <p className="mb-2 text-sm font-semibold text-ink"><span data-en>Common symptoms</span><span data-hi lang="hi">सामान्य लक्षण</span></p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {commonSymptoms.map((option) => (
-                <label key={option} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm shadow-sm transition hover:border-brand hover:bg-soft/45">
-                  <input type="checkbox" name="symptoms" value={option} className="h-4 w-4 accent-brand" />
-                  <span className="font-semibold text-ink"><span data-en>{option}</span><span data-hi lang="hi">{symptomHindi[option] ?? option}</span></span>
-                </label>
-              ))}
-            </div>
-          </div>
           <label className="lg:col-span-12">
             <span className="mb-2 block text-sm font-semibold text-ink">Message</span>
             <textarea name="message" className="min-h-32 w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] transition placeholder:text-muted/65 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" placeholder="Main concern, preferred time, prior diagnosis, or appointment notes" />
@@ -552,7 +489,6 @@ export function AppointmentForm() {
             ["Date / time", `${draft.date || "Flexible"} · ${draft.timeSlot || "Flexible"}`],
             ["Patient type", draft.patientType || "Not selected"],
             ["Preferred contact", draft.contactMethod || "Phone / WhatsApp"],
-            ["Symptoms", selectedSymptoms.length ? selectedSymptoms.join(", ") : "Not selected"],
             ["Report", selectedReport || "No report attached"]
           ].map(([label, value]) => (
             <div key={label} className="rounded-lg border border-line bg-soft/35 p-3">
