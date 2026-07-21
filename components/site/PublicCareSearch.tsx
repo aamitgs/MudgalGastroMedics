@@ -53,9 +53,10 @@ export function PublicCareSearch({ placement = "fixed", className = "" }: Public
 
   return (
     <div
+      style={placement === "fixed" ? { top: "calc(var(--site-header-bottom, 6.35rem) + 0.5rem)" } : undefined}
       className={
         placement === "fixed"
-          ? `fixed right-2 top-[6.35rem] z-[80] w-[min(216px,calc(100vw-1.5rem))] sm:right-4 sm:top-[7.15rem] lg:right-5 lg:top-36 ${className}`
+          ? `fixed right-2 z-[80] w-[min(216px,calc(100vw-1.5rem))] sm:right-4 lg:right-5 ${className}`
           : `relative z-20 w-full max-w-[216px] ${className}`
       }
     >

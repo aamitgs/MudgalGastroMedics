@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Clock, MapPin, Menu, Phone, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { opdWindows, site } from "@/lib/site-data";
 import { ButtonLink } from "@/components/site/ButtonLink";
@@ -131,7 +131,6 @@ const navItems = [
       { href: "/procedures/pancreatic-disorders", label: "Pancreatic Pain" }
     ]
   },
-  { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact Us" }
 ] satisfies Array<{
   href: string;
@@ -175,7 +174,6 @@ const navHindi: Record<string, string> = {
   "Procedures": "प्रक्रियाएँ",
   "GI Diseases": "जीआई रोग",
   "Symptoms": "लक्षण",
-  "Blog": "ब्लॉग",
   "Contact Us": "संपर्क करें",
   "About MGM": "एमजीएम के बारे में",
   "Abdominal Pain": "पेट दर्द",
@@ -246,10 +244,42 @@ function NavLabel({ label }: { label: string }) {
 export function Header() {
   const [open, setOpen] = useState(false);
   const reducedMotion = useReducedMotion();
+  const headerRef = useRef<HTMLElement>(null);
+  const topBarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const headerEl = headerRef.current;
+    const topBarEl = topBarRef.current;
+    if (!headerEl) return;
+    let frame = 0;
+    const publishOffset = () => {
+      frame = 0;
+      document.documentElement.style.setProperty("--site-header-bottom", `${headerEl.getBoundingClientRect().bottom}px`);
+    };
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(publishOffset);
+    };
+    publishOffset();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    // Watches both bars: the top contact bar can reflow (live clock/weather text,
+    // OPD hours wrapping) and shift the sticky header's position without resizing
+    // the header itself, which a header-only observer would miss.
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(headerEl);
+    if (topBarEl) resizeObserver.observe(topBarEl);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <>
-      <section aria-label="Hospital contact details" className="border-b border-line bg-ink text-sm text-white">
+      <section ref={topBarRef} aria-label="Hospital contact details" className="border-b border-line bg-ink text-sm text-white">
         <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-col justify-between gap-2 py-2 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="inline-flex items-center gap-1.5 hover:text-cyan-200">
@@ -267,7 +297,7 @@ export function Header() {
         </div>
       </section>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
+      <header ref={headerRef} className="sticky top-0 z-40 border-b border-line bg-white/95 text-ink shadow-[0_12px_28px_rgba(20,36,43,0.08)] backdrop-blur">
         <div className="mx-auto flex min-h-[88px] w-[min(1620px,calc(100%-40px))] items-center gap-4 2xl:gap-5">
           <Link href="/" className="shrink-0 rounded bg-white p-1.5" aria-label="Mudgal Gastromedics Hospital home">
             <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} priority className="rounded" style={{ width: "168px", height: "auto" }} />
