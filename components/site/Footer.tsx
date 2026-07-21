@@ -63,7 +63,7 @@ export function Footer() {
             <div className="w-fit rounded bg-white p-3">
               <Image src="/mgm-logo.png" alt="Mudgal Gastro Medics logo" width={260} height={96} style={{ width: "192px", height: "auto" }} />
             </div>
-            <p className="mt-5 max-w-sm leading-5">
+            <p className="mt-2 max-w-sm leading-5">
               Agra&apos;s gastro and liver superspeciality centre - expert diagnosis and treatment for digestive, liver and pancreatic conditions.
             </p>
           </div>
