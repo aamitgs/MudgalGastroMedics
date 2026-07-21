@@ -419,10 +419,6 @@ export function AppointmentForm() {
               <option>Long-term / recurring</option>
             </select>
           </label>
-          <label className="lg:col-span-6">
-            <span className="mb-2 block text-sm font-semibold text-ink">Current Medicines / Allergies</span>
-            <input name="medicines" className={fieldClass} placeholder="Medicine names, allergies, or leave blank" />
-          </label>
           <label className="lg:col-span-12">
             <span className="mb-2 block text-sm font-semibold text-ink">Message</span>
             <textarea name="message" className="min-h-32 w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink shadow-[0_12px_28px_rgba(8,64,84,0.08)] transition placeholder:text-muted/65 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" placeholder="Main concern, preferred time, prior diagnosis, or appointment notes" />

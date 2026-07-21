@@ -67,7 +67,7 @@ const navItems = [
   },
   {
     href: "/procedures",
-    label: "Special Procedures",
+    label: "Procedures",
     children: [
       { href: "/procedures", label: "All Procedures" },
       { href: "/procedures/endoscopy", label: "Endoscopy" },
@@ -131,7 +131,6 @@ const navItems = [
       { href: "/procedures/pancreatic-disorders", label: "Pancreatic Pain" }
     ]
   },
-  { href: "/life-at-mgm", label: "Life@MGM" },
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact Us" }
 ] satisfies Array<{
@@ -173,7 +172,7 @@ const navHindi: Record<string, string> = {
   "Pharmacy": "फार्मेसी",
   "Equipment": "उपकरण",
   "Accessibility Facilities": "सुगम्यता सुविधाएँ",
-  "Special Procedures": "विशेष प्रक्रियाएँ",
+  "Procedures": "प्रक्रियाएँ",
   "GI Diseases": "जीआई रोग",
   "Symptoms": "लक्षण",
   "Blog": "ब्लॉग",
