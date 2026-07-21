@@ -327,11 +327,15 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <LanguageToggle compact className="h-12 min-w-[98px] rounded px-4 text-[15px] xl:h-[52px] xl:min-w-[108px]" />
-            <ButtonLink href="/portal#appointment" className="hidden min-w-[144px] whitespace-nowrap border-coral bg-coral px-3.5 text-[13px] hover:bg-brand-dark md:inline-flex xl:min-w-[156px] xl:text-sm">
-              <span data-en>Book Appointment</span>
-              <span data-hi lang="hi">बुक करें</span>
-            </ButtonLink>
+            <div className="hidden min-[1280px]:block">
+              <LanguageToggle compact className="h-12 min-w-[98px] rounded px-4 text-[15px] xl:h-[52px] xl:min-w-[108px]" />
+            </div>
+            <div className="hidden md:block">
+              <ButtonLink href="/portal#appointment" className="min-w-[144px] whitespace-nowrap border-coral bg-coral px-3.5 text-[13px] hover:bg-brand-dark xl:min-w-[156px] xl:text-sm">
+                <span data-en>Book Appointment</span>
+                <span data-hi lang="hi">बुक करें</span>
+              </ButtonLink>
+            </div>
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
@@ -353,6 +357,9 @@ export function Header() {
             exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
+            <div className="mb-2 flex justify-end">
+              <LanguageToggle compact />
+            </div>
             {navItems.map((item) => (
               <div key={`${item.href}-${item.label}`}>
                 <Link href={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between rounded px-2 py-3 hover:bg-soft">
