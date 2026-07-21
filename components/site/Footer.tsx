@@ -41,10 +41,7 @@ const supportLinks = [
   { href: "/editorial-policy", label: "Editorial Policy" }
 ];
 
-const areaLinks = [
-  { href: "/areas", label: "All Local Care Areas" },
-  ...localSeoPages.slice(0, 5).map((page) => ({ href: `/areas/${page.slug}`, label: page.title }))
-];
+const areaLinks = localSeoPages.slice(0, 5).map((page) => ({ href: `/areas/${page.slug}`, label: page.title }));
 
 const socialLinks = [
   { label: "WhatsApp Channel", href: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d", color: "#25D366" },
