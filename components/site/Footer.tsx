@@ -142,13 +142,13 @@ function FooterColumn({ title, links, limit }: { title: string; links: Array<{ h
   return (
     <div>
       <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-ink">{title}</h3>
-      <div className="grid gap-1.5 text-[13px] leading-5">
+      <div className="grid gap-1.5 text-xs leading-5">
         {visibleLinks.map((link) => (
           <FooterLink key={link.label} link={link} />
         ))}
         {hiddenLinks.length ? (
           <details className="group/show-more">
-            <summary className="mt-1 inline-flex cursor-pointer list-none items-center text-[13px] font-semibold text-muted transition hover:text-brand-dark [&::-webkit-details-marker]:hidden">
+            <summary className="mt-1 inline-flex cursor-pointer list-none items-center text-xs font-semibold text-muted transition hover:text-brand-dark [&::-webkit-details-marker]:hidden">
               <span className="group-open/show-more:hidden">Show more</span>
               <span className="hidden group-open/show-more:inline">Show fewer</span>
             </summary>
