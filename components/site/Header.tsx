@@ -313,7 +313,7 @@ export function Header() {
               <div key={`${item.href}-${item.label}`} className="group relative">
                 <Link
                   href={item.href}
-                  className="flex items-center gap-1 whitespace-nowrap py-8 text-[13px] font-semibold transition hover:text-[#19c7f3] xl:text-[14px] 2xl:text-[15px]"
+                  className="flex items-center gap-1 whitespace-nowrap py-8 text-[15px] font-semibold transition hover:text-[#19c7f3] xl:text-[16px] 2xl:text-[17px]"
                 >
                   <NavLabel label={item.label} />
                   {item.children?.length ? <ChevronDown size={15} strokeWidth={3} /> : null}
