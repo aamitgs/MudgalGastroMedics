@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { QrCode } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { HosFormField } from "@/components/hospital-os/HosFormField";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { FormField } from "@/components/design-system/FormField";
 import { PrintIdCardDialog } from "@/components/patients/PrintIdCardDialog";
 import type { PatientRecord } from "@/lib/patient-types";
 
@@ -38,9 +38,9 @@ export function WristbandQrButton() {
 
   return (
     <>
-      <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={() => setSearchOpen(true)}>
+      <ActionButton variant="outline" onClick={() => setSearchOpen(true)}>
         <QrCode size={16} /> Wristband QR
-      </Button>
+      </ActionButton>
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogContent>
           <DialogHeader>
@@ -48,15 +48,16 @@ export function WristbandQrButton() {
             <DialogDescription>Search by name, UHID or phone to print a wristband.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <HosFormField label="Search">
+            <FormField label="Search" htmlFor="wristband-search">
               <input
+                id="wristband-search"
                 autoFocus
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Name, UHID or phone"
-                className="min-h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className="min-h-10 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
               />
-            </HosFormField>
+            </FormField>
             <div className="grid max-h-72 gap-1.5 overflow-auto">
               {results.map((patient) => (
                 <button
@@ -66,15 +67,15 @@ export function WristbandQrButton() {
                     setPrintPatient(patient);
                     setSearchOpen(false);
                   }}
-                  className="rounded-lg border border-[var(--hos-border)] p-3 text-left transition hover:border-[var(--hos-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hos-primary)]"
+                  className="rounded-lg border border-line p-3 text-left transition hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                 >
                   <p className="font-semibold">{patient.name}</p>
-                  <p className="text-xs text-[var(--hos-muted-text)]">
+                  <p className="text-xs text-muted">
                     {patient.uhid} · {patient.phone}
                   </p>
                 </button>
               ))}
-              {results.length === 0 ? <p className="text-sm text-[var(--hos-muted-text)]">No patients found.</p> : null}
+              {results.length === 0 ? <p className="text-sm text-muted">No patients found.</p> : null}
             </div>
           </div>
         </DialogContent>

@@ -357,20 +357,6 @@ export function auditEventToRealtimeEvent(event: MinimalAuditEvent): HospitalRea
   }
 }
 
-/** Badge color per PatientStatus/BillingStatus value — used by OperationsTable and PatientWorkspace. */
-export const statusTone: Record<string, string> = {
-  "In Consultation": "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  "Vitals Pending": "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",
-  "Lab Review": "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  Scheduled: "border-[var(--hos-border)] bg-[var(--hos-muted)] text-[var(--hos-text)]",
-  "Billing Hold": "border-[var(--hos-danger)]/20 bg-[var(--hos-danger)]/10 text-[var(--hos-danger)]",
-  Discharged: "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  Open: "border-[var(--hos-warning)]/25 bg-[var(--hos-warning)]/10 text-[var(--hos-warning)]",
-  Paid: "border-[var(--hos-success)]/20 bg-[var(--hos-success)]/10 text-[var(--hos-success)]",
-  Insurance: "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  Preauth: "border-[var(--hos-primary)]/20 bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]",
-  "Refund Review": "border-[var(--hos-danger)]/20 bg-[var(--hos-danger)]/10 text-[var(--hos-danger)]"
-};
 
 export const patientFlowExportHeaders = ["UHID", "Patient", "Age", "Status", "Doctor", "Department", "Billing", "Insurance", "Wait Minutes", "Risk", "Last Activity"];
 

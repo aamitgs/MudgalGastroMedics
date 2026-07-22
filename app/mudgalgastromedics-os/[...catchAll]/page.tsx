@@ -25,16 +25,16 @@ export const metadata: Metadata = {
 
 export default function CatchAll() {
   return (
-    <main className="hospital-os-theme grid min-h-screen place-items-center bg-[var(--hos-bg)] p-8 text-center">
+    <main className="hospital-os-theme grid min-h-screen place-items-center bg-mist p-8 text-center">
       <div className="grid justify-items-center gap-4">
-        <SearchX size={40} className="text-[var(--hos-muted-text)]" aria-hidden="true" />
-        <h1 className="text-xl font-bold text-[var(--hos-text)]">Page not found</h1>
-        <p className="max-w-md text-sm text-[var(--hos-muted-text)]">
+        <SearchX size={40} className="text-muted" aria-hidden="true" />
+        <h1 className="text-xl font-bold text-ink">Page not found</h1>
+        <p className="max-w-md text-sm text-muted">
           This isn&apos;t a page in the Hospital OS. Check the URL, or head back to the dashboard.
         </p>
         <Link
           href="/mudgalgastromedics-os"
-          className="inline-flex items-center gap-2 rounded border border-[var(--hos-border)] bg-[var(--hos-primary)] px-5 py-2.5 text-sm font-bold text-white"
+          className="inline-flex items-center gap-2 rounded border border-line bg-brand px-5 py-2.5 text-sm font-bold text-white"
         >
           <ArrowLeft size={15} /> Back to dashboard
         </Link>

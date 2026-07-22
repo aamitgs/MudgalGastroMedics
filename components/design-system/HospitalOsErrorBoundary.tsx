@@ -25,24 +25,24 @@ export function HospitalOsErrorBoundary({ error, reset }: { error: Error & { dig
   }, [error]);
 
   return (
-    <main className="hospital-os-theme grid min-h-screen place-items-center bg-[var(--hos-bg)] p-8 text-center">
+    <main className="hospital-os-theme grid min-h-screen place-items-center bg-mist p-8 text-center">
       <div className="grid justify-items-center gap-4">
-        <AlertTriangle size={40} className="text-[var(--hos-danger)]" aria-hidden="true" />
-        <h1 className="text-xl font-bold text-[var(--hos-text)]">Something went wrong</h1>
-        <p className="max-w-md text-sm text-[var(--hos-muted-text)]">
+        <AlertTriangle size={40} className="text-coral" aria-hidden="true" />
+        <h1 className="text-xl font-bold text-ink">Something went wrong</h1>
+        <p className="max-w-md text-sm text-muted">
           This page hit an unexpected error. Your data is safe — try again, or head back to the dashboard.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
             onClick={reset}
-            className="rounded border border-[var(--hos-border)] bg-[var(--hos-primary)] px-5 py-2.5 text-sm font-bold text-white"
+            className="rounded border border-line bg-brand px-5 py-2.5 text-sm font-bold text-white"
           >
             Try again
           </button>
           <Link
             href="/mudgalgastromedics-os"
-            className="inline-flex items-center gap-2 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-5 py-2.5 text-sm font-bold text-[var(--hos-text)]"
+            className="inline-flex items-center gap-2 rounded border border-line bg-surface px-5 py-2.5 text-sm font-bold text-ink"
           >
             <ArrowLeft size={15} /> Back to dashboard
           </Link>

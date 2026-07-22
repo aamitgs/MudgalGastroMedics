@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Building2, Eye, MoreHorizontal } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { Building2, Download, Eye } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,18 +15,11 @@ import {
 import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from "@tanstack/react-table";
 import type { QueryClient } from "@tanstack/react-query";
 import { roleHasPermission } from "@/lib/access/matrix";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { EmptyState } from "@/components/design-system/EmptyState";
+import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { DashboardOverview } from "@/components/hospital-os/DashboardOverview";
 import { HospitalOsPageShell } from "@/components/hospital-os/HospitalOsPageShell";
 import { OperationsTable } from "@/components/hospital-os/OperationsTable";
@@ -38,13 +31,27 @@ import {
   hospitalRoleToAccessRole,
   openPatientWorkspace,
   patientFlowExportRow,
-  roleFallbackMessage,
-  statusTone
+  roleFallbackMessage
 } from "@/lib/hospital-os-data";
 import type { PatientFlowRow } from "@/lib/hospital-os-data";
 import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+
+/** CLAUDE.md status-color rule: green=success, amber=warning, red=critical, blue=info, gray=inactive. */
+const statusTone: Record<string, BadgeTone> = {
+  "In Consultation": "success",
+  "Vitals Pending": "warning",
+  "Lab Review": "info",
+  Scheduled: "inactive",
+  "Billing Hold": "critical",
+  Discharged: "success",
+  Open: "warning",
+  Paid: "success",
+  Insurance: "info",
+  Preauth: "info",
+  "Refund Review": "critical"
+};
 
 function exportPatientFlowRow(patient: PatientFlowRow) {
   const patientSlug = patient.patient.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -135,12 +142,6 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [cancelTarget, setCancelTarget] = useState<PatientFlowRow | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-  // Set alongside cancelTarget when the Cancel item is selected; read once by
-  // the menu's onCloseAutoFocus so only THAT close skips Radix's default
-  // focus-return-to-trigger. Without this, the dropdown closing and the
-  // confirm Dialog opening race for focus (a known Radix DropdownMenu+Dialog
-  // interaction) and the dialog can lose focus right after it opens.
-  const pendingCancelFocusRef = useRef(false);
 
   const { role, realtimeMessages } = useHospitalOsStore();
   const openPatientDrawer = usePatientDrawerStore((state) => state.openDrawer);
@@ -194,29 +195,37 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
     {
       accessorKey: "uhid",
       header: "UHID",
-      cell: ({ row }) => <span className="font-semibold text-[var(--hos-text)]">{row.original.uhid}</span>
+      cell: ({ row }) => <span className="font-semibold text-ink">{row.original.uhid}</span>
     },
     {
       accessorKey: "patient",
       header: "Patient",
       cell: ({ row }) => (
         <button type="button" className="text-left" onClick={() => openPatientWorkspace(row.original.id)}>
-          <span className="block font-semibold text-[var(--hos-text)]">{row.original.patient}</span>
-          <span className="block text-xs text-[var(--hos-muted-text)]">{row.original.age} years - {row.original.risk} risk</span>
+          <span className="block font-semibold text-ink">{row.original.patient}</span>
+          <span className="block text-xs text-muted">{row.original.age} years - {row.original.risk} risk</span>
         </button>
       )
     },
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => <Badge variant="outline" className={statusTone[row.original.status]}>{row.original.status}</Badge>
+      cell: ({ row }) => (
+        <StatusBadge tone={statusTone[row.original.status]} className="rounded-full px-2.5 py-0.5 text-[11px] uppercase tracking-[0.06em]">
+          {row.original.status}
+        </StatusBadge>
+      )
     },
     { accessorKey: "doctor", header: "Doctor" },
     { accessorKey: "department", header: "Department" },
     {
       accessorKey: "billing",
       header: "Billing",
-      cell: ({ row }) => <Badge variant="outline" className={statusTone[row.original.billing]}>{row.original.billing}</Badge>
+      cell: ({ row }) => (
+        <StatusBadge tone={statusTone[row.original.billing]} className="rounded-full px-2.5 py-0.5 text-[11px] uppercase tracking-[0.06em]">
+          {row.original.billing}
+        </StatusBadge>
+      )
     },
     {
       accessorKey: "waitMinutes",
@@ -227,50 +236,38 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            className="h-8 w-8 px-0"
             aria-label={`Preview ${row.original.patient}`}
             title={row.original.phone ? "Preview patient" : "No contact number on this row — preview unavailable"}
             disabled={!row.original.phone}
             onClick={() => openPatientDrawer(row.original.phone as string, row.original.patient)}
           >
-            <Eye size={16} />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="ghost" size="icon" aria-label={`Open actions for ${row.original.patient}`}>
-                <MoreHorizontal size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              onCloseAutoFocus={(event) => {
-                if (!pendingCancelFocusRef.current) return;
-                pendingCancelFocusRef.current = false;
-                event.preventDefault();
-              }}
+            <Eye size={15} />
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            className="h-8 w-8 px-0"
+            aria-label={`Export ${row.original.patient}`}
+            title="Export row"
+            onClick={() => exportPatientFlowRow(row.original)}
+          >
+            <Download size={15} />
+          </ActionButton>
+          {access.canCancel ? (
+            <ActionButton
+              variant="danger"
+              size="sm"
+              title={`Cancel this ${row.original.kind === "opd-visit" ? "visit" : "appointment"}`}
+              onClick={() => setCancelTarget(row.original)}
             >
-              <DropdownMenuItem onSelect={() => openPatientWorkspace(row.original.id)}>Open patient workspace</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => exportPatientFlowRow(row.original)}>Export row</DropdownMenuItem>
-              {access.canCancel ? (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onSelect={() => {
-                      pendingCancelFocusRef.current = true;
-                      setCancelTarget(row.original);
-                    }}
-                  >
-                    Cancel {row.original.kind === "opd-visit" ? "visit" : "appointment"}
-                  </DropdownMenuItem>
-                </>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              Cancel
+            </ActionButton>
+          ) : null}
         </div>
       )
     }
@@ -363,12 +360,12 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button type="button" variant="outline" disabled={isCancelling} onClick={() => setCancelTarget(null)}>
+                <ActionButton variant="secondary" disabled={isCancelling} onClick={() => setCancelTarget(null)}>
                   Keep it
-                </Button>
-                <Button type="button" variant="destructive" disabled={isCancelling} onClick={() => void handleConfirmCancel()}>
+                </ActionButton>
+                <ActionButton variant="danger" loading={isCancelling} disabled={isCancelling} onClick={() => void handleConfirmCancel()}>
                   {isCancelling ? "Cancelling…" : `Cancel ${cancelTarget.kind === "opd-visit" ? "visit" : "appointment"}`}
-                </Button>
+                </ActionButton>
               </DialogFooter>
             </>
           ) : null}

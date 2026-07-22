@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CalendarClock, RefreshCw } from "lucide-react";
 import { EmptyState } from "@/components/design-system/EmptyState";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { ClinicalEvent } from "@/lib/hospital-os-data";
 
 type TimelineResponse = { ok: boolean; events?: ClinicalEvent[]; error?: string };
@@ -45,11 +44,11 @@ export function PatientTimelinePanel({ phone, patientName }: { phone?: string; p
     return (
       <div className="grid gap-3" aria-busy="true" aria-label="Loading patient timeline">
         {[0, 1, 2].map((row) => (
-          <div key={row} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-[var(--hos-border)] p-4">
-            <Skeleton className="h-4 w-20" />
+          <div key={row} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-line p-4">
+            <div className="h-4 w-20 animate-pulse rounded bg-soft/70" />
             <div className="grid gap-2">
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-3 w-full max-w-md" />
+              <div className="h-4 w-48 animate-pulse rounded bg-soft/70" />
+              <div className="h-3 w-full max-w-md animate-pulse rounded bg-soft/70" />
             </div>
           </div>
         ))}
@@ -84,11 +83,11 @@ export function PatientTimelinePanel({ phone, patientName }: { phone?: string; p
   return (
     <div className="grid gap-3">
       {events.map((event, index) => (
-        <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-[var(--hos-border)] p-4">
-          <p className="text-sm font-semibold text-[var(--hos-primary)]">{event.time}</p>
+        <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-line p-4">
+          <p className="text-sm font-semibold text-brand">{event.time}</p>
           <div>
             <h3 className="font-semibold">{event.title}</h3>
-            <p className="mt-1 text-sm leading-6 text-[var(--hos-muted-text)]">{event.detail}</p>
+            <p className="mt-1 text-sm leading-6 text-muted">{event.detail}</p>
           </div>
         </article>
       ))}

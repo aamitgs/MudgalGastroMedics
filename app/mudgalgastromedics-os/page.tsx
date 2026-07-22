@@ -18,7 +18,7 @@ export default async function HospitalOsPage() {
 
   if (!canOpenAdminShell(context)) {
     return (
-      <main className="hospital-os-theme grid min-h-screen place-items-center bg-[var(--hos-bg)] p-6">
+      <main className="hospital-os-theme grid min-h-screen place-items-center bg-mist p-6">
         <WorkspaceLauncher />
       </main>
     );

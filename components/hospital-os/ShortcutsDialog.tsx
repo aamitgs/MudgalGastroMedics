@@ -12,7 +12,7 @@ const shortcuts = [
 export function ShortcutsDialog({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="hospital-os-theme border-[var(--hos-border)] bg-[var(--hos-surface)] text-[var(--hos-text)] sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>
           <DialogDescription>
@@ -21,9 +21,9 @@ export function ShortcutsDialog({ open, setOpen }: { open: boolean; setOpen: (op
         </DialogHeader>
         <div className="grid gap-2">
           {shortcuts.map(([keys, action]) => (
-            <div key={keys} className="flex items-center justify-between gap-4 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-3">
-              <span className="text-sm text-[var(--hos-muted-text)]">{action}</span>
-              <kbd className="rounded-md border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 py-1 text-xs font-semibold">{keys}</kbd>
+            <div key={keys} className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+              <span className="text-sm text-muted">{action}</span>
+              <kbd className="rounded-md border border-line bg-surface px-2 py-1 text-xs font-semibold">{keys}</kbd>
             </div>
           ))}
         </div>

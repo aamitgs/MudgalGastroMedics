@@ -81,14 +81,14 @@ export function CommandPalette({
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.12 }}
                     >
-                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]">
+                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand/10 text-brand">
                         <item.icon size={16} />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-semibold">{item.label}</span>
-                        <span className="block truncate text-xs text-[var(--hos-muted-text)]">Go to page</span>
+                        <span className="block truncate text-xs text-muted">Go to page</span>
                       </span>
-                      <Send size={14} className="text-[var(--hos-muted-text)]" />
+                      <Send size={14} className="text-muted" />
                     </motion.div>
                   </CommandItem>
                 ))}
@@ -106,14 +106,14 @@ export function CommandPalette({
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.12 }}
                   >
-                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--hos-primary)]/10 text-[var(--hos-primary)]">
+                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand/10 text-brand">
                       <Command size={16} />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{record.title}</span>
-                      <span className="block truncate text-xs text-[var(--hos-muted-text)]">{record.entity} · {record.subtitle}</span>
+                      <span className="block truncate text-xs text-muted">{record.entity} · {record.subtitle}</span>
                     </span>
-                    <Send size={14} className="text-[var(--hos-muted-text)]" />
+                    <Send size={14} className="text-muted" />
                   </motion.div>
                 </CommandItem>
               ))}

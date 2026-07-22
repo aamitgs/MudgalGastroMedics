@@ -14,8 +14,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/design-system/ActionButton";
 import { StaffFooter } from "@/components/chrome/StaffFooter";
 import { CommandPalette } from "@/components/hospital-os/CommandPalette";
 import { PatientDrawer } from "@/components/hospital-os/PatientDrawer";
@@ -369,12 +368,12 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const shellClass = darkMode ? "hospital-os-theme dark" : "hospital-os-theme";
 
   return (
-    <main className={`${shellClass} min-h-screen bg-[var(--hos-bg)] text-[var(--hos-text)]`}>
+    <main className={`${shellClass} min-h-screen bg-mist text-ink`}>
       <div className="flex min-h-screen">
         <aside
-          className={`${mobileNav ? "fixed inset-y-0 left-0 z-50" : "hidden"} ${sidebarCollapsed ? "w-[88px]" : "w-[286px]"} border-r border-[var(--hos-border)] bg-[var(--hos-surface)] lg:sticky lg:top-0 lg:z-20 lg:block lg:h-screen`}
+          className={`${mobileNav ? "fixed inset-y-0 left-0 z-50" : "hidden"} ${sidebarCollapsed ? "w-[88px]" : "w-[286px]"} border-r border-line bg-surface lg:sticky lg:top-0 lg:z-20 lg:block lg:h-screen`}
         >
-          <div className="flex h-16 items-center justify-between border-b border-[var(--hos-border)] px-4">
+          <div className="flex h-16 items-center justify-between border-b border-line px-4">
             <div className="flex min-w-0 items-center gap-3">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white">
                 <Image src="/mgm-icon.png" alt="" width={948} height={1500} className="h-7 w-auto object-contain" />
@@ -382,23 +381,23 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
               {!sidebarCollapsed ? (
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">MudgalGastromedics OS</p>
-                  <p className="truncate text-xs text-[var(--hos-muted-text)]">Connected Healthcare. Unified Operations.</p>
+                  <p className="truncate text-xs text-muted">Connected Healthcare. Unified Operations.</p>
                 </div>
               ) : null}
             </div>
-            <Button type="button" variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileNav(false)} aria-label="Close navigation">
+            <ActionButton variant="ghost" size="sm" className="h-8 w-8 px-0 lg:hidden" onClick={() => setMobileNav(false)} aria-label="Close navigation">
               <X size={16} />
-            </Button>
+            </ActionButton>
           </div>
 
           <div className="flex h-[calc(100vh-64px)] flex-col gap-3 overflow-y-auto p-3">
             {!sidebarCollapsed ? (
               <div className="px-2 py-2">
-                <p className="text-xs font-semibold uppercase text-[var(--hos-muted-text)]">Signed in</p>
-                <div className="mt-2 grid gap-2 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-3">
+                <p className="text-xs font-semibold uppercase text-muted">Signed in</p>
+                <div className="mt-2 grid gap-2 rounded-lg border border-line bg-mist p-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--hos-text)]">{osSession ? osSession.name : "Loading session..."}</p>
-                    <p className="mt-0.5 truncate text-xs text-[var(--hos-muted-text)]">
+                    <p className="truncate text-sm font-semibold text-ink">{osSession ? osSession.name : "Loading session..."}</p>
+                    <p className="mt-0.5 truncate text-xs text-muted">
                       {osSession ? roleMeta[osSession.activeRole].label : ""}
                       {osSession?.legacy ? " (legacy login)" : ""}
                     </p>
@@ -419,7 +418,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                         void switchWorkspaceRole(target);
                       }}
                       disabled={roleSwitchBusy}
-                      className="min-h-9 w-full rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-xs font-semibold text-[var(--hos-text)]"
+                      className="min-h-9 w-full rounded-lg border border-line bg-surface px-2 text-xs font-semibold text-ink"
                       aria-label="Switch to another of your roles"
                     >
                       {osSession.heldRoles.map((held) => (
@@ -434,30 +433,29 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                         value={elevationPassword}
                         onChange={(event) => setElevationPassword(event.target.value)}
                         placeholder="Confirm password to elevate"
-                        className="min-h-9 w-full rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-xs text-[var(--hos-text)]"
+                        className="min-h-9 w-full rounded-lg border border-line bg-surface px-2 text-xs text-ink"
                         aria-label="Password confirmation for Super Admin elevation"
                       />
-                      <Button
-                        type="button"
+                      <ActionButton
+                        variant="primary"
                         size="sm"
                         disabled={roleSwitchBusy || !elevationPassword}
                         onClick={() => void switchWorkspaceRole("super-admin", elevationPassword)}
-                        className="min-h-9 bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]"
+                        className="min-h-9"
                       >
                         <ShieldCheck size={14} /> Elevate for 30 min
-                      </Button>
+                      </ActionButton>
                     </div>
                   ) : null}
-                  {roleSwitchError ? <p className="text-xs font-semibold text-[var(--hos-danger)]">{roleSwitchError}</p> : null}
-                  <Button
-                    type="button"
+                  {roleSwitchError ? <p className="text-xs font-semibold text-coral">{roleSwitchError}</p> : null}
+                  <ActionButton
                     variant="outline"
                     size="sm"
                     onClick={() => void signOutOfWorkspace()}
-                    className="min-h-9 border-[var(--hos-border)] bg-[var(--hos-surface)]"
+                    className="min-h-9"
                   >
                     <LogOut size={14} /> Sign out
-                  </Button>
+                  </ActionButton>
                 </div>
               </div>
             ) : null}
@@ -469,7 +467,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                 return (
                   <div key={group} className="grid gap-1" role="group" aria-label={group}>
                     {!sidebarCollapsed ? (
-                      <p className="px-3 pb-0.5 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--hos-muted-text)]/70">{group}</p>
+                      <p className="px-3 pb-0.5 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted/70">{group}</p>
                     ) : null}
                     {items.map(({ label, icon: Icon, badge, href }) => {
                       const [hrefPath, hrefHash] = href.split("#");
@@ -482,13 +480,15 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                           key={label}
                           data-nav-item
                           onClick={() => setMobileNav(false)}
-                          className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-[var(--hos-muted)] ${isCurrentPage ? "bg-[var(--hos-primary)] text-white hover:bg-[var(--hos-primary)]" : "text-[var(--hos-muted-text)]"}`}
+                          className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-soft ${isCurrentPage ? "bg-brand text-white hover:bg-brand" : "text-muted"}`}
                           title={sidebarCollapsed ? label : undefined}
                           aria-current={isCurrentPage ? "page" : undefined}
                         >
                           <Icon size={18} className="shrink-0" />
                           {!sidebarCollapsed ? <span className="min-w-0 flex-1 truncate">{label}</span> : null}
-                          {!sidebarCollapsed && badge ? <Badge className="bg-white/15 text-white hover:bg-white/15">{badge}</Badge> : null}
+                          {!sidebarCollapsed && badge ? (
+                            <span className="inline-flex h-5 items-center justify-center rounded-full bg-white/15 px-2 py-0.5 text-xs font-bold text-white">{badge}</span>
+                          ) : null}
                         </a>
                       );
                     })}
@@ -497,10 +497,10 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
               })}
             </nav>
 
-            <Button type="button" variant="outline" onClick={toggleSidebar} className="mt-auto hidden min-h-10 gap-2 border-[var(--hos-border)] bg-[var(--hos-bg)] lg:inline-flex">
+            <ActionButton variant="outline" onClick={toggleSidebar} className="mt-auto hidden min-h-10 gap-2 lg:inline-flex">
               {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
               {!sidebarCollapsed ? "Collapse" : null}
-            </Button>
+            </ActionButton>
           </div>
         </aside>
 

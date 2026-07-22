@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PatientClinicalSnapshot } from "@/components/hospital-os/PatientClinicalSnapshot";
 import { PatientTimelinePanel } from "@/components/hospital-os/PatientTimelinePanel";
@@ -13,23 +12,23 @@ export function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
 
   if (!activePatient) {
     return (
-      <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-        <CardContent className="p-6 text-sm text-[var(--hos-muted-text)]">
+      <div id="patient-workspace" className="scroll-mt-20 rounded-lg border border-line bg-surface">
+        <div className="p-6 text-sm text-muted">
           No patients in today&rsquo;s flow yet. Registrations and OPD visits appear here automatically.
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card id="patient-workspace" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader className="border-b border-[var(--hos-border)]">
-        <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Patient workspace</p>
-        <CardTitle className="text-2xl font-semibold">{activePatient.patient} <span className="text-base font-medium text-[var(--hos-muted-text)]">{activePatient.uhid}</span></CardTitle>
-      </CardHeader>
-      <CardContent className="p-5">
+    <div id="patient-workspace" className="scroll-mt-20 rounded-lg border border-line bg-surface">
+      <div className="border-b border-line p-5">
+        <p className="text-xs font-semibold uppercase text-brand">Patient workspace</p>
+        <h2 className="text-2xl font-semibold text-ink">{activePatient.patient} <span className="text-base font-medium text-muted">{activePatient.uhid}</span></h2>
+      </div>
+      <div className="p-5">
         <Tabs defaultValue="summary" className="grid gap-5">
-          <TabsList className="h-auto flex-wrap justify-start bg-[var(--hos-muted)] p-1">
+          <TabsList className="h-auto flex-wrap justify-start bg-soft p-1">
             <TabsTrigger value="summary" className="capitalize">Summary</TabsTrigger>
             <TabsTrigger value="timeline" className="capitalize">Timeline</TabsTrigger>
           </TabsList>
@@ -40,7 +39,7 @@ export function PatientWorkspace({ rows }: { rows: PatientFlowRow[] }) {
             <PatientTimelinePanel phone={activePatient.phone} patientName={activePatient.patient} />
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

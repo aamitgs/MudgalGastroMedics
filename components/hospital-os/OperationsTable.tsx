@@ -3,14 +3,13 @@
 import type { KeyboardEvent } from "react";
 import { AlertTriangle, ChevronsUpDown, Download, FileText, Search, X } from "lucide-react";
 import { flexRender, type useReactTable } from "@tanstack/react-table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { EmptyState } from "@/components/design-system/EmptyState";
+import { ActionButton } from "@/components/design-system/ActionButton";
+import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { downloadCsvFile, openPatientWorkspace, patientFlowExportRow, patientFlowExportHeaders, type PatientFlowRow } from "@/lib/hospital-os-data";
+
+const fieldClass = "min-h-9 rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
 export function OperationsTable({
   table,
@@ -83,20 +82,26 @@ export function OperationsTable({
   }
 
   return (
-    <Card id="operations-table" className="scroll-mt-20 rounded-lg border-[var(--hos-border)] bg-[var(--hos-surface)]">
-      <CardHeader className="border-b border-[var(--hos-border)]">
+    <div id="operations-table" className="scroll-mt-20 rounded border border-line/80 bg-surface shadow-sm">
+      <div className="border-b border-line p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-[var(--hos-primary)]">Live overview</p>
-            <CardTitle className="mt-1 text-xl">Active patient flow</CardTitle>
+            <p className="text-xs font-semibold uppercase text-brand">Live overview</p>
+            <h2 className="mt-1 text-xl font-bold text-ink">Active patient flow</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Input value={globalFilter} onChange={(event) => setGlobalFilter(event.target.value)} placeholder="Filter table" className="w-48" aria-label="Filter patient flow table" />
+            <input
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              placeholder="Filter table"
+              className={`${fieldClass} w-48`}
+              aria-label="Filter patient flow table"
+            />
             <select
               aria-label="Filter patient flow status"
               value={statusFilter}
               onChange={(event) => table.getColumn("status")?.setFilterValue(event.target.value === "All" ? undefined : event.target.value)}
-              className="min-h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className={fieldClass}
             >
               <option>All</option>
               <option>Scheduled</option>
@@ -106,40 +111,36 @@ export function OperationsTable({
               <option>Billing Hold</option>
               <option>Discharged</option>
             </select>
-            <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={exportCsv}><Download size={16} /> Export CSV</Button>
-            <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={exportExcel}><FileText size={16} /> Export Excel</Button>
+            <ActionButton variant="secondary" onClick={exportCsv}><Download size={16} /> Export CSV</ActionButton>
+            <ActionButton variant="secondary" onClick={exportExcel}><FileText size={16} /> Export Excel</ActionButton>
           </div>
         </div>
         {selectedRows.length > 0 ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-[var(--hos-border)] bg-[var(--hos-muted)]/50 px-3 py-2">
-            <p className="text-sm font-semibold text-[var(--hos-text)]">{selectedRows.length} selected</p>
-            <Button type="button" variant="outline" size="sm" className="gap-2 border-[var(--hos-border)]" onClick={exportSelectedCsv}>
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded border border-line bg-soft/60 px-3 py-2">
+            <p className="text-sm font-bold text-ink">{selectedRows.length} selected</p>
+            <ActionButton variant="secondary" size="sm" onClick={exportSelectedCsv}>
               <Download size={14} /> Export selected
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={() => table.resetRowSelection()}>
+            </ActionButton>
+            <ActionButton variant="ghost" size="sm" onClick={() => table.resetRowSelection()}>
               <X size={14} /> Clear selection
-            </Button>
+            </ActionButton>
           </div>
         ) : null}
-      </CardHeader>
-      <CardContent className="p-0">
-        {isLoading ? (
-          <div className="grid gap-3 p-5">
-            {Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-12 rounded-lg" />)}
-          </div>
-        ) : null}
+      </div>
+      <div className="p-0">
+        {isLoading ? <ModuleSkeleton rows={6} tiles={0} /> : null}
         {isError ? (
-          <div className="p-5">
-            <Alert variant="destructive">
-              <AlertTriangle size={18} />
-              <AlertTitle>Unable to load patient flow</AlertTitle>
-              <AlertDescription>Check the patient flow API or retry once connectivity returns.</AlertDescription>
-            </Alert>
+          <div className="p-4">
+            <ModuleEmptyState
+              icon={AlertTriangle}
+              title="Unable to load patient flow"
+              description="Check the patient flow API or retry once connectivity returns."
+            />
           </div>
         ) : null}
         {!isLoading && !isError && table.getRowModel().rows.length === 0 ? (
-          <div className="p-5">
-            <EmptyState
+          <div className="p-4">
+            <ModuleEmptyState
               icon={Search}
               title="No matching patient flow records"
               description="Adjust the table filter or create a new appointment to start a patient flow."
@@ -152,11 +153,11 @@ export function OperationsTable({
           <>
             <div className="overflow-x-auto">
               <Table className="min-w-[980px]">
-                <TableHeader className="sticky top-0 bg-[var(--hos-bg)]">
+                <TableHeader className="sticky top-0 bg-surface">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id} className="border-b border-[var(--hos-border)] text-xs font-semibold uppercase text-[var(--hos-muted-text)]">
+                        <TableHead key={header.id} className="border-b border-line text-xs font-semibold uppercase text-muted">
                           {header.isPlaceholder ? null : header.column.getCanSort() ? (
                             <button
                               type="button"
@@ -182,11 +183,11 @@ export function OperationsTable({
                       tabIndex={0}
                       aria-label={`Open ${row.original.patient} row`}
                       data-state={row.getIsSelected() ? "selected" : undefined}
-                      className="hover:bg-[var(--hos-muted)]/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hos-primary)] focus-visible:ring-offset-2"
+                      className="hover:bg-soft/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                       onKeyDown={(event) => onPatientRowKeyDown(event, row.original.id)}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="border-b border-[var(--hos-border)] text-sm">
+                        <TableCell key={cell.id} className="border-b border-line text-sm">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -195,16 +196,16 @@ export function OperationsTable({
                 </TableBody>
               </Table>
             </div>
-            <div className="flex flex-col gap-3 border-t border-[var(--hos-border)] p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 border-t border-line p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <p className="text-sm text-[var(--hos-muted-text)]">
+                <p className="text-sm text-muted">
                   Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} &middot; Showing {table.getRowModel().rows.length} of {table.getPrePaginationRowModel().rows.length}
                 </p>
                 <select
                   aria-label="Rows per patient flow page"
                   value={table.getState().pagination.pageSize}
                   onChange={(event) => table.setPageSize(Number(event.target.value))}
-                  className="min-h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  className={fieldClass}
                 >
                   <option value="4">4 rows</option>
                   <option value="6">6 rows</option>
@@ -212,13 +213,13 @@ export function OperationsTable({
                 </select>
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>Previous</Button>
-                <Button type="button" variant="outline" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</Button>
+                <ActionButton variant="secondary" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>Previous</ActionButton>
+                <ActionButton variant="secondary" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next</ActionButton>
               </div>
             </div>
           </>
         ) : null}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
