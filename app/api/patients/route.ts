@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { listPatientAppointments } from "@/lib/appointment-store";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { listPatientIpdAdmissions } from "@/lib/ipd-store";
+import { listLabOrders } from "@/lib/lab-store";
+import { listPatientOpdVisits } from "@/lib/opd-store";
 import { queryPatients, type PatientSortField, type SortDirection } from "@/lib/patient-query";
-import { createPatient, findPatientByPhone, getPatientById, listPatients, updatePatient } from "@/lib/patient-store";
+import { createPatient, deletePatient, findPatientByPhone, getPatientById, listPatients, updatePatient } from "@/lib/patient-store";
 import { patientStatuses } from "@/lib/patient-types";
 import type { PatientStatus } from "@/lib/patient-types";
+import { listPharmacyDispenses } from "@/lib/pharmacy-store";
 import { firstZodIssueMessage } from "@/lib/validation/http";
-import { patientCreateSchema, patientUpdateSchema } from "@/lib/validation/patients";
+import { patientCreateSchema, patientDeleteSchema, patientUpdateSchema } from "@/lib/validation/patients";
+
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, "").slice(-10);
+}
 
 const sortFields: PatientSortField[] = ["name", "uhid", "status", "lastVisitAt", "createdAt"];
 
@@ -149,4 +158,62 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ ok: true, patient });
+}
+
+export async function DELETE(request: Request) {
+  // Reserved in the access matrix for admin/super-admin only
+  // (patients: [...readWriteExport, "delete"]) — every other role stops at
+  // edit (e.g. marking a record Inactive), never erasure.
+  const auth = await authorize(request, "patients", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = patientDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Patient id is required." }, { status: 400 });
+
+  const patient = await getPatientById(parsed.data.id);
+  if (!patient) return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
+
+  // Cross-store safety check: only ever removes a patient with zero real
+  // activity anywhere else in the system. A Cancelled appointment/visit never
+  // happened, so it doesn't count — this is the same "didn't happen" carve-out
+  // deleteAppointment already applies, just checked across every store a
+  // patient's history can live in instead of one. Anything else recorded
+  // against this patient blocks the delete; mark them Inactive instead.
+  const key = normalizePhone(patient.phone);
+  const [appointments, visits, admissions, allLabOrders, allDispenses] = await Promise.all([
+    listPatientAppointments(patient.phone),
+    listPatientOpdVisits(patient.phone),
+    listPatientIpdAdmissions(patient.phone),
+    listLabOrders(),
+    listPharmacyDispenses()
+  ]);
+  const hasActivity =
+    appointments.some((appointment) => appointment.status !== "Cancelled") ||
+    visits.some((visit) => visit.status !== "Cancelled") ||
+    admissions.length > 0 ||
+    allLabOrders.some((order) => normalizePhone(order.phone) === key && order.status !== "Cancelled") ||
+    allDispenses.some((record) => normalizePhone(record.phone) === key && record.status !== "Cancelled");
+
+  if (hasActivity) {
+    return NextResponse.json(
+      { ok: false, error: "This patient has appointment, visit, admission, lab or pharmacy history and can't be deleted. Mark the record Inactive instead." },
+      { status: 400 }
+    );
+  }
+
+  const result = await deletePatient(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "patient.deleted",
+    entityType: "patient",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: patient,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

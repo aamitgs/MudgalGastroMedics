@@ -1,20 +1,24 @@
 "use client";
 
-import { CreditCard, Download, FileHeart, Plus, UserRoundCheck, UsersRound } from "lucide-react";
+import { CreditCard, Download, FileHeart, Plus, Trash2, UserRoundCheck, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { roleHasPermission } from "@/lib/access/matrix";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 import { bloodGroups, patientStatuses } from "@/lib/patient-types";
 import type { PatientSortField } from "@/lib/patient-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
 import { RecentValueChips } from "@/components/design-system/RecentValueChips";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { PrintIdCardDialog } from "@/components/patients/PrintIdCardDialog";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { useRecentValues } from "@/hooks/useRecentValues";
@@ -63,6 +67,11 @@ const statusTone: Record<PatientStatus, BadgeTone> = {
 
 export function AdminPatients() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const role = useHospitalOsStore((state) => state.role);
+  // UI convenience only — DELETE /api/patients re-checks patients:delete
+  // server-side (reserved for admin/super-admin) on every request, same as
+  // every other mutation in the app.
+  const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "patients", "delete");
 
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -77,6 +86,8 @@ export function AdminPatients() {
   const [typedName, setTypedName] = useState("");
   const [confirmedNewPatient, setConfirmedNewPatient] = useState(false);
   const [printPatient, setPrintPatient] = useState<PatientRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ items: PatientRecord[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sortField = (sorting[0]?.id as PatientSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -217,6 +228,42 @@ export function AdminPatients() {
     notify.success("Patient updated");
   }
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const patient of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/patients", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: patient.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this patient.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Patient deleted" : `${deleted} patients deleted`);
+      void loadPatients();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some patients could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   const statTiles = useMemo(
     () => [
       { label: "Patient Records", value: stats.total },
@@ -325,13 +372,25 @@ export function AdminPatients() {
             <ActionButton variant="secondary" size="sm" onClick={() => setPrintPatient(row.original)} aria-label={`Print ID card for ${row.original.name}`}>
               <CreditCard size={13} /> Print ID
             </ActionButton>
+            {canDelete ? (
+              <ActionButton
+                variant="danger"
+                size="sm"
+                className="h-8 w-8 min-h-8 px-0"
+                title="Delete permanently"
+                aria-label={`Delete ${row.original.name}`}
+                onClick={() => setDeleteTarget({ items: [row.original] })}
+              >
+                <Trash2 size={13} />
+              </ActionButton>
+            ) : null}
           </div>
         )
       }
     ],
     // updateStatus only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openDrawer]
+    [openDrawer, canDelete]
   );
 
   return (
@@ -538,21 +597,66 @@ export function AdminPatients() {
               </select>
             }
             bulkActions={(selected, clear) => (
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  downloadCsv(patientExportHeaders, selected.map(patientExportRow), "selected-patients.csv");
-                  clear();
-                }}
-              >
-                <Download size={14} /> Export selected
-              </ActionButton>
+              <>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    downloadCsv(patientExportHeaders, selected.map(patientExportRow), "selected-patients.csv");
+                    clear();
+                  }}
+                >
+                  <Download size={14} /> Export selected
+                </ActionButton>
+                {canDelete ? (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                ) : null}
+              </>
             )}
           />
         </div>
       </div>
       <PrintIdCardDialog patient={printPatient} setPatient={setPrintPatient} />
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this patient" : `${deleteTarget.items.length} patients`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes ${deleteTarget.items[0].name}'s record (${deleteTarget.items[0].uhid}). Only allowed when the patient has no appointment, visit, admission, lab or pharmacy history. This cannot be undone.`
+                    : "This permanently removes the selected patients. Only patients with no appointment, visit, admission, lab or pharmacy history can be deleted — the rest will be skipped with an error. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

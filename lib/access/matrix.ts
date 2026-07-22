@@ -178,7 +178,7 @@ const readWriteExport: AccessAction[] = ["view", "create", "edit", "export"];
 export const rolePermissions: Record<AccessRole, PermissionSet> = {
   "super-admin": Object.fromEntries(accessResources.map((resource) => [resource, allActions])) as PermissionSet,
   admin: {
-    patients: readWriteExport,
+    patients: [...readWriteExport, "delete"],
     appointments: [...readWriteExport, "delete"],
     beds: readWriteExport,
     prescriptions: readWriteExport,

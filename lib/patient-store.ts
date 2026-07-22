@@ -158,3 +158,23 @@ export async function updatePatient(input: Record<string, unknown>) {
   await store.save(doc);
   return patient;
 }
+
+/**
+ * Hard delete — the route (app/api/patients/route.ts) already verified there's
+ * no appointment/visit/admission/lab/pharmacy activity against this patient
+ * before calling this, so this function itself carries no safety guard. That
+ * check lives in the route, not here, because it's genuinely cross-store
+ * (appointment-store.ts already imports FROM this file for upsertPatientFromInput,
+ * so patient-store.ts importing back from appointment-store.ts would be a
+ * circular import) — deleteAppointment/deleteBed can self-guard because their
+ * checks are intra-store; this one can't be.
+ */
+export async function deletePatient(id: string) {
+  const doc = await store.load();
+  const patient = doc.patients.find((item) => item.id === id);
+  if (!patient) return { error: "Patient not found." };
+
+  doc.patients = doc.patients.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { patient };
+}

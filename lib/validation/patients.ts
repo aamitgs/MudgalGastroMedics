@@ -48,5 +48,9 @@ export const patientUpdateSchema = z.object({
   dietPlan: optionalText
 });
 
+export const patientDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Patient id is required.")
+});
+
 export type PatientCreateInput = z.infer<typeof patientCreateSchema>;
 export type PatientUpdateInput = z.infer<typeof patientUpdateSchema>;
