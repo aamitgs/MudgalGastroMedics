@@ -1,19 +1,28 @@
 "use client";
 
-import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, Clock3, Copy, Download, MessageCircle, Phone, UserRound } from "lucide-react";
+import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, Clock3, Copy, Download, MessageCircle, Phone, Plus, UserRound } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { createAppointmentPlanningNote } from "@/lib/ai-planning";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentSortField } from "@/lib/appointment-query";
+import { opdWindows } from "@/lib/site-data";
 import { downloadCsv } from "@/lib/table-export";
+import { appointmentStaffBookingSchema, type AppointmentStaffBookingInput } from "@/lib/validation/operations";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { AppointmentWaitlistPanel } from "@/components/appointments/AppointmentWaitlistPanel";
 import { DataTable } from "@/components/design-system/DataTable";
+import { FormField } from "@/components/design-system/FormField";
+import { FormSection } from "@/components/design-system/FormSection";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
+import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+
+const appointmentServices = ["OPD", "IPD"];
+const appointmentPriorities = ["Routine", "Soon", "Urgent symptoms"];
+const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
 const appointmentExportHeaders = ["Name", "Phone", "Service", "Date", "Time Slot", "Priority", "Status", "Created"];
 
@@ -145,6 +154,37 @@ export function AdminAppointments() {
     }
     notify.success("OPD token created", { description: "Refresh the OPD Queue section below." });
   }
+
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    reset: resetBookingForm,
+    submit: submitBooking
+  } = useAdvancedForm<AppointmentStaffBookingInput>({
+    schema: appointmentStaffBookingSchema,
+    defaultValues: { name: "", phone: "", service: "", date: "", timeSlot: "", priority: "Routine", message: "" },
+    async onValid(values) {
+      let response: Response;
+      try {
+        response = await fetch("/api/appointment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values)
+        });
+      } catch {
+        notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitBooking());
+        return;
+      }
+      const data = (await response.json().catch(() => ({}))) as MutationResponse;
+      if (!response.ok || !data.ok || !data.appointment) {
+        notify.error(data.error || "Unable to book this appointment.");
+        return;
+      }
+      notify.success("Appointment booked", { description: `${data.appointment.name} · ${data.appointment.uhid ?? data.appointment.id}` });
+      resetBookingForm();
+      void loadAppointments();
+    }
+  });
 
   const statTiles = useMemo(
     () => [
@@ -283,6 +323,63 @@ export function AdminAppointments() {
         </div>
 
         <div className="p-4">
+          <form onSubmit={submitBooking} noValidate className="mb-4 rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
+            <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+              <Plus size={19} /> New appointment
+            </p>
+            <div className="grid gap-4">
+              <FormSection title="Patient" description="Booking on behalf of a caller — the same record a website request would create.">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Patient name" htmlFor="booking-name" required error={errors.name?.message}>
+                    <input id="booking-name" className={fieldClass} placeholder="Patient name" {...register("name")} />
+                  </FormField>
+                  <FormField label="Phone" htmlFor="booking-phone" required error={errors.phone?.message}>
+                    <input id="booking-phone" className={fieldClass} placeholder="Mobile number" inputMode="tel" {...register("phone")} />
+                  </FormField>
+                </div>
+              </FormSection>
+
+              <FormSection title="Visit">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <FormField label="Appointment type" htmlFor="booking-service" required error={errors.service?.message}>
+                    <select id="booking-service" className={fieldClass} defaultValue="" {...register("service")}>
+                      <option value="">Select type</option>
+                      {appointmentServices.map((service) => (
+                        <option key={service}>{service}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField label="Priority" htmlFor="booking-priority">
+                    <select id="booking-priority" className={fieldClass} {...register("priority")}>
+                      {appointmentPriorities.map((priority) => (
+                        <option key={priority}>{priority}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField label="Preferred date" htmlFor="booking-date">
+                    <input id="booking-date" type="date" className={fieldClass} {...register("date")} />
+                  </FormField>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField label="Preferred time" htmlFor="booking-time-slot">
+                    <select id="booking-time-slot" className={fieldClass} defaultValue="" {...register("timeSlot")}>
+                      <option value="">Flexible</option>
+                      <option>{`Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`}</option>
+                      <option>{`Evening ${opdWindows[1].startLabel}-${opdWindows[1].endLabel}`}</option>
+                    </select>
+                  </FormField>
+                  <FormField label="Notes" htmlFor="booking-message" hint="Symptoms, call context, anything reception should know.">
+                    <input id="booking-message" className={fieldClass} placeholder="Notes" {...register("message")} />
+                  </FormField>
+                </div>
+              </FormSection>
+
+              <ActionButton type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
+                Book appointment
+              </ActionButton>
+            </div>
+          </form>
+
           <DataTable
             columns={columns}
             data={appointments}

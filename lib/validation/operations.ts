@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhoneNumber } from "@/lib/phone";
 
 // These routes all delegate real validation/normalization to their store
 // functions (createX(input: Record<string, unknown>) already does its own
@@ -21,6 +22,27 @@ export const appointmentCreateSchema = z.looseObject({
   phone: coercedRequiredText,
   service: coercedRequiredText
 });
+
+/**
+ * Client-side inline validation only, for the staff "New appointment" form
+ * (useAdvancedForm). appointmentCreateSchema above stays loose on purpose —
+ * the POST route's own missing-field check already owns precise per-field
+ * error messages for the public booking form, and a strict schema failing
+ * the whole object would blur which field was actually invalid. This one
+ * never reaches the route; the form still POSTs to the same /api/appointment
+ * body shape appointmentCreateSchema accepts.
+ */
+export const appointmentStaffBookingSchema = z.object({
+  name: z.string().trim().min(1, "Patient name is required."),
+  phone: z.string().trim().refine(isValidPhoneNumber, "Enter a valid phone number."),
+  service: z.string().trim().min(1, "Select an appointment type."),
+  date: z.string().trim().optional(),
+  timeSlot: z.string().trim().optional(),
+  priority: z.string().trim().optional(),
+  message: z.string().trim().optional()
+});
+
+export type AppointmentStaffBookingInput = z.infer<typeof appointmentStaffBookingSchema>;
 
 export const appointmentStatusUpdateSchema = z.looseObject({
   id: z.string().default(""),

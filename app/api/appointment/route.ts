@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { authorize } from "@/lib/access/guard";
+import { authorize, getRequestAccessContext } from "@/lib/access/guard";
+import { roleHasPermission } from "@/lib/access/matrix";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { createAppointment, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
 import { offerWaitlistSlot } from "@/lib/appointment-waitlist-store";
@@ -106,9 +107,19 @@ export async function POST(request: Request) {
 
   const appointment = (await createAppointment(data));
 
+  // Stays open to the public (patient booking form needs zero auth) — but if
+  // an authenticated, permitted staff session made this call (the OS's own
+  // "New appointment" form reuses this same endpoint rather than a second
+  // create path), attribute it to them in the audit trail instead of
+  // "patient", and skip the "new request landed" staff notification email
+  // since the person who just booked it already knows.
+  const access = await getRequestAccessContext(request);
+  const staffBooked = access.authenticated && roleHasPermission(access.activeRole, "appointments", "create");
+
   await recordAuditEvent({
-    actorRole: "patient",
-    action: "appointment.request.created",
+    actorRole: staffBooked ? access.activeRole : "patient",
+    actorId: staffBooked ? access.userId : undefined,
+    action: staffBooked ? "appointment.staff_booked.created" : "appointment.request.created",
     entityType: "appointment",
     entityId: appointment.id,
     metadata: {
@@ -118,12 +129,16 @@ export async function POST(request: Request) {
     device: auditRequestMetadata(request)
   });
 
-  await sendAppointmentNotifications(appointment);
+  if (staffBooked) {
+    await sendPatientConfirmation(appointment);
+  } else {
+    await sendAppointmentNotifications(appointment);
+  }
 
   return NextResponse.json({
     ok: true,
     appointment,
-    message: "Appointment request saved for reception review."
+    message: staffBooked ? "Appointment booked." : "Appointment request saved for reception review."
   });
 }
 
