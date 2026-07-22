@@ -95,3 +95,22 @@ export async function updateAppointmentStatus(id: string, status: AppointmentSta
   await store.save(doc);
   return appointment;
 }
+
+/**
+ * Hard delete — restricted to appointments:delete (admin/super-admin only)
+ * and the route only allows it once an appointment is already Cancelled, so
+ * this never removes anything still in an active workflow. Returns the
+ * deleted record (not just ok) so the caller can put it in the audit event's
+ * `before` field — the whole point of allowing a delete here is that the
+ * record itself is the only trace left afterward.
+ */
+export async function deleteAppointment(id: string) {
+  const doc = await store.load();
+  const appointment = doc.appointments.find((item) => item.id === id);
+  if (!appointment) return { error: "Appointment not found." };
+  if (appointment.status !== "Cancelled") return { error: "Cancel this appointment before deleting it." };
+
+  doc.appointments = doc.appointments.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { appointment };
+}

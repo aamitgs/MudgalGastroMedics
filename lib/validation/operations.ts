@@ -49,6 +49,10 @@ export const appointmentStatusUpdateSchema = z.looseObject({
   status: z.string().default("")
 });
 
+export const appointmentDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Appointment id is required.")
+});
+
 export const automationActionSchema = z.looseObject({
   action: z.string().default("create"),
   type: z.string().optional(),

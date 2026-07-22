@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { authorize, getRequestAccessContext } from "@/lib/access/guard";
 import { roleHasPermission } from "@/lib/access/matrix";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { createAppointment, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
+import { createAppointment, deleteAppointment, getAppointmentById, listAppointments, updateAppointmentStatus } from "@/lib/appointment-store";
 import { offerWaitlistSlot } from "@/lib/appointment-waitlist-store";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { queryAppointments, type AppointmentSortField, type SortDirection } from "@/lib/appointment-query";
 import { sendEmail } from "@/lib/email";
 import { site } from "@/lib/site-data";
-import { appointmentCreateSchema, appointmentStatusUpdateSchema } from "@/lib/validation/operations";
+import { appointmentCreateSchema, appointmentDeleteSchema, appointmentStatusUpdateSchema } from "@/lib/validation/operations";
 
 async function sendPatientConfirmation(appointment: AppointmentRecord) {
   if (!appointment.email?.includes("@")) return;
@@ -189,4 +189,32 @@ export async function PATCH(request: Request) {
   }
 
   return NextResponse.json({ ok: true, appointment });
+}
+
+export async function DELETE(request: Request) {
+  // Reserved in the access matrix for admin/super-admin only
+  // (appointments: [...readWriteExport, "delete"]) — every other role stops
+  // at edit (status changes), never erasure.
+  const auth = await authorize(request, "appointments", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = appointmentDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Appointment id is required." }, { status: 400 });
+
+  const before = await getAppointmentById(parsed.data.id);
+  const result = await deleteAppointment(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "appointment.deleted",
+    entityType: "appointment",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

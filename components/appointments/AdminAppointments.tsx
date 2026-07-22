@@ -1,23 +1,27 @@
 "use client";
 
-import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, Clock3, Copy, Download, MessageCircle, Phone, Plus, UserRound } from "lucide-react";
+import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, Clock3, Copy, Download, MessageCircle, Phone, Plus, Trash2, UserRound } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { createAppointmentPlanningNote } from "@/lib/ai-planning";
+import { roleHasPermission } from "@/lib/access/matrix";
 import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-types";
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentSortField } from "@/lib/appointment-query";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import { opdWindows } from "@/lib/site-data";
 import { downloadCsv } from "@/lib/table-export";
 import { appointmentStaffBookingSchema, type AppointmentStaffBookingInput } from "@/lib/validation/operations";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { AppointmentWaitlistPanel } from "@/components/appointments/AppointmentWaitlistPanel";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 const appointmentServices = ["OPD", "IPD"];
@@ -67,6 +71,11 @@ const statusTone: Record<AppointmentStatus, BadgeTone> = {
 
 export function AdminAppointments() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const role = useHospitalOsStore((state) => state.role);
+  // UI convenience only — DELETE /api/appointment re-checks appointments:delete
+  // server-side (reserved for admin/super-admin in the access matrix) on every
+  // request, same as every other mutation in the app.
+  const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "appointments", "delete");
 
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -78,6 +87,8 @@ export function AdminAppointments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [planAppointment, setPlanAppointment] = useState<AppointmentRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ items: AppointmentRecord[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sortField = (sorting[0]?.id as AppointmentSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -159,6 +170,42 @@ export function AdminAppointments() {
       return;
     }
     notify.success("OPD token created", { description: "Refresh the OPD Queue section below." });
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const appointment of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/appointment", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: appointment.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this appointment.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Appointment deleted" : `${deleted} appointments deleted`);
+      void loadAppointments();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some appointments could not be deleted.");
+    }
+    setDeleteTarget(null);
   }
 
   const {
@@ -280,30 +327,25 @@ export function AdminAppointments() {
           return (
             <div className="flex items-center gap-1">
               <a
-                href={cancelled ? undefined : `tel:${row.original.phone}`}
-                aria-disabled={cancelled}
-                tabIndex={cancelled ? -1 : undefined}
-                title={cancelled ? "Cancelled — locked" : "Call"}
-                className={`grid h-8 w-8 place-items-center rounded border ${cancelled ? "pointer-events-none border-line/50 text-muted opacity-40" : "border-line text-ink hover:border-brand hover:text-brand"}`}
+                href={`tel:${row.original.phone}`}
+                title="Call"
+                className="grid h-8 w-8 place-items-center rounded border border-line text-ink hover:border-brand hover:text-brand"
               >
                 <Phone size={14} />
               </a>
               <a
-                href={cancelled ? undefined : `https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
-                target={cancelled ? undefined : "_blank"}
-                rel={cancelled ? undefined : "noreferrer"}
-                aria-disabled={cancelled}
-                tabIndex={cancelled ? -1 : undefined}
-                title={cancelled ? "Cancelled — locked" : "WhatsApp"}
-                className={`grid h-8 w-8 place-items-center rounded border ${cancelled ? "pointer-events-none border-line/50 text-muted opacity-40" : "border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950"}`}
+                href={`https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noreferrer"
+                title="WhatsApp"
+                className="grid h-8 w-8 place-items-center rounded border border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950"
               >
                 <MessageCircle size={14} />
               </a>
               <ActionButton
                 variant="secondary"
                 size="sm"
-                title={cancelled ? "Cancelled — locked" : "AI Plan"}
-                disabled={cancelled}
+                title="AI Plan"
                 aria-expanded={planAppointment?.id === row.original.id}
                 onClick={() => setPlanAppointment((current) => (current?.id === row.original.id ? null : row.original))}
                 className="h-8 w-8 min-h-8 border-cyan-200 bg-cyan-50 px-0 text-brand hover:bg-cyan-100 dark:border-cyan-900 dark:bg-cyan-950"
@@ -320,6 +362,18 @@ export function AdminAppointments() {
               >
                 <CalendarDays size={14} />
               </ActionButton>
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  title={cancelled ? "Delete permanently" : "Cancel this appointment first"}
+                  disabled={!cancelled}
+                  onClick={() => setDeleteTarget({ items: [row.original] })}
+                  className="h-8 w-8 min-h-8 px-0"
+                >
+                  <Trash2 size={14} />
+                </ActionButton>
+              ) : null}
             </div>
           );
         }
@@ -327,7 +381,7 @@ export function AdminAppointments() {
     ],
     // updateStatus/createOpdToken only forward call-time arguments via functional setState, so they're safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openDrawer, planAppointment]
+    [openDrawer, planAppointment, canDelete]
   );
 
   return (
@@ -459,23 +513,73 @@ export function AdminAppointments() {
                 ))}
               </select>
             }
-            bulkActions={(selected, clear) => (
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  downloadCsv(appointmentExportHeaders, selected.map(appointmentExportRow), "selected-appointments.csv");
-                  clear();
-                }}
-              >
-                <Download size={14} /> Export selected
-              </ActionButton>
-            )}
+            bulkActions={(selected, clear) => {
+              const allCancelled = selected.every((appointment) => appointment.status === "Cancelled");
+              return (
+                <>
+                  <ActionButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      downloadCsv(appointmentExportHeaders, selected.map(appointmentExportRow), "selected-appointments.csv");
+                      clear();
+                    }}
+                  >
+                    <Download size={14} /> Export selected
+                  </ActionButton>
+                  {canDelete ? (
+                    <ActionButton
+                      variant="danger"
+                      size="sm"
+                      disabled={!allCancelled}
+                      title={allCancelled ? "Delete selected permanently" : "Only Cancelled appointments can be deleted — cancel the rest first"}
+                      onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                    >
+                      <Trash2 size={14} /> Delete selected
+                    </ActionButton>
+                  ) : null}
+                </>
+              );
+            }}
           />
 
           {planAppointment ? <PlanningNote appointment={planAppointment} onClose={() => setPlanAppointment(null)} /> : null}
         </div>
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this appointment" : `${deleteTarget.items.length} appointments`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes ${deleteTarget.items[0].name}'s cancelled appointment (${deleteTarget.items[0].id}). This cannot be undone.`
+                    : "This permanently removes the selected cancelled appointments. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       <AppointmentWaitlistPanel />
     </div>
