@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
-import { AlertTriangle, ChevronsUpDown, Download, FileText, Search } from "lucide-react";
+import { AlertTriangle, ChevronsUpDown, Download, FileText, Search, X } from "lucide-react";
 import { flexRender, type useReactTable } from "@tanstack/react-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,12 @@ export function OperationsTable({
 
   function exportCsv() {
     downloadCsvFile(exportRows, "hospital-os-patient-flow.csv");
+  }
+
+  const selectedRows = table.getSelectedRowModel().rows;
+
+  function exportSelectedCsv() {
+    downloadCsvFile(selectedRows.map((row) => patientFlowExportRow(row.original)), "hospital-os-patient-flow-selected.csv");
   }
 
   function exportExcel() {
@@ -104,6 +110,17 @@ export function OperationsTable({
             <Button type="button" variant="outline" className="gap-2 border-[var(--hos-border)]" onClick={exportExcel}><FileText size={16} /> Export Excel</Button>
           </div>
         </div>
+        {selectedRows.length > 0 ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-[var(--hos-border)] bg-[var(--hos-muted)]/50 px-3 py-2">
+            <p className="text-sm font-semibold text-[var(--hos-text)]">{selectedRows.length} selected</p>
+            <Button type="button" variant="outline" size="sm" className="gap-2 border-[var(--hos-border)]" onClick={exportSelectedCsv}>
+              <Download size={14} /> Export selected
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={() => table.resetRowSelection()}>
+              <X size={14} /> Clear selection
+            </Button>
+          </div>
+        ) : null}
       </CardHeader>
       <CardContent className="p-0">
         {isLoading ? (

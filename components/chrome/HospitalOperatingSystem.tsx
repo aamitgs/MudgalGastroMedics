@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Building2, MoreHorizontal } from "lucide-react";
+import { Building2, Eye, MoreHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -12,13 +12,17 @@ import {
   getSortedRowModel,
   useReactTable
 } from "@tanstack/react-table";
-import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table";
+import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from "@tanstack/react-table";
+import type { QueryClient } from "@tanstack/react-query";
+import { roleHasPermission } from "@/lib/access/matrix";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/design-system/EmptyState";
@@ -30,17 +34,55 @@ import {
   canAccessSection,
   downloadCsvFile,
   fetchHospitalSnapshot,
+  hospitalRoleToAccessRole,
   openPatientWorkspace,
   patientFlowExportRow,
   roleFallbackMessage,
   statusTone
 } from "@/lib/hospital-os-data";
 import type { PatientFlowRow } from "@/lib/hospital-os-data";
+import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
+import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
 function exportPatientFlowRow(patient: PatientFlowRow) {
   const patientSlug = patient.patient.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   downloadCsvFile([patientFlowExportRow(patient)], `hospital-os-patient-flow-${patientSlug}.csv`);
+}
+
+/**
+ * Cancel is a real status transition (PATCH → "Cancelled"), never a delete —
+ * this codebase has no hard-delete for clinical/appointment records, and the
+ * matching row is removed from the next snapshot fetch because the API
+ * excludes Cancelled rows from patient flow, not because anything was erased.
+ * Routes to the store that actually owns the id (opd-visit vs appointment —
+ * see PatientFlowRow.kind); both PATCH endpoints already authorize + audit.
+ */
+async function cancelPatientFlowRow(row: PatientFlowRow, queryClient: QueryClient) {
+  const noun = row.kind === "opd-visit" ? "visit" : "appointment";
+  if (!window.confirm(`Cancel ${row.patient}'s ${noun}? This cannot be undone.`)) return;
+
+  const endpoint = row.kind === "opd-visit" ? "/api/opd" : "/api/appointment";
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: row.id, status: "Cancelled" })
+    });
+  } catch {
+    notify.retryable("Unable to reach the server. Check your connection and retry.", () => void cancelPatientFlowRow(row, queryClient));
+    return;
+  }
+
+  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+  if (!response.ok || !data.ok) {
+    notify.error(data.error || `Unable to cancel this ${noun}.`);
+    return;
+  }
+
+  notify.success(`${noun === "visit" ? "Visit" : "Appointment"} cancelled`);
+  await queryClient.invalidateQueries({ queryKey: ["hospital-os", "patient-flow"] });
 }
 
 /**
@@ -67,7 +109,7 @@ export function HospitalOperatingSystem({ roleTodayBand }: { roleTodayBand?: Rea
  * shortcuts live in HospitalOsShell, shared with every per-module route.
  * This component owns only what's specific to the /mudgalgastromedics-os
  * dashboard itself — the live KPIs/trend, the role's "Today" band, a
- * per-patient clinical snapshot, and a real, read-only patient-flow table.
+ * per-patient clinical snapshot, and a real patient-flow table.
  *
  * The build-acceptance checklist, the three "Vercel-style"/"Stripe-style"
  * preview forms, the session-only fake audit trail, the patient-portal
@@ -76,14 +118,24 @@ export function HospitalOperatingSystem({ roleTodayBand }: { roleTodayBand?: Rea
  * (they only ever wrote a decorative audit-log line), and every one of them
  * duplicates a real, fully-working module already reachable from the
  * sidebar (Patients, Appointments, Billing, Doctor Portal, Patient Portal).
+ *
+ * Row selection, preview and Cancel do NOT repeat that mistake: selection
+ * only powers a read-only "export selected" (no new mutation surface),
+ * preview reuses the existing global PatientDrawer (stores/patient-drawer-store.ts)
+ * instead of a new panel, and Cancel PATCHes the same appointment/opd
+ * endpoints the Appointments and OPD modules already call — it's a second
+ * entry point to one real action, not a duplicate implementation of it.
  */
 function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const { role, realtimeMessages } = useHospitalOsStore();
+  const openPatientDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const queryClient = useQueryClient();
 
   const {
     data: snapshot = { rows: [], metrics: [], trend: [], navBadges: {} },
@@ -99,14 +151,37 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const access = useMemo(() => {
     const clinicalWorkspace = canAccessSection(role, "clinicalWorkspace");
     const patientFlow = canAccessSection(role, "patientFlow");
+    // UI convenience only — the PATCH endpoints re-check "appointments":"edit"
+    // server-side on every request, same as every other mutation in the app.
+    const canCancel = roleHasPermission(hospitalRoleToAccessRole[role], "appointments", "edit");
     return {
       clinicalWorkspace,
       patientFlow,
+      canCancel,
       hasAnySection: clinicalWorkspace || patientFlow
     };
   }, [role]);
 
   const columns = useMemo<ColumnDef<PatientFlowRow>[]>(() => [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() ? "indeterminate" : false)}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(value === true)}
+          aria-label="Select all rows on this page"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(value === true)}
+          aria-label={`Select ${row.original.patient}`}
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false
+    },
     {
       accessorKey: "uhid",
       header: "UHID",
@@ -143,34 +218,62 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" aria-label={`Open actions for ${row.original.patient}`}>
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => openPatientWorkspace(row.original.id)}>Open patient workspace</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => exportPatientFlowRow(row.original)}>Export row</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Preview ${row.original.patient}`}
+            title={row.original.phone ? "Preview patient" : "No contact number on this row — preview unavailable"}
+            disabled={!row.original.phone}
+            onClick={() => openPatientDrawer(row.original.phone as string, row.original.patient)}
+          >
+            <Eye size={16} />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="ghost" size="icon" aria-label={`Open actions for ${row.original.patient}`}>
+                <MoreHorizontal size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openPatientWorkspace(row.original.id)}>Open patient workspace</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => exportPatientFlowRow(row.original)}>Export row</DropdownMenuItem>
+              {access.canCancel ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={() => void cancelPatientFlowRow(row.original, queryClient)}
+                  >
+                    Cancel {row.original.kind === "opd-visit" ? "visit" : "appointment"}
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )
     }
-  ], []);
+  ], [access.canCancel, openPatientDrawer, queryClient]);
 
   // TanStack Table intentionally returns imperative helpers that React Compiler cannot memoize safely.
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: rows,
     columns,
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
     state: {
       sorting,
       globalFilter,
-      columnFilters
+      columnFilters,
+      rowSelection
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

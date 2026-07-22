@@ -62,6 +62,8 @@ export type NavItem = {
 
 export type PatientFlowRow = {
   id: string;
+  /** Which store `id` resolves against — status changes (e.g. cancel) must PATCH the matching endpoint. */
+  kind: "opd-visit" | "appointment";
   uhid: string;
   patient: string;
   age: number;
@@ -299,12 +301,12 @@ export const roleFallbackMessage: Partial<Record<HospitalRole, { title: string; 
 };
 
 export const patientFlowRows: PatientFlowRow[] = [
-  { id: "pf-1", uhid: "MGM-24018", patient: "Aarav Sharma", age: 42, status: "In Consultation", doctor: "Dr. Deepak Sharma", department: "Gastroenterology", billing: "Open", insurance: "Star Health", waitMinutes: 18, risk: "Moderate", lastActivity: "Consult started 09:44" },
-  { id: "pf-2", uhid: "MGM-24019", patient: "Nisha Verma", age: 35, status: "Vitals Pending", doctor: "Dr. Deepak Sharma", department: "OPD", billing: "Paid", insurance: "Self pay", waitMinutes: 24, risk: "Low", lastActivity: "Registered 09:28" },
-  { id: "pf-3", uhid: "MGM-24020", patient: "Imran Khan", age: 51, status: "Lab Review", doctor: "Dr. Deepak Sharma", department: "Laboratory", billing: "Insurance", insurance: "Care Health", waitMinutes: 35, risk: "High", lastActivity: "Critical LFT flagged" },
-  { id: "pf-4", uhid: "MGM-24021", patient: "Meera Joshi", age: 29, status: "Scheduled", doctor: "Duty Doctor", department: "Endoscopy", billing: "Preauth", insurance: "HDFC Ergo", waitMinutes: 8, risk: "Low", lastActivity: "Procedure slot held" },
-  { id: "pf-5", uhid: "MGM-24022", patient: "Devendra Singh", age: 63, status: "Billing Hold", doctor: "Dr. Deepak Sharma", department: "IPD", billing: "Refund Review", insurance: "Ayushman Bharat", waitMinutes: 11, risk: "Moderate", lastActivity: "Discharge bill review" },
-  { id: "pf-6", uhid: "MGM-24023", patient: "Kavya Mehta", age: 46, status: "Discharged", doctor: "Dr. Deepak Sharma", department: "Pharmacy", billing: "Paid", insurance: "Self pay", waitMinutes: 0, risk: "Low", lastActivity: "Medicine dispensed" }
+  { id: "pf-1", kind: "opd-visit", uhid: "MGM-24018", patient: "Aarav Sharma", age: 42, status: "In Consultation", doctor: "Dr. Deepak Sharma", department: "Gastroenterology", billing: "Open", insurance: "Star Health", waitMinutes: 18, risk: "Moderate", lastActivity: "Consult started 09:44" },
+  { id: "pf-2", kind: "opd-visit", uhid: "MGM-24019", patient: "Nisha Verma", age: 35, status: "Vitals Pending", doctor: "Dr. Deepak Sharma", department: "OPD", billing: "Paid", insurance: "Self pay", waitMinutes: 24, risk: "Low", lastActivity: "Registered 09:28" },
+  { id: "pf-3", kind: "opd-visit", uhid: "MGM-24020", patient: "Imran Khan", age: 51, status: "Lab Review", doctor: "Dr. Deepak Sharma", department: "Laboratory", billing: "Insurance", insurance: "Care Health", waitMinutes: 35, risk: "High", lastActivity: "Critical LFT flagged" },
+  { id: "pf-4", kind: "appointment", uhid: "MGM-24021", patient: "Meera Joshi", age: 29, status: "Scheduled", doctor: "Duty Doctor", department: "Endoscopy", billing: "Preauth", insurance: "HDFC Ergo", waitMinutes: 8, risk: "Low", lastActivity: "Procedure slot held" },
+  { id: "pf-5", kind: "opd-visit", uhid: "MGM-24022", patient: "Devendra Singh", age: 63, status: "Billing Hold", doctor: "Dr. Deepak Sharma", department: "IPD", billing: "Refund Review", insurance: "Ayushman Bharat", waitMinutes: 11, risk: "Moderate", lastActivity: "Discharge bill review" },
+  { id: "pf-6", kind: "opd-visit", uhid: "MGM-24023", patient: "Kavya Mehta", age: 46, status: "Discharged", doctor: "Dr. Deepak Sharma", department: "Pharmacy", billing: "Paid", insurance: "Self pay", waitMinutes: 0, risk: "Low", lastActivity: "Medicine dispensed" }
 ];
 
 /** Audit actions that are internal telemetry, not activity worth surfacing in the live feed. */

@@ -37,6 +37,7 @@ async function livePatientFlowRows(): Promise<PatientFlowRow[]> {
 
     rows.push({
       id: visit.id,
+      kind: "opd-visit",
       uhid: visit.uhid || visit.token,
       patient: visit.patientName,
       age: Number(patient?.age) || 0,
@@ -57,6 +58,7 @@ async function livePatientFlowRows(): Promise<PatientFlowRow[]> {
     if (appointment.status === "Cancelled" || appointment.status === "Completed") continue;
     rows.push({
       id: appointment.id,
+      kind: "appointment",
       uhid: appointment.uhid || appointment.id,
       patient: appointment.name,
       age: Number(appointment.age) || 0,
