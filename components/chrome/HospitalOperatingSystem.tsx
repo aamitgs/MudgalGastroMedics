@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Building2, Eye, MoreHorizontal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,6 +18,7 @@ import { roleHasPermission } from "@/lib/access/matrix";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,11 +58,10 @@ function exportPatientFlowRow(patient: PatientFlowRow) {
  * excludes Cancelled rows from patient flow, not because anything was erased.
  * Routes to the store that actually owns the id (opd-visit vs appointment —
  * see PatientFlowRow.kind); both PATCH endpoints already authorize + audit.
+ * Confirmation happens in the caller (a Dialog) — this just performs the PATCH.
  */
-async function cancelPatientFlowRow(row: PatientFlowRow, queryClient: QueryClient) {
+async function cancelPatientFlowRow(row: PatientFlowRow, queryClient: QueryClient): Promise<boolean> {
   const noun = row.kind === "opd-visit" ? "visit" : "appointment";
-  if (!window.confirm(`Cancel ${row.patient}'s ${noun}? This cannot be undone.`)) return;
-
   const endpoint = row.kind === "opd-visit" ? "/api/opd" : "/api/appointment";
   let response: Response;
   try {
@@ -72,17 +72,18 @@ async function cancelPatientFlowRow(row: PatientFlowRow, queryClient: QueryClien
     });
   } catch {
     notify.retryable("Unable to reach the server. Check your connection and retry.", () => void cancelPatientFlowRow(row, queryClient));
-    return;
+    return false;
   }
 
   const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
   if (!response.ok || !data.ok) {
     notify.error(data.error || `Unable to cancel this ${noun}.`);
-    return;
+    return false;
   }
 
   notify.success(`${noun === "visit" ? "Visit" : "Appointment"} cancelled`);
   await queryClient.invalidateQueries({ queryKey: ["hospital-os", "patient-flow"] });
+  return true;
 }
 
 /**
@@ -132,6 +133,14 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [cancelTarget, setCancelTarget] = useState<PatientFlowRow | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  // Set alongside cancelTarget when the Cancel item is selected; read once by
+  // the menu's onCloseAutoFocus so only THAT close skips Radix's default
+  // focus-return-to-trigger. Without this, the dropdown closing and the
+  // confirm Dialog opening race for focus (a known Radix DropdownMenu+Dialog
+  // interaction) and the dialog can lose focus right after it opens.
+  const pendingCancelFocusRef = useRef(false);
 
   const { role, realtimeMessages } = useHospitalOsStore();
   const openPatientDrawer = usePatientDrawerStore((state) => state.openDrawer);
@@ -236,7 +245,14 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
                 <MoreHorizontal size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              onCloseAutoFocus={(event) => {
+                if (!pendingCancelFocusRef.current) return;
+                pendingCancelFocusRef.current = false;
+                event.preventDefault();
+              }}
+            >
               <DropdownMenuItem onSelect={() => openPatientWorkspace(row.original.id)}>Open patient workspace</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => exportPatientFlowRow(row.original)}>Export row</DropdownMenuItem>
               {access.canCancel ? (
@@ -244,7 +260,10 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => void cancelPatientFlowRow(row.original, queryClient)}
+                    onSelect={() => {
+                      pendingCancelFocusRef.current = true;
+                      setCancelTarget(row.original);
+                    }}
                   >
                     Cancel {row.original.kind === "opd-visit" ? "visit" : "appointment"}
                   </DropdownMenuItem>
@@ -255,7 +274,7 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
         </div>
       )
     }
-  ], [access.canCancel, openPatientDrawer, queryClient]);
+  ], [access.canCancel, openPatientDrawer]);
 
   // TanStack Table intentionally returns imperative helpers that React Compiler cannot memoize safely.
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -284,6 +303,14 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
       }
     }
   });
+
+  async function handleConfirmCancel() {
+    if (!cancelTarget) return;
+    setIsCancelling(true);
+    const cancelled = await cancelPatientFlowRow(cancelTarget, queryClient);
+    setIsCancelling(false);
+    if (cancelled) setCancelTarget(null);
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-[1560px] gap-5 px-4 py-5 lg:px-6">
@@ -324,6 +351,29 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
           onAction={() => window.location.assign("/admin")}
         />
       ) : null}
+
+      <Dialog open={cancelTarget !== null} onOpenChange={(open) => !open && !isCancelling && setCancelTarget(null)}>
+        <DialogContent>
+          {cancelTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Cancel {cancelTarget.kind === "opd-visit" ? "visit" : "appointment"}?</DialogTitle>
+                <DialogDescription>
+                  This cancels {cancelTarget.patient}&apos;s {cancelTarget.kind === "opd-visit" ? "OPD visit" : "appointment"} ({cancelTarget.uhid}). This cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button type="button" variant="outline" disabled={isCancelling} onClick={() => setCancelTarget(null)}>
+                  Keep it
+                </Button>
+                <Button type="button" variant="destructive" disabled={isCancelling} onClick={() => void handleConfirmCancel()}>
+                  {isCancelling ? "Cancelling…" : `Cancel ${cancelTarget.kind === "opd-visit" ? "visit" : "appointment"}`}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
