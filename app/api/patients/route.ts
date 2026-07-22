@@ -189,7 +189,11 @@ export async function DELETE(request: Request) {
   ]);
   const hasActivity =
     appointments.some((appointment) => appointment.status !== "Cancelled") ||
-    visits.some((visit) => visit.status !== "Cancelled") ||
+    // A visit stays real activity even once Cancelled if money moved on it —
+    // same billing/refund footprint check deleteOpdVisit applies to itself.
+    visits.some(
+      (visit) => visit.status !== "Cancelled" || visit.billingStatus !== "Not Started" || visit.paidAt || visit.receiptId || visit.refundStatus
+    ) ||
     admissions.length > 0 ||
     allLabOrders.some((order) => normalizePhone(order.phone) === key && order.status !== "Cancelled") ||
     allDispenses.some((record) => normalizePhone(record.phone) === key && record.status !== "Cancelled");

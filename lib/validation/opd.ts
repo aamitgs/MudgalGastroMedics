@@ -42,5 +42,9 @@ export const opdVisitUpdateSchema = z.object({
   refundAmount: optionalText
 });
 
+export const opdVisitDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Visit id is required.")
+});
+
 export type OpdVisitCreateInput = z.infer<typeof opdVisitCreateSchema>;
 export type OpdVisitUpdateInput = z.infer<typeof opdVisitUpdateSchema>;

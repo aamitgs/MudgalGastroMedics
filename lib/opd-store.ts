@@ -148,3 +148,25 @@ export async function updateOpdVisit(input: {
   await store.save(doc);
   return visit;
 }
+
+/**
+ * Hard delete — only a Cancelled visit with zero billing/refund footprint.
+ * A Completed visit is real clinical documentation and never qualifies, same
+ * as deleteAppointment's Cancelled-only rule. Unlike patient/appointment
+ * activity, everything needed to judge this lives on the visit record itself
+ * (billingStatus, paidAt, receiptId, refundStatus), so this can self-guard
+ * intra-store — no cross-store lookup, no circular-import concern.
+ */
+export async function deleteOpdVisit(id: string) {
+  const doc = await store.load();
+  const visit = doc.visits.find((item) => item.id === id);
+  if (!visit) return { error: "Visit not found." };
+  if (visit.status !== "Cancelled") return { error: "Cancel this visit before deleting it." };
+  if (visit.billingStatus !== "Not Started" || visit.paidAt || visit.receiptId || visit.refundStatus) {
+    return { error: "This visit has billing or refund history and can't be deleted." };
+  }
+
+  doc.visits = doc.visits.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { visit };
+}

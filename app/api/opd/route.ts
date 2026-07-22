@@ -3,11 +3,11 @@ import { authorize } from "@/lib/access/guard";
 import { createAppointment, getAppointmentById } from "@/lib/appointment-store";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
-import { createOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
+import { createOpdVisit, deleteOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
 import { opdVisitStatuses } from "@/lib/opd-types";
 import type { OpdVisitStatus } from "@/lib/opd-types";
 import { firstZodIssueMessage } from "@/lib/validation/http";
-import { opdVisitCreateSchema, opdVisitUpdateSchema } from "@/lib/validation/opd";
+import { opdVisitCreateSchema, opdVisitDeleteSchema, opdVisitUpdateSchema } from "@/lib/validation/opd";
 
 const sortFields: OpdSortField[] = ["patientName", "token", "status", "service", "createdAt"];
 
@@ -178,4 +178,34 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ ok: true, visit });
+}
+
+export async function DELETE(request: Request) {
+  // OPD has no RBAC resource of its own — queue/status actions authorize
+  // against "appointments" everywhere else in this route too (GET/POST above,
+  // and PATCH's non-clinical/non-billing branch), so delete follows the same
+  // appointments:delete grant (admin/super-admin only) rather than inventing
+  // a new resource.
+  const auth = await authorize(request, "appointments", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = opdVisitDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Visit id is required." }, { status: 400 });
+
+  const before = await getOpdVisitById(parsed.data.id);
+  const result = await deleteOpdVisit(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "opd.visit.deleted",
+    entityType: "opd_visit",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }
