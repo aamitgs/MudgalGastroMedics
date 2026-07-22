@@ -3,10 +3,10 @@ import { getRequestAccessContext } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes, canEditAutomationTask, canViewAutomationTask } from "@/lib/automation-types";
 import type { AutomationTaskPriority, AutomationTaskStatus, AutomationTaskType } from "@/lib/automation-types";
-import { createAutomationTask, generateAutomationTasks, listAutomationTasks, updateAutomationTask } from "@/lib/automation-store";
+import { createAutomationTask, deleteAutomationTask, generateAutomationTasks, listAutomationTasks, updateAutomationTask } from "@/lib/automation-store";
 import { queryAutomationTasks, type AutomationTaskSortField, type SortDirection } from "@/lib/automation-task-query";
 import { listStaff } from "@/lib/hr-store";
-import { automationActionSchema, automationUpdateSchema } from "@/lib/validation/operations";
+import { automationActionSchema, automationDeleteSchema, automationUpdateSchema } from "@/lib/validation/operations";
 
 const sortFields: AutomationTaskSortField[] = ["title", "type", "priority", "status", "dueAt", "createdAt"];
 
@@ -148,4 +148,36 @@ export async function PATCH(request: Request) {
     device: auditRequestMetadata(request)
   });
   return NextResponse.json({ ok: true, task: result });
+}
+
+export async function DELETE(request: Request) {
+  const context = await requireStaff(request);
+  if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
+  // No dedicated "automation" RBAC resource exists — every task type maps
+  // onto an existing resource's edit rights instead (canEditAutomationTask),
+  // so there's nothing to authorize() a delete action against. Delete is
+  // reserved to admin/super-admin directly, matching every other module's
+  // "reserved for admin/super-admin only" delete grant.
+  if (context.activeRole !== "admin" && context.activeRole !== "super-admin") {
+    return NextResponse.json({ ok: false, error: "Only an admin can delete automation tasks." }, { status: 403 });
+  }
+
+  const parsed = automationDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Task id is required." }, { status: 400 });
+
+  const result = await deleteAutomationTask(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: context.activeRole,
+    actorId: context.userId,
+    action: "automation.task.deleted",
+    entityType: "automation_task",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.task,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

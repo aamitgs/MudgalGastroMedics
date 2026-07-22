@@ -15,3 +15,7 @@ export const staffNoteStatusUpdateSchema = z.object({
   id: z.string().trim().min(1, "Note id is required."),
   status: z.enum(["Open", "Acknowledged", "Resolved"])
 });
+
+export const staffNoteDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Note id is required.")
+});

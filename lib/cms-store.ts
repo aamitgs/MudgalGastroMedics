@@ -183,3 +183,23 @@ export async function updateCmsStatus(id: string, status: CmsContentStatus) {
   await docStore.save(store);
   return item;
 }
+
+/**
+ * Hard delete — only Draft (never went live) or Archived (deliberately
+ * retired) content. Published/In Review content is either live on the
+ * public site or mid-workflow, so it never qualifies. Also prunes the
+ * item's own revision history, which would otherwise be orphaned.
+ */
+export async function deleteCmsContent(id: string) {
+  const store = await docStore.load();
+  const item = store.items.find((entry) => entry.id === id);
+  if (!item) return { error: "Content not found." };
+  if (item.status !== "Draft" && item.status !== "Archived") {
+    return { error: "Only Draft or Archived content can be deleted." };
+  }
+
+  store.items = store.items.filter((entry) => entry.id !== id);
+  store.revisions = store.revisions.filter((revision) => revision.itemId !== id);
+  await docStore.save(store);
+  return { item };
+}

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
-import { createPurchaseOrder, listPurchaseOrders, updatePurchaseOrderStatus } from "@/lib/purchase-order-store";
+import { createPurchaseOrder, deletePurchaseOrder, listPurchaseOrders, updatePurchaseOrderStatus } from "@/lib/purchase-order-store";
 import type { PurchaseOrderStatus } from "@/lib/purchase-order-types";
 import { firstZodIssueMessage } from "@/lib/validation/http";
-import { purchaseOrderCreateSchema, purchaseOrderUpdateSchema } from "@/lib/validation/purchase-orders";
+import { purchaseOrderCreateSchema, purchaseOrderDeleteSchema, purchaseOrderUpdateSchema } from "@/lib/validation/purchase-orders";
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "pharmacy-inventory", "view");
@@ -68,4 +68,28 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ ok: true, order });
+}
+
+export async function DELETE(request: Request) {
+  const auth = await authorize(request, "pharmacy-inventory", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = purchaseOrderDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Purchase order id is required." }, { status: 400 });
+
+  const result = await deletePurchaseOrder(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "purchase-order.deleted",
+    entityType: "purchase_order",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.order,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

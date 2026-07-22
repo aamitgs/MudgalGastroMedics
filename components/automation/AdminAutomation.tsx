@@ -1,8 +1,9 @@
 "use client";
 
-import { Bot, Download, WandSparkles } from "lucide-react";
+import { Bot, Download, Trash2, WandSparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { AutomationTask, AutomationTaskPriority, AutomationTaskStatus } from "@/lib/automation-types";
 import { automationTaskPriorities, automationTaskStatuses, automationTaskTypes } from "@/lib/automation-types";
 import type { AutomationTaskSortField } from "@/lib/automation-task-query";
@@ -10,8 +11,10 @@ import type { StaffMember } from "@/lib/hr-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { automationTaskCreateSchema, type AutomationTaskCreateInput } from "@/lib/validation/automation";
@@ -45,6 +48,13 @@ function priorityClass(priority: AutomationTaskPriority) {
 
 export function AdminAutomation() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const role = useHospitalOsStore((state) => state.role);
+  // No dedicated "automation" RBAC resource exists — the route reserves
+  // delete to admin/super-admin directly, so the UI gate mirrors that
+  // instead of going through roleHasPermission(resource, "delete").
+  const accessRole = hospitalRoleToAccessRole[role];
+  const canDelete = accessRole === "admin" || accessRole === "super-admin";
+
   const [tasks, setTasks] = useState<AutomationTask[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [stats, setStats] = useState({ open: 0, queued: 0, escalated: 0, done: 0 });
@@ -56,6 +66,8 @@ export function AdminAutomation() {
   const [sorting, setSorting] = useState<SortingState>([{ id: "dueAt", desc: false }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ items: AutomationTask[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sortField = (sorting[0]?.id as AutomationTaskSortField | undefined) ?? "dueAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -181,6 +193,42 @@ export function AdminAutomation() {
     setTasks((items) => items.map((item) => (item.id === id ? updated : item)));
   }
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const task of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/automation", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: task.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this task.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Task deleted" : `${deleted} tasks deleted`);
+      void loadAutomation();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some tasks could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   const columns = useMemo<ColumnDef<AutomationTask, unknown>[]>(
     () => [
       {
@@ -280,20 +328,38 @@ export function AdminAutomation() {
       {
         id: "actions",
         header: "Actions",
-        size: 90,
+        size: 130,
         enableSorting: false,
         enableHiding: false,
-        cell: ({ row }) =>
-          row.original.actionUrl ? (
-            <a href={row.original.actionUrl} className="inline-flex min-h-8 items-center justify-center rounded border border-cyan-200 bg-cyan-50 px-2 text-xs font-bold text-brand dark:border-cyan-900 dark:bg-cyan-950">
-              Open
-            </a>
-          ) : null
+        cell: ({ row }) => {
+          const eligibleForDelete = row.original.status === "Done" || row.original.status === "Skipped";
+          return (
+            <div className="flex items-center gap-1">
+              {row.original.actionUrl ? (
+                <a href={row.original.actionUrl} className="inline-flex min-h-8 items-center justify-center rounded border border-cyan-200 bg-cyan-50 px-2 text-xs font-bold text-brand dark:border-cyan-900 dark:bg-cyan-950">
+                  Open
+                </a>
+              ) : null}
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  disabled={!eligibleForDelete}
+                  title={eligibleForDelete ? "Delete permanently" : "Only Done or Skipped tasks can be deleted"}
+                  onClick={() => setDeleteTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              ) : null}
+            </div>
+          );
+        }
       }
     ],
     // updateTask only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openDrawer, staff]
+    [openDrawer, staff, canDelete]
   );
 
   return (
@@ -425,20 +491,70 @@ export function AdminAutomation() {
               ))}
             </select>
           }
-          bulkActions={(selected, clear) => (
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                downloadCsv(automationExportHeaders, selected.map(automationExportRow), "selected-automation-tasks.csv");
-                clear();
-              }}
-            >
-              <Download size={14} /> Export selected
-            </ActionButton>
-          )}
+          bulkActions={(selected, clear) => {
+            const allEligible = selected.every((task) => task.status === "Done" || task.status === "Skipped");
+            return (
+              <>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    downloadCsv(automationExportHeaders, selected.map(automationExportRow), "selected-automation-tasks.csv");
+                    clear();
+                  }}
+                >
+                  <Download size={14} /> Export selected
+                </ActionButton>
+                {canDelete ? (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    disabled={!allEligible}
+                    title={allEligible ? "Delete selected permanently" : "Only Done or Skipped tasks can be deleted"}
+                    onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                ) : null}
+              </>
+            );
+          }}
         />
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this task" : `${deleteTarget.items.length} tasks`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes "${deleteTarget.items[0].title}". This cannot be undone.`
+                    : "This permanently removes the selected tasks. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

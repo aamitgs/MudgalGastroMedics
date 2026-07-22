@@ -1,14 +1,17 @@
 "use client";
 
-import { Download, Eye, FileText, History, ImageIcon, Plus, RefreshCw, SearchCheck } from "lucide-react";
+import { Download, Eye, FileText, History, ImageIcon, Plus, RefreshCw, SearchCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { roleHasPermission } from "@/lib/access/matrix";
+import type { AccessRole } from "@/lib/access/matrix";
 import type { CmsContentItem, CmsContentRevision, CmsContentStatus, CmsContentType } from "@/lib/cms-types";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { CmsContentSortField } from "@/lib/cms-content-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { StatusBadge, getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
@@ -46,6 +49,9 @@ export function AdminCmsWorkspace() {
   const [previewItem, setPreviewItem] = useState<CmsContentItem | null>(null);
   const [revisions, setRevisions] = useState<CmsContentRevision[]>([]);
   const [currentUser, setCurrentUser] = useState<{ name: string; role: string } | null>(null);
+  // Server already tells us the real access role via GET's currentUser —
+  // reuse it rather than pulling in the HospitalRole mapping used elsewhere.
+  const canDelete = currentUser ? roleHasPermission(currentUser.role as AccessRole, "cms", "delete") : false;
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCount, setPageCount] = useState(1);
@@ -55,6 +61,8 @@ export function AdminCmsWorkspace() {
   const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ items: CmsContentItem[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sortField = (sorting[0]?.id as CmsContentSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -187,6 +195,42 @@ export function AdminCmsWorkspace() {
     setPreviewItem((current) => (current?.id === id ? updated : current));
   }
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const item of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/cms", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: item.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this content.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Content deleted" : `${deleted} items deleted`);
+      void loadItems();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some content could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   const stats = useMemo(
     () => [
       { label: "Content Items", value: items.length, icon: FileText },
@@ -230,19 +274,36 @@ export function AdminCmsWorkspace() {
       {
         id: "actions",
         header: "Actions",
-        size: 150,
+        size: 190,
         enableSorting: false,
         enableHiding: false,
-        cell: ({ row }) => (
-          <ActionButton variant="secondary" size="sm" onClick={() => void previewContent(row.original)} aria-expanded={previewItem?.id === row.original.id}>
-            <Eye size={13} /> Preview + History
-          </ActionButton>
-        )
+        cell: ({ row }) => {
+          const eligibleForDelete = row.original.status === "Draft" || row.original.status === "Archived";
+          return (
+            <div className="flex items-center gap-1">
+              <ActionButton variant="secondary" size="sm" onClick={() => void previewContent(row.original)} aria-expanded={previewItem?.id === row.original.id}>
+                <Eye size={13} /> Preview + History
+              </ActionButton>
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  disabled={!eligibleForDelete}
+                  title={eligibleForDelete ? "Delete permanently" : "Only Draft or Archived content can be deleted"}
+                  onClick={() => setDeleteTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              ) : null}
+            </div>
+          );
+        }
       }
     ],
     // updateStatus only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [previewItem]
+    [previewItem, canDelete]
   );
 
   return (
@@ -439,20 +500,70 @@ export function AdminCmsWorkspace() {
               </select>
             </>
           }
-          bulkActions={(selected, clear) => (
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                downloadCsv(cmsExportHeaders, selected.map(cmsExportRow), "selected-cms-content.csv");
-                clear();
-              }}
-            >
-              <Download size={14} /> Export selected
-            </ActionButton>
-          )}
+          bulkActions={(selected, clear) => {
+            const allEligible = selected.every((item) => item.status === "Draft" || item.status === "Archived");
+            return (
+              <>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    downloadCsv(cmsExportHeaders, selected.map(cmsExportRow), "selected-cms-content.csv");
+                    clear();
+                  }}
+                >
+                  <Download size={14} /> Export selected
+                </ActionButton>
+                {canDelete ? (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    disabled={!allEligible}
+                    title={allEligible ? "Delete selected permanently" : "Only Draft or Archived content can be deleted"}
+                    onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                ) : null}
+              </>
+            );
+          }}
         />
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this content" : `${deleteTarget.items.length} items`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes "${deleteTarget.items[0].title}" and its revision history. This cannot be undone.`
+                    : "This permanently removes the selected content and its revision history. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -61,3 +61,21 @@ export async function updateStaffNoteStatus(id: string, status: StaffNoteStatus,
   await store.save(doc);
   return note;
 }
+
+/**
+ * Hard delete — only Resolved notes. Unlike the other three operational
+ * modules, staff notes have no "draft/cancelled/never happened" state: every
+ * note was a real message someone sent, so Open/Acknowledged notes (a shift
+ * may still be relying on them) never qualify — Resolved is the only
+ * terminal state.
+ */
+export async function deleteStaffNote(id: string) {
+  const doc = await store.load();
+  const note = doc.notes.find((item) => item.id === id);
+  if (!note) return { error: "Note not found." };
+  if (note.status !== "Resolved") return { error: "Only Resolved notes can be deleted." };
+
+  doc.notes = doc.notes.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { note };
+}

@@ -23,5 +23,9 @@ export const purchaseOrderUpdateSchema = z.object({
   status: z.enum(purchaseOrderStatuses as [string, ...string[]], { error: "Invalid purchase order status." })
 });
 
+export const purchaseOrderDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Purchase order id is required.")
+});
+
 export type PurchaseOrderCreateInput = z.infer<typeof purchaseOrderCreateSchema>;
 export type PurchaseOrderUpdateInput = z.infer<typeof purchaseOrderUpdateSchema>;

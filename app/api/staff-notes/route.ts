@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getRequestAccessContext } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { canViewStaffNoteDepartment, departmentForRole } from "@/lib/staff-notes-types";
-import { createStaffNote, listStaffNotes, updateStaffNoteStatus } from "@/lib/staff-notes-store";
+import { createStaffNote, deleteStaffNote, listStaffNotes, updateStaffNoteStatus } from "@/lib/staff-notes-store";
 import { firstZodIssueMessage } from "@/lib/validation/http";
-import { staffNoteCreateSchema, staffNoteStatusUpdateSchema } from "@/lib/validation/staff-notes";
+import { staffNoteCreateSchema, staffNoteDeleteSchema, staffNoteStatusUpdateSchema } from "@/lib/validation/staff-notes";
 
 /**
  * Cross-department staff notes are visible to any role that can already view
@@ -86,4 +86,41 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ ok: true, note });
+}
+
+export async function DELETE(request: Request) {
+  const context = await requireStaff(request);
+  if (!context) return NextResponse.json({ ok: false, error: "Staff login required." }, { status: 401 });
+
+  const parsed = staffNoteDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Note id is required." }, { status: 400 });
+
+  const existing = (await listStaffNotes()).find((item) => item.id === parsed.data.id);
+  if (!existing || !(existing.authorRole === context.activeRole || canViewStaffNoteDepartment(context.activeRole, existing.toDepartment))) {
+    // 404, not 403: don't confirm a note's existence to a role that can't view it.
+    return NextResponse.json({ ok: false, error: "Note not found." }, { status: 404 });
+  }
+  // No dedicated "staff-notes" RBAC resource exists — visibility is derived
+  // from the target department's resource instead (see canViewStaffNoteDepartment),
+  // so there's nothing to authorize() a delete against. Reserved to
+  // admin/super-admin directly, same as automation tasks.
+  if (context.activeRole !== "admin" && context.activeRole !== "super-admin") {
+    return NextResponse.json({ ok: false, error: "Only an admin can delete staff notes." }, { status: 403 });
+  }
+
+  const result = await deleteStaffNote(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: context.activeRole,
+    actorId: context.userId,
+    action: "staff_note.deleted",
+    entityType: "staff_note",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.note,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

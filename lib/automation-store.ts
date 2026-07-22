@@ -168,6 +168,26 @@ export async function updateAutomationTask(input: {
   return task;
 }
 
+/**
+ * Hard delete — only Done/Skipped (terminal) tasks. Anything still Open,
+ * Queued or Escalated is live work a shift may be relying on; deleting one
+ * of those would also be pointless for an auto-generated task, since the
+ * next generateAutomationTasks() run recreates it while its source
+ * condition still holds and it isn't Done/Skipped (see upsertGeneratedTask).
+ */
+export async function deleteAutomationTask(id: string) {
+  const doc = await docStore.load();
+  const task = doc.tasks.find((item) => item.id === id);
+  if (!task) return { error: "Task not found." };
+  if (task.status !== "Done" && task.status !== "Skipped") {
+    return { error: "Only Done or Skipped tasks can be deleted." };
+  }
+
+  doc.tasks = doc.tasks.filter((item) => item.id !== id);
+  await docStore.save(doc);
+  return { task };
+}
+
 export async function generateAutomationTasks() {
   const doc = await docStore.load();
   const generated: AutomationTask[] = [];

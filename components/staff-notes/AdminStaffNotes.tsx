@@ -1,13 +1,16 @@
 "use client";
 
-import { MessagesSquare, Send } from "lucide-react";
+import { MessagesSquare, Send, Trash2 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { StaffNote, StaffNoteCategory, StaffNoteDepartment, StaffNotePriority, StaffNoteStatus } from "@/lib/staff-notes-types";
 import { staffNoteCategories, staffNoteDepartments, staffNotePriorities } from "@/lib/staff-notes-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 
 type StaffNotesResponse = { ok: boolean; notes?: StaffNote[]; note?: StaffNote; error?: string };
 
@@ -28,6 +31,12 @@ function statusClass(status: StaffNoteStatus) {
 const pageSize = 25;
 
 export function AdminStaffNotes() {
+  const role = useHospitalOsStore((state) => state.role);
+  // No dedicated "staff-notes" RBAC resource exists — the route reserves
+  // delete to admin/super-admin directly, so the UI gate mirrors that.
+  const accessRole = hospitalRoleToAccessRole[role];
+  const canDelete = accessRole === "admin" || accessRole === "super-admin";
+
   const [notes, setNotes] = useState<StaffNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [composing, setComposing] = useState(false);
@@ -36,6 +45,8 @@ export function AdminStaffNotes() {
   const [priority, setPriority] = useState<StaffNotePriority>("Normal");
   const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ items: StaffNote[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -105,6 +116,42 @@ export function AdminStaffNotes() {
     void load();
   }, []);
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const note of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/staff-notes", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: note.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this note.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Note deleted" : `${deleted} notes deleted`);
+      void load();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some notes could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   const sortField = sorting[0]?.id as keyof StaffNote | undefined;
   const sortDir = sorting[0]?.desc ? -1 : 1;
 
@@ -164,7 +211,7 @@ export function AdminStaffNotes() {
       {
         id: "actions",
         header: "Actions",
-        size: 160,
+        size: 200,
         enableSorting: false,
         enableHiding: false,
         cell: ({ row }) => (
@@ -179,11 +226,23 @@ export function AdminStaffNotes() {
                 Resolve
               </ActionButton>
             ) : null}
+            {canDelete ? (
+              <ActionButton
+                variant="danger"
+                size="sm"
+                className="h-8 w-8 min-h-8 px-0"
+                disabled={row.original.status !== "Resolved"}
+                title={row.original.status === "Resolved" ? "Delete permanently" : "Only Resolved notes can be deleted"}
+                onClick={() => setDeleteTarget({ items: [row.original] })}
+              >
+                <Trash2 size={13} />
+              </ActionButton>
+            ) : null}
           </div>
         )
       }
     ],
-    [setStatus]
+    [setStatus, canDelete]
   );
 
   return (
@@ -266,7 +325,59 @@ export function AdminStaffNotes() {
           action: globalFilter ? "Clear search" : "New note",
           onAction: () => (globalFilter ? updateGlobalFilter("") : setComposing(true))
         }}
+        bulkActions={
+          canDelete
+            ? (selected, clear) => {
+                const allEligible = selected.every((note) => note.status === "Resolved");
+                return (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    disabled={!allEligible}
+                    title={allEligible ? "Delete selected permanently" : "Only Resolved notes can be deleted"}
+                    onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                );
+              }
+            : undefined
+        }
       />
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this note" : `${deleteTarget.items.length} notes`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? "This permanently removes this resolved staff note. This cannot be undone."
+                    : "This permanently removes the selected resolved staff notes. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

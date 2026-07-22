@@ -183,7 +183,9 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     beds: readWriteExport,
     prescriptions: readWriteExport,
     "lab-orders": readWriteExport,
-    "pharmacy-inventory": readWriteExport,
+    // "delete" here only backs purchase-order deletion (Draft/Cancelled POs) —
+    // no inventory-item delete exists, so this grant doesn't widen anything else.
+    "pharmacy-inventory": [...readWriteExport, "delete"],
     billing: readWriteExport,
     insurance: readWriteExport,
     "hr-records": readWriteExport,
@@ -195,7 +197,7 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     "system-settings": ["view", "edit"],
     "user-management": ["view"],
     "liaison-notes": readWriteExport,
-    cms: readWriteExport,
+    cms: [...readWriteExport, "delete"],
     "diet-plans": readWriteExport
   },
   "main-doctor": {

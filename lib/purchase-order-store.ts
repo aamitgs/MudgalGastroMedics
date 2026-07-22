@@ -87,3 +87,22 @@ export async function updatePurchaseOrderStatus(id: string, status: PurchaseOrde
   await store.save(doc);
   return order;
 }
+
+/**
+ * Hard delete — only Draft (never sent to a vendor) or Cancelled (never
+ * fulfilled). "Ordered" is a live commitment and "Received" already restocked
+ * inventory via adjustInventoryQuantity above — deleting either would erase
+ * the paper trail behind a real vendor commitment or a stock increase.
+ */
+export async function deletePurchaseOrder(id: string) {
+  const doc = await store.load();
+  const order = doc.orders.find((entry) => entry.id === id);
+  if (!order) return { error: "Purchase order not found." };
+  if (order.status !== "Draft" && order.status !== "Cancelled") {
+    return { error: "Only Draft or Cancelled orders can be deleted." };
+  }
+
+  doc.orders = doc.orders.filter((entry) => entry.id !== id);
+  await store.save(doc);
+  return { order };
+}

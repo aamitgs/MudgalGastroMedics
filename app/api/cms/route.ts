@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { cmsContentStatuses, cmsContentTypes } from "@/lib/cms-types";
 import type { CmsContentStatus, CmsContentType } from "@/lib/cms-types";
-import { listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } from "@/lib/cms-store";
+import { deleteCmsContent, listCmsContent, listCmsRevisions, updateCmsStatus, upsertCmsContent } from "@/lib/cms-store";
 import { queryCmsContent, type CmsContentSortField, type SortDirection } from "@/lib/cms-content-query";
 import { authorize } from "@/lib/access/guard";
-import { cmsStatusUpdateSchema, cmsUpsertSchema } from "@/lib/validation/operations";
+import { cmsDeleteSchema, cmsStatusUpdateSchema, cmsUpsertSchema } from "@/lib/validation/operations";
 
 const sortFields: CmsContentSortField[] = ["title", "type", "status", "owner", "createdAt"];
 
@@ -107,4 +107,28 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ ok: true, item });
+}
+
+export async function DELETE(request: Request) {
+  const auth = await authorize(request, "cms", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = cmsDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Content id is required." }, { status: 400 });
+
+  const result = await deleteCmsContent(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "cms.content.deleted",
+    entityType: "cms_content",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.item,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

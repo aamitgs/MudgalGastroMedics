@@ -69,6 +69,10 @@ export const automationUpdateSchema = z.looseObject({
   notes: z.string().optional()
 });
 
+export const automationDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Task id is required.")
+});
+
 export const cmsUpsertSchema = z.looseObject({
   type: z.string().optional(),
   status: z.string().optional()
@@ -77,6 +81,10 @@ export const cmsUpsertSchema = z.looseObject({
 export const cmsStatusUpdateSchema = z.looseObject({
   id: z.string().default(""),
   status: z.string().optional()
+});
+
+export const cmsDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Content id is required.")
 });
 
 export const communicationCreateSchema = z.looseObject({

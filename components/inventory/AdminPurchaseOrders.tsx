@@ -2,14 +2,18 @@
 
 import { AlertTriangle, Download, FileDown, PackagePlus, PlusCircle, Trash2, Truck } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { roleHasPermission } from "@/lib/access/matrix";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { InventoryItem } from "@/lib/inventory-types";
 import { isPurchaseOrderOverdue, purchaseOrderStatuses } from "@/lib/purchase-order-types";
 import type { PurchaseOrderRecord, PurchaseOrderStatus } from "@/lib/purchase-order-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
@@ -44,6 +48,11 @@ function suggestedReorderQty(item: InventoryItem) {
 }
 
 export function AdminPurchaseOrders() {
+  const role = useHospitalOsStore((state) => state.role);
+  // UI convenience only — DELETE /api/purchase-orders re-checks
+  // pharmacy-inventory:delete server-side (admin/super-admin only).
+  const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "pharmacy-inventory", "delete");
+
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [orders, setOrders] = useState<PurchaseOrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +64,8 @@ export function AdminPurchaseOrders() {
   const [pendingQty, setPendingQty] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<PurchaseOrderStatus | "">("");
+  const [deleteTarget, setDeleteTarget] = useState<PurchaseOrderRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function loadAll() {
     setLoading(true);
@@ -180,6 +191,32 @@ export function AdminPurchaseOrders() {
     } else {
       notify.success(`Marked ${status}.`);
     }
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let response: Response;
+    try {
+      response = await fetch("/api/purchase-orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deleteTarget.id })
+      });
+    } catch {
+      setIsDeleting(false);
+      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void handleConfirmDelete());
+      return;
+    }
+    const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    setIsDeleting(false);
+    if (!response.ok || !data.ok) {
+      notify.error(data.error || "Unable to delete this purchase order.");
+      return;
+    }
+    setOrders((current) => current.filter((order) => order.id !== deleteTarget.id));
+    notify.success("Purchase order deleted");
+    setDeleteTarget(null);
   }
 
   return (
@@ -348,6 +385,11 @@ export function AdminPurchaseOrders() {
                       Cancel
                     </ActionButton>
                   ) : null}
+                  {canDelete && (order.status === "Draft" || order.status === "Cancelled") ? (
+                    <ActionButton variant="danger" size="sm" onClick={() => setDeleteTarget(order)}>
+                      <Trash2 size={13} /> Delete
+                    </ActionButton>
+                  ) : null}
                 </div>
               </div>
               );
@@ -355,6 +397,29 @@ export function AdminPurchaseOrders() {
           </div>
         </div>
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete this purchase order?</DialogTitle>
+                <DialogDescription>
+                  This permanently removes the {deleteTarget.id} order for {deleteTarget.vendor}. This cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton variant="danger" loading={isDeleting} disabled={isDeleting} onClick={() => void handleConfirmDelete()}>
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
