@@ -50,6 +50,11 @@ export const attendanceUpdateSchema = z.object({
   notes: optionalText
 });
 
+export const staffDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Record id is required."),
+  mode: z.enum(["staff", "attendance"]).default("staff")
+});
+
 export type StaffCreateInput = z.infer<typeof staffCreateSchema>;
 export type AttendanceCreateInput = z.infer<typeof attendanceCreateSchema>;
 export type StaffUpdateInput = z.infer<typeof staffUpdateSchema>;

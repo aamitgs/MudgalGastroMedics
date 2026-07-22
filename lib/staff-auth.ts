@@ -69,6 +69,16 @@ function parseStaffCredentials(): StaffCredential[] {
   ];
 }
 
+/**
+ * Every staffId a legacy username/password credential can resolve to —
+ * STF-ADMIN-001 and STF-RECEPTION-001 by default, plus anything set via
+ * STAFF_USERS_JSON. Used to keep HR delete from ever removing a staff
+ * record a legacy login still depends on (see app/api/hr/route.ts).
+ */
+export function legacyCredentialStaffIds(): string[] {
+  return parseStaffCredentials().map((credential) => credential.staffId);
+}
+
 export async function authenticateStaffUser(username: string, password: string): Promise<StaffMember | null> {
   const normalizedUsername = username.trim().toLowerCase();
   const credential = parseStaffCredentials().find((entry) => entry.username.trim().toLowerCase() === normalizedUsername);

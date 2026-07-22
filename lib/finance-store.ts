@@ -115,6 +115,30 @@ export async function updateInsuranceClaim(input: {
   return claim;
 }
 
+/**
+ * Hard delete — Draft claims only. Anything Preauth Sent/Approved/Rejected/
+ * Submitted/Settled has real insurer-facing history (a claim number, a
+ * TPA interaction, an approved/settled amount) even if it was later
+ * rejected — that outcome is itself worth keeping for dispute/resubmission
+ * reference. Only a claim nobody has acted on yet qualifies.
+ *
+ * AccountEntry deliberately gets no delete function: it has no status field
+ * at all (see finance-types.ts) and no update function exists either — every
+ * entry represents money that already moved, with no "draft" concept to gate
+ * a safe deletion on. Deleting one would be introducing the first-ever
+ * post-create mutation to an append-only ledger.
+ */
+export async function deleteInsuranceClaim(id: string) {
+  const doc = await docStore.load();
+  const claim = doc.claims.find((item) => item.id === id);
+  if (!claim) return { error: "Insurance claim not found." };
+  if (claim.status !== "Draft") return { error: "Only Draft claims can be deleted." };
+
+  doc.claims = doc.claims.filter((item) => item.id !== id);
+  await docStore.save(doc);
+  return { claim };
+}
+
 export async function createAccountEntry(input: Record<string, unknown>) {
   const doc = await docStore.load();
   const amount = normalizeNumber(input.amount);

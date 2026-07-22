@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
 import type { AccountEntryType, InsuranceClaimStatus } from "@/lib/finance-types";
-import { createAccountEntry, createInsuranceClaim, listAccountEntries, listInsuranceClaims, updateInsuranceClaim } from "@/lib/finance-store";
+import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { createAccountEntry, createInsuranceClaim, deleteInsuranceClaim, listAccountEntries, listInsuranceClaims, updateInsuranceClaim } from "@/lib/finance-store";
 import { listIpdAdmissions } from "@/lib/ipd-store";
 import { listOpdVisits } from "@/lib/opd-store";
-import { financeClaimUpdateSchema, financeCreateSchema } from "@/lib/validation/operations";
+import { financeClaimDeleteSchema, financeClaimUpdateSchema, financeCreateSchema } from "@/lib/validation/operations";
 
 export async function GET(request: Request) {
   const auth = await authorize(request, "billing", "view");
@@ -63,4 +64,31 @@ export async function PATCH(request: Request) {
 
   if (!claim) return NextResponse.json({ ok: false, error: "Claim not found." }, { status: 404 });
   return NextResponse.json({ ok: true, claim });
+}
+
+export async function DELETE(request: Request) {
+  // Note: no delete route exists for AccountEntry — the ledger has no status
+  // field and no update path either, so there's nothing safe to gate a
+  // delete on. This only ever removes a Draft insurance claim.
+  const auth = await authorize(request, "billing", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = financeClaimDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Claim id is required." }, { status: 400 });
+
+  const result = await deleteInsuranceClaim(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "finance.claim.deleted",
+    entityType: "insurance_claim",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.claim,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

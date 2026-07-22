@@ -182,11 +182,14 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     appointments: [...readWriteExport, "delete"],
     beds: readWriteExport,
     prescriptions: readWriteExport,
-    "lab-orders": readWriteExport,
+    "lab-orders": [...readWriteExport, "delete"],
     // "delete" here only backs purchase-order deletion (Draft/Cancelled POs) —
     // no inventory-item delete exists, so this grant doesn't widen anything else.
     "pharmacy-inventory": [...readWriteExport, "delete"],
-    billing: readWriteExport,
+    // "delete" here only backs deleting a Draft insurance claim
+    // (app/api/finance/route.ts) — account ledger entries have no delete
+    // path at all, so this doesn't widen anything about the cash ledger.
+    billing: [...readWriteExport, "delete"],
     insurance: readWriteExport,
     "hr-records": readWriteExport,
     reports: ["view", "export"],

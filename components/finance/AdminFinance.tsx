@@ -1,12 +1,14 @@
 "use client";
 
-import { BadgeIndianRupee, Download, FileCheck2 } from "lucide-react";
+import { BadgeIndianRupee, Download, FileCheck2, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { roleHasPermission } from "@/lib/access/matrix";
 import type { AccountEntry, AccountEntryType, InsuranceClaim, InsuranceClaimStatus } from "@/lib/finance-types";
 import { accountEntryMethods, accountEntryTypes, insuranceClaimStatuses } from "@/lib/finance-types";
 import type { AccountEntrySortField } from "@/lib/account-entry-query";
 import { queryAccountEntries } from "@/lib/account-entry-query";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { InsuranceClaimSortField } from "@/lib/insurance-claim-query";
 import { queryInsuranceClaims } from "@/lib/insurance-claim-query";
 import type { IpdAdmission } from "@/lib/ipd-types";
@@ -14,9 +16,11 @@ import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { accountEntryCreateSchema, insuranceClaimCreateSchema, type AccountEntryCreateInput, type InsuranceClaimCreateInput } from "@/lib/validation/finance";
@@ -71,12 +75,20 @@ const entryTypeTone: Record<AccountEntryType, BadgeTone> = {
 
 export function AdminFinance() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const role = useHospitalOsStore((state) => state.role);
+  // UI convenience only — DELETE /api/finance re-checks billing:delete
+  // server-side (admin/super-admin only). Only insurance claims get a
+  // delete UI — the account ledger has no delete endpoint to call.
+  const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "billing", "delete");
+
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
   const [entries, setEntries] = useState<AccountEntry[]>([]);
   const [admissions, setAdmissions] = useState<IpdAdmission[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ items: InsuranceClaim[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [claimPage, setClaimPage] = useState(0);
   const [claimFilter, setClaimFilter] = useState("");
@@ -256,6 +268,42 @@ export function AdminFinance() {
     setClaims((items) => items.map((item) => (item.id === id ? updated : item)));
   }
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const claim of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/finance", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: claim.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this claim.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Claim deleted" : `${deleted} claims deleted`);
+      void loadFinance();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some claims could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   function updateClaimFilter(value: string) {
     setClaimFilter(value);
     setClaimPage(0);
@@ -357,11 +405,34 @@ export function AdminFinance() {
             ))}
           </select>
         )
-      }
+      },
+      ...(canDelete
+        ? [
+            {
+              id: "actions",
+              header: "Actions",
+              size: 60,
+              enableSorting: false,
+              enableHiding: false,
+              cell: ({ row }: { row: { original: InsuranceClaim } }) => (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  disabled={row.original.status !== "Draft"}
+                  title={row.original.status === "Draft" ? "Delete permanently" : "Only Draft claims can be deleted"}
+                  onClick={() => setDeleteTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              )
+            } satisfies ColumnDef<InsuranceClaim, unknown>
+          ]
+        : [])
     ],
     // updateClaim only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openDrawer]
+    [openDrawer, canDelete]
   );
 
   const entryColumns = useMemo<ColumnDef<AccountEntry, unknown>[]>(
@@ -596,18 +667,34 @@ export function AdminFinance() {
               ))}
             </select>
           }
-          bulkActions={(selected, clear) => (
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                downloadCsv(claimExportHeaders, selected.map(claimExportRow), "selected-insurance-claims.csv");
-                clear();
-              }}
-            >
-              <Download size={14} /> Export selected
-            </ActionButton>
-          )}
+          bulkActions={(selected, clear) => {
+            const allEligible = selected.every((claim) => claim.status === "Draft");
+            return (
+              <>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    downloadCsv(claimExportHeaders, selected.map(claimExportRow), "selected-insurance-claims.csv");
+                    clear();
+                  }}
+                >
+                  <Download size={14} /> Export selected
+                </ActionButton>
+                {canDelete ? (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    disabled={!allEligible}
+                    title={allEligible ? "Delete selected permanently" : "Only Draft claims can be deleted"}
+                    onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                ) : null}
+              </>
+            );
+          }}
         />
       </div>
 
@@ -671,6 +758,40 @@ export function AdminFinance() {
           )}
         />
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this claim" : `${deleteTarget.items.length} claims`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes the Draft insurance claim for ${deleteTarget.items[0].patientName} (${deleteTarget.items[0].insurer}). This cannot be undone.`
+                    : "This permanently removes the selected Draft insurance claims. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

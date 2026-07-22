@@ -1,17 +1,21 @@
 "use client";
 
-import { AlertTriangle, Download, Edit3, FlaskConical, TestTube2 } from "lucide-react";
+import { AlertTriangle, Download, Edit3, FlaskConical, TestTube2, Trash2 } from "lucide-react";
+import { roleHasPermission } from "@/lib/access/matrix";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderPriorities, labOrderStatuses, labPaymentStatuses } from "@/lib/lab-types";
 import type { LabSortField } from "@/lib/lab-query";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { labOrderCreateSchema, type LabOrderCreateInput } from "@/lib/validation/lab";
@@ -42,6 +46,11 @@ const pageSize = 25;
 
 export function AdminLab() {
   const openDrawer = usePatientDrawerStore((state) => state.openDrawer);
+  const role = useHospitalOsStore((state) => state.role);
+  // UI convenience only — DELETE /api/lab re-checks lab-orders:delete
+  // server-side (admin/super-admin only).
+  const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "lab-orders", "delete");
+
   const [orders, setOrders] = useState<LabOrder[]>([]);
   const [visits, setVisits] = useState<OpdVisit[]>([]);
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
@@ -57,6 +66,8 @@ export function AdminLab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingOrder, setEditingOrder] = useState<LabOrder | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ items: LabOrder[]; clearSelection?: () => void } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const sortField = (sorting[0]?.id as LabSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
@@ -190,6 +201,42 @@ export function AdminLab() {
     setEditingOrder((current) => (current?.id === id ? updated : current));
   }
 
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const order of deleteTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/lab", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: order.id })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this lab order.";
+      }
+    }
+    setIsDeleting(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Lab order deleted" : `${deleted} lab orders deleted`);
+      void loadLab();
+    }
+    if (deleted < deleteTarget.items.length) {
+      notify.error(lastError || "Some lab orders could not be deleted.");
+    }
+    setDeleteTarget(null);
+  }
+
   const statTiles = useMemo(
     () => [
       { label: "Lab Orders", value: stats.total },
@@ -309,19 +356,42 @@ export function AdminLab() {
       {
         id: "actions",
         header: "Actions",
-        size: 90,
+        size: 130,
         enableSorting: false,
         enableHiding: false,
-        cell: ({ row }) => (
-          <ActionButton variant="secondary" size="sm" onClick={() => setEditingOrder((current) => (current?.id === row.original.id ? null : row.original))} aria-expanded={editingOrder?.id === row.original.id}>
-            <Edit3 size={13} /> Result
-          </ActionButton>
-        )
+        cell: ({ row }) => {
+          const eligibleForDelete =
+            row.original.status === "Cancelled" &&
+            !row.original.resultSummary &&
+            !row.original.reportReference &&
+            row.original.paymentStatus !== "Paid" &&
+            !row.original.criticalFlag &&
+            !row.original.criticalAcknowledgedAt;
+          return (
+            <div className="flex items-center gap-1">
+              <ActionButton variant="secondary" size="sm" onClick={() => setEditingOrder((current) => (current?.id === row.original.id ? null : row.original))} aria-expanded={editingOrder?.id === row.original.id}>
+                <Edit3 size={13} /> Result
+              </ActionButton>
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  disabled={!eligibleForDelete}
+                  title={eligibleForDelete ? "Delete permanently" : "Only a Cancelled order with no result, payment or critical-flag history can be deleted"}
+                  onClick={() => setDeleteTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              ) : null}
+            </div>
+          );
+        }
       }
     ],
     // updateOrder only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openDrawer, editingOrder]
+    [openDrawer, editingOrder, canDelete]
   );
 
   return (
@@ -464,18 +534,42 @@ export function AdminLab() {
                 </label>
               </>
             }
-            bulkActions={(selected, clear) => (
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  downloadCsv(labExportHeaders, selected.map(labExportRow), "selected-lab-orders.csv");
-                  clear();
-                }}
-              >
-                <Download size={14} /> Export selected
-              </ActionButton>
-            )}
+            bulkActions={(selected, clear) => {
+              const allEligible = selected.every(
+                (order) =>
+                  order.status === "Cancelled" &&
+                  !order.resultSummary &&
+                  !order.reportReference &&
+                  order.paymentStatus !== "Paid" &&
+                  !order.criticalFlag &&
+                  !order.criticalAcknowledgedAt
+              );
+              return (
+                <>
+                  <ActionButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      downloadCsv(labExportHeaders, selected.map(labExportRow), "selected-lab-orders.csv");
+                      clear();
+                    }}
+                  >
+                    <Download size={14} /> Export selected
+                  </ActionButton>
+                  {canDelete ? (
+                    <ActionButton
+                      variant="danger"
+                      size="sm"
+                      disabled={!allEligible}
+                      title={allEligible ? "Delete selected permanently" : "Only Cancelled orders with no result, payment or critical-flag history can be deleted"}
+                      onClick={() => setDeleteTarget({ items: selected, clearSelection: clear })}
+                    >
+                      <Trash2 size={14} /> Delete selected
+                    </ActionButton>
+                  ) : null}
+                </>
+              );
+            }}
           />
 
           {editingOrder ? (
@@ -537,6 +631,40 @@ export function AdminLab() {
           ) : null}
         </div>
       </div>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}>
+        <DialogContent>
+          {deleteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteTarget.items.length === 1 ? "this lab order" : `${deleteTarget.items.length} lab orders`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteTarget.items.length === 1
+                    ? `This permanently removes token ${deleteTarget.items[0].token}'s cancelled lab order. This cannot be undone.`
+                    : "This permanently removes the selected cancelled lab orders. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeleting} onClick={() => setDeleteTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeleting}
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    const clearSelection = deleteTarget.clearSelection;
+                    await handleConfirmDelete();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

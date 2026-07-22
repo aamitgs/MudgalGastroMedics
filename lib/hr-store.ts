@@ -301,3 +301,37 @@ export async function updateAttendance(input: {
   await store.save(doc);
   return attendance;
 }
+
+/**
+ * Hard delete — Inactive staff only, and only once no attendance history
+ * references them (intra-store, cheap to check here). The legacy-login-id
+ * check (STF-ADMIN-001/STF-RECEPTION-001/STF-DOCTOR-001 + STAFF_USERS_JSON)
+ * and the automation ownerStaffId check live in the route instead: both are
+ * genuinely cross-module (staff-auth.ts and automation-store.ts), and
+ * automation-store.ts already imports getStaffById FROM this file, so this
+ * file importing back from either would be circular.
+ */
+export async function deleteStaff(id: string) {
+  const doc = await store.load();
+  const member = doc.staff.find((item) => item.id === id);
+  if (!member) return { error: "Staff record not found." };
+  if (member.status !== "Inactive") return { error: "Only Inactive staff records can be deleted." };
+
+  const hasAttendance = doc.attendance.some((record) => record.staffId === id);
+  if (hasAttendance) return { error: "This staff member has attendance history and can't be deleted." };
+
+  doc.staff = doc.staff.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { staff: member };
+}
+
+/** Hard delete — no status concept applies to attendance, so this is a plain admin/super-admin-gated removal (see app/api/hr/route.ts), audited like everything else. */
+export async function deleteAttendance(id: string) {
+  const doc = await store.load();
+  const record = doc.attendance.find((item) => item.id === id);
+  if (!record) return { error: "Attendance record not found." };
+
+  doc.attendance = doc.attendance.filter((item) => item.id !== id);
+  await store.save(doc);
+  return { attendance: record };
+}

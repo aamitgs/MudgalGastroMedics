@@ -119,6 +119,10 @@ export const financeClaimUpdateSchema = z.looseObject({
   notes: z.string().optional()
 });
 
+export const financeClaimDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Claim id is required.")
+});
+
 export const inventoryAdjustSchema = z.looseObject({
   id: z.string().default(""),
   delta: z.unknown().optional()
@@ -134,6 +138,10 @@ export const labOrderUpdateSchema = z.looseObject({
   notes: z.string().optional(),
   criticalManual: z.unknown().optional(),
   acknowledgeCritical: z.unknown().optional()
+});
+
+export const labOrderDeleteSchema = z.object({
+  id: z.string().trim().min(1, "Lab order id is required.")
 });
 
 export const notificationActionSchema = z.looseObject({

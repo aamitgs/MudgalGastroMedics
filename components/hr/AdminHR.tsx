@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarCheck2, Download, Phone, ShieldCheck, UserRoundPlus, UsersRound } from "lucide-react";
+import { CalendarCheck2, Download, Phone, ShieldCheck, Trash2, UserRoundPlus, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { AttendanceRecord, AttendanceStatus, StaffMember, StaffPermission, StaffStatus } from "@/lib/hr-types";
 import { attendanceStatuses, staffPermissions, staffRoles, staffStatuses } from "@/lib/hr-types";
 import type { AttendanceSortField } from "@/lib/attendance-query";
@@ -12,8 +13,10 @@ import { queryStaffDirectory } from "@/lib/staff-directory-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { notify } from "@/lib/notify";
+import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { attendanceCreateSchema, staffCreateSchema, type AttendanceCreateInput, type StaffCreateInput } from "@/lib/validation/hr";
 
@@ -51,6 +54,15 @@ function formatAmount(value?: number) {
 }
 
 export function AdminHR() {
+  const role = useHospitalOsStore((state) => state.role);
+  // No dedicated delete grant for admin exists in the access matrix here —
+  // the "hr" role already has hr-records:delete reserved, but the route
+  // deliberately restricts DELETE /api/hr to admin/super-admin only (see
+  // app/api/hr/route.ts), so the UI gate mirrors that explicit check rather
+  // than going through roleHasPermission.
+  const accessRole = hospitalRoleToAccessRole[role];
+  const canDelete = accessRole === "admin" || accessRole === "super-admin";
+
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,11 +74,15 @@ export function AdminHR() {
   const [staffStatusFilter, setStaffStatusFilter] = useState<StaffStatus | "">("");
   const [staffSorting, setStaffSorting] = useState<SortingState>([{ id: "name", desc: false }]);
   const [permissionsMember, setPermissionsMember] = useState<StaffMember | null>(null);
+  const [deleteStaffTarget, setDeleteStaffTarget] = useState<{ items: StaffMember[]; clearSelection?: () => void } | null>(null);
+  const [isDeletingStaff, setIsDeletingStaff] = useState(false);
 
   const [attendancePage, setAttendancePage] = useState(0);
   const [attendanceFilter, setAttendanceFilter] = useState("");
   const [attendanceStatusFilter, setAttendanceStatusFilter] = useState<AttendanceStatus | "">("");
   const [attendanceSorting, setAttendanceSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
+  const [deleteAttendanceTarget, setDeleteAttendanceTarget] = useState<{ items: AttendanceRecord[]; clearSelection?: () => void } | null>(null);
+  const [isDeletingAttendance, setIsDeletingAttendance] = useState(false);
 
   const staffSortField = (staffSorting[0]?.id as StaffSortField | undefined) ?? "name";
   const staffSortDir = staffSorting[0]?.desc ? "desc" : "asc";
@@ -270,6 +286,78 @@ export function AdminHR() {
     setAttendance((items) => items.map((item) => (item.id === id ? record : item)));
   }
 
+  async function handleConfirmDeleteStaff() {
+    if (!deleteStaffTarget) return;
+    setIsDeletingStaff(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const member of deleteStaffTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/hr", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: member.id, mode: "staff" })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this staff record.";
+      }
+    }
+    setIsDeletingStaff(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Staff record deleted" : `${deleted} staff records deleted`);
+      void loadHr();
+    }
+    if (deleted < deleteStaffTarget.items.length) {
+      notify.error(lastError || "Some staff records could not be deleted.");
+    }
+    setDeleteStaffTarget(null);
+  }
+
+  async function handleConfirmDeleteAttendance() {
+    if (!deleteAttendanceTarget) return;
+    setIsDeletingAttendance(true);
+    let deleted = 0;
+    let lastError = "";
+    for (const record of deleteAttendanceTarget.items) {
+      let response: Response;
+      try {
+        response = await fetch("/api/hr", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: record.id, mode: "attendance" })
+        });
+      } catch {
+        lastError = "Unable to reach the server. Check your connection and retry.";
+        continue;
+      }
+      const data = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (response.ok && data.ok) {
+        deleted += 1;
+      } else {
+        lastError = data.error || "Unable to delete this attendance record.";
+      }
+    }
+    setIsDeletingAttendance(false);
+
+    if (deleted > 0) {
+      notify.success(deleted === 1 ? "Attendance record deleted" : `${deleted} attendance records deleted`);
+      void loadHr();
+    }
+    if (deleted < deleteAttendanceTarget.items.length) {
+      notify.error(lastError || "Some attendance records could not be deleted.");
+    }
+    setDeleteAttendanceTarget(null);
+  }
+
   function updateStaffFilter(value: string) {
     setStaffFilter(value);
     setStaffPage(0);
@@ -375,24 +463,41 @@ export function AdminHR() {
       {
         id: "actions",
         header: "Actions",
-        size: 130,
+        size: 190,
         enableSorting: false,
         enableHiding: false,
-        cell: ({ row }) => (
-          <ActionButton
-            variant="secondary"
-            size="sm"
-            onClick={() => setPermissionsMember((current) => (current?.id === row.original.id ? null : row.original))}
-            aria-expanded={permissionsMember?.id === row.original.id}
-          >
-            <ShieldCheck size={13} /> Permissions
-          </ActionButton>
-        )
+        cell: ({ row }) => {
+          const eligibleForDelete = row.original.status === "Inactive";
+          return (
+            <div className="flex items-center gap-1">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setPermissionsMember((current) => (current?.id === row.original.id ? null : row.original))}
+                aria-expanded={permissionsMember?.id === row.original.id}
+              >
+                <ShieldCheck size={13} /> Permissions
+              </ActionButton>
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  disabled={!eligibleForDelete}
+                  title={eligibleForDelete ? "Delete permanently" : "Only Inactive staff records can be deleted"}
+                  onClick={() => setDeleteStaffTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              ) : null}
+            </div>
+          );
+        }
       }
     ],
     // updateStaffStatus only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [permissionsMember]
+    [permissionsMember, canDelete]
   );
 
   const attendanceColumns = useMemo<ColumnDef<AttendanceRecord, unknown>[]>(
@@ -431,11 +536,33 @@ export function AdminHR() {
           ) : (
             <span className="text-muted">—</span>
           )
-      }
+      },
+      ...(canDelete
+        ? [
+            {
+              id: "actions",
+              header: "Actions",
+              size: 60,
+              enableSorting: false,
+              enableHiding: false,
+              cell: ({ row }: { row: { original: AttendanceRecord } }) => (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  className="h-8 w-8 min-h-8 px-0"
+                  title="Delete permanently"
+                  onClick={() => setDeleteAttendanceTarget({ items: [row.original] })}
+                >
+                  <Trash2 size={13} />
+                </ActionButton>
+              )
+            } satisfies ColumnDef<AttendanceRecord, unknown>
+          ]
+        : [])
     ],
     // updateAttendanceStatus only forwards call-time arguments via functional setState, so it's safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [canDelete]
   );
 
   return (
@@ -629,18 +756,34 @@ export function AdminHR() {
               </select>
             </>
           }
-          bulkActions={(selected, clear) => (
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                downloadCsv(staffExportHeaders, selected.map(staffExportRow), "selected-staff.csv");
-                clear();
-              }}
-            >
-              <Download size={14} /> Export selected
-            </ActionButton>
-          )}
+          bulkActions={(selected, clear) => {
+            const allEligible = selected.every((member) => member.status === "Inactive");
+            return (
+              <>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    downloadCsv(staffExportHeaders, selected.map(staffExportRow), "selected-staff.csv");
+                    clear();
+                  }}
+                >
+                  <Download size={14} /> Export selected
+                </ActionButton>
+                {canDelete ? (
+                  <ActionButton
+                    variant="danger"
+                    size="sm"
+                    disabled={!allEligible}
+                    title={allEligible ? "Delete selected permanently" : "Only Inactive staff records can be deleted"}
+                    onClick={() => setDeleteStaffTarget({ items: selected, clearSelection: clear })}
+                  >
+                    <Trash2 size={14} /> Delete selected
+                  </ActionButton>
+                ) : null}
+              </>
+            );
+          }}
         />
 
         {permissionsMember ? (
@@ -730,19 +873,94 @@ export function AdminHR() {
             </select>
           }
           bulkActions={(selected, clear) => (
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                downloadCsv(attendanceExportHeaders, selected.map(attendanceExportRow), "selected-attendance.csv");
-                clear();
-              }}
-            >
-              <Download size={14} /> Export selected
-            </ActionButton>
+            <>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  downloadCsv(attendanceExportHeaders, selected.map(attendanceExportRow), "selected-attendance.csv");
+                  clear();
+                }}
+              >
+                <Download size={14} /> Export selected
+              </ActionButton>
+              {canDelete ? (
+                <ActionButton
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setDeleteAttendanceTarget({ items: selected, clearSelection: clear })}
+                >
+                  <Trash2 size={14} /> Delete selected
+                </ActionButton>
+              ) : null}
+            </>
           )}
         />
       </div>
+
+      <Dialog open={deleteStaffTarget !== null} onOpenChange={(open) => !open && !isDeletingStaff && setDeleteStaffTarget(null)}>
+        <DialogContent>
+          {deleteStaffTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteStaffTarget.items.length === 1 ? "this staff record" : `${deleteStaffTarget.items.length} staff records`}?</DialogTitle>
+                <DialogDescription>
+                  {deleteStaffTarget.items.length === 1
+                    ? `This permanently removes ${deleteStaffTarget.items[0].name}'s inactive staff record. This cannot be undone.`
+                    : "This permanently removes the selected inactive staff records. This cannot be undone."}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeletingStaff} onClick={() => setDeleteStaffTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeletingStaff}
+                  disabled={isDeletingStaff}
+                  onClick={async () => {
+                    const clearSelection = deleteStaffTarget.clearSelection;
+                    await handleConfirmDeleteStaff();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeletingStaff ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteAttendanceTarget !== null} onOpenChange={(open) => !open && !isDeletingAttendance && setDeleteAttendanceTarget(null)}>
+        <DialogContent>
+          {deleteAttendanceTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete {deleteAttendanceTarget.items.length === 1 ? "this attendance record" : `${deleteAttendanceTarget.items.length} attendance records`}?</DialogTitle>
+                <DialogDescription>This permanently removes the selected attendance record{deleteAttendanceTarget.items.length === 1 ? "" : "s"}. This cannot be undone.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ActionButton variant="secondary" disabled={isDeletingAttendance} onClick={() => setDeleteAttendanceTarget(null)}>
+                  Keep it
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  loading={isDeletingAttendance}
+                  disabled={isDeletingAttendance}
+                  onClick={async () => {
+                    const clearSelection = deleteAttendanceTarget.clearSelection;
+                    await handleConfirmDeleteAttendance();
+                    clearSelection?.();
+                  }}
+                >
+                  {isDeletingAttendance ? "Deleting…" : "Delete permanently"}
+                </ActionButton>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

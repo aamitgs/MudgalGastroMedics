@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryLabOrders, type LabSortField, type SortDirection } from "@/lib/lab-query";
-import { createLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
+import { createLabOrder, deleteLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
 import { labOrderStatuses } from "@/lib/lab-types";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { listOpdVisits } from "@/lib/opd-store";
-import { labOrderUpdateSchema } from "@/lib/validation/operations";
+import { labOrderDeleteSchema, labOrderUpdateSchema } from "@/lib/validation/operations";
 
 const sortFields: LabSortField[] = ["patientName", "token", "status", "priority", "createdAt"];
 
@@ -116,4 +116,28 @@ export async function PATCH(request: Request) {
   }
 
   return NextResponse.json({ ok: true, order });
+}
+
+export async function DELETE(request: Request) {
+  const auth = await authorize(request, "lab-orders", "delete");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+
+  const parsed = labOrderDeleteSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ ok: false, error: "Lab order id is required." }, { status: 400 });
+
+  const result = await deleteLabOrder(parsed.data.id);
+  if ("error" in result) return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+
+  await recordAuditEvent({
+    actorRole: auth.context.activeRole,
+    actorId: auth.context.userId,
+    action: "lab.order.deleted",
+    entityType: "lab-order",
+    entityId: parsed.data.id,
+    severity: "warning",
+    before: result.order,
+    device: auditRequestMetadata(request)
+  });
+
+  return NextResponse.json({ ok: true });
 }

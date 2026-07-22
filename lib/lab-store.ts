@@ -148,3 +148,32 @@ export async function updateLabOrder(input: {
   await docStore.save(doc);
   return order;
 }
+
+/**
+ * Hard delete — only a Cancelled order with no result, no payment and no
+ * critical flag ever recorded. resultSummary/reportReference are real
+ * diagnostic documentation independent of status; paymentStatus "Paid" is
+ * real financial movement; a critical flag (even a since-unmarked one still
+ * has criticalAcknowledgedAt/By set, which this checks too) is a recorded
+ * panic value a doctor may have signed off on — none of those are safe to
+ * erase regardless of the order's current status.
+ */
+export async function deleteLabOrder(id: string) {
+  const doc = await docStore.load();
+  const order = doc.orders.find((item) => item.id === id);
+  if (!order) return { error: "Lab order not found." };
+  if (
+    order.status !== "Cancelled" ||
+    order.resultSummary ||
+    order.reportReference ||
+    order.paymentStatus === "Paid" ||
+    order.criticalFlag ||
+    order.criticalAcknowledgedAt
+  ) {
+    return { error: "Only a Cancelled order with no result, payment or critical-flag history can be deleted." };
+  }
+
+  doc.orders = doc.orders.filter((item) => item.id !== id);
+  await docStore.save(doc);
+  return { order };
+}
