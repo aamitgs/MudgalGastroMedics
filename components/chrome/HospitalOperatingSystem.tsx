@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Building2, Download, Eye } from "lucide-react";
+import { Building2, Download, Eye, Stethoscope } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -326,6 +326,23 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
           rule flags exactly that as an invalid jump once a later h3 (e.g. an
           empty-state) appears with no h2 between it and the page's h1. */}
       {roleTodayBand}
+
+      {role === "Doctor" ? (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-line bg-surface p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand">
+              <Stethoscope size={22} />
+            </span>
+            <div>
+              <p className="font-bold text-ink">Continue to your clinical workspace</p>
+              <p className="text-sm text-muted">OPD queue, patient context, prescriptions and follow-up planning.</p>
+            </div>
+          </div>
+          <ActionButton variant="primary" onClick={() => window.location.assign("/mudgalgastromedics-os/doctor-portal")}>
+            Open Doctor Portal
+          </ActionButton>
+        </div>
+      ) : null}
 
       {access.clinicalWorkspace ? <PatientWorkspace rows={rows} /> : null}
 

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { clearAdminSessionCookie, clearAdminStaffCookie, createAdminSessionCookie, createAdminStaffCookie, isValidAdminPasscode } from "@/lib/admin-auth";
+import { accessRoleForStaffRole } from "@/lib/access/guard";
+import { roleMeta } from "@/lib/access/matrix";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { getStaffById } from "@/lib/hr-store";
 import { authenticateStaffUser } from "@/lib/staff-auth";
@@ -37,7 +39,14 @@ export async function POST(request: Request) {
     device: auditRequestMetadata(request)
   });
 
-  const response = NextResponse.json({ ok: true, staff });
+  // Same role-keyed landing the primary RBAC login already returns
+  // (app/api/auth/login) — this legacy cookie path just never carried it, so
+  // every role fell through to a page reload of whatever the generic
+  // dashboard route resolves to, doctors included.
+  const accessRole = accessRoleForStaffRole(staff.role);
+  const landing = accessRole ? roleMeta[accessRole].landing : "/mudgalgastromedics-os";
+
+  const response = NextResponse.json({ ok: true, staff, landing });
   response.cookies.set(createAdminSessionCookie(staff?.id));
   response.cookies.set(createAdminStaffCookie(staff?.id));
   return response;

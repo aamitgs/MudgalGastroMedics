@@ -42,7 +42,7 @@ const unauthenticated: AccessContext = {
  * with no safe RBAC equivalent (e.g. Housekeeping) so the caller fails closed
  * instead of guessing broad access.
  */
-function accessRoleForStaffRole(role: StaffRole): AccessRole | null {
+export function accessRoleForStaffRole(role: StaffRole): AccessRole | null {
   switch (role) {
     case "Admin":
       return "super-admin";

@@ -29,7 +29,7 @@ export function AdminLogin() {
       return;
     }
 
-    window.location.reload();
+    window.location.assign(data.landing || "/mudgalgastromedics-os");
   }
 
   return (
