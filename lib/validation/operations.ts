@@ -37,7 +37,7 @@ export const appointmentStaffBookingSchema = z.object({
   phone: z.string().trim().refine(isValidPhoneNumber, "Enter a valid phone number."),
   service: z.string().trim().min(1, "Select an appointment type."),
   date: z.string().trim().optional(),
-  timeSlot: z.string().trim().optional(),
+  timeSlot: z.string().trim().min(1, "Select a preferred time."),
   priority: z.string().trim().optional(),
   message: z.string().trim().optional()
 });

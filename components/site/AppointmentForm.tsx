@@ -319,7 +319,6 @@ export function AppointmentForm() {
           <label className="lg:col-span-3">
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Preferred Time</span><span data-hi lang="hi">पसंदीदा समय</span></span>
             <select name="timeSlot" className={fieldClass}>
-              <option>Flexible</option>
               <option>Morning {opdWindows[0].startLabel}-{opdWindows[0].endLabel}</option>
               <option>Evening {opdWindows[1].startLabel}-{opdWindows[1].endLabel}</option>
             </select>

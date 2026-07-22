@@ -24,6 +24,12 @@ const appointmentServices = ["OPD", "IPD"];
 const appointmentPriorities = ["Routine", "Soon", "Urgent symptoms"];
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
 
+/** Local calendar date (not UTC) — matches the plain YYYY-MM-DD the date input/store use. */
+function todayDateString() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
 const appointmentExportHeaders = ["Name", "Phone", "Service", "Date", "Time Slot", "Priority", "Status", "Created"];
 
 function appointmentExportRow(appointment: AppointmentRecord) {
@@ -162,7 +168,7 @@ export function AdminAppointments() {
     submit: submitBooking
   } = useAdvancedForm<AppointmentStaffBookingInput>({
     schema: appointmentStaffBookingSchema,
-    defaultValues: { name: "", phone: "", service: "", date: "", timeSlot: "", priority: "Routine", message: "" },
+    defaultValues: { name: "", phone: "", service: "", date: "", timeSlot: `Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`, priority: "Routine", message: "" },
     async onValid(values) {
       let response: Response;
       try {
@@ -243,18 +249,23 @@ export function AdminAppointments() {
         accessorKey: "status",
         header: "Status",
         size: 140,
-        cell: ({ row }) => (
-          <select
-            aria-label="Appointment status"
-            value={row.original.status}
-            onChange={(event) => void updateStatus(row.original.id, event.target.value as AppointmentStatus)}
-            className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] ${getStatusToneClass(statusTone[row.original.status])}`}
-          >
-            {appointmentStatuses.map((status) => (
-              <option key={status}>{status}</option>
-            ))}
-          </select>
-        )
+        cell: ({ row }) => {
+          const cancelled = row.original.status === "Cancelled";
+          return (
+            <select
+              aria-label="Appointment status"
+              value={row.original.status}
+              onChange={(event) => void updateStatus(row.original.id, event.target.value as AppointmentStatus)}
+              disabled={cancelled}
+              title={cancelled ? "Cancelled — status is final" : undefined}
+              className={`rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-60 ${getStatusToneClass(statusTone[row.original.status])}`}
+            >
+              {appointmentStatuses.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+          );
+        }
       },
       {
         id: "actions",
@@ -262,35 +273,56 @@ export function AdminAppointments() {
         size: 170,
         enableSorting: false,
         enableHiding: false,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <a href={`tel:${row.original.phone}`} title="Call" className="grid h-8 w-8 place-items-center rounded border border-line text-ink hover:border-brand hover:text-brand">
-              <Phone size={14} />
-            </a>
-            <a
-              href={`https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noreferrer"
-              title="WhatsApp"
-              className="grid h-8 w-8 place-items-center rounded border border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950"
-            >
-              <MessageCircle size={14} />
-            </a>
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              title="AI Plan"
-              aria-expanded={planAppointment?.id === row.original.id}
-              onClick={() => setPlanAppointment((current) => (current?.id === row.original.id ? null : row.original))}
-              className="h-8 w-8 min-h-8 border-cyan-200 bg-cyan-50 px-0 text-brand hover:bg-cyan-100 dark:border-cyan-900 dark:bg-cyan-950"
-            >
-              <BrainCircuit size={14} />
-            </ActionButton>
-            <ActionButton variant="success" size="sm" title="Create OPD Token" onClick={() => void createOpdToken(row.original.id)} className="h-8 w-8 min-h-8 px-0">
-              <CalendarDays size={14} />
-            </ActionButton>
-          </div>
-        )
+        cell: ({ row }) => {
+          const cancelled = row.original.status === "Cancelled";
+          const onAppointmentDate = !row.original.date || row.original.date === todayDateString();
+          const canCreateOpdToken = !cancelled && onAppointmentDate;
+          return (
+            <div className="flex items-center gap-1">
+              <a
+                href={cancelled ? undefined : `tel:${row.original.phone}`}
+                aria-disabled={cancelled}
+                tabIndex={cancelled ? -1 : undefined}
+                title={cancelled ? "Cancelled — locked" : "Call"}
+                className={`grid h-8 w-8 place-items-center rounded border ${cancelled ? "pointer-events-none border-line/50 text-muted opacity-40" : "border-line text-ink hover:border-brand hover:text-brand"}`}
+              >
+                <Phone size={14} />
+              </a>
+              <a
+                href={cancelled ? undefined : `https://wa.me/${row.original.phone.replace(/\D/g, "")}`}
+                target={cancelled ? undefined : "_blank"}
+                rel={cancelled ? undefined : "noreferrer"}
+                aria-disabled={cancelled}
+                tabIndex={cancelled ? -1 : undefined}
+                title={cancelled ? "Cancelled — locked" : "WhatsApp"}
+                className={`grid h-8 w-8 place-items-center rounded border ${cancelled ? "pointer-events-none border-line/50 text-muted opacity-40" : "border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950"}`}
+              >
+                <MessageCircle size={14} />
+              </a>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                title={cancelled ? "Cancelled — locked" : "AI Plan"}
+                disabled={cancelled}
+                aria-expanded={planAppointment?.id === row.original.id}
+                onClick={() => setPlanAppointment((current) => (current?.id === row.original.id ? null : row.original))}
+                className="h-8 w-8 min-h-8 border-cyan-200 bg-cyan-50 px-0 text-brand hover:bg-cyan-100 dark:border-cyan-900 dark:bg-cyan-950"
+              >
+                <BrainCircuit size={14} />
+              </ActionButton>
+              <ActionButton
+                variant="success"
+                size="sm"
+                title={canCreateOpdToken ? "Create OPD Token" : cancelled ? "Cancelled — locked" : "Available on the appointment date"}
+                disabled={!canCreateOpdToken}
+                onClick={() => void createOpdToken(row.original.id)}
+                className="h-8 w-8 min-h-8 px-0"
+              >
+                <CalendarDays size={14} />
+              </ActionButton>
+            </div>
+          );
+        }
       }
     ],
     // updateStatus/createOpdToken only forward call-time arguments via functional setState, so they're safe to omit.
@@ -361,9 +393,8 @@ export function AdminAppointments() {
                   </FormField>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <FormField label="Preferred time" htmlFor="booking-time-slot">
-                    <select id="booking-time-slot" className={fieldClass} defaultValue="" {...register("timeSlot")}>
-                      <option value="">Flexible</option>
+                  <FormField label="Preferred time" htmlFor="booking-time-slot" required error={errors.timeSlot?.message}>
+                    <select id="booking-time-slot" className={fieldClass} {...register("timeSlot")}>
                       <option>{`Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`}</option>
                       <option>{`Evening ${opdWindows[1].startLabel}-${opdWindows[1].endLabel}`}</option>
                     </select>
