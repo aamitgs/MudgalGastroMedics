@@ -234,7 +234,11 @@ export const navItems: NavItem[] = [
   // "Patients" points at the dashboard's own real, live OperationsTable
   // (patient-flow overview); "Patient Registry" is the dedicated full-CRUD
   // /mudgalgastromedics-os/patients page — genuinely different views, both kept.
-  { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("patients") },
+  // Roles gated on "appointments" (not "patients") to match sectionPermission.patientFlow
+  // below, which is what actually gates #operations-table's rendering — otherwise a
+  // patients-view-only role (e.g. Lab Tech, Billing/Accounts) sees this item but its
+  // target never mounts, and the click silently does nothing.
+  { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("appointments") },
   { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },

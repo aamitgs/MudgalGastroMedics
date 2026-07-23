@@ -1,6 +1,7 @@
 "use client";
 
 import Fuse from "fuse.js";
+import { useReducedMotion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -135,6 +136,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const [liveSearchResults, setLiveSearchResults] = useState<CommandRecord[]>([]);
   const [activeDashboardSection, setActiveDashboardSection] = useState(dashboardSectionIds[0]);
   const navRef = useRef<HTMLElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   // Live entity search (/api/search) — the server already gates each category
   // by the same RBAC matrix enforced everywhere else, so no client-side
@@ -294,6 +296,20 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
       window.removeEventListener("scroll", onScroll);
     };
   }, [pathname]);
+
+  // Dashboard/Notifications/Patients clicks while already on the dashboard page:
+  // native <a href="#hash"> scrolling silently no-ops when the target's scroll
+  // position doesn't change (e.g. #realtime-feed sits beside #analytics in the
+  // xl+ grid, so clicking "Notifications" moves nothing). A brief ring flash on
+  // the destination section gives the click visible confirmation regardless of
+  // whether the page actually scrolled.
+  function focusDashboardSection(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    el.classList.add("ring-4", "ring-brand/30", "transition-shadow", "duration-300");
+    window.setTimeout(() => el.classList.remove("ring-4", "ring-brand/30"), 900);
+  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -479,7 +495,17 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                           href={href}
                           key={label}
                           data-nav-item
-                          onClick={() => setMobileNav(false)}
+                          onClick={(event) => {
+                            setMobileNav(false);
+                            if (!hrefHash || pathname !== hrefPath) return;
+                            // Already on the target page — a full navigation (and its
+                            // native anchor-scroll) would be a no-op, so drive the
+                            // scroll/highlight ourselves instead of letting the <a> fire.
+                            event.preventDefault();
+                            window.history.pushState(null, "", href);
+                            setActiveDashboardSection(hrefHash);
+                            focusDashboardSection(hrefHash);
+                          }}
                           className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-soft ${isCurrentPage ? "bg-brand text-white hover:bg-brand" : "text-muted"}`}
                           title={sidebarCollapsed ? label : undefined}
                           aria-current={isCurrentPage ? "page" : undefined}
