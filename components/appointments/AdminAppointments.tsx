@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, Clock3, Copy, Download, MessageCircle, Phone, Plus, Trash2, UserRound } from "lucide-react";
+import { AlertTriangle, BrainCircuit, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Copy, Download, MessageCircle, Phone, Plus, Trash2, UserRound, UsersRound } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { createAppointmentPlanningNote } from "@/lib/ai-planning";
@@ -9,6 +9,7 @@ import type { AppointmentRecord, AppointmentStatus } from "@/lib/appointment-typ
 import { appointmentStatuses } from "@/lib/appointment-types";
 import type { AppointmentSortField } from "@/lib/appointment-query";
 import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
+import { bloodGroups } from "@/lib/patient-types";
 import { opdWindows } from "@/lib/site-data";
 import { downloadCsv } from "@/lib/table-export";
 import { appointmentStaffBookingSchema, type AppointmentStaffBookingInput } from "@/lib/validation/operations";
@@ -18,15 +19,19 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
+import { RecentValueChips } from "@/components/design-system/RecentValueChips";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+import { useRecentValues } from "@/hooks/useRecentValues";
 
 const appointmentServices = ["OPD", "IPD"];
 const appointmentPriorities = ["Routine", "Soon", "Urgent symptoms"];
 const fieldClass = "min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10";
+
+type DuplicateMatch = { id: string; uhid: string; name: string; phone: string; age?: string; gender?: string; bloodGroup?: string; allergies?: string };
 
 /** Local calendar date (not UTC) — matches the plain YYYY-MM-DD the date input/store use. */
 function todayDateString() {
@@ -89,9 +94,30 @@ export function AdminAppointments() {
   const [planAppointment, setPlanAppointment] = useState<AppointmentRecord | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ items: AppointmentRecord[]; clearSelection?: () => void } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
+  const [typedName, setTypedName] = useState("");
+  const [confirmedNewPatient, setConfirmedNewPatient] = useState(false);
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
 
   const sortField = (sorting[0]?.id as AppointmentSortField | undefined) ?? "createdAt";
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
+
+  // Reception unified booking (Reception module): reuses the exact same
+  // phone-match duplicate check the Patients registration form already has
+  // (Track 0.3) — so booking recognizes a returning patient by phone instead
+  // of always creating a fresh record via upsertPatientFromInput, and
+  // reception never has to leave this page to search the Patients module
+  // first or retype details that are already on file.
+  async function checkDuplicate(phone: string) {
+    setConfirmedNewPatient(false);
+    if (phone.replace(/\D/g, "").length < 6) {
+      setDuplicateMatch(null);
+      return;
+    }
+    const response = await fetch(`/api/patients/match?phone=${encodeURIComponent(phone)}`, { cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    setDuplicateMatch(response.ok && data.ok ? data.match : null);
+  }
 
   async function loadAppointments() {
     setLoading(true);
@@ -208,21 +234,44 @@ export function AdminAppointments() {
     setDeleteTarget(null);
   }
 
+  const allergyRecents = useRecentValues("patient-allergies");
+  const conditionRecents = useRecentValues("patient-chronic-conditions");
+  const medicineRecents = useRecentValues("patient-current-medicines");
+
   const {
     register,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
     reset: resetBookingForm,
     submit: submitBooking
   } = useAdvancedForm<AppointmentStaffBookingInput>({
     schema: appointmentStaffBookingSchema,
-    defaultValues: { name: "", phone: "", service: "", date: "", timeSlot: `Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`, priority: "Routine", message: "" },
+    defaultValues: {
+      name: "",
+      phone: "",
+      service: "",
+      date: "",
+      timeSlot: `Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`,
+      priority: "Routine",
+      message: "",
+      email: "",
+      age: "",
+      gender: "",
+      bloodGroup: "",
+      address: "",
+      emergencyContact: "",
+      allergies: "",
+      chronicConditions: "",
+      currentMedicines: ""
+    },
     async onValid(values) {
       let response: Response;
       try {
         response = await fetch("/api/appointment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values)
+          body: JSON.stringify({ ...values, forceNew: duplicateMatch && confirmedNewPatient })
         });
       } catch {
         notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitBooking());
@@ -234,10 +283,22 @@ export function AdminAppointments() {
         return;
       }
       notify.success("Appointment booked", { description: `${data.appointment.name} · ${data.appointment.uhid ?? data.appointment.id}` });
+      for (const token of (values.allergies ?? "").split(",")) allergyRecents.remember(token);
+      for (const token of (values.chronicConditions ?? "").split(",")) conditionRecents.remember(token);
+      for (const token of (values.currentMedicines ?? "").split(",")) medicineRecents.remember(token);
       resetBookingForm();
+      setDuplicateMatch(null);
+      setConfirmedNewPatient(false);
+      setTypedName("");
+      setShowMoreDetails(false);
       void loadAppointments();
     }
   });
+
+  function insertRecentValue(field: "allergies" | "chronicConditions" | "currentMedicines", value: string) {
+    const current = (getValues(field) ?? "").trim();
+    setValue(field, current ? `${current}, ${value}` : value, { shouldValidate: true });
+  }
 
   const statTiles = useMemo(
     () => [
@@ -414,15 +475,125 @@ export function AdminAppointments() {
               <Plus size={19} /> New appointment
             </p>
             <div className="grid gap-4">
-              <FormSection title="Patient" description="Booking on behalf of a caller — the same record a website request would create.">
+              <FormSection title="Patient" description="Search by phone first — an existing patient's details load automatically, no retyping.">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <FormField label="Patient name" htmlFor="booking-name" required error={errors.name?.message}>
-                    <input id="booking-name" className={fieldClass} placeholder="Patient name" {...register("name")} />
+                    <input
+                      id="booking-name"
+                      className={fieldClass}
+                      placeholder="Patient name"
+                      {...register("name", { onChange: (event) => setTypedName(event.target.value) })}
+                    />
                   </FormField>
                   <FormField label="Phone" htmlFor="booking-phone" required error={errors.phone?.message}>
-                    <input id="booking-phone" className={fieldClass} placeholder="Mobile number" inputMode="tel" {...register("phone")} />
+                    <input
+                      id="booking-phone"
+                      className={fieldClass}
+                      placeholder="Mobile number"
+                      inputMode="tel"
+                      {...register("phone", { onBlur: (event) => void checkDuplicate(event.target.value) })}
+                    />
                   </FormField>
                 </div>
+
+                {duplicateMatch ? (
+                  <div className="flex items-start gap-2.5 rounded border-2 border-amber-300 bg-amber-50 p-3 dark:bg-amber-950" role="alert">
+                    <UsersRound size={18} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div className="flex-1 text-sm text-amber-900 dark:text-amber-200">
+                      <p className="font-black uppercase tracking-[0.1em] text-amber-700 dark:text-amber-300">Existing patient found</p>
+                      <p className="mt-1">
+                        {duplicateMatch.name} · {duplicateMatch.uhid} · {duplicateMatch.phone}
+                        {duplicateMatch.age || duplicateMatch.gender ? ` · ${[duplicateMatch.age, duplicateMatch.gender].filter(Boolean).join(", ")}` : ""}
+                        {duplicateMatch.bloodGroup ? ` · ${duplicateMatch.bloodGroup}` : ""}
+                      </p>
+                      {duplicateMatch.allergies ? <p className="mt-1 font-bold text-red-700 dark:text-red-300">Allergies: {duplicateMatch.allergies}</p> : null}
+                      {typedName.trim() && typedName.trim().toLowerCase() !== duplicateMatch.name.toLowerCase() ? (
+                        <p className="mt-1 text-xs">Typed name differs from the record on file — confirm this is the same person before booking.</p>
+                      ) : null}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmedNewPatient(false)}
+                          aria-pressed={!confirmedNewPatient}
+                          className={`rounded border px-3 py-1.5 text-xs font-bold transition ${!confirmedNewPatient ? "border-amber-600 bg-amber-600 text-white" : "border-amber-300 bg-white text-amber-800"}`}
+                        >
+                          Same person — book for them
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmedNewPatient(true)}
+                          aria-pressed={confirmedNewPatient}
+                          className={`rounded border px-3 py-1.5 text-xs font-bold transition ${confirmedNewPatient ? "border-amber-600 bg-amber-600 text-white" : "border-amber-300 bg-white text-amber-800"}`}
+                        >
+                          Different person, same number
+                        </button>
+                      </div>
+                      {confirmedNewPatient ? (
+                        <p className="mt-2 text-xs">Booking will create a new, separate patient record with its own UHID, even though the number matches {duplicateMatch.name}.</p>
+                      ) : (
+                        <p className="mt-2 text-xs">Booking will use {duplicateMatch.name}&apos;s existing record — no new UHID is generated.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreDetails((current) => !current)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-brand hover:underline"
+                  >
+                    {showMoreDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    {showMoreDetails ? "Hide" : "Add"} more patient details (optional — for a new patient)
+                  </button>
+                )}
+
+                {showMoreDetails && !duplicateMatch ? (
+                  <div className="grid gap-3 rounded border border-line/70 bg-mist/40 p-3">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <FormField label="Age" htmlFor="booking-age" error={errors.age?.message}>
+                        <input id="booking-age" className={fieldClass} placeholder="Age" inputMode="numeric" {...register("age")} />
+                      </FormField>
+                      <FormField label="Gender" htmlFor="booking-gender">
+                        <select id="booking-gender" className={fieldClass} defaultValue="" {...register("gender")}>
+                          <option value="">Gender</option>
+                          <option>Female</option>
+                          <option>Male</option>
+                          <option>Other</option>
+                        </select>
+                      </FormField>
+                      <FormField label="Blood group" htmlFor="booking-blood-group">
+                        <select id="booking-blood-group" className={fieldClass} defaultValue="" {...register("bloodGroup")}>
+                          <option value="">Blood group</option>
+                          {bloodGroups.filter(Boolean).map((group) => (
+                            <option key={group}>{group}</option>
+                          ))}
+                        </select>
+                      </FormField>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <FormField label="Email" htmlFor="booking-email" error={errors.email?.message}>
+                        <input id="booking-email" className={fieldClass} placeholder="Email" type="email" {...register("email")} />
+                      </FormField>
+                      <FormField label="Emergency contact" htmlFor="booking-emergency-contact" error={errors.emergencyContact?.message}>
+                        <input id="booking-emergency-contact" className={fieldClass} placeholder="Emergency contact" {...register("emergencyContact")} />
+                      </FormField>
+                    </div>
+                    <FormField label="Address" htmlFor="booking-address" error={errors.address?.message}>
+                      <textarea id="booking-address" className={`${fieldClass} min-h-16 py-3`} placeholder="Address" {...register("address")} />
+                    </FormField>
+                    <FormField label="Allergies / drug reactions" htmlFor="booking-allergies" error={errors.allergies?.message}>
+                      <textarea id="booking-allergies" className={`${fieldClass} min-h-16 py-3`} placeholder="Allergies / drug reactions" {...register("allergies")} />
+                      <RecentValueChips values={allergyRecents.values} onPick={(value) => insertRecentValue("allergies", value)} />
+                    </FormField>
+                    <FormField label="Chronic conditions" htmlFor="booking-chronic-conditions" error={errors.chronicConditions?.message}>
+                      <textarea id="booking-chronic-conditions" className={`${fieldClass} min-h-16 py-3`} placeholder="Chronic conditions, liver disease history, diabetes, hypertension..." {...register("chronicConditions")} />
+                      <RecentValueChips values={conditionRecents.values} onPick={(value) => insertRecentValue("chronicConditions", value)} />
+                    </FormField>
+                    <FormField label="Current medicines" htmlFor="booking-current-medicines" error={errors.currentMedicines?.message}>
+                      <textarea id="booking-current-medicines" className={`${fieldClass} min-h-16 py-3`} placeholder="Current medicines" {...register("currentMedicines")} />
+                      <RecentValueChips values={medicineRecents.values} onPick={(value) => insertRecentValue("currentMedicines", value)} />
+                    </FormField>
+                  </div>
+                ) : null}
               </FormSection>
 
               <FormSection title="Visit">

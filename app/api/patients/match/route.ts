@@ -3,11 +3,16 @@ import { authorize } from "@/lib/access/guard";
 import { findPatientByPhone } from "@/lib/patient-store";
 
 /**
- * Duplicate-patient detection at registration (Clinical Safety, Track 0.3).
- * Returns an existing patient matched by phone so the registration form can
- * warn staff *before* they submit — the store merges on phone match, so a
- * "new" registration silently updates the existing record. Surfacing this
- * prevents duplicate records and wrong-patient edits (e.g. a shared number).
+ * Duplicate-patient detection at registration (Clinical Safety, Track 0.3) —
+ * also reused by the Appointments staff booking form (Reception unified
+ * booking) so reception sees the same "existing patient found" context
+ * before booking, not just before registering. Returns an existing patient
+ * matched by phone so the form can warn staff *before* they submit — the
+ * store merges on phone match, so a "new" registration/booking silently
+ * updates the existing record. Surfacing this prevents duplicate records and
+ * wrong-patient edits (e.g. a shared number). age/gender/bloodGroup/allergies
+ * are included so booking can show useful context inline without a second
+ * lookup or navigating to the patient's own record.
  */
 export async function GET(request: Request) {
   const auth = await authorize(request, "patients", "view");
@@ -23,6 +28,15 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    match: { id: patient.id, uhid: patient.uhid, name: patient.name, phone: patient.phone }
+    match: {
+      id: patient.id,
+      uhid: patient.uhid,
+      name: patient.name,
+      phone: patient.phone,
+      age: patient.age,
+      gender: patient.gender,
+      bloodGroup: patient.bloodGroup,
+      allergies: patient.allergies
+    }
   });
 }

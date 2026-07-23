@@ -32,6 +32,11 @@ export const appointmentCreateSchema = z.looseObject({
  * never reaches the route; the form still POSTs to the same /api/appointment
  * body shape appointmentCreateSchema accepts.
  */
+// Patient-profile fields below are optional on this schema on purpose — the
+// fast path (existing patient found by phone, or a new patient with just a
+// name) never has to fill them in. They only get used when reception
+// expands "Add more patient details" for a genuinely new patient (Reception
+// unified booking flow) and flow straight through to upsertPatientFromInput.
 export const appointmentStaffBookingSchema = z.object({
   name: z.string().trim().min(1, "Patient name is required."),
   phone: z.string().trim().refine(isValidPhoneNumber, "Enter a valid phone number."),
@@ -39,7 +44,16 @@ export const appointmentStaffBookingSchema = z.object({
   date: z.string().trim().optional(),
   timeSlot: z.string().trim().min(1, "Select a preferred time."),
   priority: z.string().trim().optional(),
-  message: z.string().trim().optional()
+  message: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+  age: z.string().trim().optional(),
+  gender: z.string().trim().optional(),
+  bloodGroup: z.string().trim().optional(),
+  address: z.string().trim().optional(),
+  emergencyContact: z.string().trim().optional(),
+  allergies: z.string().trim().optional(),
+  chronicConditions: z.string().trim().optional(),
+  currentMedicines: z.string().trim().optional()
 });
 
 export type AppointmentStaffBookingInput = z.infer<typeof appointmentStaffBookingSchema>;

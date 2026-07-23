@@ -52,15 +52,30 @@ export async function upsertPatientFromInput(input: Record<string, unknown>) {
   const phone = normalizeText(input.phone);
   const name = normalizeText(input.name);
   const doc = await store.load();
-  const existing = findByPhoneIn(doc.patients, phone);
+  // Same forceNew override as createPatient — a phone match usually means
+  // the same person re-booking, but the Appointments staff booking form's
+  // duplicate-detection banner lets reception explicitly say "different
+  // person, same number" instead of silently overwriting the existing name.
+  const existing = input.forceNew === true ? null : findByPhoneIn(doc.patients, phone);
   const now = new Date().toISOString();
+
+  // input.medicines (public-site booking form's own field name) and
+  // input.currentMedicines (staff booking form, matching Patient
+  // registration's field name) are two different callers of this same
+  // upsert — accept either so neither loses data.
+  const currentMedicines = normalizeText(input.currentMedicines) || normalizeText(input.medicines);
 
   if (existing) {
     existing.name = name || existing.name;
     existing.email = normalizeText(input.email) || existing.email;
     existing.age = normalizeText(input.age) || existing.age;
     existing.gender = normalizeText(input.gender) || existing.gender;
-    existing.currentMedicines = normalizeText(input.medicines) || existing.currentMedicines;
+    existing.currentMedicines = currentMedicines || existing.currentMedicines;
+    existing.bloodGroup = normalizeText(input.bloodGroup) || existing.bloodGroup;
+    existing.address = normalizeText(input.address) || existing.address;
+    existing.emergencyContact = normalizeText(input.emergencyContact) || existing.emergencyContact;
+    existing.allergies = normalizeText(input.allergies) || existing.allergies;
+    existing.chronicConditions = normalizeText(input.chronicConditions) || existing.chronicConditions;
     existing.updatedAt = now;
     existing.lastVisitAt = now;
     await store.save(doc);
@@ -78,7 +93,12 @@ export async function upsertPatientFromInput(input: Record<string, unknown>) {
     email: normalizeText(input.email),
     age: normalizeText(input.age),
     gender: normalizeText(input.gender),
-    currentMedicines: normalizeText(input.medicines),
+    bloodGroup: normalizeText(input.bloodGroup),
+    address: normalizeText(input.address),
+    emergencyContact: normalizeText(input.emergencyContact),
+    allergies: normalizeText(input.allergies),
+    chronicConditions: normalizeText(input.chronicConditions),
+    currentMedicines,
     notes: normalizeText(input.message),
     lastVisitAt: now
   };
