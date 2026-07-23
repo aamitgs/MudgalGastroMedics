@@ -110,12 +110,12 @@ export async function PATCH(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
-  const { id, status, billingStatus, estimatedAmount, paymentMethod, notes, clinicalNote, diagnosis, prescription, advice, followUpDate, referralTo, referralLetter, certificateNote, refundAction, refundReason, refundAmount } = parsed.data;
+  const { id, status, billingStatus, estimatedAmount, paymentMethod, notes, clinicalNote, diagnosis, prescription, prescriptionItems, advice, followUpDate, referralTo, referralLetter, certificateNote, refundAction, refundReason, refundAmount } = parsed.data;
 
   // Field-level enforcement: clinical fields need prescription rights, billing
   // fields need billing rights, and plain queue/status changes only need
   // appointment rights — so a nurse can move the queue but not write an Rx.
-  const touchesClinical = [clinicalNote, diagnosis, prescription, advice, followUpDate, referralTo, referralLetter, certificateNote].some((value) => value !== undefined);
+  const touchesClinical = [clinicalNote, diagnosis, prescription, prescriptionItems, advice, followUpDate, referralTo, referralLetter, certificateNote].some((value) => value !== undefined);
   const touchesBilling = [billingStatus, estimatedAmount, paymentMethod].some((value) => value !== undefined) || Boolean(refundAction);
   const auth = await authorize(
     request,
@@ -138,6 +138,7 @@ export async function PATCH(request: Request) {
     clinicalNote,
     diagnosis,
     prescription,
+    prescriptionItems,
     advice,
     followUpDate,
     referralTo,

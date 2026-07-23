@@ -330,6 +330,38 @@ body.lang-hi .inline-lang [data-hi] {
     white-space: pre-line;
   }
 
+  .print-rx-table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+  }
+
+  .print-rx-table th {
+    border-bottom: 1px solid #cdeef4;
+    padding: 6px 8px;
+    color: #087d9e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .print-rx-table td {
+    border-bottom: 1px solid #e6f7fa;
+    padding: 6px 8px;
+    color: #213f49;
+    font-size: 12px;
+    vertical-align: top;
+  }
+
+  .print-rx-table .rx-hindi {
+    display: block;
+    margin-top: 2px;
+    color: #4c6570;
+    font-size: 11px;
+  }
+
   .print-footer {
     display: flex;
     justify-content: space-between;

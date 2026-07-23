@@ -5,6 +5,14 @@ const optionalText = z.string().trim().optional();
 const billingStatuses = ["Not Started", "Estimate Shared", "Paid"] as const;
 const paymentMethods = ["Cash", "UPI", "Card", "Insurance", "Other"] as const;
 
+const prescriptionItemSchema = z.object({
+  id: z.string().trim().min(1),
+  medicine: z.string().trim().min(1, "Medicine name is required."),
+  strength: optionalText,
+  instruction: z.string().trim().min(1, "Instruction is required."),
+  days: optionalText
+});
+
 export const opdVisitCreateSchema = z
   .object({
     appointmentId: optionalText,
@@ -32,6 +40,7 @@ export const opdVisitUpdateSchema = z.object({
   clinicalNote: optionalText,
   diagnosis: optionalText,
   prescription: optionalText,
+  prescriptionItems: z.array(prescriptionItemSchema).optional(),
   advice: optionalText,
   followUpDate: optionalText,
   referralTo: optionalText,

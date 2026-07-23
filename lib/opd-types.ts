@@ -1,5 +1,19 @@
 export type OpdVisitStatus = "Waiting" | "In Consultation" | "Completed" | "Cancelled";
 
+/**
+ * One row of a structured prescription (Track: prescription pad redesign).
+ * `instruction` holds either a prescriptionInstructionPresets id (resolved to
+ * its bilingual label at render time) or free-typed text for anything the
+ * preset list doesn't cover.
+ */
+export type PrescriptionItem = {
+  id: string;
+  medicine: string;
+  strength?: string;
+  instruction: string;
+  days?: string;
+};
+
 export type OpdVisit = {
   id: string;
   token: string;
@@ -23,6 +37,8 @@ export type OpdVisit = {
   /** Short structured impression, separate from the free-text clinical note — powers the doctor's "favourite diagnoses" quick-insert list. */
   diagnosis?: string;
   prescription?: string;
+  /** Structured rows (medicine/strength/instruction/days) for the redesigned prescription pad — `prescription` above stays auto-derived from these for every existing string consumer (favourites, exports, copy summary). Undefined on visits written before this existed. */
+  prescriptionItems?: PrescriptionItem[];
   advice?: string;
   followUpDate?: string;
   /** Name/specialty/facility the patient is being referred to (Track 4.3) — not a structured lookup, since referrals go to external specialists this hospital has no directory of. */

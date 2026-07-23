@@ -86,6 +86,7 @@ export async function updateOpdVisit(input: {
   clinicalNote?: string;
   diagnosis?: string;
   prescription?: string;
+  prescriptionItems?: OpdVisit["prescriptionItems"];
   advice?: string;
   followUpDate?: string;
   referralTo?: string;
@@ -107,7 +108,7 @@ export async function updateOpdVisit(input: {
     visit.status = input.status;
     if (input.status === "In Consultation") visit.consultationStartedAt ||= new Date().toISOString();
   }
-  const touchesClinical = [input.clinicalNote, input.diagnosis, input.prescription, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote].some((value) => value !== undefined);
+  const touchesClinical = [input.clinicalNote, input.diagnosis, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote].some((value) => value !== undefined);
   if (touchesClinical && input.actingDoctorName) visit.doctorName ||= input.actingDoctorName;
   if (input.billingStatus) {
     visit.billingStatus = input.billingStatus;
@@ -126,6 +127,7 @@ export async function updateOpdVisit(input: {
   if (typeof input.clinicalNote === "string") visit.clinicalNote = input.clinicalNote.trim();
   if (typeof input.diagnosis === "string") visit.diagnosis = input.diagnosis.trim();
   if (typeof input.prescription === "string") visit.prescription = input.prescription.trim();
+  if (input.prescriptionItems !== undefined) visit.prescriptionItems = input.prescriptionItems;
   if (typeof input.advice === "string") visit.advice = input.advice.trim();
   if (typeof input.followUpDate === "string") visit.followUpDate = input.followUpDate.trim();
   if (typeof input.referralTo === "string") visit.referralTo = input.referralTo.trim();

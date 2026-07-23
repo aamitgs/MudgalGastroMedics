@@ -2,7 +2,7 @@
 
 import { Copy, FileDown, FileText, History, Printer, Send, Stamp, X } from "lucide-react";
 import { useRef, useState } from "react";
-import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
+import type { OpdVisit, OpdVisitStatus, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { AiMedicalCertificateDraft } from "@/components/opd/AiMedicalCertificateDraft";
@@ -40,15 +40,17 @@ export function DoctorConsultationCard({
   printSummary,
   favouriteDiagnoses,
   favouritePrescriptions,
+  favouritePrescriptionItems,
   recall
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
-  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<boolean>;
+  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "prescriptionItems" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<boolean>;
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
   favouriteDiagnoses: string[];
   favouritePrescriptions: string[];
+  favouritePrescriptionItems: PrescriptionItem[];
   recall?: PatientRecallAlert;
 }) {
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
@@ -161,7 +163,9 @@ export function DoctorConsultationCard({
             currentMedicines={patient?.currentMedicines}
             disabled={!identityConfirmed}
             favourites={favouritePrescriptions}
+            favouriteItems={favouritePrescriptionItems}
             onSave={(value) => void updateVisit(visit.id, { prescription: value })}
+            onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
           />
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Advice / Procedure Instructions</span>

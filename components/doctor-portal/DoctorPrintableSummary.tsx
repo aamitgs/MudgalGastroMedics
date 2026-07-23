@@ -1,8 +1,10 @@
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
+import { resolveInstructionText } from "@/lib/prescription-instructions";
 import { site } from "@/lib/site-data";
 
 export function DoctorPrintableSummary({ visit, patient }: { visit: OpdVisit; patient?: PatientRecord }) {
+  const hasItems = Boolean(visit.prescriptionItems?.length);
   return (
     <section className="patient-print">
       <div className="print-sheet">
@@ -36,8 +38,40 @@ export function DoctorPrintableSummary({ visit, patient }: { visit: OpdVisit; pa
         </dl>
         {patient?.allergies ? <section className="print-block"><h3>Allergies</h3><p>{patient.allergies}</p></section> : null}
         {visit.symptoms.length ? <section className="print-block"><h3>Symptoms</h3><p>{visit.symptoms.join(", ")}</p></section> : null}
+        {visit.diagnosis ? <section className="print-block"><h3>Diagnosis</h3><p>{visit.diagnosis}</p></section> : null}
         {visit.clinicalNote ? <section className="print-block"><h3>Clinical Note</h3><p>{visit.clinicalNote}</p></section> : null}
-        {visit.prescription ? <section className="print-block"><h3>Prescription</h3><p>{visit.prescription}</p></section> : null}
+        {hasItems ? (
+          <section className="print-block">
+            <h3>Treatment Advice (Rx)</h3>
+            <table className="print-rx-table">
+              <thead>
+                <tr>
+                  <th>Medicine Name</th>
+                  <th>Strength</th>
+                  <th>Instruction</th>
+                  <th>Days</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visit.prescriptionItems!.map((item) => {
+                  const instruction = resolveInstructionText(item.instruction);
+                  return (
+                    <tr key={item.id}>
+                      <td>{item.medicine}</td>
+                      <td>{item.strength || "—"}</td>
+                      <td>
+                        {instruction.label}
+                        {instruction.hindi ? <span className="rx-hindi">{instruction.hindi}</span> : null}
+                      </td>
+                      <td>{item.days || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </section>
+        ) : null}
+        {visit.prescription ? <section className="print-block"><h3>{hasItems ? "Additional Notes" : "Prescription"}</h3><p>{visit.prescription}</p></section> : null}
         {visit.advice ? <section className="print-block"><h3>Advice</h3><p>{visit.advice}</p></section> : null}
         <footer className="print-footer">
           <p>Generated from doctor portal. Final instructions should be clinician-reviewed before sharing.</p>

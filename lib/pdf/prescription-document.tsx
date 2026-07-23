@@ -1,7 +1,8 @@
 import "server-only";
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { OpdVisit } from "@/lib/opd-types";
+import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
+import { resolveInstructionText } from "@/lib/prescription-instructions";
 import { doctor, fullAddress, site } from "@/lib/site-data";
 import { PdfFooter, clinicalConfidentialityNote, generatedAtLabel, pdfColors, pdfStyles, stomachIconPath } from "@/lib/pdf/branding";
 
@@ -42,6 +43,16 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   allergyText: { fontSize: 9.5, fontFamily: "Geist", fontWeight: "semibold", color: "#991b1b" },
+  rxTable: { borderWidth: 1, borderColor: pdfColors.line, borderRadius: 4 },
+  rxTableHeadRow: { flexDirection: "row", backgroundColor: pdfColors.soft, borderBottomWidth: 1, borderBottomColor: pdfColors.line },
+  rxTableRow: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: pdfColors.line },
+  rxHeadCell: { padding: 6, fontFamily: "Geist", fontWeight: "semibold", fontSize: 8, color: pdfColors.brand, textTransform: "uppercase", letterSpacing: 0.4 },
+  rxBodyCell: { padding: 6, fontSize: 9, color: pdfColors.ink },
+  rxBodyCellHindi: { fontSize: 8, color: pdfColors.muted, marginTop: 1 },
+  rxColMedicine: { flex: 2 },
+  rxColStrength: { flex: 1 },
+  rxColInstruction: { flex: 2.4 },
+  rxColDays: { flex: 0.6 },
   signatureBlock: { marginTop: 28, alignItems: "flex-end" },
   signatureBox: { width: 190, alignItems: "center", borderTopWidth: 1, borderTopStyle: "dashed", borderTopColor: pdfColors.muted, paddingTop: 6 },
   signatureLabel: { fontFamily: "Geist", fontStyle: "italic", fontSize: 9, color: pdfColors.muted },
@@ -71,7 +82,35 @@ function PrescriptionHeader() {
   );
 }
 
+function RxTable({ items }: { items: PrescriptionItem[] }) {
+  return (
+    <View style={styles.rxTable}>
+      <View style={styles.rxTableHeadRow}>
+        <Text style={[styles.rxHeadCell, styles.rxColMedicine]}>Medicine Name</Text>
+        <Text style={[styles.rxHeadCell, styles.rxColStrength]}>Strength</Text>
+        <Text style={[styles.rxHeadCell, styles.rxColInstruction]}>Instruction</Text>
+        <Text style={[styles.rxHeadCell, styles.rxColDays]}>Days</Text>
+      </View>
+      {items.map((item) => {
+        const instruction = resolveInstructionText(item.instruction);
+        return (
+          <View key={item.id} style={styles.rxTableRow} wrap={false}>
+            <Text style={[styles.rxBodyCell, styles.rxColMedicine]}>{item.medicine}</Text>
+            <Text style={[styles.rxBodyCell, styles.rxColStrength]}>{item.strength || "—"}</Text>
+            <View style={[styles.rxBodyCell, styles.rxColInstruction]}>
+              <Text>{instruction.label}</Text>
+              {instruction.hindi ? <Text style={styles.rxBodyCellHindi}>{instruction.hindi}</Text> : null}
+            </View>
+            <Text style={[styles.rxBodyCell, styles.rxColDays]}>{item.days || "—"}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; patient?: PatientRecord }) {
+  const hasItems = Boolean(visit.prescriptionItems?.length);
   return (
     <Document title={`Prescription - ${visit.patientName}`}>
       <Page size="A4" style={styles.page}>
@@ -116,6 +155,13 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
           </View>
         ) : null}
 
+        {visit.diagnosis ? (
+          <View style={pdfStyles.card}>
+            <Text style={pdfStyles.sectionLabel}>Diagnosis</Text>
+            <Text style={pdfStyles.bodyText}>{visit.diagnosis}</Text>
+          </View>
+        ) : null}
+
         {visit.clinicalNote ? (
           <View style={pdfStyles.card}>
             <Text style={pdfStyles.sectionLabel}>Clinical Note</Text>
@@ -124,9 +170,20 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
         ) : null}
 
         <View style={pdfStyles.card}>
-          <Text style={pdfStyles.sectionLabel}>Prescription (Rx)</Text>
-          <Text style={pdfStyles.bodyText}>{visit.prescription || "No medication prescribed at this visit."}</Text>
+          <Text style={pdfStyles.sectionLabel}>Treatment Advice (Rx)</Text>
+          {hasItems ? (
+            <RxTable items={visit.prescriptionItems!} />
+          ) : (
+            <Text style={pdfStyles.bodyText}>{visit.prescription || "No medication prescribed at this visit."}</Text>
+          )}
         </View>
+
+        {hasItems && visit.prescription ? (
+          <View style={pdfStyles.card}>
+            <Text style={pdfStyles.sectionLabel}>Additional Notes</Text>
+            <Text style={pdfStyles.bodyText}>{visit.prescription}</Text>
+          </View>
+        ) : null}
 
         {visit.advice ? (
           <View style={pdfStyles.card}>

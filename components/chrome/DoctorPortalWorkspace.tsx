@@ -9,7 +9,7 @@ import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
 import { DoctorRecentActivity } from "@/components/chrome/DoctorRecentActivity";
 import { DoctorConsultationCard } from "@/components/doctor-portal/DoctorConsultationCard";
 import { DoctorPrintableSummary } from "@/components/doctor-portal/DoctorPrintableSummary";
-import { createDoctorSummaryText, findPatientForVisit, topFrequent } from "@/components/doctor-portal/helpers";
+import { createDoctorSummaryText, findPatientForVisit, prescriptionItemKey, topFrequent, topFrequentByKey } from "@/components/doctor-portal/helpers";
 import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
@@ -82,7 +82,7 @@ export function DoctorPortalWorkspace({
     setLoading(false);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>): Promise<boolean> {
+  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "prescriptionItems" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>): Promise<boolean> {
     let response: Response;
     try {
       response = await fetch("/api/opd", {
@@ -190,6 +190,10 @@ export function DoctorPortalWorkspace({
   // never gets surfaced as if it were a habitual choice.
   const favouriteDiagnoses = useMemo(() => topFrequent(visits.map((visit) => visit.diagnosis)), [visits]);
   const favouritePrescriptions = useMemo(() => topFrequent(visits.map((visit) => visit.prescription)), [visits]);
+  const favouritePrescriptionItems = useMemo(
+    () => topFrequentByKey(visits.flatMap((visit) => visit.prescriptionItems ?? []), prescriptionItemKey),
+    [visits]
+  );
 
   // Chronic-care recall (lib/clinical/recall.ts) already drives reception
   // outreach via automation/notifications — this surfaces the same
@@ -394,6 +398,7 @@ export function DoctorPortalWorkspace({
               printSummary={printSummary}
               favouriteDiagnoses={favouriteDiagnoses}
               favouritePrescriptions={favouritePrescriptions}
+              favouritePrescriptionItems={favouritePrescriptionItems}
               recall={selectedVisit.patientId ? patientRecallAlerts.get(selectedVisit.patientId) : undefined}
             />
           ) : (
