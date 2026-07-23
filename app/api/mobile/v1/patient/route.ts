@@ -44,6 +44,7 @@ async function publicVisit(phone: string) {
     paidAt: visit.paidAt,
     clinicalNote: visit.clinicalNote,
     prescription: visit.prescription,
+    prescriptionItems: visit.prescriptionItems,
     advice: visit.advice,
     followUpDate: visit.followUpDate
   }));

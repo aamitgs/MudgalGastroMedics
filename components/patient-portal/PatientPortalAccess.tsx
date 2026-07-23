@@ -31,6 +31,7 @@ const PatientHealthDashboard = dynamic(
   }
 );
 import type { FamilyMember } from "@/lib/family-types";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 import { site } from "@/lib/site-data";
 
 type LookupResponse = {
@@ -538,10 +539,10 @@ export function PatientPortalAccess() {
               <p>{printableVisit.clinicalNote}</p>
             </section>
           ) : null}
-          {printableVisit.prescription ? (
+          {prescriptionSummaryText(printableVisit) ? (
             <section className="print-block">
               <h3>Prescription</h3>
-              <p>{printableVisit.prescription}</p>
+              <p>{prescriptionSummaryText(printableVisit)}</p>
             </section>
           ) : null}
           {printableVisit.advice ? (

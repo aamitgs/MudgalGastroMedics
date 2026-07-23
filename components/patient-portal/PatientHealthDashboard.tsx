@@ -23,6 +23,8 @@ import { EmptyState } from "@/components/design-system/EmptyState";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { familyRelations } from "@/lib/family-types";
 import type { FamilyMember } from "@/lib/family-types";
+import type { PrescriptionItem } from "@/lib/opd-types";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 import { site } from "@/lib/site-data";
 
 export type PatientAppointmentSummary = {
@@ -56,6 +58,7 @@ export type PatientVisitSummary = {
   receiptId?: string;
   clinicalNote?: string;
   prescription?: string;
+  prescriptionItems?: PrescriptionItem[];
   advice?: string;
   followUpDate?: string;
 };
@@ -367,25 +370,28 @@ export function PatientHealthDashboard({
 
           <section className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] p-5">
             <h3 className="flex items-center gap-2 text-lg font-semibold text-[var(--hos-text)]"><Pill size={18} className="text-[var(--hos-primary)]" /> Reports &amp; prescriptions</h3>
-            {visits.filter((visit) => visit.prescription || visit.clinicalNote || visit.advice).length === 0 ? (
+            {visits.filter((visit) => visit.prescription || visit.prescriptionItems?.length || visit.clinicalNote || visit.advice).length === 0 ? (
               <p className="mt-3 text-sm text-[var(--hos-muted-text)]">Prescriptions and doctor notes will appear here after your consultation is recorded.</p>
             ) : (
               <div className="mt-3 grid gap-3">
                 {visits
-                  .filter((visit) => visit.prescription || visit.clinicalNote || visit.advice)
-                  .map((visit) => (
-                    <div key={visit.id} className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-semibold text-[var(--hos-text)]">{visit.service} · {formatDate(visit.createdAt)}</p>
-                        <button type="button" onClick={() => onPrintVisit(visit)} className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--hos-primary)]">
-                          <Printer size={14} /> Print
-                        </button>
+                  .filter((visit) => visit.prescription || visit.prescriptionItems?.length || visit.clinicalNote || visit.advice)
+                  .map((visit) => {
+                    const prescriptionText = prescriptionSummaryText(visit);
+                    return (
+                      <div key={visit.id} className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-semibold text-[var(--hos-text)]">{visit.service} · {formatDate(visit.createdAt)}</p>
+                          <button type="button" onClick={() => onPrintVisit(visit)} className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--hos-primary)]">
+                            <Printer size={14} /> Print
+                          </button>
+                        </div>
+                        {visit.clinicalNote ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Summary: </span>{visit.clinicalNote}</p> : null}
+                        {prescriptionText ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Prescription: </span>{prescriptionText}</p> : null}
+                        {visit.advice ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Advice: </span>{visit.advice}</p> : null}
                       </div>
-                      {visit.clinicalNote ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Summary: </span>{visit.clinicalNote}</p> : null}
-                      {visit.prescription ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Prescription: </span>{visit.prescription}</p> : null}
-                      {visit.advice ? <p className="mt-2 whitespace-pre-line text-sm text-[var(--hos-muted-text)]"><span className="font-semibold text-[var(--hos-text)]">Advice: </span>{visit.advice}</p> : null}
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             )}
           </section>

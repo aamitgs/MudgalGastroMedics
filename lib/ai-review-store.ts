@@ -89,7 +89,7 @@ export async function generateAiReview(source: AiCaseSource, sourceId: string) {
     flags: [
       urgency === "Urgent Reception Call" ? "Priority symptom review required" : "",
       visit.clinicalNote ? "Clinical note available for doctor review" : "Clinical note pending",
-      visit.prescription ? "Prescription note available" : "Prescription not recorded",
+      visit.prescription || visit.prescriptionItems?.length ? "Prescription note available" : "Prescription not recorded",
       visit.followUpDate ? "Follow-up date recorded" : "Follow-up date pending"
     ].filter(Boolean),
     preparation: [

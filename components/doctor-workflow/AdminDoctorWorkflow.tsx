@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { OpdSortField } from "@/lib/opd-query";
+import { prescriptionSummaryText, resolveInstructionText } from "@/lib/prescription-instructions";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
@@ -14,7 +15,7 @@ import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 const doctorWorkflowExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Clinical Note", "Prescription", "Follow-up Date"];
 
 function doctorWorkflowExportRow(visit: OpdVisit) {
-  return [visit.token, visit.patientName, visit.phone, visit.service, visit.status, visit.clinicalNote ?? "", visit.prescription ?? "", visit.followUpDate ?? ""];
+  return [visit.token, visit.patientName, visit.phone, visit.service, visit.status, visit.clinicalNote ?? "", prescriptionSummaryText(visit), visit.followUpDate ?? ""];
 }
 
 type OpdResponse = {
@@ -106,7 +107,7 @@ export function AdminDoctorWorkflow() {
       `Service: ${visit.service}`,
       `Token: ${visit.token}`,
       visit.clinicalNote ? `Clinical note: ${visit.clinicalNote}` : "",
-      visit.prescription ? `Prescription: ${visit.prescription}` : "",
+      prescriptionSummaryText(visit) ? `Prescription: ${prescriptionSummaryText(visit)}` : "",
       visit.advice ? `Advice: ${visit.advice}` : "",
       visit.followUpDate ? `Follow-up: ${visit.followUpDate}` : ""
     ]
@@ -275,15 +276,31 @@ export function AdminDoctorWorkflow() {
                   placeholder="Doctor review notes, exam findings, procedure note, or clinical summary"
                 />
               </label>
-              <label>
-                <span className="mb-2 block text-sm font-bold text-ink">Prescription</span>
-                <textarea
-                  defaultValue={editingVisit.prescription}
-                  onBlur={(event) => void updateVisit(editingVisit.id, { prescription: event.target.value })}
-                  className={textareaClass}
-                  placeholder="Medicine name, dose, duration, instructions"
-                />
-              </label>
+              <div>
+                {editingVisit.prescriptionItems?.length ? (
+                  <div className="mb-3 rounded border border-line bg-soft/40 p-3">
+                    <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted">Prescribed medicines (from Doctor Portal)</p>
+                    <div className="grid gap-1 text-sm text-ink">
+                      {editingVisit.prescriptionItems.map((item) => (
+                        <p key={item.id}>
+                          {item.medicine}
+                          {item.strength ? ` ${item.strength}` : ""} — {resolveInstructionText(item.instruction).label}
+                          {item.days ? ` — ${item.days} day${item.days === "1" ? "" : "s"}` : ""}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <label>
+                  <span className="mb-2 block text-sm font-bold text-ink">{editingVisit.prescriptionItems?.length ? "Additional Notes" : "Prescription"}</span>
+                  <textarea
+                    defaultValue={editingVisit.prescription}
+                    onBlur={(event) => void updateVisit(editingVisit.id, { prescription: event.target.value })}
+                    className={textareaClass}
+                    placeholder="Medicine name, dose, duration, instructions"
+                  />
+                </label>
+              </div>
               <label>
                 <span className="mb-2 block text-sm font-bold text-ink">Advice / Instructions</span>
                 <textarea

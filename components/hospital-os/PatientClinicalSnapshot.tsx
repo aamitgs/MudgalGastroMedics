@@ -6,6 +6,7 @@ import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { PatientFlowRow } from "@/lib/hospital-os-data";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 
 type PatientSummary = {
   patient: PatientRecord | null;
@@ -99,7 +100,7 @@ export function PatientClinicalSnapshot({ activePatient }: { activePatient: Pati
         ) : (
           [
             ["Clinical Note", visit?.clinicalNote || "No clinical note recorded for this visit yet."],
-            ["Prescription", visit?.prescription || "No prescription recorded for this visit yet."],
+            ["Prescription", (visit && prescriptionSummaryText(visit)) || "No prescription recorded for this visit yet."],
             ["Next action", summary ? nextActionFor(summary) : "No pending action flagged."]
           ].map(([title, text]) => (
             <div key={title} className="rounded-lg border border-line p-4">

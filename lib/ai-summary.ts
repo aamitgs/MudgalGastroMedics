@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { listPatientAppointments } from "@/lib/appointment-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { listPatientIpdAdmissions, listVitals } from "@/lib/ipd-store";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 
 export const aiPatientSummarySafetyNote =
   "AI-generated summary for staff review only. It does not diagnose, prescribe or replace clinical judgment — verify against the source record before acting.";
@@ -31,7 +32,7 @@ async function buildTimelineText(phone: string) {
 
   for (const visit of visits) {
     lines.push(
-      `[OPD visit ${visit.createdAt}] service=${visit.service}; status=${visit.status}; clinicalNote=${visit.clinicalNote || "none"}; prescription=${visit.prescription || "none"}; advice=${visit.advice || "none"}; followUp=${visit.followUpDate || "none"}`
+      `[OPD visit ${visit.createdAt}] service=${visit.service}; status=${visit.status}; clinicalNote=${visit.clinicalNote || "none"}; prescription=${prescriptionSummaryText(visit) || "none"}; advice=${visit.advice || "none"}; followUp=${visit.followUpDate || "none"}`
     );
   }
 

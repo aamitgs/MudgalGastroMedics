@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     paidAt: visit.paidAt,
     clinicalNote: visit.clinicalNote,
     prescription: visit.prescription,
+    prescriptionItems: visit.prescriptionItems,
     advice: visit.advice,
     followUpDate: visit.followUpDate
   }));

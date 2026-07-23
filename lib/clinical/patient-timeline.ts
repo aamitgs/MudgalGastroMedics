@@ -5,6 +5,7 @@ import { listPatientIpdAdmissions, listVitals } from "@/lib/ipd-store";
 import { listLabOrders } from "@/lib/lab-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { listPharmacyDispenses } from "@/lib/pharmacy-store";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 
 type TimelineEntry = ClinicalEvent & { at: string };
 
@@ -64,8 +65,9 @@ export async function buildPatientTimeline(phone: string): Promise<ClinicalEvent
       `OPD visit · ${visit.status}`,
       `${visit.service} · Token ${visit.token}${visit.clinicalNote ? ` · ${visit.clinicalNote}` : ""}`
     ));
-    if (visit.prescription) {
-      events.push(entry(visit.createdAt, "consult", "Prescription issued", visit.prescription));
+    const prescriptionText = prescriptionSummaryText(visit);
+    if (prescriptionText) {
+      events.push(entry(visit.createdAt, "consult", "Prescription issued", prescriptionText));
     }
     if (visit.billingStatus === "Paid") {
       events.push(entry(

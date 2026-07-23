@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { getOpdVisitById } from "@/lib/opd-store";
 import { findPatientByPhone, getPatientById } from "@/lib/patient-store";
+import { prescriptionSummaryText } from "@/lib/prescription-instructions";
 
 export const aiVisitAssistantSafetyNote =
   "Answers are grounded only in this visit's own record — not a diagnosis or treatment recommendation. Verify anything important before acting on it.";
@@ -53,7 +54,7 @@ Known allergies: ${patient?.allergies || "none on record"}
 Current medicines: ${patient?.currentMedicines || "none on record"}
 Diagnosis: ${visit.diagnosis || "none noted"}
 Clinical note: ${visit.clinicalNote || "none noted"}
-Prescription: ${visit.prescription || "none noted"}
+Prescription: ${prescriptionSummaryText(visit) || "none noted"}
 Advice: ${visit.advice || "none noted"}
 Follow-up date: ${visit.followUpDate || "none set"}
 Referred to: ${visit.referralTo || "not referred"}`;
