@@ -89,7 +89,7 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
       <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex min-h-14 w-[min(1560px,calc(100%-32px))] items-center gap-4">
           <Link href="/mudgalgastromedics-os" className="flex min-w-0 items-center gap-2.5" aria-label="MudgalGastromedics OS home">
-            <Image src="/mgm-logo.png" alt="" width={34} height={34} className="h-8 w-8 shrink-0 rounded bg-white object-contain p-0.5" />
+            <Image src="/mgm-logo.png" alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded bg-white object-contain p-0.5" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-bold leading-tight text-ink">MudgalGastromedics OS</span>
               <span className="hidden truncate text-[11px] font-semibold leading-tight text-muted sm:block">
@@ -120,12 +120,13 @@ export function StaffChrome({ children }: Readonly<{ children: React.ReactNode }
               onClick={() => openPalette(true)}
               aria-label="Open command palette"
               variant="outline"
-              className="gap-1.5 px-3 text-sm font-semibold"
+              size="lg"
+              className="gap-2 text-sm font-semibold"
             >
-              <Search size={15} />
-              <span className="hidden items-center gap-1.5 md:inline-flex">
+              <Search size={18} />
+              <span className="hidden items-center gap-2 md:inline-flex">
                 Search
-                <kbd className="rounded border border-line bg-soft px-1.5 py-0.5 font-mono text-[10px] font-semibold text-ink">⌘K</kbd>
+                <kbd className="rounded border border-line bg-soft px-2 py-1 font-mono text-xs font-semibold text-ink">⌘K</kbd>
               </span>
             </ActionButton>
             <ActionButton
