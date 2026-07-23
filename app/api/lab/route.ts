@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryLabOrders, type LabSortField, type SortDirection } from "@/lib/lab-query";
-import { createLabOrder, deleteLabOrder, listLabOrders, updateLabOrder } from "@/lib/lab-store";
+import { createLabOrder, deleteLabOrder, listLabOrders, listPatientLabOrders, updateLabOrder } from "@/lib/lab-store";
 import { labOrderStatuses } from "@/lib/lab-types";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { listOpdVisits } from "@/lib/opd-store";
@@ -15,6 +15,15 @@ export async function GET(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const params = new URL(request.url).searchParams;
+
+  // Per-patient lookup (e.g. the Doctor Portal's recent-labs strip) — narrows
+  // server-side via the store's own phone match instead of shipping every
+  // patient's lab history to the browser just to filter one out client-side.
+  const phoneParam = params.get("phone");
+  if (phoneParam !== null) {
+    return NextResponse.json({ ok: true, orders: await listPatientLabOrders(phoneParam) });
+  }
+
   const pageParam = params.get("page");
   const allOrders = await listLabOrders();
   const visits = await listOpdVisits();

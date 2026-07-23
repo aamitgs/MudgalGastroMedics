@@ -10,6 +10,8 @@ import { DoctorRecentActivity } from "@/components/chrome/DoctorRecentActivity";
 import { DoctorConsultationCard } from "@/components/doctor-portal/DoctorConsultationCard";
 import { DoctorPrintableSummary } from "@/components/doctor-portal/DoctorPrintableSummary";
 import { createDoctorSummaryText, findPatientForVisit, topFrequent } from "@/components/doctor-portal/helpers";
+import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
+import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
 
 type OpdResponse = {
@@ -80,7 +82,7 @@ export function DoctorPortalWorkspace({
     setLoading(false);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) {
+  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>): Promise<boolean> {
     let response: Response;
     try {
       response = await fetch("/api/opd", {
@@ -94,15 +96,16 @@ export function DoctorPortalWorkspace({
       // only adds handling for the network-throw case, which previously had
       // none at all (not even the banner).
       notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
-      return;
+      return false;
     }
     const data = (await response.json().catch(() => ({}))) as OpdResponse;
     if (!response.ok || !data.ok || !data.visit) {
       setError(data.error || "Unable to save consultation.");
-      return;
+      return false;
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
     notify.saved("Saved", { id: "doctor-autosave" });
+    return true;
   }
 
   // Takes the form element itself (captured synchronously at submit time),
@@ -188,6 +191,28 @@ export function DoctorPortalWorkspace({
   const favouriteDiagnoses = useMemo(() => topFrequent(visits.map((visit) => visit.diagnosis)), [visits]);
   const favouritePrescriptions = useMemo(() => topFrequent(visits.map((visit) => visit.prescription)), [visits]);
 
+  // Chronic-care recall (lib/clinical/recall.ts) already drives reception
+  // outreach via automation/notifications — this surfaces the same
+  // evaluation to the doctor directly, keyed by patient rather than visit,
+  // since it's about "does this patient have any outstanding recall", not
+  // any one specific visit. Keeps only the most urgent (overdue over
+  // due-soon, then most days overdue) per patient so the queue/card show one
+  // clear signal instead of a list of every past follow-up.
+  const patientRecallAlerts = useMemo(() => {
+    const recalls = evaluateRecalls(visits);
+    const byPatient = new Map<string, PatientRecallAlert>();
+    for (const visit of visits) {
+      if (!visit.patientId) continue;
+      const evaluation = recalls.get(visit.id);
+      if (!evaluation || (evaluation.status !== "overdue" && evaluation.status !== "due-soon")) continue;
+      const existing = byPatient.get(visit.patientId);
+      if (existing && existing.status === "overdue" && evaluation.status !== "overdue") continue;
+      if (existing && existing.daysOverdue >= evaluation.daysOverdue && existing.status === evaluation.status) continue;
+      byPatient.set(visit.patientId, { status: evaluation.status, dueDate: evaluation.dueDate, daysOverdue: evaluation.daysOverdue, service: visit.service });
+    }
+    return byPatient;
+  }, [visits]);
+
   async function copySummary(visit: OpdVisit, patient?: PatientRecord) {
     await navigator.clipboard.writeText(createDoctorSummaryText(visit, patient));
   }
@@ -213,7 +238,7 @@ export function DoctorPortalWorkspace({
             >
               {statsOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
             </button>
-            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${statsOpen ? "ml-3 w-[360px] opacity-100" : "ml-0 w-0 opacity-0"}`}>
+            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${statsOpen ? "ml-3 h-auto w-[360px] opacity-100" : "ml-0 h-14 w-0 opacity-0"}`}>
               <div className="w-[360px] rounded border border-line/80 bg-white shadow-sm">
                 <div className="border-b border-line p-4">
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-sky-600">Overview</p>
@@ -236,25 +261,6 @@ export function DoctorPortalWorkspace({
             </div>
           </div>
 
-          {/* Recent Activity panel — separate, independently toggled */}
-          <div className="flex items-start gap-0">
-            <button
-              type="button"
-              onClick={() => setActivityOpen((value) => !value)}
-              aria-expanded={activityOpen}
-              aria-label={activityOpen ? "Collapse Recent Activity panel" : "Expand Recent Activity panel"}
-              title="Recent Activity"
-              className="grid h-14 w-6 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white shadow-[0_10px_24px_rgba(79,70,229,0.35)] transition hover:-translate-y-0.5 hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/30"
-            >
-              {activityOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
-            </button>
-            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${activityOpen ? "ml-3 w-[360px] opacity-100" : "ml-0 w-0 opacity-0"}`}>
-              <div className="w-[360px]">
-                <DoctorRecentActivity />
-              </div>
-            </div>
-          </div>
-
           {/* Doctor Queue panel — separate, independently toggled */}
           <div className="flex items-start gap-0">
             <button
@@ -267,21 +273,28 @@ export function DoctorPortalWorkspace({
             >
               {queueOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
             </button>
-            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${queueOpen ? "ml-3 w-[360px] opacity-100" : "ml-0 w-0 opacity-0"}`}>
+            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${queueOpen ? "ml-3 h-auto w-[360px] opacity-100" : "ml-0 h-14 w-0 opacity-0"}`}>
               <div className="w-[360px]">
                 <aside className="rounded border border-line/80 bg-white shadow-sm">
                   <div className="border-b border-line p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Doctor Queue</p>
                         <h2 className="mt-1 text-xl font-bold text-ink">Consultations</h2>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <ActionButton variant="primary" onClick={() => setShowNewConsultation((value) => !value)} aria-expanded={showNewConsultation}>
-                          <UserPlus size={16} /> New Consultation
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <ActionButton
+                          variant="primary"
+                          size="sm"
+                          className="whitespace-nowrap"
+                          onClick={() => setShowNewConsultation((value) => !value)}
+                          aria-expanded={showNewConsultation}
+                          title="Start a new consultation"
+                        >
+                          <UserPlus size={15} /> New
                         </ActionButton>
-                        <ActionButton variant="secondary" onClick={() => void loadWorkspace()} className="h-11 w-11 p-0" aria-label="Refresh doctor queue">
-                          <RefreshCw size={17} />
+                        <ActionButton variant="secondary" size="sm" onClick={() => void loadWorkspace()} className="w-9 p-0" aria-label="Refresh doctor queue" title="Refresh">
+                          <RefreshCw size={15} />
                         </ActionButton>
                       </div>
                     </div>
@@ -338,11 +351,33 @@ export function DoctorPortalWorkspace({
                           <span className="shrink-0 rounded-full border border-line bg-white px-2 py-0.5 text-[10px] font-bold text-muted">{visit.status}</span>
                         </div>
                         <p className="mt-1 truncate text-xs font-black uppercase tracking-[0.1em] text-brand">{visit.token}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
-                        <p className="mt-1 truncate text-xs text-muted">{visit.service}</p>
+                        <div className="mt-1 flex items-center justify-between gap-2">
+                          <p className="truncate text-xs text-muted">{visit.service}</p>
+                          <RecallBadge recall={visit.patientId ? patientRecallAlerts.get(visit.patientId) : undefined} />
+                        </div>
                       </button>
                     ))}
                   </div>
                 </aside>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity panel — separate, independently toggled */}
+          <div className="flex items-start gap-0">
+            <button
+              type="button"
+              onClick={() => setActivityOpen((value) => !value)}
+              aria-expanded={activityOpen}
+              aria-label={activityOpen ? "Collapse Recent Activity panel" : "Expand Recent Activity panel"}
+              title="Recent Activity"
+              className="grid h-14 w-6 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white shadow-[0_10px_24px_rgba(79,70,229,0.35)] transition hover:-translate-y-0.5 hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/30"
+            >
+              {activityOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
+            </button>
+            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${activityOpen ? "ml-3 h-auto w-[360px] opacity-100" : "ml-0 h-14 w-0 opacity-0"}`}>
+              <div className="w-[360px]">
+                <DoctorRecentActivity />
               </div>
             </div>
           </div>
@@ -359,6 +394,7 @@ export function DoctorPortalWorkspace({
               printSummary={printSummary}
               favouriteDiagnoses={favouriteDiagnoses}
               favouritePrescriptions={favouritePrescriptions}
+              recall={selectedVisit.patientId ? patientRecallAlerts.get(selectedVisit.patientId) : undefined}
             />
           ) : (
             <div className="rounded border border-dashed border-line bg-white p-10 text-center shadow-sm">

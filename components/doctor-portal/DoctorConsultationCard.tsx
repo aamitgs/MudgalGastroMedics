@@ -1,7 +1,7 @@
 "use client";
 
-import { Copy, FileDown, FileText, Printer, Send, Stamp } from "lucide-react";
-import { useState } from "react";
+import { Copy, FileDown, FileText, History, Printer, Send, Stamp, X } from "lucide-react";
+import { useRef, useState } from "react";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -13,7 +13,24 @@ import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
+import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
+import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
+import { useDraftRecovery } from "@/hooks/useDraftRecovery";
+
+/** Shown above a field whose typing was recovered from before a crash/closed tab — see hooks/useDraftRecovery. */
+function DraftRestoredNotice({ onDiscard }: { onDiscard: () => void }) {
+  return (
+    <div className="mb-2 flex items-center justify-between gap-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950 px-2.5 py-1.5 text-xs">
+      <span className="flex items-center gap-1.5 font-semibold text-amber-900 dark:text-amber-200">
+        <History size={13} className="shrink-0" /> Recovered unsaved text from before — review and save, or discard it.
+      </span>
+      <button type="button" onClick={onDiscard} className="inline-flex shrink-0 items-center gap-1 font-bold text-amber-700 hover:text-amber-900">
+        <X size={12} /> Discard
+      </button>
+    </div>
+  );
+}
 
 export function DoctorConsultationCard({
   visit,
@@ -22,17 +39,27 @@ export function DoctorConsultationCard({
   copySummary,
   printSummary,
   favouriteDiagnoses,
-  favouritePrescriptions
+  favouritePrescriptions,
+  recall
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
-  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<void>;
+  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<boolean>;
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
   favouriteDiagnoses: string[];
   favouritePrescriptions: string[];
+  recall?: PatientRecallAlert;
 }) {
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
+  const clinicalNoteRef = useRef<HTMLTextAreaElement>(null);
+  const clinicalNoteDraft = useDraftRecovery(clinicalNoteRef, `${visit.id}:clinicalNote`, visit.clinicalNote ?? "");
+  const adviceRef = useRef<HTMLTextAreaElement>(null);
+  const adviceDraft = useDraftRecovery(adviceRef, `${visit.id}:advice`, visit.advice ?? "");
+  const referralLetterRef = useRef<HTMLTextAreaElement>(null);
+  const referralLetterDraft = useDraftRecovery(referralLetterRef, `${visit.id}:referralLetter`, visit.referralLetter ?? "");
+  const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
+  const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "");
 
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
@@ -85,9 +112,13 @@ export function DoctorConsultationCard({
           </div>
         ) : null}
 
+        <RecentLabsStrip phone={visit.phone} />
+
         <AiPatientSummaryPanel phone={visit.phone} />
 
         <AiVisitAssistant key={`${visit.id}-assistant`} visitId={visit.id} />
+
+        <RecallAlert recall={recall} />
 
         <AllergyGuard key={visit.id} visitId={visit.id} allergies={patient?.allergies} />
 
@@ -110,9 +141,14 @@ export function DoctorConsultationCard({
             />
             <label>
               <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
+              {clinicalNoteDraft.restored ? <DraftRestoredNotice onDiscard={clinicalNoteDraft.discard} /> : null}
               <textarea
+                ref={clinicalNoteRef}
                 defaultValue={visit.clinicalNote}
-                onBlur={(event) => void updateVisit(visit.id, { clinicalNote: event.target.value })}
+                onInput={clinicalNoteDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { clinicalNote: event.target.value })) clinicalNoteDraft.onCommit();
+                }}
                 disabled={!identityConfirmed}
                 className={textareaClass}
                 placeholder="History, examination, impression, procedure note"
@@ -129,9 +165,14 @@ export function DoctorConsultationCard({
           />
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Advice / Procedure Instructions</span>
+            {adviceDraft.restored ? <DraftRestoredNotice onDiscard={adviceDraft.discard} /> : null}
             <textarea
+              ref={adviceRef}
               defaultValue={visit.advice}
-              onBlur={(event) => void updateVisit(visit.id, { advice: event.target.value })}
+              onInput={adviceDraft.onInput}
+              onBlur={async (event) => {
+                if (await updateVisit(visit.id, { advice: event.target.value })) adviceDraft.onCommit();
+              }}
               disabled={!identityConfirmed}
               className={textareaClass}
               placeholder="Diet, warning signs, preparation, reports to bring"
@@ -179,10 +220,15 @@ export function DoctorConsultationCard({
           </label>
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Referral Letter</span>
+            {referralLetterDraft.restored ? <DraftRestoredNotice onDiscard={referralLetterDraft.discard} /> : null}
             <textarea
               key={visit.referralLetter}
+              ref={referralLetterRef}
               defaultValue={visit.referralLetter}
-              onBlur={(event) => void updateVisit(visit.id, { referralLetter: event.target.value })}
+              onInput={referralLetterDraft.onInput}
+              onBlur={async (event) => {
+                if (await updateVisit(visit.id, { referralLetter: event.target.value })) referralLetterDraft.onCommit();
+              }}
               disabled={!identityConfirmed}
               className={textareaClass}
               placeholder="Reason for referral and relevant findings"
@@ -195,10 +241,15 @@ export function DoctorConsultationCard({
           </label>
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Certificate Note</span>
+            {certificateNoteDraft.restored ? <DraftRestoredNotice onDiscard={certificateNoteDraft.discard} /> : null}
             <textarea
               key={visit.certificateNote}
+              ref={certificateNoteRef}
               defaultValue={visit.certificateNote}
-              onBlur={(event) => void updateVisit(visit.id, { certificateNote: event.target.value })}
+              onInput={certificateNoteDraft.onInput}
+              onBlur={async (event) => {
+                if (await updateVisit(visit.id, { certificateNote: event.target.value })) certificateNoteDraft.onCommit();
+              }}
               disabled={!identityConfirmed}
               className={textareaClass}
               placeholder="Optional custom wording for the medical certificate — leave blank to use the default findings/advice text"
