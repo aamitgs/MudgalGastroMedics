@@ -502,18 +502,29 @@ test("Hospital OS sidebar has no duplicate nav entries pointing at the same rout
   assert.doesNotMatch(data, /label: "Doctors"/);
 });
 
-test("dashboard's own anchor nav entries (Dashboard/Patients/Notifications) get scroll-spy active state", () => {
-  // pathname === href can never match an href with a #hash (usePathname()
-  // never includes one), so these three sidebar entries never highlighted
-  // as active even while genuinely viewing that section. Fixed with a
-  // scroll-spy effect that special-cases #realtime-feed, which renders
-  // beside #analytics in the same grid row at xl+ widths (identical top at
-  // every scroll position there, not just on load) — Dashboard keeps
-  // priority until it genuinely diverges in a narrower, stacked layout.
+test("Dashboard/Patients/Notifications sidebar entries are real routes, not dashboard anchors", () => {
+  // These three used to be #hash links onto the single dashboard page: a
+  // click while already there had no real destination to navigate to
+  // (native anchor-scroll silently no-ops when the target's scroll position
+  // doesn't change — e.g. Notifications rendered beside Dashboard's own
+  // content in the xl+ grid, so nothing ever moved). Each now has its own
+  // dedicated route, same as every other sidebar entry — real back/forward,
+  // a direct link, and pathname === href works uniformly for isCurrentPage.
+  const data = read("lib/hospital-os-data.ts");
+  assert.match(data, /label: "Dashboard", group: "Overview", href: "\/mudgalgastromedics-os",/);
+  assert.match(data, /label: "Patients", group: "Clinical", href: "\/mudgalgastromedics-os\/patient-flow",/);
+  assert.match(data, /label: "Notifications", group: "Overview", href: "\/mudgalgastromedics-os\/notifications",/);
+  assert.doesNotMatch(data, /#analytics|#operations-table|#realtime-feed/);
+
   const shell = read("components/hospital-os/HospitalOsShell.tsx");
-  assert.match(shell, /activeDashboardSection/);
-  assert.match(shell, /dashboardSectionIds/);
-  assert.match(shell, /hrefHash\s*\?\s*\n?\s*pathname === hrefPath && activeDashboardSection === hrefHash/);
+  assert.doesNotMatch(shell, /activeDashboardSection|dashboardSectionIds|hrefHash/);
+  assert.match(shell, /const isCurrentPage = pathname === href;/);
+});
+
+test("Notifications and Patient Flow routes are registered in the module access matrix", () => {
+  const modules = read("lib/access/admin-modules.ts");
+  assert.match(modules, /id: "module-notifications", label: "Notifications", resource: null, route: "\/mudgalgastromedics-os\/notifications"/);
+  assert.match(modules, /id: "module-patient-flow", label: "Patient Flow", resource: "appointments", route: "\/mudgalgastromedics-os\/patient-flow"/);
 });
 
 test("AI Planning Note's reception-script copy button confirms the copy", () => {

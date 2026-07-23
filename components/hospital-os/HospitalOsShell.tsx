@@ -1,7 +1,6 @@
 "use client";
 
 import Fuse from "fuse.js";
-import { useReducedMotion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,15 +33,6 @@ import { roleMeta, type AccessRole } from "@/lib/access/matrix";
 import { createHospitalRealtimeClient } from "@/lib/websocket/hospital-os-client";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { useThemeStore } from "@/stores/theme-store";
-
-// Dashboard-only anchor sections (Dashboard, Patients, Notifications sidebar
-// entries), top-to-bottom in real DOM order — #realtime-feed renders nested
-// inside #analytics's own section (DashboardOverview's second card), not as
-// a separate sibling, so a naive "any part visible" check would flag both
-// at once. Scroll-spy below picks whichever section's top has most recently
-// scrolled past the threshold, which resolves that correctly regardless of
-// the nesting.
-const dashboardSectionIds = ["analytics", "realtime-feed", "operations-table"];
 
 const searchCategoryEntity: Record<SearchCategory, CommandRecord["entity"]> = {
   Patients: "Patient",
@@ -134,9 +124,7 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState<CommandRecord[]>([]);
-  const [activeDashboardSection, setActiveDashboardSection] = useState(dashboardSectionIds[0]);
   const navRef = useRef<HTMLElement | null>(null);
-  const reducedMotion = useReducedMotion();
 
   // Live entity search (/api/search) — the server already gates each category
   // by the same RBAC matrix enforced everywhere else, so no client-side
@@ -254,62 +242,6 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem("hospital-os-sidebar", sidebarCollapsed ? "collapsed" : "expanded");
   }, [sidebarCollapsed]);
-
-  // Scroll-spy for the dashboard's own Dashboard/Patients/Notifications
-  // sidebar entries (Track 4.15): they all point at the single dashboard
-  // page via #hash, so pathname alone can't tell them apart. A no-op on
-  // every other route, since none of these ids exist there.
-  useEffect(() => {
-    if (pathname !== "/mudgalgastromedics-os") return;
-    let frame = 0;
-    function updateActiveSection() {
-      // Viewport-relative, not a fixed pixel value — #operations-table sits
-      // near the bottom of a short page and can never scroll closer to the
-      // top than its own remaining scroll room allows, so a small fixed
-      // threshold would never trigger for it.
-      const threshold = window.innerHeight * 0.5;
-      const tops = Object.fromEntries(
-        dashboardSectionIds.map((id) => [id, document.getElementById(id)?.getBoundingClientRect().top ?? Infinity])
-      );
-      let current = dashboardSectionIds[0];
-      for (const id of dashboardSectionIds) {
-        if (tops[id] > threshold) continue;
-        // #realtime-feed renders as DashboardOverview's second card inside
-        // #analytics's own section, side-by-side with it in a 2-column grid
-        // at xl+ widths (grid-cols-[1fr_420px]) — their tops are identical
-        // there at every scroll position, not just on load, so "Dashboard"
-        // keeps priority until they genuinely diverge (a narrower, stacked
-        // layout where #realtime-feed's card has scrolled independently).
-        if (id === "realtime-feed" && Math.abs(tops[id] - tops.analytics) < 2) continue;
-        current = id;
-      }
-      setActiveDashboardSection(current);
-    }
-    function onScroll() {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateActiveSection);
-    }
-    updateActiveSection();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [pathname]);
-
-  // Dashboard/Notifications/Patients clicks while already on the dashboard page:
-  // native <a href="#hash"> scrolling silently no-ops when the target's scroll
-  // position doesn't change (e.g. #realtime-feed sits beside #analytics in the
-  // xl+ grid, so clicking "Notifications" moves nothing). A brief ring flash on
-  // the destination section gives the click visible confirmation regardless of
-  // whether the page actually scrolled.
-  function focusDashboardSection(id: string) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
-    el.classList.add("ring-4", "ring-brand/30", "transition-shadow", "duration-300");
-    window.setTimeout(() => el.classList.remove("ring-4", "ring-brand/30"), 900);
-  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -486,27 +418,14 @@ export function HospitalOsShell({ children }: { children: ReactNode }) {
                       <p className="px-3 pb-0.5 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted/70">{group}</p>
                     ) : null}
                     {items.map(({ label, icon: Icon, badge, href }) => {
-                      const [hrefPath, hrefHash] = href.split("#");
-                      const isCurrentPage = hrefHash
-                        ? pathname === hrefPath && activeDashboardSection === hrefHash
-                        : pathname === href;
+                      const isCurrentPage = pathname === href;
                       return (
                         <a
                           href={href}
                           key={label}
                           data-nav-item
-                          onClick={(event) => {
-                            setMobileNav(false);
-                            if (!hrefHash || pathname !== hrefPath) return;
-                            // Already on the target page — a full navigation (and its
-                            // native anchor-scroll) would be a no-op, so drive the
-                            // scroll/highlight ourselves instead of letting the <a> fire.
-                            event.preventDefault();
-                            window.history.pushState(null, "", href);
-                            setActiveDashboardSection(hrefHash);
-                            focusDashboardSection(hrefHash);
-                          }}
-                          className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition hover:bg-soft ${isCurrentPage ? "bg-brand text-white hover:bg-brand" : "text-muted"}`}
+                          onClick={() => setMobileNav(false)}
+                          className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition ${isCurrentPage ? "bg-brand text-white hover:bg-brand" : "text-muted hover:bg-soft"}`}
                           title={sidebarCollapsed ? label : undefined}
                           aria-current={isCurrentPage ? "page" : undefined}
                         >

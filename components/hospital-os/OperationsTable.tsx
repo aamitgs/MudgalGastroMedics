@@ -82,7 +82,7 @@ export function OperationsTable({
   }
 
   return (
-    <div id="operations-table" className="scroll-mt-20 rounded border border-line/80 bg-surface shadow-sm">
+    <div className="rounded border border-line/80 bg-surface shadow-sm">
       <div className="border-b border-line p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>

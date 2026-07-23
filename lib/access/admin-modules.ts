@@ -54,7 +54,15 @@ export const adminModules: AdminModuleDef[] = [
   // that needs to send or receive one (e.g. pharmacist has no "patients"
   // permission), so this is visible to every staff role by design; per-note
   // read/write is still gated department-by-department (staff-notes-types.ts).
-  { id: "module-staff-notes", label: "Staff Notes", resource: null, route: "/mudgalgastromedics-os/staff-notes" }
+  { id: "module-staff-notes", label: "Staff Notes", resource: null, route: "/mudgalgastromedics-os/staff-notes" },
+  // Same "visible to everyone" reasoning as Staff Notes — /api/notifications
+  // already filters each notification by canViewNotificationCategory server-side,
+  // so a role with no visible categories just sees an empty inbox, not a 403.
+  { id: "module-notifications", label: "Notifications", resource: null, route: "/mudgalgastromedics-os/notifications" },
+  // Matches sectionPermission.patientFlow (lib/hospital-os-data.ts) — the
+  // dashboard's live today's-queue view, kept separate from the full-CRUD
+  // Patient Registry (module-patients).
+  { id: "module-patient-flow", label: "Patient Flow", resource: "appointments", route: "/mudgalgastromedics-os/patient-flow" }
 ];
 
 /** Resolves a legacy `#module-x` hash id (old /admin deep links) to its real Hospital OS route; null if the id is unknown. */

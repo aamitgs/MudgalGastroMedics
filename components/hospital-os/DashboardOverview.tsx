@@ -99,7 +99,7 @@ export function DashboardOverview({
         </div>
       </div>
 
-      <div id="realtime-feed" className="scroll-mt-20 rounded-lg border border-line bg-surface">
+      <div className="rounded-lg border border-line bg-surface">
         <div className="p-5">
           <div className="flex items-center justify-between">
             <div>

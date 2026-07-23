@@ -221,24 +221,16 @@ function rolesWithPermission(resource: AccessResource | null, action: AccessActi
   return hospitalRoles.filter((role) => roleHasPermission(hospitalRoleToAccessRole[role], resource, action));
 }
 
-// Anchor-only hrefs are prefixed with the dashboard's own path (not bare
-// "#id") — Track 4.13's shell now renders on 14+ other routes too, and a bare
-// "#id" link only scrolls within whatever page you're currently on; clicked
-// from another route it would silently do nothing instead of navigating to
-// the dashboard first. Full navigation to a URL with a hash still scrolls to
-// that element once the page renders, same as before, on every page.
-const dashboardPath = "/mudgalgastromedics-os";
-
 export const navItems: NavItem[] = [
-  { label: "Dashboard", group: "Overview", href: `${dashboardPath}#analytics`, icon: LayoutDashboard, roles: rolesWithPermission(null) },
-  // "Patients" points at the dashboard's own real, live OperationsTable
-  // (patient-flow overview); "Patient Registry" is the dedicated full-CRUD
+  { label: "Dashboard", group: "Overview", href: "/mudgalgastromedics-os", icon: LayoutDashboard, roles: rolesWithPermission(null) },
+  // "Patients" is the dashboard's live today's-queue view (patient-flow), its
+  // own dedicated route; "Patient Registry" is the separate full-CRUD
   // /mudgalgastromedics-os/patients page — genuinely different views, both kept.
   // Roles gated on "appointments" (not "patients") to match sectionPermission.patientFlow
-  // below, which is what actually gates #operations-table's rendering — otherwise a
-  // patients-view-only role (e.g. Lab Tech, Billing/Accounts) sees this item but its
-  // target never mounts, and the click silently does nothing.
-  { label: "Patients", group: "Clinical", href: `${dashboardPath}#operations-table`, icon: UsersRound, roles: rolesWithPermission("appointments") },
+  // below, which is what actually gates the patient-flow page's content — otherwise a
+  // patients-view-only role (e.g. Lab Tech, Billing/Accounts) would see this item but
+  // land on a page with nothing they're allowed to see.
+  { label: "Patients", group: "Clinical", href: "/mudgalgastromedics-os/patient-flow", icon: UsersRound, roles: rolesWithPermission("appointments") },
   { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },
@@ -267,7 +259,7 @@ export const navItems: NavItem[] = [
   { label: "Reports", group: "Administration", href: "/mudgalgastromedics-os/reports", icon: BarChart3, roles: rolesWithPermission("reports") },
   { label: "CMS", group: "Administration", href: "/mudgalgastromedics-os/cms", icon: Activity, roles: rolesWithPermission("cms") },
   { label: "Settings", group: "Administration", href: "/mudgalgastromedics-os/settings", icon: Settings, roles: rolesWithPermission("system-settings") },
-  { label: "Notifications", group: "Overview", href: `${dashboardPath}#realtime-feed`, icon: Bell, roles: rolesWithPermission(null) },
+  { label: "Notifications", group: "Overview", href: "/mudgalgastromedics-os/notifications", icon: Bell, roles: rolesWithPermission(null) },
   { label: "Readiness", group: "Administration", href: "/mudgalgastromedics-os/readiness", icon: Gauge, roles: rolesWithPermission("system-settings") },
   { label: "Audit", group: "Administration", href: "/mudgalgastromedics-os/audit", icon: History, roles: rolesWithPermission("audit-logs") },
   { label: "Analytics", group: "Administration", href: "/mudgalgastromedics-os/analytics", icon: LineChart, roles: rolesWithPermission("reports") },
