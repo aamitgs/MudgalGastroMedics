@@ -224,14 +224,14 @@ function rolesWithPermission(resource: AccessResource | null, action: AccessActi
 export const navItems: NavItem[] = [
   { label: "Dashboard", group: "Overview", href: "/mudgalgastromedics-os", icon: LayoutDashboard, roles: rolesWithPermission(null) },
   // "Patients" is the dashboard's live today's-queue view (patient-flow), its
-  // own dedicated route; "Patient Registry" is the separate full-CRUD
+  // own dedicated route; "Patient List" is the separate full-CRUD
   // /mudgalgastromedics-os/patients page — genuinely different views, both kept.
   // Roles gated on "appointments" (not "patients") to match sectionPermission.patientFlow
   // below, which is what actually gates the patient-flow page's content — otherwise a
   // patients-view-only role (e.g. Lab Tech, Billing/Accounts) would see this item but
   // land on a page with nothing they're allowed to see.
   { label: "Patients", group: "Clinical", href: "/mudgalgastromedics-os/patient-flow", icon: UsersRound, roles: rolesWithPermission("appointments") },
-  { label: "Patient Registry", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
+  { label: "Patient List", group: "Clinical", href: "/mudgalgastromedics-os/patients", icon: BookUser, roles: rolesWithPermission("patients") },
   { label: "AI Reviews", group: "Clinical", href: "/mudgalgastromedics-os/ai-reviews", icon: BrainCircuit, roles: rolesWithPermission("patients") },
   { label: "Appointment Requests", group: "Clinical", href: "/mudgalgastromedics-os/appointments", icon: Inbox, roles: rolesWithPermission("appointments") },
   { label: "OPD", group: "Clinical", href: "/mudgalgastromedics-os/opd", icon: ClipboardList, roles: rolesWithPermission("appointments") },

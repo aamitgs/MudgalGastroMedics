@@ -83,7 +83,7 @@ async function cancelPatientFlowRow(row: PatientFlowRow, queryClient: QueryClien
  * Today's live patient-flow queue — the sidebar's "Patients" entry, its own
  * dedicated route, split out from the dashboard (Dashboard/Notifications/
  * Patients routing fix) so it has real back/forward and a direct link,
- * same as every other module. "Patient Registry" (full CRUD) is separate.
+ * same as every other module. "Patient List" (full CRUD) is separate.
  */
 export function PatientFlowPage() {
   const [globalFilter, setGlobalFilter] = useState("");

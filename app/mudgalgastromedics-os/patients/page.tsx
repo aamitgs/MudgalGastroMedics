@@ -34,7 +34,7 @@ export default async function PatientsPage() {
           <div className="mx-auto flex w-[min(1560px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 py-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Patients</p>
-              <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Patient registry</h1>
+              <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Patient List</h1>
             </div>
           </div>
         </section>
@@ -62,7 +62,7 @@ export default async function PatientsPage() {
             <ArrowLeft size={13} /> Dashboard
           </Link>
           <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">Patients</p>
-          <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Patient registry</h1>
+          <h1 className="mt-1 text-2xl font-bold leading-tight text-ink">Patient List</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
             Permanent patient records, registration and demographic detail across the hospital.
           </p>

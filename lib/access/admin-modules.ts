@@ -61,7 +61,7 @@ export const adminModules: AdminModuleDef[] = [
   { id: "module-notifications", label: "Notifications", resource: null, route: "/mudgalgastromedics-os/notifications" },
   // Matches sectionPermission.patientFlow (lib/hospital-os-data.ts) — the
   // dashboard's live today's-queue view, kept separate from the full-CRUD
-  // Patient Registry (module-patients).
+  // Patient List (module-patients).
   { id: "module-patient-flow", label: "Patient Flow", resource: "appointments", route: "/mudgalgastromedics-os/patient-flow" }
 ];
 

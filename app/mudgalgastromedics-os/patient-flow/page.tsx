@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }
 };
 
-/** Sidebar's "Patients" entry (Dashboard/Notifications/Patients routing fix) — same page.tsx pattern as staff-notes/page.tsx. Distinct from "Patient Registry" (module-patients), the full-CRUD record store. */
+/** Sidebar's "Patients" entry (Dashboard/Notifications/Patients routing fix) — same page.tsx pattern as staff-notes/page.tsx. Distinct from "Patient List" (module-patients), the full-CRUD record store. */
 export default async function PatientFlowPage() {
   const cookieStore = await cookies();
   const context = await accessContextFromCookieStore(cookieStore);
