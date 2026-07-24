@@ -16,6 +16,8 @@ import { TableDocument } from "@/lib/pdf/table-document";
 import { getPublicProcedure } from "@/lib/cms-public";
 import { getPrepChecklist } from "@/lib/procedure-prep";
 import { ProcedurePrepDocument } from "@/lib/pdf/procedure-prep-document";
+import { getPatientEducationSheet } from "@/lib/patient-education-sheets";
+import { PatientEducationDocument } from "@/lib/pdf/patient-education-document";
 
 export type PdfRenderResult =
   | { ok: true; buffer: Buffer; filename: string }
@@ -41,6 +43,18 @@ export async function renderPrescriptionPdf(visitId: string): Promise<PdfRenderR
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(PrescriptionDocument({ visit, patient }));
   return { ok: true, buffer, filename: `prescription-${slugify(visit.patientName)}-${visit.token}.pdf` };
+}
+
+export async function renderPatientEducationPdf(visitId: string, sheetKey: string): Promise<PdfRenderResult> {
+  const visit = (await getOpdVisitById(visitId));
+  if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
+  const sheet = getPatientEducationSheet(sheetKey);
+  if (!sheet) return { ok: false, error: "Unknown education sheet.", status: 404 };
+
+  registerPdfFonts();
+  const patient = await findPatientForVisit(visit.patientId, visit.phone);
+  const buffer = await renderToBuffer(PatientEducationDocument({ visit, patient, title: sheet.title, points: sheet.points }));
+  return { ok: true, buffer, filename: `${slugify(sheet.title)}-${slugify(visit.patientName)}.pdf` };
 }
 
 export async function renderMedicalCertificatePdf(visitId: string): Promise<PdfRenderResult> {
