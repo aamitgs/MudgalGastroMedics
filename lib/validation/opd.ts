@@ -53,6 +53,8 @@ export const opdVisitUpdateSchema = z.object({
   priorInvestigation: optionalText,
   clinicalNote: optionalText,
   diagnosis: optionalText,
+  diagnosisIcd10Code: optionalText,
+  diagnosisIcd10Label: optionalText,
   investigationAdvice: optionalText,
   prescription: optionalText,
   prescriptionItems: z.array(prescriptionItemSchema).optional(),

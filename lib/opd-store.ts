@@ -98,6 +98,8 @@ export async function updateOpdVisit(input: {
   priorInvestigation?: string;
   clinicalNote?: string;
   diagnosis?: string;
+  diagnosisIcd10Code?: string;
+  diagnosisIcd10Label?: string;
   investigationAdvice?: string;
   prescription?: string;
   prescriptionItems?: OpdVisit["prescriptionItems"];
@@ -128,7 +130,7 @@ export async function updateOpdVisit(input: {
   // require prescriptions:edit or attribute the visit to "acting doctor".
   const touchesClinical = [
     input.presentingComplaints, input.history, input.generalExamination, input.perAbdomen, input.priorInvestigation,
-    input.clinicalNote, input.diagnosis, input.investigationAdvice, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote
+    input.clinicalNote, input.diagnosis, input.diagnosisIcd10Code, input.investigationAdvice, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote
   ].some((value) => value !== undefined);
   if (touchesClinical && input.actingDoctorName) visit.doctorName ||= input.actingDoctorName;
   if (input.billingStatus) {
@@ -160,6 +162,8 @@ export async function updateOpdVisit(input: {
   if (typeof input.priorInvestigation === "string") visit.priorInvestigation = input.priorInvestigation.trim();
   if (typeof input.clinicalNote === "string") visit.clinicalNote = input.clinicalNote.trim();
   if (typeof input.diagnosis === "string") visit.diagnosis = input.diagnosis.trim();
+  if (typeof input.diagnosisIcd10Code === "string") visit.diagnosisIcd10Code = input.diagnosisIcd10Code.trim();
+  if (typeof input.diagnosisIcd10Label === "string") visit.diagnosisIcd10Label = input.diagnosisIcd10Label.trim();
   if (typeof input.investigationAdvice === "string") visit.investigationAdvice = input.investigationAdvice.trim();
   if (typeof input.prescription === "string") visit.prescription = input.prescription.trim();
   if (input.prescriptionItems !== undefined) visit.prescriptionItems = input.prescriptionItems;

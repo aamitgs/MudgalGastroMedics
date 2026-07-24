@@ -55,6 +55,9 @@ export type OpdVisit = {
   clinicalNote?: string;
   /** Short structured impression, separate from the free-text clinical note — powers the doctor's "favourite diagnoses" quick-insert list. */
   diagnosis?: string;
+  /** Optional, doctor-attached coding from lib/icd10-codes.ts's curated GI/hepatology subset (Track: ICD-10 coding) — never inferred automatically from the free-text diagnosis. Label is stored alongside the code so the record stays self-contained even if the curated list changes later. */
+  diagnosisIcd10Code?: string;
+  diagnosisIcd10Label?: string;
   /** What investigations/tests to get done — distinct from `advice` (general patient instructions: diet, warning signs, reports to bring). */
   investigationAdvice?: string;
   prescription?: string;

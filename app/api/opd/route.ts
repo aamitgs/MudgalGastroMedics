@@ -114,7 +114,7 @@ export async function PATCH(request: Request) {
     id, status, billingStatus, estimatedAmount, paymentMethod, notes,
     presentingComplaints, history, vitalsBp, vitalsPulse, vitalsWeight, vitalsHeight, vitalsRespiratoryRate, vitalsTemperature, vitalsSpo2, vitalsBloodSugar,
     generalExamination, perAbdomen, priorInvestigation,
-    clinicalNote, diagnosis, investigationAdvice, prescription, prescriptionItems, advice, followUpDate,
+    clinicalNote, diagnosis, diagnosisIcd10Code, diagnosisIcd10Label, investigationAdvice, prescription, prescriptionItems, advice, followUpDate,
     referralTo, referralLetter, certificateNote, refundAction, refundReason, refundAmount
   } = parsed.data;
 
@@ -124,7 +124,7 @@ export async function PATCH(request: Request) {
   // and Reception has no prescriptions right) only need appointment rights.
   const touchesClinical = [
     presentingComplaints, history, generalExamination, perAbdomen, priorInvestigation,
-    clinicalNote, diagnosis, investigationAdvice, prescription, prescriptionItems, advice, followUpDate, referralTo, referralLetter, certificateNote
+    clinicalNote, diagnosis, diagnosisIcd10Code, investigationAdvice, prescription, prescriptionItems, advice, followUpDate, referralTo, referralLetter, certificateNote
   ].some((value) => value !== undefined);
   const touchesBilling = [billingStatus, estimatedAmount, paymentMethod].some((value) => value !== undefined) || Boolean(refundAction);
   const auth = await authorize(
@@ -160,6 +160,8 @@ export async function PATCH(request: Request) {
     priorInvestigation,
     clinicalNote,
     diagnosis,
+    diagnosisIcd10Code,
+    diagnosisIcd10Label,
     investigationAdvice,
     prescription,
     prescriptionItems,
