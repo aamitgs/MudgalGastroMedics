@@ -18,7 +18,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { OperationsTable } from "@/components/hospital-os/OperationsTable";
-import { downloadCsvFile, fetchHospitalSnapshot, hospitalRoleToAccessRole, openPatientWorkspace, patientFlowExportRow } from "@/lib/hospital-os-data";
+import { PatientWorkspace } from "@/components/hospital-os/PatientWorkspace";
+import { canAccessSection, downloadCsvFile, fetchHospitalSnapshot, hospitalRoleToAccessRole, openPatientWorkspace, patientFlowExportRow } from "@/lib/hospital-os-data";
 import type { PatientFlowRow } from "@/lib/hospital-os-data";
 import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
@@ -111,6 +112,10 @@ export function PatientFlowPage() {
   // UI convenience only — the PATCH endpoints re-check "appointments":"edit"
   // server-side on every request, same as every other mutation in the app.
   const canCancel = roleHasPermission(hospitalRoleToAccessRole[role], "appointments", "edit");
+  // Same gate the dashboard used before Patient Flow moved to its own route —
+  // a role with only patientFlow access (Reception, PRO) still opens this
+  // page, but never had the clinical snapshot/timeline panel either.
+  const canSeeWorkspace = canAccessSection(role, "clinicalWorkspace");
 
   const columns = useMemo<ColumnDef<PatientFlowRow>[]>(() => [
     {
@@ -258,6 +263,8 @@ export function PatientFlowPage() {
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
       />
+
+      {canSeeWorkspace ? <PatientWorkspace rows={rows} /> : null}
 
       <Dialog open={cancelTarget !== null} onOpenChange={(open) => !open && !isCancelling && setCancelTarget(null)}>
         <DialogContent>
