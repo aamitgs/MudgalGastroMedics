@@ -72,6 +72,8 @@ export type OpdVisit = {
   doctorName?: string;
   /** Set automatically the first time status moves to "In Consultation" — powers a real (not fabricated) average wait time. */
   consultationStartedAt?: string;
+  /** Set automatically the first time status moves to "Completed" — with consultationStartedAt, powers real (not fabricated) consultation-duration analytics. */
+  completedAt?: string;
   /** Requested by Billing after a Paid visit; Refunded once the money has actually gone back. */
   refundStatus?: "Requested" | "Refunded";
   refundReason?: string;

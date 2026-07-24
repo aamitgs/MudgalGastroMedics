@@ -1,16 +1,18 @@
 "use client";
 
-import { CalendarClock, CheckCircle2, ChevronsLeft, ChevronsRight, FileText, RefreshCw, Search, Stethoscope, UserPlus, UserRound } from "lucide-react";
+import { BarChart3, CalendarClock, CheckCircle2, ChevronsLeft, ChevronsRight, FileText, RefreshCw, Search, Stethoscope, UserPlus, UserRound } from "lucide-react";
 import { useLayoutEffect, useMemo, useState, type FormEvent } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { DoctorAnalyticsPanel } from "@/components/doctor-portal/DoctorAnalyticsPanel";
 import { DoctorRecentActivity } from "@/components/chrome/DoctorRecentActivity";
 import { DoctorConsultationCard } from "@/components/doctor-portal/DoctorConsultationCard";
 import { DoctorPrintableSummary } from "@/components/doctor-portal/DoctorPrintableSummary";
 import { createDoctorSummaryText, findPatientForVisit, prescriptionItemKey, topFrequent, topFrequentByKey } from "@/components/doctor-portal/helpers";
 import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
+import { computeDoctorAnalytics } from "@/lib/clinical/doctor-analytics";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
 
@@ -53,6 +55,7 @@ export function DoctorPortalWorkspace({
   const [statsOpen, setStatsOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
   async function loadWorkspace() {
     setLoading(true);
@@ -211,6 +214,8 @@ export function DoctorPortalWorkspace({
       { label: "Follow-ups", value: visits.filter((visit) => Boolean(visit.followUpDate)).length, icon: FileText }
     ];
   }, [visits]);
+
+  const analytics = useMemo(() => computeDoctorAnalytics(visits), [visits]);
 
   // Favourites need real repeats, not a single past entry, so a one-off note
   // never gets surfaced as if it were a habitual choice.
@@ -418,6 +423,31 @@ export function DoctorPortalWorkspace({
             <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${activityOpen ? "ml-3 h-auto w-[360px] opacity-100" : "ml-0 h-14 w-0 opacity-0"}`}>
               <div className="w-[360px]">
                 <DoctorRecentActivity />
+              </div>
+            </div>
+          </div>
+
+          {/* Analytics panel — separate, independently toggled */}
+          <div className="flex items-start gap-0">
+            <button
+              type="button"
+              onClick={() => setAnalyticsOpen((value) => !value)}
+              aria-expanded={analyticsOpen}
+              aria-label={analyticsOpen ? "Collapse Analytics panel" : "Expand Analytics panel"}
+              title="Analytics"
+              className="grid h-14 w-6 shrink-0 place-items-center rounded-lg bg-violet-600 text-white shadow-[0_10px_24px_rgba(124,58,237,0.35)] transition hover:-translate-y-0.5 hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-500/30"
+            >
+              {analyticsOpen ? <ChevronsLeft size={15} /> : <ChevronsRight size={15} />}
+            </button>
+            <div className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${analyticsOpen ? "ml-3 h-auto w-[360px] opacity-100" : "ml-0 h-14 w-0 opacity-0"}`}>
+              <div className="w-[360px] rounded border border-line/80 bg-white shadow-sm">
+                <div className="border-b border-line p-4">
+                  <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.16em] text-violet-600"><BarChart3 size={13} /> Analytics</p>
+                  <h2 className="mt-1 text-xl font-bold text-ink">Consultation insights</h2>
+                </div>
+                <div className="p-4">
+                  <DoctorAnalyticsPanel analytics={analytics} />
+                </div>
               </div>
             </div>
           </div>

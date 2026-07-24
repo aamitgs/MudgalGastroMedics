@@ -121,6 +121,7 @@ export async function updateOpdVisit(input: {
   if (input.status) {
     visit.status = input.status;
     if (input.status === "In Consultation") visit.consultationStartedAt ||= new Date().toISOString();
+    if (input.status === "Completed") visit.completedAt ||= new Date().toISOString();
   }
   // Vitals are deliberately excluded — Reception captures them before the
   // doctor sees the patient (Track: reception vitals), so they must not
