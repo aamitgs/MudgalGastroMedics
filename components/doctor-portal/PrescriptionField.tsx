@@ -7,6 +7,7 @@ import { detectDrugInteractions } from "@/lib/clinical/drug-interactions";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { prescriptionInstructionPresets, resolveInstructionText } from "@/lib/prescription-instructions";
 import { ActionButton } from "@/components/design-system/ActionButton";
+import { DuplicatePreviousRxMenu } from "@/components/doctor-portal/DuplicatePreviousRxMenu";
 import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { InteractionGuard } from "@/components/doctor-portal/InteractionGuard";
 import { MedicineAutocomplete } from "@/components/doctor-portal/MedicineAutocomplete";
@@ -15,7 +16,7 @@ import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndica
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useControlledAutosave } from "@/hooks/useControlledAutosave";
 
-function newItemId() {
+export function newItemId() {
   return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `rx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -72,8 +73,15 @@ export function PrescriptionField({
     onSaveItems(next.filter((item) => item.medicine.trim()));
   }
 
+  // Editing anything on a duplicated "Continue" row means it's no longer
+  // unchanged from last visit — the medication-reconciliation badge should
+  // say so without the doctor having to remember to flip it themselves.
+  function withStatusUpgrade(item: PrescriptionItem, patch: Partial<PrescriptionItem>): PrescriptionItem {
+    return { ...item, ...patch, status: item.status === "Continue" ? "Modify" : item.status };
+  }
+
   function updateItem(id: string, patch: Partial<PrescriptionItem>) {
-    setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    setItems((current) => current.map((item) => (item.id === id ? withStatusUpgrade(item, patch) : item)));
   }
 
   function addItem(prefill?: Partial<PrescriptionItem>) {
@@ -86,14 +94,21 @@ export function PrescriptionField({
     commit(items.filter((item) => item.id !== id));
   }
 
+  function applyDuplicated(duplicated: PrescriptionItem[]) {
+    commit([...items, ...duplicated]);
+  }
+
   return (
     <div className="grid gap-3">
       <div>
-        <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-bold text-ink">Prescription (Rx)</span>
-          <ActionButton type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => addItem()} disabled={disabled}>
-            <Plus size={14} /> Add medicine
-          </ActionButton>
+          <div className="flex flex-wrap gap-1.5">
+            <DuplicatePreviousRxMenu phone={visit.phone} excludeVisitId={visit.id} disabled={disabled} onApply={applyDuplicated} />
+            <ActionButton type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => addItem()} disabled={disabled}>
+              <Plus size={14} /> Add medicine
+            </ActionButton>
+          </div>
         </div>
 
         {favouriteItems.length ? (
@@ -121,12 +136,23 @@ export function PrescriptionField({
               const preview = resolveInstructionText(item.instruction);
               return (
                 <div key={item.id} className="grid gap-1.5 rounded border border-line bg-white p-2.5">
+                  {item.status ? (
+                    <span
+                      className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${
+                        item.status === "Modify"
+                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                          : "bg-soft text-muted"
+                      }`}
+                    >
+                      {item.status === "Modify" ? "Modified from last visit" : "Continued from last visit"}
+                    </span>
+                  ) : null}
                   <div className="grid grid-cols-[1.3fr_0.8fr_auto] items-center gap-1.5">
                     <MedicineAutocomplete
                       value={item.medicine}
                       onChange={(value) => updateItem(item.id, { medicine: value })}
                       onBlur={() => commit(items)}
-                      onPick={(name) => commit(items.map((row) => (row.id === item.id ? { ...row, medicine: name } : row)))}
+                      onPick={(name) => commit(items.map((row) => (row.id === item.id ? withStatusUpgrade(row, { medicine: name }) : row)))}
                       disabled={disabled}
                     />
                     <input
@@ -150,7 +176,7 @@ export function PrescriptionField({
                   <div className="grid grid-cols-[1.6fr_0.7fr] items-center gap-1.5">
                     <select
                       value={isKnownPreset ? item.instruction : "custom"}
-                      onChange={(event) => commit(items.map((row) => (row.id === item.id ? { ...row, instruction: event.target.value === "custom" ? "" : event.target.value } : row)))}
+                      onChange={(event) => commit(items.map((row) => (row.id === item.id ? withStatusUpgrade(row, { instruction: event.target.value === "custom" ? "" : event.target.value }) : row)))}
                       disabled={disabled}
                       className={inputClass}
                     >
