@@ -46,7 +46,7 @@ test("patient registration, then row click opens the Global Patient Drawer", asy
   // from a /mudgalgastromedics-os/* module's row click silently did nothing.
   // Now mounted on HospitalOsShell too.
   await page.goto("/mudgalgastromedics-os/patients");
-  await expect(page.getByRole("heading", { name: "Patient registry" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Patient List" })).toBeVisible();
 
   // Unique phone per run so repeat/local runs never collide with a
   // previously-created record and hit the duplicate-match confirmation flow.
@@ -63,8 +63,12 @@ test("patient registration, then row click opens the Global Patient Drawer", asy
 });
 
 test("patient flow table exports CSV", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
+  // "Active patient flow" is static header text, rendered before the
+  // snapshot query resolves — wait for an actual row so Export CSV doesn't
+  // race the fetch and download a header-only file.
+  await expect(page.getByRole("row", { name: /Aarav Sharma/i })).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: /export csv/i }).click();
   const download = await downloadPromise;
@@ -77,8 +81,9 @@ test("patient flow table exports CSV", async ({ page }) => {
 });
 
 test("patient flow table exports Excel-compatible file", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
+  await expect(page.getByRole("row", { name: /Aarav Sharma/i })).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: /export excel/i }).click();
   const download = await downloadPromise;
@@ -91,8 +96,12 @@ test("patient flow table exports Excel-compatible file", async ({ page }) => {
 });
 
 test("patient flow table filters by status column", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
+  // Wait for the snapshot query to actually resolve before touching the
+  // filter — selecting against a still-empty/pre-hydration table risks the
+  // filter value being set before there's any data for it to apply to.
+  await expect(page.getByRole("row", { name: /Aarav Sharma/i })).toBeVisible();
   await page.getByLabel("Filter patient flow status").selectOption("Vitals Pending");
   await expect(page.getByRole("row", { name: /Nisha Verma/i })).toBeVisible();
   await expect(page.getByRole("row", { name: /Aarav Sharma/i })).toHaveCount(0);
@@ -109,7 +118,7 @@ test("patient flow table filters by status column", async ({ page }) => {
 });
 
 test("patient flow table changes rows per page", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   await expect(page.getByText(/showing 4 of 6/i)).toBeVisible();
   await expect(page.getByRole("row", { name: /Kavya Mehta/i })).toHaveCount(0);
@@ -119,7 +128,7 @@ test("patient flow table changes rows per page", async ({ page }) => {
 });
 
 test("patient flow table supports keyboard row navigation", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
   const firstRow = page.getByLabel("Open Aarav Sharma row");
   await firstRow.focus();
@@ -130,19 +139,20 @@ test("patient flow table supports keyboard row navigation", async ({ page }) => 
 });
 
 test("patient flow row action opens patient workspace", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
-  await page.getByRole("button", { name: "Open actions for Imran Khan" }).click();
-  await page.getByRole("menuitem", { name: "Open patient workspace" }).click();
+  // The patient's name is its own button (no row-action dropdown here) —
+  // matched by the leading name so it doesn't also catch the row's
+  // "Preview Imran Khan" / "Export Imran Khan" icon buttons.
+  await page.getByRole("button", { name: /^Imran Khan/ }).click();
   await expect(page.getByText(/Imran Khan\s+MGM-24020/)).toBeVisible();
 });
 
 test("patient flow row action exports a single row", async ({ page }) => {
-  await page.goto("/mudgalgastromedics-os");
+  await page.goto("/mudgalgastromedics-os/patient-flow");
   await expect(page.getByText(/active patient flow/i)).toBeVisible();
-  await page.getByRole("button", { name: "Open actions for Imran Khan" }).click();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("menuitem", { name: "Export row" }).click();
+  await page.getByRole("button", { name: "Export Imran Khan" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("hospital-os-patient-flow-imran-khan.csv");
   const path = await download.path();
