@@ -32,7 +32,7 @@ export async function GET(request: Request) {
   return new NextResponse(new Uint8Array(result.buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${result.filename}"`,
+      "Content-Disposition": `inline; filename="${result.filename}"`,
       "Cache-Control": "no-store"
     }
   });

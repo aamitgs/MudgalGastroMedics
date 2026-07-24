@@ -24,7 +24,9 @@ const styles = StyleSheet.create({
   },
   rxHeaderCol: { flex: 1, gap: 1.5 },
   rxHeaderColRight: { alignItems: "flex-end" },
-  rxIcon: { width: 56, height: 56, marginHorizontal: 12 },
+  // mgm-icon.png is a tall portrait source (948x1500) — without objectFit
+  // this square box stretches it horizontally, distorting the mark.
+  rxIcon: { width: 56, height: 56, marginHorizontal: 12, objectFit: "contain" },
   rxDoctorName: { fontFamily: "Geist", fontWeight: "bold", fontSize: 15, color: "#c0392b" },
   rxDoctorCredentials: { fontFamily: "Geist", fontWeight: "bold", fontSize: 8.5, color: pdfColors.ink, marginTop: 1 },
   rxDoctorMeta: { fontSize: 8, color: pdfColors.ink },

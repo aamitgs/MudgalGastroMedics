@@ -10,6 +10,7 @@ import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admiss
 import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { AdminMedicationRecord } from "@/components/ipd/AdminMedicationRecord";
 import { AiDischargeSummaryDraft } from "@/components/ipd/AiDischargeSummaryDraft";
 import { notify } from "@/lib/notify";
@@ -675,12 +676,14 @@ export function AdminIpdBeds() {
                 admissionId={editingAdmission.id}
                 onUseDraft={(draft) => void updateAdmission(editingAdmission.id, { dischargeSummary: draft })}
               />
-              <a
+              <PdfPreviewButton
                 href={`/api/pdf/discharge-summary?admissionId=${encodeURIComponent(editingAdmission.id)}`}
-                className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded border border-line bg-soft px-4 text-sm font-bold text-ink transition hover:border-brand hover:text-brand"
-              >
-                <FileDown size={15} /> Download Discharge Summary PDF
-              </a>
+                title={`Discharge Summary — ${editingAdmission.patientName}`}
+                label="Discharge Summary PDF"
+                variant="secondary"
+                size="md"
+                className="mt-3"
+              />
             </div>
           ) : null}
         </div>

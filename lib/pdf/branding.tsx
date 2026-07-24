@@ -58,7 +58,9 @@ export const pdfStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start"
   },
-  logo: { width: 42, height: 42 },
+  // mgm-logo.png is a wide landscape source (612x285) — without objectFit
+  // this square box stretches it vertically, distorting the mark.
+  logo: { width: 42, height: 42, objectFit: "contain" },
   headerRow: { flexDirection: "row", gap: 12 },
   hospitalName: { fontFamily: "Geist", fontWeight: "bold", fontSize: 13, color: pdfColors.ink },
   hospitalMeta: { fontSize: 8, color: pdfColors.muted, marginTop: 2, maxWidth: 260 },

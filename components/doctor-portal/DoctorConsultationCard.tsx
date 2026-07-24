@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, FileDown, FileText, History, Printer, Send, Stamp, X } from "lucide-react";
+import { Copy, FileText, History, Printer, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { OpdVisit, OpdVisitStatus, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -13,6 +13,7 @@ import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { FormField } from "@/components/design-system/FormField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
+import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
@@ -369,17 +370,29 @@ export function DoctorConsultationCard({
               <ActionButton variant="primary" className="whitespace-nowrap" onClick={() => printSummary(visit, patient)}>
                 <Printer size={16} /> Print
               </ActionButton>
-              <a href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
-                <Stamp size={16} /> Certificate
-              </a>
+              <PdfPreviewButton
+                href={`/api/pdf/medical-certificate?visitId=${encodeURIComponent(visit.id)}`}
+                title={`Medical Certificate — ${visit.patientName}`}
+                label="Certificate"
+                variant="secondary"
+                size="md"
+              />
               {visit.referralLetter?.trim() ? (
-                <a href={`/api/pdf/referral-letter?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-line bg-soft px-4 font-bold text-ink hover:border-brand hover:text-brand">
-                  <Send size={16} /> Referral Letter
-                </a>
+                <PdfPreviewButton
+                  href={`/api/pdf/referral-letter?visitId=${encodeURIComponent(visit.id)}`}
+                  title={`Referral Letter — ${visit.patientName}`}
+                  label="Referral Letter"
+                  variant="secondary"
+                  size="md"
+                />
               ) : null}
-              <a href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`} className="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded border border-emerald-300/20 bg-[linear-gradient(135deg,#10b981,#047857)] px-4 font-bold text-white shadow-[0_14px_30px_rgba(16,185,129,0.22)]">
-                <FileDown size={16} /> Download PDF
-              </a>
+              <PdfPreviewButton
+                href={`/api/pdf/prescription?visitId=${encodeURIComponent(visit.id)}`}
+                title={`Prescription — ${visit.patientName}`}
+                label="Prescription"
+                variant="success"
+                size="md"
+              />
             </div>
           </label>
           <label>

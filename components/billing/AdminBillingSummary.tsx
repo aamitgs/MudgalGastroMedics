@@ -9,6 +9,7 @@ import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
@@ -255,12 +256,14 @@ export function AdminBillingSummary() {
         cell: ({ row }) => (
           <div className="flex flex-wrap items-center gap-1.5">
             {row.original.billingStatus === "Paid" ? (
-              <a
+              <PdfPreviewButton
                 href={`/api/pdf/invoice?visitId=${encodeURIComponent(row.original.id)}`}
-                className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded border border-line bg-surface px-2 text-xs font-bold text-ink transition hover:border-brand hover:text-brand"
-              >
-                <Download size={13} /> Receipt
-              </a>
+                title={`Receipt — ${row.original.patientName}`}
+                description={`${row.original.token} · ${row.original.receiptId || "Receipt pending"}`}
+                label="Receipt"
+                size="sm"
+                className="min-h-8 px-2 text-xs"
+              />
             ) : null}
             <ActionButton variant="secondary" size="sm" onClick={() => openManage(row.original)} aria-expanded={editingVisit?.id === row.original.id}>
               <Edit3 size={13} /> Manage

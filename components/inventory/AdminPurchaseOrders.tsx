@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Download, FileDown, PackagePlus, PlusCircle, Trash2, Truck } from "lucide-react";
+import { AlertTriangle, Download, PackagePlus, PlusCircle, Trash2, Truck } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { roleHasPermission } from "@/lib/access/matrix";
 import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
@@ -10,6 +10,7 @@ import type { PurchaseOrderRecord, PurchaseOrderStatus } from "@/lib/purchase-or
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
+import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { StatusBadge, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
@@ -364,12 +365,14 @@ export function AdminPurchaseOrders() {
                   <p className="mt-1 text-[11px] text-muted">Expected delivery: {order.expectedDeliveryDate}</p>
                 ) : null}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <a
+                  <PdfPreviewButton
                     href={`/api/pdf/purchase-order?orderId=${encodeURIComponent(order.id)}`}
-                    className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded border border-line bg-surface px-2 text-xs font-bold text-ink transition hover:border-brand hover:text-brand"
-                  >
-                    <FileDown size={13} /> PDF
-                  </a>
+                    title={`Purchase Order — ${order.vendor}`}
+                    label="PDF"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-8 px-2 text-xs"
+                  />
                   {order.status === "Draft" ? (
                     <ActionButton variant="secondary" size="sm" onClick={() => void setStatus(order.id, "Ordered")}>
                       Mark Ordered
