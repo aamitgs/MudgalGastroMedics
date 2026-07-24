@@ -33,9 +33,10 @@ const styles = StyleSheet.create({
   rxHospitalName: { fontFamily: "Geist", fontWeight: "bold", fontSize: 17, color: "#c0392b", textAlign: "right" },
   rxHospitalMeta: { fontSize: 8.5, fontFamily: "Geist", fontWeight: "bold", color: pdfColors.ink, textAlign: "right" },
   rxHospitalContact: { fontSize: 8, color: pdfColors.ink, textAlign: "right" },
-  patientRow: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: 4 },
-  patientLabel: { fontSize: 8, color: pdfColors.muted, textTransform: "uppercase", letterSpacing: 0.4 },
-  patientValue: { fontSize: 10, fontFamily: "Geist", fontWeight: "semibold", color: pdfColors.ink, marginTop: 1 },
+  patientDetails: { marginBottom: 8, gap: 3 },
+  patientDetailRow: { flexDirection: "row", gap: 14 },
+  patientDetailCell: { flex: 1, fontSize: 9.5, fontFamily: "Geist", color: pdfColors.ink },
+  patientDetailLabel: { fontFamily: "Geist", fontWeight: "bold" },
   allergyBanner: {
     borderWidth: 1,
     borderColor: "#fca5a5",
@@ -156,49 +157,32 @@ function RxTable({ items }: { items: PrescriptionItem[] }) {
   );
 }
 
+/** DD.MM.YYYY to match the hospital's printed prescription pad — generatedAtLabel's "medium" style (with time) is for other documents, not this header. */
+function visitDateLabel(date: Date) {
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Kolkata" }).replace(/\//g, ".");
+}
+
 export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; patient?: PatientRecord }) {
   const hasItems = Boolean(visit.prescriptionItems?.length);
+  const ageSex = [patient?.age ? `${patient.age} Y` : "", patient?.gender].filter(Boolean).join(", ") || "Not recorded";
   return (
     <Document title={`Prescription - ${visit.patientName}`}>
       <Page size="A4" style={styles.page}>
         <PrescriptionHeader />
 
-        <View style={styles.patientRow}>
-          <View>
-            <Text style={styles.patientLabel}>Token</Text>
-            <Text style={styles.patientValue}>{visit.token}</Text>
+        <View style={styles.patientDetails}>
+          <View style={styles.patientDetailRow}>
+            <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Patient Name: </Text>{visit.patientName}</Text>
+            <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Age / Sex: </Text>{ageSex}</Text>
+            <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>UHID ID: </Text>{visit.uhid || "Not recorded"}</Text>
           </View>
-          <View>
-            <Text style={styles.patientLabel}>Patient</Text>
-            <Text style={styles.patientValue}>{visit.patientName}</Text>
-          </View>
-          {visit.uhid ? (
-            <View>
-              <Text style={styles.patientLabel}>UHID</Text>
-              <Text style={styles.patientValue}>{visit.uhid}</Text>
-            </View>
-          ) : null}
-          <View>
-            <Text style={styles.patientLabel}>Age / Gender</Text>
-            <Text style={styles.patientValue}>{[patient?.age, patient?.gender].filter(Boolean).join(" / ") || "Not recorded"}</Text>
-          </View>
-          {patient?.address ? (
-            <View>
-              <Text style={styles.patientLabel}>Address</Text>
-              <Text style={styles.patientValue}>{patient.address}</Text>
-            </View>
-          ) : null}
-          <View>
-            <Text style={styles.patientLabel}>Phone</Text>
-            <Text style={styles.patientValue}>{visit.phone}</Text>
-          </View>
-          <View>
-            <Text style={styles.patientLabel}>Visit Date</Text>
-            <Text style={styles.patientValue}>{generatedAtLabel(new Date(visit.createdAt))}</Text>
-          </View>
-          <View>
-            <Text style={styles.patientLabel}>Service</Text>
-            <Text style={styles.patientValue}>{visit.service}</Text>
+          <View style={styles.patientDetailRow}>
+            <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Address: </Text>{patient?.address || "Not recorded"}</Text>
+            <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Mobile No: </Text>{visit.phone}</Text>
+            <Text style={styles.patientDetailCell}>
+              <Text style={styles.patientDetailLabel}>Date: </Text>{visitDateLabel(new Date(visit.createdAt))}
+              <Text style={styles.patientDetailLabel}>, Token No: - </Text>{visit.token}
+            </Text>
           </View>
         </View>
 
