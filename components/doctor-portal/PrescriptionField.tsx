@@ -9,8 +9,11 @@ import { prescriptionInstructionPresets, resolveInstructionText } from "@/lib/pr
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { InteractionGuard } from "@/components/doctor-portal/InteractionGuard";
+import { MedicineAutocomplete } from "@/components/doctor-portal/MedicineAutocomplete";
 import { PrescriptionTemplateMenu } from "@/components/doctor-portal/PrescriptionTemplateMenu";
+import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
+import { useControlledAutosave } from "@/hooks/useControlledAutosave";
 
 function newItemId() {
   return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `rx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -44,11 +47,12 @@ export function PrescriptionField({
   disabled?: boolean;
   favourites: string[];
   favouriteItems: PrescriptionItem[];
-  onSave: (value: string) => void;
+  onSave: (value: string) => Promise<boolean>;
   onSaveItems: (items: PrescriptionItem[]) => void;
 }) {
   const [draft, setDraft] = useState(visit.prescription ?? "");
   const [items, setItems] = useState<PrescriptionItem[]>(visit.prescriptionItems ?? []);
+  const notesAutosave = useControlledAutosave(onSave);
 
   // Both entry paths (rows + free notes) feed one combined text so duplicate/
   // interaction detection catches a drug regardless of which the doctor used.
@@ -118,13 +122,12 @@ export function PrescriptionField({
               return (
                 <div key={item.id} className="grid gap-1.5 rounded border border-line bg-white p-2.5">
                   <div className="grid grid-cols-[1.3fr_0.8fr_auto] items-center gap-1.5">
-                    <input
+                    <MedicineAutocomplete
                       value={item.medicine}
-                      onChange={(event) => updateItem(item.id, { medicine: event.target.value })}
+                      onChange={(value) => updateItem(item.id, { medicine: value })}
                       onBlur={() => commit(items)}
+                      onPick={(name) => commit(items.map((row) => (row.id === item.id ? { ...row, medicine: name } : row)))}
                       disabled={disabled}
-                      placeholder="Medicine name"
-                      className={inputClass}
                     />
                     <input
                       value={item.strength ?? ""}
@@ -186,7 +189,10 @@ export function PrescriptionField({
 
       <label>
         <span className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-sm font-bold text-ink">Additional Notes</span>
+          <span className="flex items-center gap-2">
+            <span className="text-sm font-bold text-ink">Additional Notes</span>
+            <SaveStatusIndicator state={notesAutosave.saveState} />
+          </span>
           <PrescriptionTemplateMenu
             draft={draft}
             onInsert={(text) => {
@@ -196,7 +202,7 @@ export function PrescriptionField({
               // lose data" principle applies just as much here).
               const next = draft.trim() ? `${draft}\n\n${text}` : text;
               setDraft(next);
-              onSave(next);
+              void onSave(next);
             }}
           />
         </span>
@@ -205,14 +211,17 @@ export function PrescriptionField({
             favourites={favourites}
             onPick={(value) => {
               setDraft(value);
-              onSave(value);
+              void onSave(value);
             }}
           />
         ) : null}
         <textarea
           value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={(event) => onSave(event.target.value)}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            notesAutosave.onChange(event.target.value);
+          }}
+          onBlur={(event) => notesAutosave.onBlur(event.target.value)}
           disabled={disabled}
           className={textareaClass}
           placeholder="Anything not captured above — special instructions, regimen from a saved template, etc."
