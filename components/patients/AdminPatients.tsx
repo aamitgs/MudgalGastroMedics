@@ -14,6 +14,7 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
+import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { RecentValueChips } from "@/components/design-system/RecentValueChips";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { PrintIdCardDialog } from "@/components/patients/PrintIdCardDialog";
@@ -21,6 +22,7 @@ import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { useFormDraft } from "@/hooks/useFormDraft";
 import { useRecentValues } from "@/hooks/useRecentValues";
 import { patientCreateSchema, type PatientCreateInput } from "@/lib/validation/patients";
 
@@ -160,6 +162,7 @@ export function AdminPatients() {
     register,
     setValue,
     getValues,
+    watch,
     reset,
     formState: { errors, isSubmitting },
     submit: submitPatient
@@ -195,12 +198,15 @@ export function AdminPatients() {
       for (const token of (values.chronicConditions ?? "").split(",")) conditionRecents.remember(token);
       for (const token of (values.currentMedicines ?? "").split(",")) medicineRecents.remember(token);
       reset();
+      draft.clear();
       setDuplicateMatch(null);
       setConfirmedNewPatient(false);
       setTypedName("");
       void loadPatients();
     }
   });
+
+  const draft = useFormDraft<PatientCreateInput>("patient-registration", watch, reset);
 
   function insertRecentValue(field: "allergies" | "chronicConditions" | "currentMedicines", value: string) {
     const current = (getValues(field) ?? "").trim();
@@ -420,6 +426,9 @@ export function AdminPatients() {
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
               <Plus size={19} /> Create patient record
             </p>
+            {draft.restored ? (
+              <DraftRestoredNotice onDiscard={draft.clear} message="Recovered an unfinished registration from before — review and save, or discard it." />
+            ) : null}
             <div className="grid gap-4">
               <FormSection title="Identity">
                 <div className="grid gap-3 sm:grid-cols-2">

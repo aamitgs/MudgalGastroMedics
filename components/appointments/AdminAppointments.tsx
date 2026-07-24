@@ -17,12 +17,14 @@ import { ActionButton } from "@/components/design-system/ActionButton";
 import { AppointmentWaitlistPanel } from "@/components/appointments/AppointmentWaitlistPanel";
 import { DataTable } from "@/components/design-system/DataTable";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { FormField } from "@/components/design-system/FormField";
 import { FormSection } from "@/components/design-system/FormSection";
 import { RecentValueChips } from "@/components/design-system/RecentValueChips";
 import { getStatusToneClass, type BadgeTone } from "@/components/design-system/StatusBadge";
 import { notify } from "@/lib/notify";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
+import { useFormDraft } from "@/hooks/useFormDraft";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useRecentValues } from "@/hooks/useRecentValues";
@@ -242,6 +244,7 @@ export function AdminAppointments() {
     register,
     setValue,
     getValues,
+    watch,
     formState: { errors, isSubmitting },
     reset: resetBookingForm,
     submit: submitBooking
@@ -287,6 +290,7 @@ export function AdminAppointments() {
       for (const token of (values.chronicConditions ?? "").split(",")) conditionRecents.remember(token);
       for (const token of (values.currentMedicines ?? "").split(",")) medicineRecents.remember(token);
       resetBookingForm();
+      bookingDraft.clear();
       setDuplicateMatch(null);
       setConfirmedNewPatient(false);
       setTypedName("");
@@ -294,6 +298,8 @@ export function AdminAppointments() {
       void loadAppointments();
     }
   });
+
+  const bookingDraft = useFormDraft<AppointmentStaffBookingInput>("appointment-booking", watch, resetBookingForm);
 
   function insertRecentValue(field: "allergies" | "chronicConditions" | "currentMedicines", value: string) {
     const current = (getValues(field) ?? "").trim();
@@ -474,6 +480,9 @@ export function AdminAppointments() {
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
               <Plus size={19} /> New appointment
             </p>
+            {bookingDraft.restored ? (
+              <DraftRestoredNotice onDiscard={bookingDraft.clear} message="Recovered an unfinished booking from before — review and save, or discard it." />
+            ) : null}
             <div className="grid gap-4">
               <FormSection title="Patient" description="Search by phone first — an existing patient's details load automatically, no retyping.">
                 <div className="grid gap-3 sm:grid-cols-2">
