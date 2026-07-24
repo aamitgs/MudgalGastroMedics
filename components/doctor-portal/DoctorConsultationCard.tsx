@@ -21,6 +21,7 @@ import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
 import { PreviousVisitHistory } from "@/components/doctor-portal/PreviousVisitHistory";
+import { TimelineComparisonPanel } from "@/components/doctor-portal/TimelineComparisonPanel";
 import { generalExaminationChips, perAbdomenChips, QuickExamChips } from "@/components/doctor-portal/QuickExamChips";
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
@@ -229,6 +230,8 @@ export function DoctorConsultationCard({
         <RecentLabsStrip phone={visit.phone} />
 
         <PreviousVisitHistory phone={visit.phone} patientName={visit.patientName} />
+
+        <TimelineComparisonPanel visit={visit} />
 
         <AiPatientSummaryPanel phone={visit.phone} />
 
