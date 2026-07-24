@@ -303,6 +303,20 @@ export function AdminInventory() {
               </FormField>
             </FormSection>
 
+            <FormSection title="Medicine details (optional)">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormField label="Generic name" htmlFor="inventory-generic" error={errors.genericName?.message}>
+                  <input id="inventory-generic" className={fieldClass} placeholder="e.g. Pantoprazole" {...register("genericName")} />
+                </FormField>
+                <FormField label="Dosage form" htmlFor="inventory-dosage-form" error={errors.dosageForm?.message}>
+                  <input id="inventory-dosage-form" className={fieldClass} placeholder="e.g. Tablet, Syrup" {...register("dosageForm")} />
+                </FormField>
+              </div>
+              <FormField label="Manufacturer" htmlFor="inventory-manufacturer" error={errors.manufacturer?.message}>
+                <input id="inventory-manufacturer" className={fieldClass} placeholder="e.g. Cipla Ltd" {...register("manufacturer")} />
+              </FormField>
+            </FormSection>
+
             <FormSection title="Stock & tracking">
               <div className="grid gap-3 sm:grid-cols-3">
                 <FormField label="Quantity" htmlFor="inventory-quantity" error={errors.quantity?.message}>

@@ -8,6 +8,12 @@ export type InventoryItem = {
   reorderLevel: number;
   unit: string;
   vendor?: string;
+  /** Generic/salt name (e.g. "Pantoprazole" for brand "Pantop") — distinct from `name`, which is the brand/trade name staff search by. */
+  genericName?: string;
+  /** e.g. "Tablet", "Syrup", "Injection" — free text, same convention as `unit`. */
+  dosageForm?: string;
+  /** The drug's actual manufacturer — distinct from `vendor`, the supplier/distributor this stock was purchased through. */
+  manufacturer?: string;
   /** Supplier batch reference for recall traceability (P4). */
   batchNumber?: string;
   /** Manufacturer lot reference for recall traceability (P4). */

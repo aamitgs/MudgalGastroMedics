@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { inputClass } from "@/components/doctor-portal/shared-styles";
 
-type MedicineSuggestion = { name: string; unit: string; quantity: number };
+type MedicineSuggestion = { name: string; genericName?: string; dosageForm?: string; manufacturer?: string; unit: string; quantity: number };
 type SuggestionsResponse = { ok: boolean; medicines?: MedicineSuggestion[] };
 
 /**
@@ -79,24 +79,30 @@ export function MedicineAutocomplete({
       />
       {open && suggestions.length > 0 ? (
         <ul id={listboxId} className="absolute z-10 mt-1 w-full overflow-hidden rounded border border-line bg-white shadow-lg" role="listbox">
-          {suggestions.map((suggestion) => (
-            <li key={suggestion.name}>
-              <button
-                type="button"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  onPick(suggestion.name);
-                  setOpen(false);
-                }}
-                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-soft"
-                role="option"
-                aria-selected={suggestion.name === value}
-              >
-                <span className="truncate font-semibold text-ink">{suggestion.name}</span>
-                <span className="shrink-0 text-xs text-muted">{suggestion.quantity} {suggestion.unit} in stock</span>
-              </button>
-            </li>
-          ))}
+          {suggestions.map((suggestion) => {
+            const metaParts = [suggestion.genericName, suggestion.dosageForm, suggestion.manufacturer].filter(Boolean);
+            return (
+              <li key={suggestion.name}>
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    onPick(suggestion.name);
+                    setOpen(false);
+                  }}
+                  className="flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm hover:bg-soft"
+                  role="option"
+                  aria-selected={suggestion.name === value}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="truncate font-semibold text-ink">{suggestion.name}</span>
+                    <span className="shrink-0 text-xs text-muted">{suggestion.quantity} {suggestion.unit} in stock</span>
+                  </span>
+                  {metaParts.length ? <span className="truncate text-xs text-muted">{metaParts.join(" · ")}</span> : null}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>

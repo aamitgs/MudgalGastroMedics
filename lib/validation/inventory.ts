@@ -14,6 +14,9 @@ export const inventoryItemCreateSchema = z.object({
   reorderLevel: z.coerce.number({ error: "Reorder level is required." }).min(0, "Reorder level must be zero or greater."),
   unit: z.string({ error: "Unit is required." }).trim().min(1, "Unit is required."),
   vendor: z.string().trim().optional(),
+  genericName: z.string().trim().optional(),
+  dosageForm: z.string().trim().optional(),
+  manufacturer: z.string().trim().optional(),
   batchNumber: z.string().trim().optional(),
   lotNumber: z.string().trim().optional(),
   expiryDate: z.string().trim().optional()
