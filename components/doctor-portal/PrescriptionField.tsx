@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Plus, Sparkles, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import { detectDrugInteractions } from "@/lib/clinical/drug-interactions";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
@@ -15,6 +15,7 @@ import { PrescriptionTemplateMenu } from "@/components/doctor-portal/Prescriptio
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useControlledAutosave } from "@/hooks/useControlledAutosave";
+import type { AutosaveState } from "@/hooks/useDraftRecovery";
 
 export function newItemId() {
   return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `rx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -41,7 +42,8 @@ export function PrescriptionField({
   favourites,
   favouriteItems,
   onSave,
-  onSaveItems
+  onSaveItems,
+  onSaveStateChange
 }: {
   visit: OpdVisit;
   currentMedicines?: string;
@@ -50,10 +52,18 @@ export function PrescriptionField({
   favouriteItems: PrescriptionItem[];
   onSave: (value: string) => Promise<boolean>;
   onSaveItems: (items: PrescriptionItem[]) => void;
+  /** Lets a parent (the sticky consultation header) fold the notes field's save state into one aggregate indicator — the Rx table's own row edits commit immediately and aren't debounced, so they have no separate state to report. */
+  onSaveStateChange?: (state: AutosaveState) => void;
 }) {
   const [draft, setDraft] = useState(visit.prescription ?? "");
   const [items, setItems] = useState<PrescriptionItem[]>(visit.prescriptionItems ?? []);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const notesAutosave = useControlledAutosave(onSave);
+
+  useEffect(() => {
+    onSaveStateChange?.(notesAutosave.saveState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notesAutosave.saveState]);
 
   // Both entry paths (rows + free notes) feed one combined text so duplicate/
   // interaction detection catches a drug regardless of which the doctor used.
@@ -84,10 +94,15 @@ export function PrescriptionField({
     setItems((current) => current.map((item) => (item.id === id ? withStatusUpgrade(item, patch) : item)));
   }
 
+  // Tracks the row Ctrl/Cmd+Space (or the Add medicine button) just created,
+  // so its medicine field can auto-focus — a manual click already has focus
+  // where the doctor wants it, so this only matters for the fresh-row case.
   function addItem(prefill?: Partial<PrescriptionItem>) {
-    const next = [...items, emptyItem(prefill)];
+    const item = emptyItem(prefill);
+    const next = [...items, item];
     if (prefill?.medicine) commit(next);
     else setItems(next);
+    setLastAddedId(item.id);
   }
 
   function removeItem(id: string) {
@@ -105,7 +120,7 @@ export function PrescriptionField({
           <span className="text-sm font-bold text-ink">Prescription (Rx)</span>
           <div className="flex flex-wrap gap-1.5">
             <DuplicatePreviousRxMenu phone={visit.phone} excludeVisitId={visit.id} disabled={disabled} onApply={applyDuplicated} />
-            <ActionButton type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => addItem()} disabled={disabled}>
+            <ActionButton id="visit-add-medicine-button" type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => addItem()} disabled={disabled}>
               <Plus size={14} /> Add medicine
             </ActionButton>
           </div>
@@ -154,6 +169,7 @@ export function PrescriptionField({
                       onBlur={() => commit(items)}
                       onPick={(name) => commit(items.map((row) => (row.id === item.id ? withStatusUpgrade(row, { medicine: name }) : row)))}
                       disabled={disabled}
+                      autoFocus={item.id === lastAddedId}
                     />
                     <input
                       value={item.strength ?? ""}
@@ -213,12 +229,12 @@ export function PrescriptionField({
         ) : null}
       </div>
 
-      <label>
-        <span className="mb-2 flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2">
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <label htmlFor="visit-prescription-notes" className="flex items-center gap-2">
             <span className="text-sm font-bold text-ink">Additional Notes</span>
             <SaveStatusIndicator state={notesAutosave.saveState} />
-          </span>
+          </label>
           <PrescriptionTemplateMenu
             draft={draft}
             onInsert={(text) => {
@@ -231,7 +247,7 @@ export function PrescriptionField({
               void onSave(next);
             }}
           />
-        </span>
+        </div>
         {!draft.trim() ? (
           <FavouriteChips
             favourites={favourites}
@@ -242,6 +258,7 @@ export function PrescriptionField({
           />
         ) : null}
         <textarea
+          id="visit-prescription-notes"
           value={draft}
           onChange={(event) => {
             setDraft(event.target.value);
@@ -252,7 +269,7 @@ export function PrescriptionField({
           className={textareaClass}
           placeholder="Anything not captured above — special instructions, regimen from a saved template, etc."
         />
-      </label>
+      </div>
 
       {overlap.length ? (
         <div className="flex items-start gap-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950 p-2.5 text-xs" role="alert">

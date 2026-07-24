@@ -19,7 +19,8 @@ export function MedicineAutocomplete({
   onChange,
   onBlur,
   onPick,
-  disabled
+  disabled,
+  autoFocus
 }: {
   id?: string;
   value: string;
@@ -27,6 +28,7 @@ export function MedicineAutocomplete({
   onBlur: () => void;
   onPick: (name: string) => void;
   disabled?: boolean;
+  autoFocus?: boolean;
 }) {
   const [suggestions, setSuggestions] = useState<MedicineSuggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -58,6 +60,7 @@ export function MedicineAutocomplete({
       <input
         id={id}
         value={value}
+        autoFocus={autoFocus}
         onChange={(event) => {
           onChange(event.target.value);
           setOpen(true);

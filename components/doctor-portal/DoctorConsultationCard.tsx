@@ -1,8 +1,8 @@
 "use client";
 
 import { Copy, FileText, Printer } from "lucide-react";
-import { useRef, useState } from "react";
-import type { OpdVisit, OpdVisitStatus, PrescriptionItem } from "@/lib/opd-types";
+import { useEffect, useRef, useState } from "react";
+import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { AiMedicalCertificateDraft } from "@/components/opd/AiMedicalCertificateDraft";
@@ -12,6 +12,8 @@ import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSumma
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
 import { ClinicalTemplateMenu } from "@/components/doctor-portal/ClinicalTemplateMenu";
 import { ConsultationChecklist } from "@/components/doctor-portal/ConsultationChecklist";
+import { ConsultationShortcutsDialog } from "@/components/doctor-portal/ConsultationShortcutsDialog";
+import { ConsultationStickyHeader } from "@/components/doctor-portal/ConsultationStickyHeader";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { FollowUpQuickPicks } from "@/components/doctor-portal/FollowUpQuickPicks";
@@ -25,7 +27,8 @@ import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { VitalsGrid } from "@/components/doctor-portal/VitalsGrid";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
-import { useDraftRecovery } from "@/hooks/useDraftRecovery";
+import { useConsultationShortcuts } from "@/hooks/useConsultationShortcuts";
+import { useDraftRecovery, type AutosaveState } from "@/hooks/useDraftRecovery";
 import { notify } from "@/lib/notify";
 import type { ClinicalTemplate } from "@/lib/clinical-template-types";
 
@@ -101,6 +104,50 @@ export function DoctorConsultationCard({
   const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "", (value) => updateVisit(visit.id, { certificateNote: value }));
   const followUpDateRef = useRef<HTMLInputElement>(null);
   const [diagnosisApply, setDiagnosisApply] = useState<{ value: string; nonce: number }>();
+  const [diagnosisSaveState, setDiagnosisSaveState] = useState<AutosaveState>("idle");
+  const [prescriptionSaveState, setPrescriptionSaveState] = useState<AutosaveState>("idle");
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  // One honest status for the sticky header, folded from every field's own
+  // indicator — Diagnosis and Prescription notes report in via
+  // onSaveStateChange since their autosave state is otherwise private to
+  // those components. The Rx table's own row edits commit immediately (no
+  // debounce, no separate state to fold in) and already toast on failure.
+  const allSaveStates: AutosaveState[] = [
+    presentingComplaintsDraft.saveState,
+    historyDraft.saveState,
+    generalExaminationDraft.saveState,
+    perAbdomenDraft.saveState,
+    priorInvestigationDraft.saveState,
+    investigationAdviceDraft.saveState,
+    clinicalNoteDraft.saveState,
+    referralLetterDraft.saveState,
+    certificateNoteDraft.saveState,
+    diagnosisSaveState,
+    prescriptionSaveState
+  ];
+  const aggregateSaveState: AutosaveState = allSaveStates.includes("saving")
+    ? "saving"
+    : allSaveStates.includes("pending")
+      ? "pending"
+      : allSaveStates.includes("saved")
+        ? "saved"
+        : "idle";
+
+  // Native "leave site?" confirmation while a debounced save hasn't landed
+  // yet — Part 8/Track 4.2's "never silently lose data" applies to tab
+  // closes and navigation just as much as a crash.
+  useEffect(() => {
+    if (aggregateSaveState !== "pending" && aggregateSaveState !== "saving") return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [aggregateSaveState]);
+
+  useConsultationShortcuts(identityConfirmed);
 
   // Only fills a field that's currently blank — a template must never
   // silently overwrite what the doctor has already documented (Track 4.2's
@@ -140,26 +187,14 @@ export function DoctorConsultationCard({
 
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
-      <div className="border-b border-line bg-[linear-gradient(135deg,#ffffff,#ecfeff)] p-4">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">{visit.token} | {visit.status}</p>
-            <h2 className="mt-2 text-2xl font-bold leading-tight text-ink">{visit.patientName}</h2>
-            <p className="mt-2 text-sm font-semibold text-muted">{visit.service} | {visit.phone}{visit.uhid ? ` | ${visit.uhid}` : ""}</p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 md:min-w-[440px]">
-            <ActionButton variant="primary" onClick={() => void updateVisit(visit.id, { status: "In Consultation" })}>Start</ActionButton>
-            <ActionButton variant="success" onClick={() => void updateVisit(visit.id, { status: "Completed" })}>Complete</ActionButton>
-            <select aria-label="Visit status"
-              value={visit.status}
-              onChange={(event) => void updateVisit(visit.id, { status: event.target.value as OpdVisitStatus })}
-              className="rounded border border-line bg-white px-3 py-2 font-semibold text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
-            >
-              {["Waiting", "In Consultation", "Completed", "Cancelled"].map((status) => <option key={status}>{status}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
+      <ConsultationStickyHeader
+        visit={visit}
+        patient={patient}
+        aggregateSaveState={aggregateSaveState}
+        onStatusChange={(status) => void updateVisit(visit.id, { status })}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
+      />
+      <ConsultationShortcutsDialog open={shortcutsOpen} setOpen={setShortcutsOpen} />
 
       <div className="grid gap-5 p-4">
         <ConsultationChecklist visit={visit} identityConfirmed={identityConfirmed} />
@@ -211,7 +246,7 @@ export function DoctorConsultationCard({
           onConfirmed={() => setIdentityConfirmed(true)}
         />
 
-        <div className="grid gap-4 rounded border border-line bg-white p-4">
+        <div id="visit-section-examination" className="grid scroll-mt-40 gap-4 rounded border border-line bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Clinical Examination</p>
             <ClinicalTemplateMenu
@@ -364,15 +399,18 @@ export function DoctorConsultationCard({
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="grid gap-4">
-            <DiagnosisField
-              key={`${visit.id}-diagnosis`}
-              visit={visit}
-              disabled={!identityConfirmed}
-              favourites={favouriteDiagnoses}
-              onSave={(value) => updateVisit(visit.id, { diagnosis: value })}
-              applyTemplate={diagnosisApply}
-            />
-            <label>
+            <div id="visit-section-diagnosis" className="scroll-mt-40">
+              <DiagnosisField
+                key={`${visit.id}-diagnosis`}
+                visit={visit}
+                disabled={!identityConfirmed}
+                favourites={favouriteDiagnoses}
+                onSave={(value) => updateVisit(visit.id, { diagnosis: value })}
+                applyTemplate={diagnosisApply}
+                onSaveStateChange={setDiagnosisSaveState}
+              />
+            </div>
+            <label id="visit-section-clinical-note" className="scroll-mt-40 block">
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
                 <SaveStatusIndicator state={clinicalNoteDraft.saveState} />
@@ -391,17 +429,20 @@ export function DoctorConsultationCard({
               />
             </label>
           </div>
-          <PrescriptionField
-            key={visit.id}
-            visit={visit}
-            currentMedicines={patient?.currentMedicines}
-            disabled={!identityConfirmed}
-            favourites={favouritePrescriptions}
-            favouriteItems={favouritePrescriptionItems}
-            onSave={(value) => updateVisit(visit.id, { prescription: value })}
-            onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
-          />
-          <div>
+          <div id="visit-section-prescription" className="scroll-mt-40">
+            <PrescriptionField
+              key={visit.id}
+              visit={visit}
+              currentMedicines={patient?.currentMedicines}
+              disabled={!identityConfirmed}
+              favourites={favouritePrescriptions}
+              favouriteItems={favouritePrescriptionItems}
+              onSave={(value) => updateVisit(visit.id, { prescription: value })}
+              onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
+              onSaveStateChange={setPrescriptionSaveState}
+            />
+          </div>
+          <div id="visit-section-followup" className="scroll-mt-40">
             <label htmlFor="visit-followup-date">
               <span className="mb-2 block text-sm font-bold text-ink">Follow-up Date</span>
             </label>
@@ -462,7 +503,7 @@ export function DoctorConsultationCard({
               placeholder="Specialist name, department or facility"
             />
           </label>
-          <label>
+          <label id="visit-section-referral" className="scroll-mt-40 block">
             <span className="mb-2 flex items-center justify-between gap-2">
               <span className="text-sm font-bold text-ink">Referral Letter</span>
               <SaveStatusIndicator state={referralLetterDraft.saveState} />
@@ -486,7 +527,7 @@ export function DoctorConsultationCard({
               onUseDraft={(draft) => void updateVisit(visit.id, { referralLetter: draft })}
             />
           </label>
-          <label>
+          <label id="visit-section-certificate" className="scroll-mt-40 block">
             <span className="mb-2 flex items-center justify-between gap-2">
               <span className="text-sm font-bold text-ink">Certificate Note</span>
               <SaveStatusIndicator state={certificateNoteDraft.saveState} />
