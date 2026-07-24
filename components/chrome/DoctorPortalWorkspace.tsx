@@ -11,10 +11,12 @@ import { DoctorRecentActivity } from "@/components/chrome/DoctorRecentActivity";
 import { DoctorConsultationCard } from "@/components/doctor-portal/DoctorConsultationCard";
 import { DoctorPrintableSummary } from "@/components/doctor-portal/DoctorPrintableSummary";
 import { createDoctorSummaryText, findPatientForVisit, prescriptionItemKey, topFrequent, topFrequentByKey } from "@/components/doctor-portal/helpers";
+import { OfflineQueueBanner } from "@/components/doctor-portal/OfflineQueueBanner";
 import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { computeDoctorAnalytics } from "@/lib/clinical/doctor-analytics";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
+import { enqueueSave, listQueuedSaves, removeQueuedSave } from "@/lib/offline-save-queue";
 
 type OpdResponse = {
   ok: boolean;
@@ -56,6 +58,7 @@ export function DoctorPortalWorkspace({
   const [activityOpen, setActivityOpen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [syncingQueue, setSyncingQueue] = useState(false);
 
   async function loadWorkspace() {
     setLoading(true);
@@ -120,10 +123,17 @@ export function DoctorPortalWorkspace({
         body: JSON.stringify({ id, ...updates })
       });
     } catch {
-      // The existing HTTP-error branch below deliberately stays on the
-      // persistent setError banner (not a toast) — leave that as-is. This
-      // only adds handling for the network-throw case, which previously had
-      // none at all (not even the banner).
+      // Offline specifically (not just "the fetch failed"): queue the write
+      // instead of only offering a manual retry. Still doctor-initiated to
+      // replay (OfflineQueueBanner's "Sync Now") — never auto-replayed on
+      // reconnect, same principle OfflineBanner already documents for why a
+      // clinical write should never silently resend itself.
+      if (!navigator.onLine) {
+        const visit = visits.find((item) => item.id === id);
+        enqueueSave(id, visit?.patientName ?? "this patient", updates);
+        notify.retryable("You're offline — this change is saved locally and queued to sync.", () => void updateVisit(id, updates));
+        return false;
+      }
       notify.retryable("Unable to reach the server. Check your connection and retry.", () => void updateVisit(id, updates));
       return false;
     }
@@ -135,6 +145,34 @@ export function DoctorPortalWorkspace({
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
     notify.saved("Saved", { id: "doctor-autosave" });
     return true;
+  }
+
+  // Doctor-initiated only (OfflineQueueBanner's "Sync Now") — see
+  // lib/offline-save-queue.ts for why this never fires on its own. Replays
+  // in queued order and stops at the first failure rather than skipping
+  // ahead, so a still-flaky connection doesn't replay out of order.
+  async function syncQueuedSaves() {
+    setSyncingQueue(true);
+    let synced = 0;
+    for (const entry of listQueuedSaves()) {
+      try {
+        const response = await fetch("/api/opd", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: entry.visitId, ...entry.updates })
+        });
+        const data = (await response.json().catch(() => ({}))) as OpdResponse;
+        if (!response.ok || !data.ok || !data.visit) break;
+        removeQueuedSave(entry.id);
+        setVisits((items) => items.map((item) => (item.id === entry.visitId ? data.visit as OpdVisit : item)));
+        synced += 1;
+      } catch {
+        break;
+      }
+    }
+    setSyncingQueue(false);
+    if (synced > 0) notify.success(`Synced ${synced} queued change${synced === 1 ? "" : "s"}.`);
+    else if (listQueuedSaves().length > 0) notify.error("Unable to sync queued changes. Check your connection and try again.");
   }
 
   // Takes the form element itself (captured synchronously at submit time),
@@ -269,6 +307,7 @@ export function DoctorPortalWorkspace({
 
   return (
     <>
+      <OfflineQueueBanner onSync={() => void syncQueuedSaves()} syncing={syncingQueue} />
       <div className="flex items-start gap-3">
         <div className="grid shrink-0 gap-3">
           {/* Overview panel — separate, independently toggled */}
