@@ -112,16 +112,18 @@ export async function PATCH(request: Request) {
   }
   const {
     id, status, billingStatus, estimatedAmount, paymentMethod, notes,
-    presentingComplaints, history, vitalsBp, vitalsPulse, vitalsWeight, generalExamination, perAbdomen, priorInvestigation,
+    presentingComplaints, history, vitalsBp, vitalsPulse, vitalsWeight, vitalsHeight, vitalsRespiratoryRate, vitalsTemperature, vitalsSpo2, vitalsBloodSugar,
+    generalExamination, perAbdomen, priorInvestigation,
     clinicalNote, diagnosis, investigationAdvice, prescription, prescriptionItems, advice, followUpDate,
     referralTo, referralLetter, certificateNote, refundAction, refundReason, refundAmount
   } = parsed.data;
 
   // Field-level enforcement: clinical fields need prescription rights, billing
-  // fields need billing rights, and plain queue/status changes only need
-  // appointment rights — so a nurse can move the queue but not write an Rx.
+  // fields need billing rights, and plain queue/status changes (including
+  // vitals — Reception records these before the doctor sees the patient,
+  // and Reception has no prescriptions right) only need appointment rights.
   const touchesClinical = [
-    presentingComplaints, history, vitalsBp, vitalsPulse, vitalsWeight, generalExamination, perAbdomen, priorInvestigation,
+    presentingComplaints, history, generalExamination, perAbdomen, priorInvestigation,
     clinicalNote, diagnosis, investigationAdvice, prescription, prescriptionItems, advice, followUpDate, referralTo, referralLetter, certificateNote
   ].some((value) => value !== undefined);
   const touchesBilling = [billingStatus, estimatedAmount, paymentMethod].some((value) => value !== undefined) || Boolean(refundAction);
@@ -148,6 +150,11 @@ export async function PATCH(request: Request) {
     vitalsBp,
     vitalsPulse,
     vitalsWeight,
+    vitalsHeight,
+    vitalsRespiratoryRate,
+    vitalsTemperature,
+    vitalsSpo2,
+    vitalsBloodSugar,
     generalExamination,
     perAbdomen,
     priorInvestigation,

@@ -1,9 +1,10 @@
 "use client";
 
-import { Banknote, ClipboardList, Download, Edit3, Stethoscope, Trash2 } from "lucide-react";
+import { Banknote, ClipboardList, Download, Edit3, HeartPulse, Stethoscope, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { roleHasPermission } from "@/lib/access/matrix";
+import { bmiCategory, computeBmi } from "@/lib/clinical/vitals";
 import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 import { opdVisitStatuses } from "@/lib/opd-types";
@@ -15,6 +16,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
+
+type VitalFieldKey = "vitalsHeight" | "vitalsWeight" | "vitalsBp" | "vitalsPulse" | "vitalsRespiratoryRate" | "vitalsTemperature" | "vitalsSpo2" | "vitalsBloodSugar";
+
+const vitalsFields: { key: VitalFieldKey; label: string; placeholder: string }[] = [
+  { key: "vitalsHeight", label: "Height", placeholder: "e.g. 165 cm" },
+  { key: "vitalsWeight", label: "Weight", placeholder: "e.g. 62 kg" },
+  { key: "vitalsBp", label: "Blood Pressure", placeholder: "e.g. 120/80" },
+  { key: "vitalsPulse", label: "Pulse", placeholder: "e.g. 78/min" },
+  { key: "vitalsRespiratoryRate", label: "Respiratory Rate", placeholder: "e.g. 16/min" },
+  { key: "vitalsTemperature", label: "Temperature", placeholder: "e.g. 98.4 F" },
+  { key: "vitalsSpo2", label: "SpO2", placeholder: "e.g. 98%" },
+  { key: "vitalsBloodSugar", label: "Blood Sugar", placeholder: "e.g. 110 mg/dL" }
+];
 
 const opdExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
 
@@ -99,7 +113,27 @@ export function AdminOpdQueue() {
     setPageIndex(0);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "billingStatus" | "estimatedAmount" | "paymentMethod" | "notes">>) {
+  async function updateVisit(
+    id: string,
+    updates: Partial<
+      Pick<
+        OpdVisit,
+        | "status"
+        | "billingStatus"
+        | "estimatedAmount"
+        | "paymentMethod"
+        | "notes"
+        | "vitalsHeight"
+        | "vitalsWeight"
+        | "vitalsBp"
+        | "vitalsPulse"
+        | "vitalsRespiratoryRate"
+        | "vitalsTemperature"
+        | "vitalsSpo2"
+        | "vitalsBloodSugar"
+      >
+    >
+  ) {
     let response: Response;
     try {
       response = await fetch("/api/opd", {
@@ -292,6 +326,8 @@ export function AdminOpdQueue() {
     [openDrawer, editingVisit, canDelete]
   );
 
+  const bmi = editingVisit ? computeBmi(editingVisit.vitalsHeight, editingVisit.vitalsWeight) : undefined;
+
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
       <div className="flex flex-col justify-between gap-4 border-b border-line p-4 md:flex-row md:items-center">
@@ -425,6 +461,29 @@ export function AdminOpdQueue() {
                   placeholder="Estimate"
                 />
               </label>
+            </div>
+            <div className="mt-3">
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2 text-sm font-bold text-ink">
+                  <HeartPulse size={16} /> Vitals — capture before the doctor sees the patient
+                </span>
+                {bmi !== undefined ? (
+                  <span className="rounded-full border border-line bg-soft px-2.5 py-1 text-xs font-bold text-ink">BMI {bmi} · {bmiCategory(bmi)}</span>
+                ) : null}
+              </span>
+              <div className="grid gap-3 sm:grid-cols-4">
+                {vitalsFields.map((field) => (
+                  <label key={field.key}>
+                    <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-muted">{field.label}</span>
+                    <input
+                      defaultValue={editingVisit[field.key]}
+                      onBlur={(event) => void updateVisit(editingVisit.id, { [field.key]: event.target.value } as Partial<Pick<OpdVisit, VitalFieldKey>>)}
+                      placeholder={field.placeholder}
+                      className="min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
             <label className="mt-3 block">
               <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">

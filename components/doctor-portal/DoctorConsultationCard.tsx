@@ -15,7 +15,6 @@ import { ConsultationChecklist } from "@/components/doctor-portal/ConsultationCh
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { FollowUpQuickPicks } from "@/components/doctor-portal/FollowUpQuickPicks";
-import { FormField } from "@/components/design-system/FormField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
@@ -24,6 +23,7 @@ import { generalExaminationChips, perAbdomenChips, QuickExamChips } from "@/comp
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
+import { VitalsGrid } from "@/components/doctor-portal/VitalsGrid";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useDraftRecovery } from "@/hooks/useDraftRecovery";
 import { notify } from "@/lib/notify";
@@ -53,6 +53,11 @@ export function DoctorConsultationCard({
         | "vitalsBp"
         | "vitalsPulse"
         | "vitalsWeight"
+        | "vitalsHeight"
+        | "vitalsRespiratoryRate"
+        | "vitalsTemperature"
+        | "vitalsSpo2"
+        | "vitalsBloodSugar"
         | "generalExamination"
         | "perAbdomen"
         | "priorInvestigation"
@@ -260,41 +265,7 @@ export function DoctorConsultationCard({
             </label>
           </div>
 
-          <div>
-            <span className="mb-2 block text-sm font-bold text-ink">Vitals</span>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <FormField label="BP" htmlFor="visit-vitals-bp">
-                <input
-                  id="visit-vitals-bp"
-                  defaultValue={visit.vitalsBp}
-                  onBlur={(event) => void updateVisit(visit.id, { vitalsBp: event.target.value })}
-                  disabled={!identityConfirmed}
-                  className={inputClass}
-                  placeholder="e.g. 120/80"
-                />
-              </FormField>
-              <FormField label="Pulse" htmlFor="visit-vitals-pulse">
-                <input
-                  id="visit-vitals-pulse"
-                  defaultValue={visit.vitalsPulse}
-                  onBlur={(event) => void updateVisit(visit.id, { vitalsPulse: event.target.value })}
-                  disabled={!identityConfirmed}
-                  className={inputClass}
-                  placeholder="e.g. 78/min"
-                />
-              </FormField>
-              <FormField label="Weight" htmlFor="visit-vitals-weight">
-                <input
-                  id="visit-vitals-weight"
-                  defaultValue={visit.vitalsWeight}
-                  onBlur={(event) => void updateVisit(visit.id, { vitalsWeight: event.target.value })}
-                  disabled={!identityConfirmed}
-                  className={inputClass}
-                  placeholder="e.g. 62 kg"
-                />
-              </FormField>
-            </div>
-          </div>
+          <VitalsGrid visit={visit} disabled={!identityConfirmed} onUpdate={(updates) => void updateVisit(visit.id, updates)} />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <div>

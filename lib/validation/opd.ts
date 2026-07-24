@@ -10,7 +10,8 @@ const prescriptionItemSchema = z.object({
   medicine: z.string().trim().min(1, "Medicine name is required."),
   strength: optionalText,
   instruction: z.string().trim().min(1, "Instruction is required."),
-  days: optionalText
+  days: optionalText,
+  status: z.enum(["Continue", "Modify"]).optional()
 });
 
 export const opdVisitCreateSchema = z
@@ -42,6 +43,11 @@ export const opdVisitUpdateSchema = z.object({
   vitalsBp: optionalText,
   vitalsPulse: optionalText,
   vitalsWeight: optionalText,
+  vitalsHeight: optionalText,
+  vitalsRespiratoryRate: optionalText,
+  vitalsTemperature: optionalText,
+  vitalsSpo2: optionalText,
+  vitalsBloodSugar: optionalText,
   generalExamination: optionalText,
   perAbdomen: optionalText,
   priorInvestigation: optionalText,

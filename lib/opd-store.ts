@@ -88,6 +88,11 @@ export async function updateOpdVisit(input: {
   vitalsBp?: string;
   vitalsPulse?: string;
   vitalsWeight?: string;
+  vitalsHeight?: string;
+  vitalsRespiratoryRate?: string;
+  vitalsTemperature?: string;
+  vitalsSpo2?: string;
+  vitalsBloodSugar?: string;
   generalExamination?: string;
   perAbdomen?: string;
   priorInvestigation?: string;
@@ -117,8 +122,11 @@ export async function updateOpdVisit(input: {
     visit.status = input.status;
     if (input.status === "In Consultation") visit.consultationStartedAt ||= new Date().toISOString();
   }
+  // Vitals are deliberately excluded — Reception captures them before the
+  // doctor sees the patient (Track: reception vitals), so they must not
+  // require prescriptions:edit or attribute the visit to "acting doctor".
   const touchesClinical = [
-    input.presentingComplaints, input.history, input.vitalsBp, input.vitalsPulse, input.vitalsWeight, input.generalExamination, input.perAbdomen, input.priorInvestigation,
+    input.presentingComplaints, input.history, input.generalExamination, input.perAbdomen, input.priorInvestigation,
     input.clinicalNote, input.diagnosis, input.investigationAdvice, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote
   ].some((value) => value !== undefined);
   if (touchesClinical && input.actingDoctorName) visit.doctorName ||= input.actingDoctorName;
@@ -141,6 +149,11 @@ export async function updateOpdVisit(input: {
   if (typeof input.vitalsBp === "string") visit.vitalsBp = input.vitalsBp.trim();
   if (typeof input.vitalsPulse === "string") visit.vitalsPulse = input.vitalsPulse.trim();
   if (typeof input.vitalsWeight === "string") visit.vitalsWeight = input.vitalsWeight.trim();
+  if (typeof input.vitalsHeight === "string") visit.vitalsHeight = input.vitalsHeight.trim();
+  if (typeof input.vitalsRespiratoryRate === "string") visit.vitalsRespiratoryRate = input.vitalsRespiratoryRate.trim();
+  if (typeof input.vitalsTemperature === "string") visit.vitalsTemperature = input.vitalsTemperature.trim();
+  if (typeof input.vitalsSpo2 === "string") visit.vitalsSpo2 = input.vitalsSpo2.trim();
+  if (typeof input.vitalsBloodSugar === "string") visit.vitalsBloodSugar = input.vitalsBloodSugar.trim();
   if (typeof input.generalExamination === "string") visit.generalExamination = input.generalExamination.trim();
   if (typeof input.perAbdomen === "string") visit.perAbdomen = input.perAbdomen.trim();
   if (typeof input.priorInvestigation === "string") visit.priorInvestigation = input.priorInvestigation.trim();

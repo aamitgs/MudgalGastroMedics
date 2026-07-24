@@ -12,6 +12,8 @@ export type PrescriptionItem = {
   strength?: string;
   instruction: string;
   days?: string;
+  /** Set only when this row came from "Duplicate Previous Rx" (medication reconciliation) — Continue (carried forward unchanged) or Modify (doctor changed dose/duration). Undefined for medicines entered fresh this visit. */
+  status?: "Continue" | "Modify";
 };
 
 export type OpdVisit = {
@@ -40,6 +42,12 @@ export type OpdVisit = {
   vitalsBp?: string;
   vitalsPulse?: string;
   vitalsWeight?: string;
+  /** Reception-captured, before the doctor sees the patient (Track: reception vitals) — doctor may edit. BMI is derived from height+weight, never stored. */
+  vitalsHeight?: string;
+  vitalsRespiratoryRate?: string;
+  vitalsTemperature?: string;
+  vitalsSpo2?: string;
+  vitalsBloodSugar?: string;
   generalExamination?: string;
   /** GI-specific exam finding, matches the pad's own layout. */
   perAbdomen?: string;
