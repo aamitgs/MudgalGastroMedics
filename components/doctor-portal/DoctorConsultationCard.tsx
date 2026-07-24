@@ -10,12 +10,16 @@ import { AiReferralLetterDraft } from "@/components/opd/AiReferralLetterDraft";
 import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSummaryPanel";
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
+import { ConsultationChecklist } from "@/components/doctor-portal/ConsultationChecklist";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
+import { FollowUpQuickPicks } from "@/components/doctor-portal/FollowUpQuickPicks";
 import { FormField } from "@/components/design-system/FormField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
+import { PreviousVisitHistory } from "@/components/doctor-portal/PreviousVisitHistory";
+import { generalExaminationChips, perAbdomenChips, QuickExamChips } from "@/components/doctor-portal/QuickExamChips";
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
@@ -87,6 +91,7 @@ export function DoctorConsultationCard({
   const referralLetterDraft = useDraftRecovery(referralLetterRef, `${visit.id}:referralLetter`, visit.referralLetter ?? "", (value) => updateVisit(visit.id, { referralLetter: value }));
   const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
   const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "", (value) => updateVisit(visit.id, { certificateNote: value }));
+  const followUpDateRef = useRef<HTMLInputElement>(null);
 
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
@@ -112,6 +117,8 @@ export function DoctorConsultationCard({
       </div>
 
       <div className="grid gap-5 p-4">
+        <ConsultationChecklist visit={visit} identityConfirmed={identityConfirmed} />
+
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="rounded border border-line bg-soft/60 p-4">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Patient Context</p>
@@ -140,6 +147,8 @@ export function DoctorConsultationCard({
         ) : null}
 
         <RecentLabsStrip phone={visit.phone} />
+
+        <PreviousVisitHistory phone={visit.phone} patientName={visit.patientName} />
 
         <AiPatientSummaryPanel phone={visit.phone} />
 
@@ -235,13 +244,24 @@ export function DoctorConsultationCard({
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <label>
-              <span className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-ink">General Examination</span>
-                <SaveStatusIndicator state={generalExaminationDraft.saveState} />
-              </span>
+            <div>
+              <label htmlFor="visit-general-examination">
+                <span className="mb-2 flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-ink">General Examination</span>
+                  <SaveStatusIndicator state={generalExaminationDraft.saveState} />
+                </span>
+              </label>
               {generalExaminationDraft.restored ? <DraftRestoredNotice onDiscard={generalExaminationDraft.discard} /> : null}
+              <QuickExamChips
+                chips={generalExaminationChips}
+                textareaRef={generalExaminationRef}
+                disabled={!identityConfirmed}
+                onCommit={async (value) => {
+                  if (await updateVisit(visit.id, { generalExamination: value })) generalExaminationDraft.onCommit();
+                }}
+              />
               <textarea
+                id="visit-general-examination"
                 ref={generalExaminationRef}
                 defaultValue={visit.generalExamination}
                 onInput={generalExaminationDraft.onInput}
@@ -251,14 +271,25 @@ export function DoctorConsultationCard({
                 disabled={!identityConfirmed}
                 className={textareaClass}
               />
-            </label>
-            <label>
-              <span className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-ink">Per Abdomen</span>
-                <SaveStatusIndicator state={perAbdomenDraft.saveState} />
-              </span>
+            </div>
+            <div>
+              <label htmlFor="visit-per-abdomen">
+                <span className="mb-2 flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-ink">Per Abdomen</span>
+                  <SaveStatusIndicator state={perAbdomenDraft.saveState} />
+                </span>
+              </label>
               {perAbdomenDraft.restored ? <DraftRestoredNotice onDiscard={perAbdomenDraft.discard} /> : null}
+              <QuickExamChips
+                chips={perAbdomenChips}
+                textareaRef={perAbdomenRef}
+                disabled={!identityConfirmed}
+                onCommit={async (value) => {
+                  if (await updateVisit(visit.id, { perAbdomen: value })) perAbdomenDraft.onCommit();
+                }}
+              />
               <textarea
+                id="visit-per-abdomen"
                 ref={perAbdomenRef}
                 defaultValue={visit.perAbdomen}
                 onInput={perAbdomenDraft.onInput}
@@ -268,7 +299,7 @@ export function DoctorConsultationCard({
                 disabled={!identityConfirmed}
                 className={textareaClass}
               />
-            </label>
+            </div>
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-ink">Prior Investigation</span>
@@ -345,14 +376,23 @@ export function DoctorConsultationCard({
             onSave={(value) => updateVisit(visit.id, { prescription: value })}
             onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
           />
-          <label>
-            <span className="mb-2 block text-sm font-bold text-ink">Follow-up Date</span>
+          <div>
+            <label htmlFor="visit-followup-date">
+              <span className="mb-2 block text-sm font-bold text-ink">Follow-up Date</span>
+            </label>
             <input
+              id="visit-followup-date"
+              ref={followUpDateRef}
               type="date"
               defaultValue={visit.followUpDate}
               onBlur={(event) => void updateVisit(visit.id, { followUpDate: event.target.value })}
               disabled={!identityConfirmed}
               className={inputClass}
+            />
+            <FollowUpQuickPicks
+              dateInputRef={followUpDateRef}
+              disabled={!identityConfirmed}
+              onCommit={(value) => void updateVisit(visit.id, { followUpDate: value })}
             />
             <div className="mt-4 flex flex-wrap gap-2">
               <ActionButton variant="secondary" className="whitespace-nowrap" onClick={() => void copySummary(visit, patient)}>
@@ -385,7 +425,7 @@ export function DoctorConsultationCard({
                 size="md"
               />
             </div>
-          </label>
+          </div>
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Referred To</span>
             <input
