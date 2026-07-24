@@ -13,6 +13,18 @@ const securityHeaders = [
     : [])
 ];
 
+// The single-record PDF preview dialog (components/design-system/PdfPreviewButton.tsx)
+// embeds these routes in a same-origin <iframe>. The blanket DENY/'none' above blocks
+// that framing outright (browsers show a "refused to connect" frame-block page) — so
+// these routes get SAMEORIGIN/'self' instead, still refusing any cross-site embed.
+const pdfPreviewHeaders = securityHeaders.map((header) =>
+  header.key === "X-Frame-Options"
+    ? { key: "X-Frame-Options", value: "SAMEORIGIN" }
+    : header.key === "Content-Security-Policy"
+      ? { key: "Content-Security-Policy", value: "frame-ancestors 'self'" }
+      : header
+);
+
 const nextConfig = {
   // Keep `next build` from invalidating assets served by a running dev server.
   // NEXT_DIST_DIR lets a second `next dev` (e.g. Playwright's e2e webServer)
@@ -35,8 +47,13 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        // Everything except the PDF preview routes — full clickjacking lockdown.
+        source: "/((?!api/pdf/).*)",
         headers: securityHeaders
+      },
+      {
+        source: "/api/pdf/:path*",
+        headers: pdfPreviewHeaders
       }
     ];
   }
