@@ -10,6 +10,7 @@ import { AiReferralLetterDraft } from "@/components/opd/AiReferralLetterDraft";
 import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSummaryPanel";
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
+import { ClinicalTemplateMenu } from "@/components/doctor-portal/ClinicalTemplateMenu";
 import { ConsultationChecklist } from "@/components/doctor-portal/ConsultationChecklist";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
@@ -25,6 +26,8 @@ import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useDraftRecovery } from "@/hooks/useDraftRecovery";
+import { notify } from "@/lib/notify";
+import type { ClinicalTemplate } from "@/lib/clinical-template-types";
 
 export function DoctorConsultationCard({
   visit,
@@ -92,6 +95,43 @@ export function DoctorConsultationCard({
   const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
   const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "", (value) => updateVisit(visit.id, { certificateNote: value }));
   const followUpDateRef = useRef<HTMLInputElement>(null);
+  const [diagnosisApply, setDiagnosisApply] = useState<{ value: string; nonce: number }>();
+
+  // Only fills a field that's currently blank — a template must never
+  // silently overwrite what the doctor has already documented (Track 4.2's
+  // "never silently lose data" principle applies here too).
+  async function applyTemplateField(
+    field: "history" | "generalExamination" | "perAbdomen" | "investigationAdvice" | "clinicalNote",
+    ref: React.RefObject<HTMLTextAreaElement | null>,
+    draft: ReturnType<typeof useDraftRecovery<HTMLTextAreaElement>>,
+    value: string | undefined
+  ) {
+    if (!value) return;
+    const el = ref.current;
+    if (!el || el.value.trim()) return;
+    el.value = value;
+    let saved = false;
+    switch (field) {
+      case "history": saved = await updateVisit(visit.id, { history: value }); break;
+      case "generalExamination": saved = await updateVisit(visit.id, { generalExamination: value }); break;
+      case "perAbdomen": saved = await updateVisit(visit.id, { perAbdomen: value }); break;
+      case "investigationAdvice": saved = await updateVisit(visit.id, { investigationAdvice: value }); break;
+      case "clinicalNote": saved = await updateVisit(visit.id, { clinicalNote: value }); break;
+    }
+    if (saved) draft.onCommit();
+  }
+
+  async function applyClinicalTemplate(template: ClinicalTemplate) {
+    setDiagnosisApply({ value: template.diagnosis, nonce: Date.now() });
+    await Promise.all([
+      applyTemplateField("history", historyRef, historyDraft, template.history),
+      applyTemplateField("generalExamination", generalExaminationRef, generalExaminationDraft, template.generalExamination),
+      applyTemplateField("perAbdomen", perAbdomenRef, perAbdomenDraft, template.perAbdomen),
+      applyTemplateField("investigationAdvice", investigationAdviceRef, investigationAdviceDraft, template.investigationAdvice),
+      applyTemplateField("clinicalNote", clinicalNoteRef, clinicalNoteDraft, template.clinicalNote)
+    ]);
+    notify.success(`Applied "${template.name}" — review and edit before saving.`);
+  }
 
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
@@ -167,7 +207,20 @@ export function DoctorConsultationCard({
         />
 
         <div className="grid gap-4 rounded border border-line bg-white p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Clinical Examination</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Clinical Examination</p>
+            <ClinicalTemplateMenu
+              currentFields={{
+                diagnosis: visit.diagnosis ?? "",
+                history: visit.history ?? "",
+                generalExamination: visit.generalExamination ?? "",
+                perAbdomen: visit.perAbdomen ?? "",
+                investigationAdvice: visit.investigationAdvice ?? "",
+                clinicalNote: visit.clinicalNote ?? ""
+              }}
+              onApply={(template) => void applyClinicalTemplate(template)}
+            />
+          </div>
           <div className="grid gap-4 lg:grid-cols-2">
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
@@ -346,6 +399,7 @@ export function DoctorConsultationCard({
               disabled={!identityConfirmed}
               favourites={favouriteDiagnoses}
               onSave={(value) => updateVisit(visit.id, { diagnosis: value })}
+              applyTemplate={diagnosisApply}
             />
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
