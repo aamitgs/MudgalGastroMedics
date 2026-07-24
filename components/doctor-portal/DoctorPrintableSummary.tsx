@@ -58,7 +58,7 @@ export function DoctorPrintableSummary({ visit, patient }: { visit: OpdVisit; pa
               <tr><td>Per Abdomen</td><td>{visit.perAbdomen || ""}</td></tr>
               <tr><td>Prior Investigation</td><td>{visit.priorInvestigation || ""}</td></tr>
               <tr><td>Diagnosis</td><td>{visit.diagnosis || ""}</td></tr>
-              <tr><td>Investigation Advice</td><td>{visit.investigationAdvice || ""}</td></tr>
+              <tr><td>Advice / Procedure Instructions</td><td>{visit.investigationAdvice || ""}</td></tr>
             </tbody>
           </table>
         </section>

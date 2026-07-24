@@ -54,7 +54,6 @@ export function DoctorConsultationCard({
         | "investigationAdvice"
         | "prescription"
         | "prescriptionItems"
-        | "advice"
         | "followUpDate"
         | "referralTo"
         | "referralLetter"
@@ -84,8 +83,6 @@ export function DoctorConsultationCard({
   const investigationAdviceDraft = useDraftRecovery(investigationAdviceRef, `${visit.id}:investigationAdvice`, visit.investigationAdvice ?? "", (value) => updateVisit(visit.id, { investigationAdvice: value }));
   const clinicalNoteRef = useRef<HTMLTextAreaElement>(null);
   const clinicalNoteDraft = useDraftRecovery(clinicalNoteRef, `${visit.id}:clinicalNote`, visit.clinicalNote ?? "", (value) => updateVisit(visit.id, { clinicalNote: value }));
-  const adviceRef = useRef<HTMLTextAreaElement>(null);
-  const adviceDraft = useDraftRecovery(adviceRef, `${visit.id}:advice`, visit.advice ?? "", (value) => updateVisit(visit.id, { advice: value }));
   const referralLetterRef = useRef<HTMLTextAreaElement>(null);
   const referralLetterDraft = useDraftRecovery(referralLetterRef, `${visit.id}:referralLetter`, visit.referralLetter ?? "", (value) => updateVisit(visit.id, { referralLetter: value }));
   const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
@@ -291,7 +288,7 @@ export function DoctorConsultationCard({
             </label>
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-sm font-bold text-ink">Investigation Advice</span>
+                <span className="text-sm font-bold text-ink">Advice / Procedure Instructions</span>
                 <SaveStatusIndicator state={investigationAdviceDraft.saveState} />
               </span>
               {investigationAdviceDraft.restored ? <DraftRestoredNotice onDiscard={investigationAdviceDraft.discard} /> : null}
@@ -348,24 +345,6 @@ export function DoctorConsultationCard({
             onSave={(value) => updateVisit(visit.id, { prescription: value })}
             onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
           />
-          <label>
-            <span className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-sm font-bold text-ink">Advice / Procedure Instructions</span>
-              <SaveStatusIndicator state={adviceDraft.saveState} />
-            </span>
-            {adviceDraft.restored ? <DraftRestoredNotice onDiscard={adviceDraft.discard} /> : null}
-            <textarea
-              ref={adviceRef}
-              defaultValue={visit.advice}
-              onInput={adviceDraft.onInput}
-              onBlur={async (event) => {
-                if (await updateVisit(visit.id, { advice: event.target.value })) adviceDraft.onCommit();
-              }}
-              disabled={!identityConfirmed}
-              className={textareaClass}
-              placeholder="Diet, warning signs, preparation, reports to bring"
-            />
-          </label>
           <label>
             <span className="mb-2 block text-sm font-bold text-ink">Follow-up Date</span>
             <input

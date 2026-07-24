@@ -124,7 +124,7 @@ function ExamForm({ visit }: { visit: OpdVisit }) {
       <ExamRow label="Per Abdomen" value={visit.perAbdomen} />
       <ExamRow label="Prior Investigation" value={visit.priorInvestigation} />
       <ExamRow label="Diagnosis" value={visit.diagnosis} />
-      <ExamRow label="Investigation Advice" value={visit.investigationAdvice} last />
+      <ExamRow label="Advice / Procedure Instructions" value={visit.investigationAdvice} last />
     </View>
   );
 }

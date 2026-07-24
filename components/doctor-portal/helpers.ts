@@ -65,7 +65,7 @@ export function createDoctorSummaryText(visit: OpdVisit, patient?: PatientRecord
     visit.perAbdomen ? `Per abdomen: ${visit.perAbdomen}` : "",
     visit.priorInvestigation ? `Prior investigation: ${visit.priorInvestigation}` : "",
     visit.diagnosis ? `Diagnosis: ${visit.diagnosis}` : "",
-    visit.investigationAdvice ? `Investigation advice: ${visit.investigationAdvice}` : "",
+    visit.investigationAdvice ? `Advice / Procedure Instructions: ${visit.investigationAdvice}` : "",
     visit.clinicalNote ? `Clinical note: ${visit.clinicalNote}` : "",
     hasItems ? `Prescription:\n${serializePrescriptionItems(visit.prescriptionItems!)}` : "",
     visit.prescription ? `${hasItems ? "Additional notes" : "Prescription"}: ${visit.prescription}` : "",
