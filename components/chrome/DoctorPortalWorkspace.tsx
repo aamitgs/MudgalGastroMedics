@@ -16,7 +16,7 @@ import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal
 import { computeDoctorAnalytics } from "@/lib/clinical/doctor-analytics";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
-import { enqueueSave, listQueuedSaves, removeQueuedSave } from "@/lib/offline-save-queue";
+import { clearQueuedSaveForFields, enqueueSave, listQueuedSaves, removeQueuedSave } from "@/lib/offline-save-queue";
 
 type OpdResponse = {
   ok: boolean;
@@ -144,6 +144,10 @@ export function DoctorPortalWorkspace({
     }
     setVisits((items) => items.map((item) => (item.id === id ? data.visit as OpdVisit : item)));
     notify.saved("Saved", { id: "doctor-autosave" });
+    // A direct save for this exact field-set just succeeded (e.g. the "you're
+    // offline" toast's own Retry action, not Sync Now) — drop any stale
+    // queued entry so a later Sync Now can't replay an older value over it.
+    clearQueuedSaveForFields(id, updates);
     return true;
   }
 

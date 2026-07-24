@@ -68,6 +68,20 @@ export function removeQueuedSave(id: string) {
   writeQueue(readQueue().filter((entry) => entry.id !== id));
 }
 
+/**
+ * Called whenever a save for this visit+field-set succeeds through the
+ * normal (non-queue) path — e.g. the retry action on the "you're offline"
+ * toast fires once connectivity is back, bypassing Sync Now entirely. Without
+ * this, a later "Sync Now" would replay the older queued value over whatever
+ * was just saved, silently reverting it.
+ */
+export function clearQueuedSaveForFields(visitId: string, updates: Record<string, unknown>) {
+  const key = fieldSetKey({ visitId, updates });
+  const current = readQueue();
+  const remaining = current.filter((entry) => fieldSetKey(entry) !== key);
+  if (remaining.length !== current.length) writeQueue(remaining);
+}
+
 export function subscribeToQueueChanges(callback: () => void) {
   window.addEventListener(CHANGE_EVENT, callback);
   window.addEventListener("storage", callback);
