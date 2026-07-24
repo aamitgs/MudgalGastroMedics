@@ -90,8 +90,11 @@ export function PdfPreviewButton({
             </div>
           </DialogHeader>
           <div className="min-h-0 flex-1 overflow-hidden rounded border border-line bg-soft/40">
-            {/* Mounted only while open — no reason to keep re-fetching/rendering a hidden PDF in the background. */}
-            {open ? <iframe ref={iframeRef} src={href} title={title} className="h-full min-h-[60vh] w-full" /> : null}
+            {/* Mounted only while open — no reason to keep re-fetching/rendering a hidden PDF in the background.
+                Fragment hints the browser's built-in PDF viewer to fit the page to the iframe's width instead of
+                its own low default zoom — Chromium honours view=FitH, Firefox's pdf.js honours zoom=page-width;
+                each browser's viewer ignores the key it doesn't recognise. */}
+            {open ? <iframe ref={iframeRef} src={`${href}#view=FitH&zoom=page-width`} title={title} className="h-full min-h-[60vh] w-full" /> : null}
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <a
