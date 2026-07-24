@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
+import { VoiceDictationButton } from "@/components/doctor-portal/VoiceDictationButton";
 import { inputClass } from "@/components/doctor-portal/shared-styles";
 import { useControlledAutosave } from "@/hooks/useControlledAutosave";
 import type { AutosaveState } from "@/hooks/useDraftRecovery";
@@ -53,7 +54,17 @@ export function DiagnosisField({
       <label htmlFor="visit-diagnosis">
         <span className="mb-2 flex items-center justify-between gap-2">
           <span className="text-sm font-bold text-ink">Diagnosis</span>
-          <SaveStatusIndicator state={autosave.saveState} />
+          <span className="flex items-center gap-2">
+            <VoiceDictationButton
+              disabled={disabled}
+              onResult={(transcript) => {
+                const next = draft.trim() ? `${draft.trim()} ${transcript}` : transcript;
+                setDraft(next);
+                autosave.onChange(next);
+              }}
+            />
+            <SaveStatusIndicator state={autosave.saveState} />
+          </span>
         </span>
       </label>
       {!draft.trim() ? (
