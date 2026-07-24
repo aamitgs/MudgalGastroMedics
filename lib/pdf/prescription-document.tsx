@@ -53,6 +53,12 @@ const styles = StyleSheet.create({
   rxColStrength: { flex: 1 },
   rxColInstruction: { flex: 2.4 },
   rxColDays: { flex: 0.6 },
+  examTable: { borderWidth: 1, borderColor: pdfColors.line, borderRadius: 4, marginBottom: 10 },
+  examRow: { flexDirection: "row", borderBottomColor: pdfColors.line, borderBottomWidth: 1 },
+  examRowLast: { flexDirection: "row" },
+  examLabel: { width: 130, padding: 6, fontFamily: "Geist", fontWeight: "semibold", fontSize: 9, color: pdfColors.ink },
+  examValue: { flex: 1, padding: 6, paddingLeft: 0, fontSize: 9, color: pdfColors.ink },
+  vitalsValueRow: { flex: 1, flexDirection: "row", flexWrap: "wrap", gap: 14, padding: 6, paddingLeft: 0 },
   signatureBlock: { marginTop: 28, alignItems: "flex-end" },
   signatureBox: { width: 190, alignItems: "center", borderTopWidth: 1, borderTopStyle: "dashed", borderTopColor: pdfColors.muted, paddingTop: 6 },
   signatureLabel: { fontFamily: "Geist", fontStyle: "italic", fontSize: 9, color: pdfColors.muted },
@@ -78,6 +84,45 @@ function PrescriptionHeader() {
         <Text style={styles.rxHospitalContact}>{site.phone}, {site.mobile}</Text>
         <Text style={styles.rxHospitalContact}>ADD:- {fullAddress.toUpperCase()}</Text>
       </View>
+    </View>
+  );
+}
+
+function ExamRow({ label, value, last }: { label: string; value?: string; last?: boolean }) {
+  return (
+    <View style={last ? styles.examRowLast : styles.examRow} wrap={false}>
+      <Text style={styles.examLabel}>{label}:</Text>
+      <Text style={styles.examValue}>{value || ""}</Text>
+    </View>
+  );
+}
+
+/**
+ * Fixed-structure exam form (Presenting Complaints through Investigation
+ * Advice) matching the hospital's own printed prescription pad exactly —
+ * every row always renders, blank where nothing was recorded, same as a
+ * doctor would see blank lines to fill by hand. This is a deliberate
+ * exception to the rest of this document's "hide the section if empty"
+ * convention, which stays for Clinical Note/Advice/Follow-up below.
+ */
+function ExamForm({ visit }: { visit: OpdVisit }) {
+  return (
+    <View style={styles.examTable}>
+      <ExamRow label="Presenting Complaints" value={visit.presentingComplaints} />
+      <ExamRow label="History" value={visit.history} />
+      <View style={styles.examRow} wrap={false}>
+        <Text style={styles.examLabel}>Vitals:</Text>
+        <View style={styles.vitalsValueRow}>
+          <Text>BP: {visit.vitalsBp || ""}</Text>
+          <Text>Pulse: {visit.vitalsPulse || ""}</Text>
+          <Text>Weight: {visit.vitalsWeight || ""}</Text>
+        </View>
+      </View>
+      <ExamRow label="General Examination" value={visit.generalExamination} />
+      <ExamRow label="Per Abdomen" value={visit.perAbdomen} />
+      <ExamRow label="Prior Investigation" value={visit.priorInvestigation} />
+      <ExamRow label="Diagnosis" value={visit.diagnosis} />
+      <ExamRow label="Investigation Advice" value={visit.investigationAdvice} last />
     </View>
   );
 }
@@ -135,6 +180,12 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
             <Text style={styles.patientLabel}>Age / Gender</Text>
             <Text style={styles.patientValue}>{[patient?.age, patient?.gender].filter(Boolean).join(" / ") || "Not recorded"}</Text>
           </View>
+          {patient?.address ? (
+            <View>
+              <Text style={styles.patientLabel}>Address</Text>
+              <Text style={styles.patientValue}>{patient.address}</Text>
+            </View>
+          ) : null}
           <View>
             <Text style={styles.patientLabel}>Phone</Text>
             <Text style={styles.patientValue}>{visit.phone}</Text>
@@ -155,12 +206,7 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
           </View>
         ) : null}
 
-        {visit.diagnosis ? (
-          <View style={pdfStyles.card}>
-            <Text style={pdfStyles.sectionLabel}>Diagnosis</Text>
-            <Text style={pdfStyles.bodyText}>{visit.diagnosis}</Text>
-          </View>
-        ) : null}
+        <ExamForm visit={visit} />
 
         {visit.clinicalNote ? (
           <View style={pdfStyles.card}>

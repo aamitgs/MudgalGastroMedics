@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, CheckCircle2, ChevronsLeft, ChevronsRight, FileText, RefreshCw, Search, Stethoscope, UserPlus, UserRound } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { useLayoutEffect, useMemo, useState, type FormEvent } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -82,7 +82,33 @@ export function DoctorPortalWorkspace({
     setLoading(false);
   }
 
-  async function updateVisit(id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "prescriptionItems" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>): Promise<boolean> {
+  async function updateVisit(
+    id: string,
+    updates: Partial<
+      Pick<
+        OpdVisit,
+        | "status"
+        | "presentingComplaints"
+        | "history"
+        | "vitalsBp"
+        | "vitalsPulse"
+        | "vitalsWeight"
+        | "generalExamination"
+        | "perAbdomen"
+        | "priorInvestigation"
+        | "clinicalNote"
+        | "diagnosis"
+        | "investigationAdvice"
+        | "prescription"
+        | "prescriptionItems"
+        | "advice"
+        | "followUpDate"
+        | "referralTo"
+        | "referralLetter"
+        | "certificateNote"
+      >
+    >
+  ): Promise<boolean> {
     let response: Response;
     try {
       response = await fetch("/api/opd", {
@@ -223,8 +249,18 @@ export function DoctorPortalWorkspace({
 
   function printSummary(visit: OpdVisit, patient?: PatientRecord) {
     setPrintable({ visit, patient });
-    window.setTimeout(() => window.print(), 80);
   }
+
+  // A fixed setTimeout here previously raced React's render: window.print()
+  // could fire before DoctorPrintableSummary actually committed the new
+  // visit/patient to the DOM, so the dialog captured whatever was there
+  // before — blank on the very first print, or the previous patient's data
+  // on every print after that. useLayoutEffect runs synchronously right
+  // after that DOM update, so print always reads what's actually on screen.
+  useLayoutEffect(() => {
+    if (!printable) return;
+    window.print();
+  }, [printable]);
 
   return (
     <>

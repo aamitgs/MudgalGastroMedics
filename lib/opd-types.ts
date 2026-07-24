@@ -33,9 +33,22 @@ export type OpdVisit = {
   receiptId?: string;
   paidAt?: string;
   notes?: string;
+  /** History of presenting complaint, as narrated by the patient — precedes clinical examination on the prescription pad. */
+  presentingComplaints?: string;
+  /** Relevant past/family history distinct from the patient's own stored chronicConditions (which is background, not this visit's history-taking). */
+  history?: string;
+  vitalsBp?: string;
+  vitalsPulse?: string;
+  vitalsWeight?: string;
+  generalExamination?: string;
+  /** GI-specific exam finding, matches the pad's own layout. */
+  perAbdomen?: string;
+  priorInvestigation?: string;
   clinicalNote?: string;
   /** Short structured impression, separate from the free-text clinical note — powers the doctor's "favourite diagnoses" quick-insert list. */
   diagnosis?: string;
+  /** What investigations/tests to get done — distinct from `advice` (general patient instructions: diet, warning signs, reports to bring). */
+  investigationAdvice?: string;
   prescription?: string;
   /** Structured rows (medicine/strength/instruction/days) for the redesigned prescription pad — `prescription` above stays auto-derived from these for every existing string consumer (favourites, exports, copy summary). Undefined on visits written before this existed. */
   prescriptionItems?: PrescriptionItem[];

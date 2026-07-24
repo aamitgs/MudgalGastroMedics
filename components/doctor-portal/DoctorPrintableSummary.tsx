@@ -33,12 +33,35 @@ export function DoctorPrintableSummary({ visit, patient }: { visit: OpdVisit; pa
           <div><dt>Service</dt><dd>{visit.service}</dd></div>
           <div><dt>Phone</dt><dd>{visit.phone}</dd></div>
           <div><dt>Age / Gender</dt><dd>{[patient?.age, patient?.gender].filter(Boolean).join(" / ") || "-"}</dd></div>
+          {patient?.address ? <div><dt>Address</dt><dd>{patient.address}</dd></div> : null}
           <div><dt>Status</dt><dd>{visit.status}</dd></div>
           <div><dt>Follow-up</dt><dd>{visit.followUpDate || "-"}</dd></div>
         </dl>
         {patient?.allergies ? <section className="print-block"><h3>Allergies</h3><p>{patient.allergies}</p></section> : null}
         {visit.symptoms.length ? <section className="print-block"><h3>Symptoms</h3><p>{visit.symptoms.join(", ")}</p></section> : null}
-        {visit.diagnosis ? <section className="print-block"><h3>Diagnosis</h3><p>{visit.diagnosis}</p></section> : null}
+        <section className="print-block">
+          <table className="print-exam-table">
+            <tbody>
+              <tr><td>Presenting Complaints</td><td>{visit.presentingComplaints || ""}</td></tr>
+              <tr><td>History</td><td>{visit.history || ""}</td></tr>
+              <tr>
+                <td>Vitals</td>
+                <td>
+                  <span className="vitals-value">
+                    <span>BP: {visit.vitalsBp || ""}</span>
+                    <span>Pulse: {visit.vitalsPulse || ""}</span>
+                    <span>Weight: {visit.vitalsWeight || ""}</span>
+                  </span>
+                </td>
+              </tr>
+              <tr><td>General Examination</td><td>{visit.generalExamination || ""}</td></tr>
+              <tr><td>Per Abdomen</td><td>{visit.perAbdomen || ""}</td></tr>
+              <tr><td>Prior Investigation</td><td>{visit.priorInvestigation || ""}</td></tr>
+              <tr><td>Diagnosis</td><td>{visit.diagnosis || ""}</td></tr>
+              <tr><td>Investigation Advice</td><td>{visit.investigationAdvice || ""}</td></tr>
+            </tbody>
+          </table>
+        </section>
         {visit.clinicalNote ? <section className="print-block"><h3>Clinical Note</h3><p>{visit.clinicalNote}</p></section> : null}
         {hasItems ? (
           <section className="print-block">

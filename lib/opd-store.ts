@@ -83,8 +83,17 @@ export async function updateOpdVisit(input: {
   estimatedAmount?: string;
   paymentMethod?: OpdVisit["paymentMethod"];
   notes?: string;
+  presentingComplaints?: string;
+  history?: string;
+  vitalsBp?: string;
+  vitalsPulse?: string;
+  vitalsWeight?: string;
+  generalExamination?: string;
+  perAbdomen?: string;
+  priorInvestigation?: string;
   clinicalNote?: string;
   diagnosis?: string;
+  investigationAdvice?: string;
   prescription?: string;
   prescriptionItems?: OpdVisit["prescriptionItems"];
   advice?: string;
@@ -108,7 +117,10 @@ export async function updateOpdVisit(input: {
     visit.status = input.status;
     if (input.status === "In Consultation") visit.consultationStartedAt ||= new Date().toISOString();
   }
-  const touchesClinical = [input.clinicalNote, input.diagnosis, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote].some((value) => value !== undefined);
+  const touchesClinical = [
+    input.presentingComplaints, input.history, input.vitalsBp, input.vitalsPulse, input.vitalsWeight, input.generalExamination, input.perAbdomen, input.priorInvestigation,
+    input.clinicalNote, input.diagnosis, input.investigationAdvice, input.prescription, input.prescriptionItems, input.advice, input.followUpDate, input.referralTo, input.referralLetter, input.certificateNote
+  ].some((value) => value !== undefined);
   if (touchesClinical && input.actingDoctorName) visit.doctorName ||= input.actingDoctorName;
   if (input.billingStatus) {
     visit.billingStatus = input.billingStatus;
@@ -124,8 +136,17 @@ export async function updateOpdVisit(input: {
   if (typeof input.estimatedAmount === "string") visit.estimatedAmount = input.estimatedAmount.trim();
   if (input.paymentMethod) visit.paymentMethod = input.paymentMethod;
   if (typeof input.notes === "string") visit.notes = input.notes.trim();
+  if (typeof input.presentingComplaints === "string") visit.presentingComplaints = input.presentingComplaints.trim();
+  if (typeof input.history === "string") visit.history = input.history.trim();
+  if (typeof input.vitalsBp === "string") visit.vitalsBp = input.vitalsBp.trim();
+  if (typeof input.vitalsPulse === "string") visit.vitalsPulse = input.vitalsPulse.trim();
+  if (typeof input.vitalsWeight === "string") visit.vitalsWeight = input.vitalsWeight.trim();
+  if (typeof input.generalExamination === "string") visit.generalExamination = input.generalExamination.trim();
+  if (typeof input.perAbdomen === "string") visit.perAbdomen = input.perAbdomen.trim();
+  if (typeof input.priorInvestigation === "string") visit.priorInvestigation = input.priorInvestigation.trim();
   if (typeof input.clinicalNote === "string") visit.clinicalNote = input.clinicalNote.trim();
   if (typeof input.diagnosis === "string") visit.diagnosis = input.diagnosis.trim();
+  if (typeof input.investigationAdvice === "string") visit.investigationAdvice = input.investigationAdvice.trim();
   if (typeof input.prescription === "string") visit.prescription = input.prescription.trim();
   if (input.prescriptionItems !== undefined) visit.prescriptionItems = input.prescriptionItems;
   if (typeof input.advice === "string") visit.advice = input.advice.trim();

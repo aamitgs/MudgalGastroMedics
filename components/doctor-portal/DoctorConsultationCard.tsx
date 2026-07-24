@@ -11,6 +11,7 @@ import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSummaryPanel";
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
+import { FormField } from "@/components/design-system/FormField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
@@ -45,7 +46,33 @@ export function DoctorConsultationCard({
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
-  updateVisit: (id: string, updates: Partial<Pick<OpdVisit, "status" | "clinicalNote" | "diagnosis" | "prescription" | "prescriptionItems" | "advice" | "followUpDate" | "referralTo" | "referralLetter" | "certificateNote">>) => Promise<boolean>;
+  updateVisit: (
+    id: string,
+    updates: Partial<
+      Pick<
+        OpdVisit,
+        | "status"
+        | "presentingComplaints"
+        | "history"
+        | "vitalsBp"
+        | "vitalsPulse"
+        | "vitalsWeight"
+        | "generalExamination"
+        | "perAbdomen"
+        | "priorInvestigation"
+        | "clinicalNote"
+        | "diagnosis"
+        | "investigationAdvice"
+        | "prescription"
+        | "prescriptionItems"
+        | "advice"
+        | "followUpDate"
+        | "referralTo"
+        | "referralLetter"
+        | "certificateNote"
+      >
+    >
+  ) => Promise<boolean>;
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
   favouriteDiagnoses: string[];
@@ -54,6 +81,18 @@ export function DoctorConsultationCard({
   recall?: PatientRecallAlert;
 }) {
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
+  const presentingComplaintsRef = useRef<HTMLTextAreaElement>(null);
+  const presentingComplaintsDraft = useDraftRecovery(presentingComplaintsRef, `${visit.id}:presentingComplaints`, visit.presentingComplaints ?? "");
+  const historyRef = useRef<HTMLTextAreaElement>(null);
+  const historyDraft = useDraftRecovery(historyRef, `${visit.id}:history`, visit.history ?? "");
+  const generalExaminationRef = useRef<HTMLTextAreaElement>(null);
+  const generalExaminationDraft = useDraftRecovery(generalExaminationRef, `${visit.id}:generalExamination`, visit.generalExamination ?? "");
+  const perAbdomenRef = useRef<HTMLTextAreaElement>(null);
+  const perAbdomenDraft = useDraftRecovery(perAbdomenRef, `${visit.id}:perAbdomen`, visit.perAbdomen ?? "");
+  const priorInvestigationRef = useRef<HTMLTextAreaElement>(null);
+  const priorInvestigationDraft = useDraftRecovery(priorInvestigationRef, `${visit.id}:priorInvestigation`, visit.priorInvestigation ?? "");
+  const investigationAdviceRef = useRef<HTMLTextAreaElement>(null);
+  const investigationAdviceDraft = useDraftRecovery(investigationAdviceRef, `${visit.id}:investigationAdvice`, visit.investigationAdvice ?? "");
   const clinicalNoteRef = useRef<HTMLTextAreaElement>(null);
   const clinicalNoteDraft = useDraftRecovery(clinicalNoteRef, `${visit.id}:clinicalNote`, visit.clinicalNote ?? "");
   const adviceRef = useRef<HTMLTextAreaElement>(null);
@@ -131,6 +170,138 @@ export function DoctorConsultationCard({
           age={patient?.age}
           onConfirmed={() => setIdentityConfirmed(true)}
         />
+
+        <div className="grid gap-4 rounded border border-line bg-white p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Clinical Examination</p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">Presenting Complaints</span>
+              {presentingComplaintsDraft.restored ? <DraftRestoredNotice onDiscard={presentingComplaintsDraft.discard} /> : null}
+              <textarea
+                ref={presentingComplaintsRef}
+                defaultValue={visit.presentingComplaints}
+                onInput={presentingComplaintsDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { presentingComplaints: event.target.value })) presentingComplaintsDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+                placeholder="As narrated by the patient"
+              />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">History</span>
+              {historyDraft.restored ? <DraftRestoredNotice onDiscard={historyDraft.discard} /> : null}
+              <textarea
+                ref={historyRef}
+                defaultValue={visit.history}
+                onInput={historyDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { history: event.target.value })) historyDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+                placeholder="Relevant past / family history"
+              />
+            </label>
+          </div>
+
+          <div>
+            <span className="mb-2 block text-sm font-bold text-ink">Vitals</span>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <FormField label="BP" htmlFor="visit-vitals-bp">
+                <input
+                  id="visit-vitals-bp"
+                  defaultValue={visit.vitalsBp}
+                  onBlur={(event) => void updateVisit(visit.id, { vitalsBp: event.target.value })}
+                  disabled={!identityConfirmed}
+                  className={inputClass}
+                  placeholder="e.g. 120/80"
+                />
+              </FormField>
+              <FormField label="Pulse" htmlFor="visit-vitals-pulse">
+                <input
+                  id="visit-vitals-pulse"
+                  defaultValue={visit.vitalsPulse}
+                  onBlur={(event) => void updateVisit(visit.id, { vitalsPulse: event.target.value })}
+                  disabled={!identityConfirmed}
+                  className={inputClass}
+                  placeholder="e.g. 78/min"
+                />
+              </FormField>
+              <FormField label="Weight" htmlFor="visit-vitals-weight">
+                <input
+                  id="visit-vitals-weight"
+                  defaultValue={visit.vitalsWeight}
+                  onBlur={(event) => void updateVisit(visit.id, { vitalsWeight: event.target.value })}
+                  disabled={!identityConfirmed}
+                  className={inputClass}
+                  placeholder="e.g. 62 kg"
+                />
+              </FormField>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">General Examination</span>
+              {generalExaminationDraft.restored ? <DraftRestoredNotice onDiscard={generalExaminationDraft.discard} /> : null}
+              <textarea
+                ref={generalExaminationRef}
+                defaultValue={visit.generalExamination}
+                onInput={generalExaminationDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { generalExamination: event.target.value })) generalExaminationDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+              />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">Per Abdomen</span>
+              {perAbdomenDraft.restored ? <DraftRestoredNotice onDiscard={perAbdomenDraft.discard} /> : null}
+              <textarea
+                ref={perAbdomenRef}
+                defaultValue={visit.perAbdomen}
+                onInput={perAbdomenDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { perAbdomen: event.target.value })) perAbdomenDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+              />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">Prior Investigation</span>
+              {priorInvestigationDraft.restored ? <DraftRestoredNotice onDiscard={priorInvestigationDraft.discard} /> : null}
+              <textarea
+                ref={priorInvestigationRef}
+                defaultValue={visit.priorInvestigation}
+                onInput={priorInvestigationDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { priorInvestigation: event.target.value })) priorInvestigationDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+              />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-bold text-ink">Investigation Advice</span>
+              {investigationAdviceDraft.restored ? <DraftRestoredNotice onDiscard={investigationAdviceDraft.discard} /> : null}
+              <textarea
+                ref={investigationAdviceRef}
+                defaultValue={visit.investigationAdvice}
+                onInput={investigationAdviceDraft.onInput}
+                onBlur={async (event) => {
+                  if (await updateVisit(visit.id, { investigationAdvice: event.target.value })) investigationAdviceDraft.onCommit();
+                }}
+                disabled={!identityConfirmed}
+                className={textareaClass}
+                placeholder="Tests/investigations to get done"
+              />
+            </label>
+          </div>
+        </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="grid gap-4">

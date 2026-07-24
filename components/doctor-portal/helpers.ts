@@ -46,6 +46,11 @@ export function findPatientForVisit(visit: OpdVisit, patients: PatientRecord[]) 
 
 export function createDoctorSummaryText(visit: OpdVisit, patient?: PatientRecord) {
   const hasItems = Boolean(visit.prescriptionItems?.length);
+  const vitals = [
+    visit.vitalsBp ? `BP ${visit.vitalsBp}` : "",
+    visit.vitalsPulse ? `Pulse ${visit.vitalsPulse}` : "",
+    visit.vitalsWeight ? `Weight ${visit.vitalsWeight}` : ""
+  ].filter(Boolean).join(", ");
   return [
     site.name,
     `Patient: ${visit.patientName}`,
@@ -53,7 +58,14 @@ export function createDoctorSummaryText(visit: OpdVisit, patient?: PatientRecord
     `Token: ${visit.token}`,
     `Service: ${visit.service}`,
     patient?.allergies ? `Allergies: ${patient.allergies}` : "",
+    visit.presentingComplaints ? `Presenting complaints: ${visit.presentingComplaints}` : "",
+    visit.history ? `History: ${visit.history}` : "",
+    vitals ? `Vitals: ${vitals}` : "",
+    visit.generalExamination ? `General examination: ${visit.generalExamination}` : "",
+    visit.perAbdomen ? `Per abdomen: ${visit.perAbdomen}` : "",
+    visit.priorInvestigation ? `Prior investigation: ${visit.priorInvestigation}` : "",
     visit.diagnosis ? `Diagnosis: ${visit.diagnosis}` : "",
+    visit.investigationAdvice ? `Investigation advice: ${visit.investigationAdvice}` : "",
     visit.clinicalNote ? `Clinical note: ${visit.clinicalNote}` : "",
     hasItems ? `Prescription:\n${serializePrescriptionItems(visit.prescriptionItems!)}` : "",
     visit.prescription ? `${hasItems ? "Additional notes" : "Prescription"}: ${visit.prescription}` : "",

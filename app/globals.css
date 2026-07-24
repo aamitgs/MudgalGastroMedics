@@ -362,6 +362,42 @@ body.lang-hi .inline-lang [data-hi] {
     font-size: 11px;
   }
 
+  /* Fixed-structure exam form (Presenting Complaints through Investigation
+     Advice) matching the printed prescription pad — every row always shows,
+     blank where nothing was recorded, same as DoctorPrintableSummary's PDF
+     counterpart (lib/pdf/prescription-document.tsx's ExamForm). */
+  .print-exam-table {
+    width: 100%;
+    margin-top: 8px;
+    border: 1px solid #cdeef4;
+    border-radius: 8px;
+    border-collapse: collapse;
+    overflow: hidden;
+  }
+
+  .print-exam-table tr:not(:last-child) td {
+    border-bottom: 1px solid #cdeef4;
+  }
+
+  .print-exam-table td {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #213f49;
+    vertical-align: top;
+  }
+
+  .print-exam-table td:first-child {
+    width: 150px;
+    font-weight: 700;
+    color: #102f39;
+  }
+
+  .print-exam-table .vitals-value {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
   .print-footer {
     display: flex;
     justify-content: space-between;
