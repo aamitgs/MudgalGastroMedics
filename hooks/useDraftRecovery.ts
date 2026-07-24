@@ -9,6 +9,12 @@ const STORAGE_PREFIX = "doctor-portal-draft:";
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 /** Typing pause before a draft is written — frequent enough to survive a crash mid-paragraph, rare enough to not thrash localStorage on every keystroke. */
 const SAVE_DEBOUNCE_MS = 400;
+/** Typing pause before an autosave hits the server — long enough that a fast typist doesn't trigger a PATCH per sentence, short enough that stepping away mid-note still saves within a couple seconds. Shared with useControlledAutosave, which drives the same behavior for controlled (value+onChange) fields that don't fit this hook's uncontrolled-ref shape. */
+export const AUTOSAVE_DEBOUNCE_MS = 1500;
+/** How long the "Saved" state shows before fading back to idle. */
+export const SAVED_DISPLAY_MS = 2000;
+
+export type AutosaveState = "idle" | "pending" | "saving" | "saved";
 
 function readDraft(key: string): string | null {
   if (typeof window === "undefined") return null;
@@ -39,12 +45,20 @@ function clearDraft(key: string) {
 
 /**
  * Crash/lost-tab recovery for consultation fields that only save to the
- * server on blur (Clinical Note, Advice, Referral Letter, Certificate Note)
- * — anything typed but never blurred (browser crash, accidental tab close,
- * a network drop right as the doctor moves to the next field) was
- * previously gone with no way back. This mirrors that value into
- * localStorage as the doctor types and restores it if the server-saved
- * value on next mount doesn't already contain it.
+ * server on blur (Clinical Note, Advice, Referral Letter, Certificate Note,
+ * and now every Clinical Examination field) — anything typed but never
+ * blurred (browser crash, accidental tab close, a network drop right as the
+ * doctor moves to the next field) was previously gone with no way back.
+ * This mirrors that value into localStorage as the doctor types and
+ * restores it if the server-saved value on next mount doesn't already
+ * contain it.
+ *
+ * Optionally also drives true autosave: pass `onAutosave` and, ~1.5s after
+ * the doctor stops typing, the field saves to the server on its own — no
+ * blur required. Safe here specifically because these are PATCHes to one
+ * field on an *existing* visit record (idempotent, no duplicate created no
+ * matter how many times it fires) — this pattern must never be pointed at a
+ * create/POST endpoint, which would mint a new record per autosave tick.
  *
  * Built for an uncontrolled <textarea>/<input> (defaultValue + onBlur). The
  * caller owns the ref (a hook returning a ref bundled in an object trips
@@ -55,9 +69,17 @@ function clearDraft(key: string) {
  * flips true only when a draft was actually applied, so the field can show
  * a small "recovered unsaved text" notice instead of silently overwriting.
  */
-export function useDraftRecovery<T extends HTMLTextAreaElement | HTMLInputElement>(ref: RefObject<T | null>, key: string, serverValue: string) {
+export function useDraftRecovery<T extends HTMLTextAreaElement | HTMLInputElement>(
+  ref: RefObject<T | null>,
+  key: string,
+  serverValue: string,
+  onAutosave?: (value: string) => Promise<boolean>
+) {
   const [restored, setRestored] = useState(false);
+  const [saveState, setSaveState] = useState<AutosaveState>("idle");
   const debounceRef = useRef(0);
+  const autosaveRef = useRef(0);
+  const savedDisplayRef = useRef(0);
 
   useEffect(() => {
     const draft = readDraft(key);
@@ -65,7 +87,11 @@ export function useDraftRecovery<T extends HTMLTextAreaElement | HTMLInputElemen
       ref.current.value = draft;
       setRestored(true);
     }
-    return () => window.clearTimeout(debounceRef.current);
+    return () => {
+      window.clearTimeout(debounceRef.current);
+      window.clearTimeout(autosaveRef.current);
+      window.clearTimeout(savedDisplayRef.current);
+    };
     // Deliberately key-only: this is a one-time "is there unsent typing from
     // before this mount" check, not a sync — re-running it whenever
     // serverValue changes (e.g. right after this same field's own save)
@@ -77,12 +103,34 @@ export function useDraftRecovery<T extends HTMLTextAreaElement | HTMLInputElemen
     const value = event.currentTarget.value;
     window.clearTimeout(debounceRef.current);
     debounceRef.current = window.setTimeout(() => writeDraft(key, value), SAVE_DEBOUNCE_MS);
+
+    if (!onAutosave) return;
+    window.clearTimeout(autosaveRef.current);
+    window.clearTimeout(savedDisplayRef.current);
+    setSaveState("pending");
+    autosaveRef.current = window.setTimeout(async () => {
+      setSaveState("saving");
+      const ok = await onAutosave(value);
+      if (!ok) {
+        setSaveState("idle");
+        return;
+      }
+      window.clearTimeout(debounceRef.current);
+      clearDraft(key);
+      setRestored(false);
+      setSaveState("saved");
+      savedDisplayRef.current = window.setTimeout(() => setSaveState("idle"), SAVED_DISPLAY_MS);
+    }, AUTOSAVE_DEBOUNCE_MS);
   }
 
   function onCommit() {
     window.clearTimeout(debounceRef.current);
+    window.clearTimeout(autosaveRef.current);
     clearDraft(key);
     setRestored(false);
+    setSaveState("saved");
+    window.clearTimeout(savedDisplayRef.current);
+    savedDisplayRef.current = window.setTimeout(() => setSaveState("idle"), SAVED_DISPLAY_MS);
   }
 
   function discard() {
@@ -91,5 +139,5 @@ export function useDraftRecovery<T extends HTMLTextAreaElement | HTMLInputElemen
     setRestored(false);
   }
 
-  return { restored, onInput, onCommit, discard };
+  return { restored, saveState, onInput, onCommit, discard };
 }

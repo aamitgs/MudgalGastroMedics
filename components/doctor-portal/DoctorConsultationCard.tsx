@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, FileText, History, Printer, X } from "lucide-react";
+import { Copy, FileText, Printer } from "lucide-react";
 import { useRef, useState } from "react";
 import type { OpdVisit, OpdVisitStatus, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -11,28 +11,16 @@ import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSummaryPanel";
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
+import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { FormField } from "@/components/design-system/FormField";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
 import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
 import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal/RecallAlert";
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
+import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useDraftRecovery } from "@/hooks/useDraftRecovery";
-
-/** Shown above a field whose typing was recovered from before a crash/closed tab — see hooks/useDraftRecovery. */
-function DraftRestoredNotice({ onDiscard }: { onDiscard: () => void }) {
-  return (
-    <div className="mb-2 flex items-center justify-between gap-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950 px-2.5 py-1.5 text-xs">
-      <span className="flex items-center gap-1.5 font-semibold text-amber-900 dark:text-amber-200">
-        <History size={13} className="shrink-0" /> Recovered unsaved text from before — review and save, or discard it.
-      </span>
-      <button type="button" onClick={onDiscard} className="inline-flex shrink-0 items-center gap-1 font-bold text-amber-700 hover:text-amber-900">
-        <X size={12} /> Discard
-      </button>
-    </div>
-  );
-}
 
 export function DoctorConsultationCard({
   visit,
@@ -83,25 +71,25 @@ export function DoctorConsultationCard({
 }) {
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
   const presentingComplaintsRef = useRef<HTMLTextAreaElement>(null);
-  const presentingComplaintsDraft = useDraftRecovery(presentingComplaintsRef, `${visit.id}:presentingComplaints`, visit.presentingComplaints ?? "");
+  const presentingComplaintsDraft = useDraftRecovery(presentingComplaintsRef, `${visit.id}:presentingComplaints`, visit.presentingComplaints ?? "", (value) => updateVisit(visit.id, { presentingComplaints: value }));
   const historyRef = useRef<HTMLTextAreaElement>(null);
-  const historyDraft = useDraftRecovery(historyRef, `${visit.id}:history`, visit.history ?? "");
+  const historyDraft = useDraftRecovery(historyRef, `${visit.id}:history`, visit.history ?? "", (value) => updateVisit(visit.id, { history: value }));
   const generalExaminationRef = useRef<HTMLTextAreaElement>(null);
-  const generalExaminationDraft = useDraftRecovery(generalExaminationRef, `${visit.id}:generalExamination`, visit.generalExamination ?? "");
+  const generalExaminationDraft = useDraftRecovery(generalExaminationRef, `${visit.id}:generalExamination`, visit.generalExamination ?? "", (value) => updateVisit(visit.id, { generalExamination: value }));
   const perAbdomenRef = useRef<HTMLTextAreaElement>(null);
-  const perAbdomenDraft = useDraftRecovery(perAbdomenRef, `${visit.id}:perAbdomen`, visit.perAbdomen ?? "");
+  const perAbdomenDraft = useDraftRecovery(perAbdomenRef, `${visit.id}:perAbdomen`, visit.perAbdomen ?? "", (value) => updateVisit(visit.id, { perAbdomen: value }));
   const priorInvestigationRef = useRef<HTMLTextAreaElement>(null);
-  const priorInvestigationDraft = useDraftRecovery(priorInvestigationRef, `${visit.id}:priorInvestigation`, visit.priorInvestigation ?? "");
+  const priorInvestigationDraft = useDraftRecovery(priorInvestigationRef, `${visit.id}:priorInvestigation`, visit.priorInvestigation ?? "", (value) => updateVisit(visit.id, { priorInvestigation: value }));
   const investigationAdviceRef = useRef<HTMLTextAreaElement>(null);
-  const investigationAdviceDraft = useDraftRecovery(investigationAdviceRef, `${visit.id}:investigationAdvice`, visit.investigationAdvice ?? "");
+  const investigationAdviceDraft = useDraftRecovery(investigationAdviceRef, `${visit.id}:investigationAdvice`, visit.investigationAdvice ?? "", (value) => updateVisit(visit.id, { investigationAdvice: value }));
   const clinicalNoteRef = useRef<HTMLTextAreaElement>(null);
-  const clinicalNoteDraft = useDraftRecovery(clinicalNoteRef, `${visit.id}:clinicalNote`, visit.clinicalNote ?? "");
+  const clinicalNoteDraft = useDraftRecovery(clinicalNoteRef, `${visit.id}:clinicalNote`, visit.clinicalNote ?? "", (value) => updateVisit(visit.id, { clinicalNote: value }));
   const adviceRef = useRef<HTMLTextAreaElement>(null);
-  const adviceDraft = useDraftRecovery(adviceRef, `${visit.id}:advice`, visit.advice ?? "");
+  const adviceDraft = useDraftRecovery(adviceRef, `${visit.id}:advice`, visit.advice ?? "", (value) => updateVisit(visit.id, { advice: value }));
   const referralLetterRef = useRef<HTMLTextAreaElement>(null);
-  const referralLetterDraft = useDraftRecovery(referralLetterRef, `${visit.id}:referralLetter`, visit.referralLetter ?? "");
+  const referralLetterDraft = useDraftRecovery(referralLetterRef, `${visit.id}:referralLetter`, visit.referralLetter ?? "", (value) => updateVisit(visit.id, { referralLetter: value }));
   const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
-  const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "");
+  const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "", (value) => updateVisit(visit.id, { certificateNote: value }));
 
   return (
     <article className="rounded border border-line/80 bg-white shadow-sm">
@@ -176,7 +164,10 @@ export function DoctorConsultationCard({
           <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Clinical Examination</p>
           <div className="grid gap-4 lg:grid-cols-2">
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">Presenting Complaints</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">Presenting Complaints</span>
+                <SaveStatusIndicator state={presentingComplaintsDraft.saveState} />
+              </span>
               {presentingComplaintsDraft.restored ? <DraftRestoredNotice onDiscard={presentingComplaintsDraft.discard} /> : null}
               <textarea
                 ref={presentingComplaintsRef}
@@ -191,7 +182,10 @@ export function DoctorConsultationCard({
               />
             </label>
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">History</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">History</span>
+                <SaveStatusIndicator state={historyDraft.saveState} />
+              </span>
               {historyDraft.restored ? <DraftRestoredNotice onDiscard={historyDraft.discard} /> : null}
               <textarea
                 ref={historyRef}
@@ -245,7 +239,10 @@ export function DoctorConsultationCard({
 
           <div className="grid gap-4 lg:grid-cols-2">
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">General Examination</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">General Examination</span>
+                <SaveStatusIndicator state={generalExaminationDraft.saveState} />
+              </span>
               {generalExaminationDraft.restored ? <DraftRestoredNotice onDiscard={generalExaminationDraft.discard} /> : null}
               <textarea
                 ref={generalExaminationRef}
@@ -259,7 +256,10 @@ export function DoctorConsultationCard({
               />
             </label>
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">Per Abdomen</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">Per Abdomen</span>
+                <SaveStatusIndicator state={perAbdomenDraft.saveState} />
+              </span>
               {perAbdomenDraft.restored ? <DraftRestoredNotice onDiscard={perAbdomenDraft.discard} /> : null}
               <textarea
                 ref={perAbdomenRef}
@@ -273,7 +273,10 @@ export function DoctorConsultationCard({
               />
             </label>
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">Prior Investigation</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">Prior Investigation</span>
+                <SaveStatusIndicator state={priorInvestigationDraft.saveState} />
+              </span>
               {priorInvestigationDraft.restored ? <DraftRestoredNotice onDiscard={priorInvestigationDraft.discard} /> : null}
               <textarea
                 ref={priorInvestigationRef}
@@ -287,7 +290,10 @@ export function DoctorConsultationCard({
               />
             </label>
             <label>
-              <span className="mb-2 block text-sm font-bold text-ink">Investigation Advice</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">Investigation Advice</span>
+                <SaveStatusIndicator state={investigationAdviceDraft.saveState} />
+              </span>
               {investigationAdviceDraft.restored ? <DraftRestoredNotice onDiscard={investigationAdviceDraft.discard} /> : null}
               <textarea
                 ref={investigationAdviceRef}
@@ -311,10 +317,13 @@ export function DoctorConsultationCard({
               visit={visit}
               disabled={!identityConfirmed}
               favourites={favouriteDiagnoses}
-              onSave={(value) => void updateVisit(visit.id, { diagnosis: value })}
+              onSave={(value) => updateVisit(visit.id, { diagnosis: value })}
             />
             <label>
-              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
+              <span className="mb-2 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
+                <SaveStatusIndicator state={clinicalNoteDraft.saveState} />
+              </span>
               {clinicalNoteDraft.restored ? <DraftRestoredNotice onDiscard={clinicalNoteDraft.discard} /> : null}
               <textarea
                 ref={clinicalNoteRef}
@@ -336,11 +345,14 @@ export function DoctorConsultationCard({
             disabled={!identityConfirmed}
             favourites={favouritePrescriptions}
             favouriteItems={favouritePrescriptionItems}
-            onSave={(value) => void updateVisit(visit.id, { prescription: value })}
+            onSave={(value) => updateVisit(visit.id, { prescription: value })}
             onSaveItems={(items) => void updateVisit(visit.id, { prescriptionItems: items })}
           />
           <label>
-            <span className="mb-2 block text-sm font-bold text-ink">Advice / Procedure Instructions</span>
+            <span className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-sm font-bold text-ink">Advice / Procedure Instructions</span>
+              <SaveStatusIndicator state={adviceDraft.saveState} />
+            </span>
             {adviceDraft.restored ? <DraftRestoredNotice onDiscard={adviceDraft.discard} /> : null}
             <textarea
               ref={adviceRef}
@@ -407,7 +419,10 @@ export function DoctorConsultationCard({
             />
           </label>
           <label>
-            <span className="mb-2 block text-sm font-bold text-ink">Referral Letter</span>
+            <span className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-sm font-bold text-ink">Referral Letter</span>
+              <SaveStatusIndicator state={referralLetterDraft.saveState} />
+            </span>
             {referralLetterDraft.restored ? <DraftRestoredNotice onDiscard={referralLetterDraft.discard} /> : null}
             <textarea
               key={visit.referralLetter}
@@ -428,7 +443,10 @@ export function DoctorConsultationCard({
             />
           </label>
           <label>
-            <span className="mb-2 block text-sm font-bold text-ink">Certificate Note</span>
+            <span className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-sm font-bold text-ink">Certificate Note</span>
+              <SaveStatusIndicator state={certificateNoteDraft.saveState} />
+            </span>
             {certificateNoteDraft.restored ? <DraftRestoredNotice onDiscard={certificateNoteDraft.discard} /> : null}
             <textarea
               key={visit.certificateNote}
