@@ -2,16 +2,18 @@
 
 import { Mic, MicOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { notify } from "@/lib/notify";
 
 type SpeechRecognitionResult = { 0: { transcript: string } };
 type SpeechRecognitionEvent = { results: ArrayLike<SpeechRecognitionResult> };
+type SpeechRecognitionErrorEvent = { error: string };
 
 type SpeechRecognitionInstance = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
@@ -67,7 +69,17 @@ export function VoiceDictationButton({ onResult, disabled }: { onResult: (transc
       const transcript = Array.from(event.results).map((result) => result[0].transcript).join(" ").trim();
       if (transcript) onResultRef.current(transcript);
     };
-    recognition.onerror = () => setListening(false);
+    recognition.onerror = (event) => {
+      setListening(false);
+      // "no-speech"/"aborted" are routine (doctor paused, or clicked stop) —
+      // only surface the errors a doctor would need to act on, so this
+      // doesn't add a toast to every ordinary pause-and-stop.
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        notify.error("Microphone access is blocked. Allow it in your browser's site settings to use voice dictation.");
+      } else if (event.error === "network") {
+        notify.error("Voice dictation needs a network connection.");
+      }
+    };
     recognition.onend = () => setListening(false);
     recognitionRef.current = recognition;
     recognition.start();
