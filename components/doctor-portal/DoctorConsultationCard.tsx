@@ -17,7 +17,9 @@ import { ConsultationStickyHeader } from "@/components/doctor-portal/Consultatio
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
 import { FollowUpQuickPicks } from "@/components/doctor-portal/FollowUpQuickPicks";
+import { Icd10CodePicker } from "@/components/doctor-portal/Icd10CodePicker";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
+import { PatientEducationMenu } from "@/components/doctor-portal/PatientEducationMenu";
 import { PdfPreviewButton } from "@/components/design-system/PdfPreviewButton";
 import { PrescriptionField } from "@/components/doctor-portal/PrescriptionField";
 import { PreviousVisitHistory } from "@/components/doctor-portal/PreviousVisitHistory";
@@ -27,6 +29,7 @@ import { RecallAlert, type PatientRecallAlert } from "@/components/doctor-portal
 import { RecentLabsStrip } from "@/components/doctor-portal/RecentLabsStrip";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
 import { VitalsGrid } from "@/components/doctor-portal/VitalsGrid";
+import { VoiceDictationButton } from "@/components/doctor-portal/VoiceDictationButton";
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useConsultationShortcuts } from "@/hooks/useConsultationShortcuts";
 import { useDraftRecovery, type AutosaveState } from "@/hooks/useDraftRecovery";
@@ -67,6 +70,8 @@ export function DoctorConsultationCard({
         | "priorInvestigation"
         | "clinicalNote"
         | "diagnosis"
+        | "diagnosisIcd10Code"
+        | "diagnosisIcd10Label"
         | "investigationAdvice"
         | "prescription"
         | "prescriptionItems"
@@ -174,6 +179,29 @@ export function DoctorConsultationCard({
     if (saved) draft.onCommit();
   }
 
+  // Voice dictation always appends (never overwrites, even into a filled
+  // field) — a doctor dictating a second thought shouldn't have to worry
+  // about losing what's already there.
+  async function appendToField(
+    field: "presentingComplaints" | "history" | "generalExamination" | "clinicalNote",
+    ref: React.RefObject<HTMLTextAreaElement | null>,
+    draft: ReturnType<typeof useDraftRecovery<HTMLTextAreaElement>>,
+    transcript: string
+  ) {
+    const el = ref.current;
+    if (!el) return;
+    const next = el.value.trim() ? `${el.value.trim()} ${transcript}` : transcript;
+    el.value = next;
+    let saved = false;
+    switch (field) {
+      case "presentingComplaints": saved = await updateVisit(visit.id, { presentingComplaints: next }); break;
+      case "history": saved = await updateVisit(visit.id, { history: next }); break;
+      case "generalExamination": saved = await updateVisit(visit.id, { generalExamination: next }); break;
+      case "clinicalNote": saved = await updateVisit(visit.id, { clinicalNote: next }); break;
+    }
+    if (saved) draft.onCommit();
+  }
+
   async function applyClinicalTemplate(template: ClinicalTemplate) {
     setDiagnosisApply({ value: template.diagnosis, nonce: Date.now() });
     await Promise.all([
@@ -268,7 +296,13 @@ export function DoctorConsultationCard({
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-ink">Presenting Complaints</span>
-                <SaveStatusIndicator state={presentingComplaintsDraft.saveState} />
+                <span className="flex items-center gap-2">
+                  <VoiceDictationButton
+                    disabled={!identityConfirmed}
+                    onResult={(transcript) => void appendToField("presentingComplaints", presentingComplaintsRef, presentingComplaintsDraft, transcript)}
+                  />
+                  <SaveStatusIndicator state={presentingComplaintsDraft.saveState} />
+                </span>
               </span>
               {presentingComplaintsDraft.restored ? <DraftRestoredNotice onDiscard={presentingComplaintsDraft.discard} /> : null}
               <textarea
@@ -286,7 +320,13 @@ export function DoctorConsultationCard({
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-ink">History</span>
-                <SaveStatusIndicator state={historyDraft.saveState} />
+                <span className="flex items-center gap-2">
+                  <VoiceDictationButton
+                    disabled={!identityConfirmed}
+                    onResult={(transcript) => void appendToField("history", historyRef, historyDraft, transcript)}
+                  />
+                  <SaveStatusIndicator state={historyDraft.saveState} />
+                </span>
               </span>
               {historyDraft.restored ? <DraftRestoredNotice onDiscard={historyDraft.discard} /> : null}
               <textarea
@@ -310,7 +350,13 @@ export function DoctorConsultationCard({
               <label htmlFor="visit-general-examination">
                 <span className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm font-bold text-ink">General Examination</span>
-                  <SaveStatusIndicator state={generalExaminationDraft.saveState} />
+                  <span className="flex items-center gap-2">
+                    <VoiceDictationButton
+                      disabled={!identityConfirmed}
+                      onResult={(transcript) => void appendToField("generalExamination", generalExaminationRef, generalExaminationDraft, transcript)}
+                    />
+                    <SaveStatusIndicator state={generalExaminationDraft.saveState} />
+                  </span>
                 </span>
               </label>
               {generalExaminationDraft.restored ? <DraftRestoredNotice onDiscard={generalExaminationDraft.discard} /> : null}
@@ -412,11 +458,23 @@ export function DoctorConsultationCard({
                 applyTemplate={diagnosisApply}
                 onSaveStateChange={setDiagnosisSaveState}
               />
+              <Icd10CodePicker
+                code={visit.diagnosisIcd10Code}
+                label={visit.diagnosisIcd10Label}
+                disabled={!identityConfirmed}
+                onPick={(code, label) => void updateVisit(visit.id, { diagnosisIcd10Code: code, diagnosisIcd10Label: label })}
+              />
             </div>
             <label id="visit-section-clinical-note" className="scroll-mt-40 block">
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2 text-sm font-bold text-ink"><FileText size={16} /> Clinical Note</span>
-                <SaveStatusIndicator state={clinicalNoteDraft.saveState} />
+                <span className="flex items-center gap-2">
+                  <VoiceDictationButton
+                    disabled={!identityConfirmed}
+                    onResult={(transcript) => void appendToField("clinicalNote", clinicalNoteRef, clinicalNoteDraft, transcript)}
+                  />
+                  <SaveStatusIndicator state={clinicalNoteDraft.saveState} />
+                </span>
               </span>
               {clinicalNoteDraft.restored ? <DraftRestoredNotice onDiscard={clinicalNoteDraft.discard} /> : null}
               <textarea
@@ -493,6 +551,7 @@ export function DoctorConsultationCard({
                 variant="success"
                 size="md"
               />
+              <PatientEducationMenu visit={visit} />
             </div>
           </div>
           <label>
