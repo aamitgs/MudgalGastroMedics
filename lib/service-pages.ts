@@ -24,9 +24,9 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Gastroenterology",
     description:
       "Specialist care for acidity, abdominal pain, IBS, constipation, diarrhea, ulcers, GI bleeding, swallowing difficulty and digestive diseases in Agra.",
-    keywords: ["Gastroenterologist in Agra", "Digestive disease specialist", "Gastro doctor near me", "Stomach specialist Agra"],
+    keywords: ["Gastroenterologist in Agra", "Gastroenterologists in Agra", "Gastrointestinal doctors Agra", "Digestive disease specialist", "Gastro doctor near me", "Stomach specialist Agra"],
     hero:
-      "Comprehensive digestive care for stomach, intestine, food pipe, pancreas and bowel-related symptoms, planned by a gastroenterology team in Shaheed Nagar, Agra.",
+      "Comprehensive digestive care for stomach, intestine, food pipe, pancreas and bowel-related symptoms, planned by a team of gastroenterologists in Shaheed Nagar, Agra.",
     highlights: ["Digestive symptom evaluation", "Endoscopy and colonoscopy planning", "Personalized medical treatment", "Follow-up and prevention guidance"],
     sections: [
       {
@@ -60,9 +60,9 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Hepatology / Liver Care",
     description:
       "Liver specialist care for fatty liver, jaundice, liver fibrosis, cirrhosis, ascites, abnormal LFT and chronic liver disease in Agra.",
-    keywords: ["Liver specialist in Agra", "Fatty liver treatment Agra", "Jaundice doctor Agra", "Hepatology Agra"],
+    keywords: ["Liver specialist in Agra", "Chronic liver specialists Agra", "Hepatitis C treatment Agra", "Fatty liver treatment Agra", "Jaundice doctor Agra", "Hepatology Agra"],
     hero:
-      "Focused liver care for fatty liver, jaundice, fibrosis, cirrhosis and ascites with practical monitoring, lifestyle guidance and complication prevention.",
+      "Care from chronic liver specialists for fatty liver, jaundice, fibrosis, cirrhosis and ascites, with practical monitoring, lifestyle guidance and complication prevention.",
     highlights: ["Fatty liver and FibroScan assessment", "Jaundice and bile duct evaluation", "Cirrhosis and ascites care", "Varices screening and bleeding prevention"],
     sections: [
       {
@@ -96,9 +96,9 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Advanced Endoscopy Centre",
     description:
       "Advanced diagnostic and therapeutic endoscopy centre in Agra for endoscopy, colonoscopy, ERCP, GI bleeding, stenting, polypectomy and PEG tube placement.",
-    keywords: ["Advanced endoscopy centre Agra", "Endoscopy in Agra", "ERCP specialist in Agra", "Therapeutic endoscopy Agra"],
+    keywords: ["Advanced endoscopy centre Agra", "Endoscopists in Agra", "Interventional endoscopy doctors Agra", "Interventional gastroenterologists Agra", "Foreign body removal services Agra", "Endoscopy in Agra", "ERCP specialist in Agra", "Therapeutic endoscopy Agra"],
     hero:
-      "A focused endoscopy centre for diagnostic and therapeutic procedures, including upper GI endoscopy, colonoscopy, ERCP and selected advanced endoscopic treatment.",
+      "A focused endoscopy centre with interventional endoscopy support for diagnostic and therapeutic procedures — upper GI endoscopy, colonoscopy, ERCP, foreign body removal and selected advanced endoscopic treatment.",
     highlights: ["Diagnostic endoscopy and colonoscopy", "ERCP and bile duct treatment", "GI bleeding control", "Stenting, dilation and polyp removal"],
     sections: [
       {
@@ -240,7 +240,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Liver Clinic",
     description:
       "Liver clinic in Agra for fatty liver, abnormal LFT, jaundice, hepatitis, cirrhosis, ascites, liver fibrosis and FibroScan report review.",
-    keywords: ["Liver clinic Agra", "Liver doctor Agra", "Abnormal LFT treatment Agra", "Fatty liver clinic Agra"],
+    keywords: ["Liver clinic Agra", "Liver doctor Agra", "Chronic liver specialists Agra", "Hepatitis C treatment doctors Agra", "Fatty liver treatment doctors Agra", "Abnormal LFT treatment Agra", "Fatty liver clinic Agra"],
     hero:
       "A focused liver OPD for patients with fatty liver, jaundice, abnormal liver reports, fibrosis risk, cirrhosis or long-term liver monitoring needs.",
     highlights: ["Fatty liver and abnormal LFT review", "Jaundice and hepatitis evaluation", "Cirrhosis and ascites monitoring", "FibroScan and fibrosis risk planning"],
@@ -276,7 +276,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Endoscopy Services",
     description:
       "Endoscopy services in Agra for acidity, stomach pain, vomiting, difficulty swallowing, bleeding symptoms, biopsy planning and upper GI evaluation.",
-    keywords: ["Endoscopy services Agra", "Upper GI endoscopy Agra", "Stomach endoscopy Agra", "Endoscopy doctor Agra"],
+    keywords: ["Endoscopy services Agra", "Endoscopists in Agra", "Upper GI endoscopy Agra", "Stomach endoscopy Agra", "Endoscopy doctor Agra"],
     hero:
       "Upper GI endoscopy support for patients with persistent acidity, pain, vomiting, swallowing difficulty, anemia or suspected stomach and food-pipe disease.",
     highlights: ["Upper GI endoscopy planning", "Biopsy support when needed", "Bleeding and ulcer evaluation", "Clear preparation and recovery guidance"],
@@ -312,7 +312,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Colonoscopy Services",
     description:
       "Colonoscopy services in Agra for blood in stool, bowel habit change, chronic constipation or diarrhea, colon polyps and colon cancer screening.",
-    keywords: ["Colonoscopy services Agra", "Colonoscopy in Agra", "Colon cancer screening Agra", "Blood in stool doctor Agra"],
+    keywords: ["Colonoscopy services Agra", "Colonoscopy doctors Agra", "Colonoscopy in Agra", "Colon cancer screening Agra", "Blood in stool doctor Agra"],
     hero:
       "Colonoscopy planning and bowel evaluation for bleeding symptoms, bowel habit change, colon polyps, chronic diarrhea, constipation and screening needs.",
     highlights: ["Bowel symptom evaluation", "Colon polyp detection and removal planning", "Cancer screening guidance", "Bowel preparation support"],
@@ -384,7 +384,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "FibroScan & Fatty Liver Assessment",
     description:
       "FibroScan and fatty liver assessment in Agra for liver stiffness, fibrosis risk, CAP score, abnormal LFT and metabolic liver disease monitoring.",
-    keywords: ["FibroScan Agra", "Fatty liver assessment Agra", "Liver stiffness test Agra", "Fibrosis test Agra"],
+    keywords: ["FibroScan Agra", "FibroScan services Agra", "Fatty liver treatment doctors Agra", "Fatty liver assessment Agra", "Liver stiffness test Agra", "Fibrosis test Agra"],
     hero:
       "Focused assessment for fatty liver and fibrosis risk using clinical review, liver reports, ultrasound history and FibroScan-based monitoring when appropriate.",
     highlights: ["FibroScan report interpretation", "Fatty liver risk staging", "CAP and kPa score guidance", "Lifestyle and follow-up planning"],
@@ -420,7 +420,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "GI Bleeding & Emergency Gastro Care",
     description:
       "Urgent gastro care coordination in Agra for vomiting blood, black stools, blood in stool, suspected GI bleeding and variceal bleeding warning signs.",
-    keywords: ["GI bleeding treatment Agra", "Vomiting blood doctor Agra", "Black stool emergency Agra", "Blood in stool Agra"],
+    keywords: ["GI bleeding treatment Agra", "Doctors for gastrointestinal bleeding Agra", "GI foreign body removal Agra", "Vomiting blood doctor Agra", "Black stool emergency Agra", "Blood in stool Agra"],
     hero:
       "Urgent gastroenterology coordination for bleeding warning signs such as vomiting blood, black stools, blood in stool, dizziness, anemia or suspected variceal bleeding.",
     highlights: ["Vomiting blood and black stool guidance", "Variceal bleeding risk review", "Endoscopy planning when needed", "Call-before-visit instructions"],
@@ -456,7 +456,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Pancreas & Biliary Clinic",
     description:
       "Pancreas and biliary clinic in Agra for pancreatitis, pancreatic duct stones, bile duct strictures, jaundice, gallstone-related complications and ERCP planning.",
-    keywords: ["Pancreas specialist Agra", "Biliary clinic Agra", "Pancreatitis treatment Agra", "Pancreatic duct stone Agra"],
+    keywords: ["Pancreas specialist Agra", "Pancreas specialist doctors Agra", "Biliary clinic Agra", "Pancreatitis treatment Agra", "Pancreatic duct stone Agra"],
     hero:
       "Focused care for pancreatic and bile duct problems including pancreatitis, pancreatic duct stones, bile duct strictures, CBD stones and jaundice-related complications.",
     highlights: ["Pancreatitis evaluation", "Pancreatic duct stone review", "Bile duct stricture and stent planning", "ERCP-linked care pathway"],
@@ -492,7 +492,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "IBS, Constipation & Bowel Disorder Clinic",
     description:
       "Bowel disorder clinic in Agra for IBS, gas, bloating, chronic constipation, chronic diarrhea, abdominal pain and functional bowel symptoms.",
-    keywords: ["IBS treatment Agra", "Constipation doctor Agra", "Bowel disorder clinic Agra", "Gas bloating doctor Agra"],
+    keywords: ["IBS treatment Agra", "Doctors for constipation Agra", "Constipation doctor Agra", "Bowel disorder clinic Agra", "Gas bloating doctor Agra"],
     hero:
       "Structured bowel symptom evaluation for IBS, gas, bloating, constipation, diarrhea and abdominal pain with warning-sign review and practical treatment planning.",
     highlights: ["IBS and bloating assessment", "Constipation and diarrhea planning", "Diet and medicine review", "Colonoscopy decision support"],
@@ -528,7 +528,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "Acidity, GERD & Ulcer Clinic",
     description:
       "Acidity, GERD and ulcer clinic in Agra for reflux, heartburn, gastritis, peptic ulcer disease, swallowing difficulty and long-term medicine review.",
-    keywords: ["Acidity doctor Agra", "GERD treatment Agra", "Ulcer treatment Agra", "Heartburn specialist Agra"],
+    keywords: ["Acidity doctor Agra", "Doctors for acidity treatment Agra", "GERD treatment Agra", "Ulcer treatment Agra", "Heartburn specialist Agra"],
     hero:
       "Focused care for chronic acidity, GERD, gastritis, peptic ulcers, chest burning, sour belching, nausea and swallowing difficulty.",
     highlights: ["GERD and chronic acidity care", "Ulcer and gastritis evaluation", "Endoscopy decision support", "Long-term medicine safety review"],
@@ -564,7 +564,7 @@ export const servicePages: ServicePage[] = [
     shortTitle: "GI Cancer Screening & Polyp Clinic",
     description:
       "GI cancer screening and polyp clinic in Agra for colon cancer screening, colon polyps, biopsy planning, anemia, weight loss and high-risk family history.",
-    keywords: ["GI cancer screening Agra", "Colon cancer screening Agra", "Colon polyp clinic Agra", "Biopsy planning Agra"],
+    keywords: ["GI cancer screening Agra", "Esophageal cancer doctors Agra", "Colon cancer screening Agra", "Colon polyp clinic Agra", "Biopsy planning Agra"],
     hero:
       "Screening and risk assessment for colon polyps, colon cancer risk, unexplained anemia, weight loss, biopsy needs and family-history based surveillance.",
     highlights: ["Colon cancer screening advice", "Colon polyp follow-up", "Biopsy and report review", "High-risk family history planning"],
@@ -592,6 +592,42 @@ export const servicePages: ServicePage[] = [
       { label: "Polypectomy", href: "/procedures/polypectomy" },
       { label: "Colonoscopy", href: "/procedures/colonoscopy" },
       { label: "Endoscopic Biopsy", href: "/procedures/endoscopic-biopsy" }
+    ]
+  },
+  {
+    slug: "piles-fissure-care",
+    title: "Piles & Fissure Care in Agra",
+    shortTitle: "Piles & Fissure Care",
+    description:
+      "Piles and anal fissure care in Agra — evaluation of bleeding per rectum, pain and constipation, non-surgical treatment first, and referral for a procedure when it is genuinely needed.",
+    keywords: ["Piles doctor Agra", "Non surgical piles treatment Agra", "Fissure doctor Agra", "Bleeding piles treatment Agra", "Anal fissure treatment Agra"],
+    hero:
+      "Evaluation and non-surgical management of piles (haemorrhoids) and anal fissure — bleeding per rectum, pain on passing stool and constipation-related symptoms — with clear advice on diet, medicines and when a procedure or surgical referral is genuinely needed.",
+    highlights: ["Bleeding per rectum evaluation", "Non-surgical piles and fissure treatment", "Constipation and stool-softening plan", "Referral for banding or surgery when needed"],
+    sections: [
+      {
+        title: "Symptoms We Evaluate",
+        text:
+          "Patients commonly visit for bright red bleeding during or after passing stool, pain or a tear-like sensation, itching, a lump near the anus, mucus discharge or long-standing constipation and straining.",
+        items: ["Bright red bleeding per rectum", "Pain or burning during defecation (fissure)", "Swelling or a lump near the anus (piles)", "Chronic constipation and hard stools"]
+      },
+      {
+        title: "Non-Surgical Treatment First",
+        text:
+          "Most early piles and fissures settle with a high-fibre diet, adequate fluids, stool softeners, warm sitz baths, topical medicines and correcting constipation. Bleeding that persists or recurs is examined to be sure nothing more serious is being missed.",
+        items: ["High-fibre diet and fluid advice", "Stool softeners and topical medicines", "Warm sitz baths and bowel-habit correction", "Proctoscopy or colonoscopy when bleeding needs evaluation"]
+      },
+      {
+        title: "When A Procedure Is Needed",
+        text:
+          "If symptoms are severe, recurrent or advanced, the doctor explains options such as banding or a surgical referral — and, importantly, checks that rectal bleeding is not being caused by a more serious bowel condition before labelling it as piles."
+      }
+    ],
+    relatedLinks: [
+      { label: "Colonoscopy", href: "/procedures/colonoscopy" },
+      { label: "Chronic Constipation", href: "/procedures/chronic-constipation" },
+      { label: "GI Bleeding", href: "/procedures/gastrointestinal-bleeding-management" },
+      { label: "Book Appointment", href: "/contact#appointment" }
     ]
   }
 ];
