@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, FileText, Printer } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -10,12 +10,14 @@ import { AiReferralLetterDraft } from "@/components/opd/AiReferralLetterDraft";
 import { AiVisitAssistant } from "@/components/opd/AiVisitAssistant";
 import { AiPatientSummaryPanel } from "@/components/doctor-portal/AiPatientSummaryPanel";
 import { AllergyGuard } from "@/components/doctor-portal/AllergyGuard";
+import { ClinicalDecisionSupportPanel } from "@/components/doctor-portal/ClinicalDecisionSupportPanel";
 import { ClinicalTemplateMenu } from "@/components/doctor-portal/ClinicalTemplateMenu";
 import { ConsultationChecklist } from "@/components/doctor-portal/ConsultationChecklist";
 import { ConsultationShortcutsDialog } from "@/components/doctor-portal/ConsultationShortcutsDialog";
 import { ConsultationStickyHeader } from "@/components/doctor-portal/ConsultationStickyHeader";
 import { DiagnosisField } from "@/components/doctor-portal/DiagnosisField";
 import { DraftRestoredNotice } from "@/components/design-system/DraftRestoredNotice";
+import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { FollowUpQuickPicks } from "@/components/doctor-portal/FollowUpQuickPicks";
 import { Icd10CodePicker } from "@/components/doctor-portal/Icd10CodePicker";
 import { IdentityGuard } from "@/components/doctor-portal/IdentityGuard";
@@ -33,6 +35,7 @@ import { VoiceDictationButton } from "@/components/doctor-portal/VoiceDictationB
 import { inputClass, textareaClass } from "@/components/doctor-portal/shared-styles";
 import { useConsultationShortcuts } from "@/hooks/useConsultationShortcuts";
 import { useDraftRecovery, type AutosaveState } from "@/hooks/useDraftRecovery";
+import { evaluateDecisionSupport, type CdsRecommendation } from "@/lib/clinical/decision-support";
 import { notify } from "@/lib/notify";
 import type { ClinicalTemplate } from "@/lib/clinical-template-types";
 
@@ -43,12 +46,16 @@ export function DoctorConsultationCard({
   copySummary,
   printSummary,
   favouriteDiagnoses,
+  favouriteInvestigations,
   favouritePrescriptions,
   favouritePrescriptionItems,
+  pastVisits,
   recall
 }: {
   visit: OpdVisit;
   patient?: PatientRecord;
+  /** Prior visits for the same patient — feeds the CDS engine's cross-visit rules (long-term medication, screening history, recall). */
+  pastVisits: OpdVisit[];
   updateVisit: (
     id: string,
     updates: Partial<
@@ -85,6 +92,7 @@ export function DoctorConsultationCard({
   copySummary: (visit: OpdVisit, patient?: PatientRecord) => Promise<void>;
   printSummary: (visit: OpdVisit, patient?: PatientRecord) => void;
   favouriteDiagnoses: string[];
+  favouriteInvestigations: string[];
   favouritePrescriptions: string[];
   favouritePrescriptionItems: PrescriptionItem[];
   recall?: PatientRecallAlert;
@@ -109,6 +117,10 @@ export function DoctorConsultationCard({
   const certificateNoteRef = useRef<HTMLTextAreaElement>(null);
   const certificateNoteDraft = useDraftRecovery(certificateNoteRef, `${visit.id}:certificateNote`, visit.certificateNote ?? "", (value) => updateVisit(visit.id, { certificateNote: value }));
   const followUpDateRef = useRef<HTMLInputElement>(null);
+  // The investigation-advice field is an uncontrolled textarea, so its blank/
+  // filled state (which drives whether the frequently-used chips show, mirroring
+  // the controlled Diagnosis/Prescription fields) is tracked separately.
+  const [investigationAdviceEmpty, setInvestigationAdviceEmpty] = useState(!visit.investigationAdvice?.trim());
   const [diagnosisApply, setDiagnosisApply] = useState<{ value: string; nonce: number }>();
   const [diagnosisSaveState, setDiagnosisSaveState] = useState<AutosaveState>("idle");
   const [prescriptionSaveState, setPrescriptionSaveState] = useState<AutosaveState>("idle");
@@ -155,6 +167,14 @@ export function DoctorConsultationCard({
 
   useConsultationShortcuts(identityConfirmed);
 
+  // Deterministic, client-side — no network, no schema read. Recomputes as the
+  // doctor documents; recommendations self-resolve (e.g. the investigation
+  // nudge disappears once investigations are recorded).
+  const cdsRecommendations = useMemo(
+    () => evaluateDecisionSupport({ visit, patient, pastVisits }),
+    [visit, patient, pastVisits]
+  );
+
   // Only fills a field that's currently blank — a template must never
   // silently overwrite what the doctor has already documented (Track 4.2's
   // "never silently lose data" principle applies here too).
@@ -177,6 +197,53 @@ export function DoctorConsultationCard({
       case "clinicalNote": saved = await updateVisit(visit.id, { clinicalNote: value }); break;
     }
     if (saved) draft.onCommit();
+  }
+
+  // Quick-insert a frequently-used investigation set. Same blank-guard as a
+  // template apply — never overwrites what the doctor has already documented.
+  async function insertInvestigationFavourite(value: string) {
+    const el = investigationAdviceRef.current;
+    if (!el || el.value.trim()) return;
+    el.value = value;
+    setInvestigationAdviceEmpty(false);
+    if (await updateVisit(visit.id, { investigationAdvice: value })) investigationAdviceDraft.onCommit();
+  }
+
+  // CDS actions append to the investigation/advice field (never overwrite) and
+  // set the follow-up date — reusing the same uncontrolled-field commit paths
+  // the rest of the pad uses. Advisory: the inserted text is a starting draft
+  // the doctor reviews and edits before saving.
+  async function appendInvestigationAdvice(text: string) {
+    const el = investigationAdviceRef.current;
+    if (!el) return;
+    const next = el.value.trim() ? `${el.value.trim()}\n${text}` : text;
+    el.value = next;
+    setInvestigationAdviceEmpty(false);
+    if (await updateVisit(visit.id, { investigationAdvice: next })) investigationAdviceDraft.onCommit();
+  }
+
+  async function setFollowUpInDays(days: number) {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    const value = date.toISOString().slice(0, 10);
+    if (followUpDateRef.current) followUpDateRef.current.value = value;
+    await updateVisit(visit.id, { followUpDate: value });
+  }
+
+  function handleCdsAction(rec: CdsRecommendation) {
+    const action = rec.action;
+    if (!action) return;
+    switch (action.kind) {
+      case "insert-investigation":
+      case "insert-advice":
+        void appendInvestigationAdvice(action.text);
+        notify.success("Added — review and edit before saving.");
+        break;
+      case "set-follow-up":
+        void setFollowUpInDays(action.days);
+        notify.success(`Follow-up set for ${action.days} days.`);
+        break;
+    }
   }
 
   // Voice dictation always appends (never overwrites, even into a filled
@@ -227,6 +294,13 @@ export function DoctorConsultationCard({
 
       <div className="grid gap-5 p-4">
         <ConsultationChecklist visit={visit} identityConfirmed={identityConfirmed} />
+
+        <ClinicalDecisionSupportPanel
+          visitId={visit.id}
+          recommendations={cdsRecommendations}
+          disabled={!identityConfirmed}
+          onAction={handleCdsAction}
+        />
 
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="rounded border border-line bg-soft/60 p-4">
@@ -431,10 +505,16 @@ export function DoctorConsultationCard({
                 <SaveStatusIndicator state={investigationAdviceDraft.saveState} />
               </span>
               {investigationAdviceDraft.restored ? <DraftRestoredNotice onDiscard={investigationAdviceDraft.discard} /> : null}
+              {investigationAdviceEmpty ? (
+                <FavouriteChips favourites={favouriteInvestigations} onPick={(value) => void insertInvestigationFavourite(value)} />
+              ) : null}
               <textarea
                 ref={investigationAdviceRef}
                 defaultValue={visit.investigationAdvice}
-                onInput={investigationAdviceDraft.onInput}
+                onInput={(event) => {
+                  investigationAdviceDraft.onInput(event);
+                  setInvestigationAdviceEmpty(!event.currentTarget.value.trim());
+                }}
                 onBlur={async (event) => {
                   if (await updateVisit(visit.id, { investigationAdvice: event.target.value })) investigationAdviceDraft.onCommit();
                 }}

@@ -243,6 +243,16 @@ export function DoctorPortalWorkspace({
 
   const selectedVisit = visits.find((visit) => visit.id === selectedVisitId) ?? filteredVisits[0];
   const selectedPatient = selectedVisit ? findPatientForVisit(selectedVisit, patients) : undefined;
+  // Prior visits for the same patient — matched by patientId when present,
+  // else by phone (walk-in edge case). Feeds the CDS engine's cross-visit rules.
+  const pastVisitsForSelected = useMemo(() => {
+    if (!selectedVisit) return [];
+    return visits.filter(
+      (visit) =>
+        visit.id !== selectedVisit.id &&
+        (selectedVisit.patientId ? visit.patientId === selectedVisit.patientId : visit.phone === selectedVisit.phone)
+    );
+  }, [visits, selectedVisit]);
   const followUps = visits
     .filter((visit) => visit.followUpDate && visit.status !== "Cancelled")
     .sort((left, right) => String(left.followUpDate).localeCompare(String(right.followUpDate)))
@@ -262,6 +272,7 @@ export function DoctorPortalWorkspace({
   // Favourites need real repeats, not a single past entry, so a one-off note
   // never gets surfaced as if it were a habitual choice.
   const favouriteDiagnoses = useMemo(() => topFrequent(visits.map((visit) => visit.diagnosis)), [visits]);
+  const favouriteInvestigations = useMemo(() => topFrequent(visits.map((visit) => visit.investigationAdvice)), [visits]);
   const favouritePrescriptions = useMemo(() => topFrequent(visits.map((visit) => visit.prescription)), [visits]);
   const favouritePrescriptionItems = useMemo(
     () => topFrequentByKey(visits.flatMap((visit) => visit.prescriptionItems ?? []), prescriptionItemKey),
@@ -506,8 +517,10 @@ export function DoctorPortalWorkspace({
               copySummary={copySummary}
               printSummary={printSummary}
               favouriteDiagnoses={favouriteDiagnoses}
+              favouriteInvestigations={favouriteInvestigations}
               favouritePrescriptions={favouritePrescriptions}
               favouritePrescriptionItems={favouritePrescriptionItems}
+              pastVisits={pastVisitsForSelected}
               recall={selectedVisit.patientId ? patientRecallAlerts.get(selectedVisit.patientId) : undefined}
             />
           ) : (

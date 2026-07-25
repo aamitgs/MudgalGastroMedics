@@ -4,12 +4,14 @@ import { AlertTriangle, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import { detectDrugInteractions } from "@/lib/clinical/drug-interactions";
+import { detectMaxDoseExceedances } from "@/lib/clinical/max-dose";
 import { detectMedicationOverlap } from "@/lib/clinical/medication-overlap";
 import { prescriptionInstructionPresets, resolveInstructionText } from "@/lib/prescription-instructions";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DuplicatePreviousRxMenu } from "@/components/doctor-portal/DuplicatePreviousRxMenu";
 import { FavouriteChips } from "@/components/doctor-portal/FavouriteChips";
 import { InteractionGuard } from "@/components/doctor-portal/InteractionGuard";
+import { MaxDoseGuard } from "@/components/doctor-portal/MaxDoseGuard";
 import { MedicineAutocomplete } from "@/components/doctor-portal/MedicineAutocomplete";
 import { PrescriptionTemplateMenu } from "@/components/doctor-portal/PrescriptionTemplateMenu";
 import { SaveStatusIndicator } from "@/components/doctor-portal/SaveStatusIndicator";
@@ -75,6 +77,9 @@ export function PrescriptionField({
   const interactions = useMemo(() => detectDrugInteractions(combinedMedicationText, currentMedicines ?? ""), [combinedMedicationText, currentMedicines]);
   const highRiskInteractions = interactions.filter((match) => match.severity === "high");
   const moderateInteractions = interactions.filter((match) => match.severity === "moderate");
+  // Max-dose reads the structured rows only — the free-text notes carry no
+  // discrete strength/frequency to compute a daily total from.
+  const maxDoseMatches = useMemo(() => detectMaxDoseExceedances(items), [items]);
 
   // Fully-blank rows (an "Add medicine" click the doctor never filled in)
   // never persist — only rows with an actual medicine name are saved.
@@ -292,6 +297,7 @@ export function PrescriptionField({
         </div>
       ) : null}
       {highRiskInteractions.length ? <InteractionGuard visitId={visit.id} matches={highRiskInteractions} /> : null}
+      {maxDoseMatches.length ? <MaxDoseGuard visitId={visit.id} matches={maxDoseMatches} /> : null}
     </div>
   );
 }

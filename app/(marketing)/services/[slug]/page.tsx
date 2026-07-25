@@ -202,7 +202,8 @@ export default async function ServicePage({ params }: ServicePageProps) {
           addressCountry: site.country
         },
         areaServed: ["Agra", "Shaheed Nagar", "Fatehabad Road", "Tajganj", "Agra Cantt"],
-        medicalSpecialty: ["Gastroenterology", "Hepatology"]
+        medicalSpecialty: ["Gastroenterology", "Hepatology"],
+        availableService: page.highlights.map((service) => ({ "@type": "MedicalTherapy", name: service }))
       },
       breadcrumbSchema([
         { name: "Home", url: "/" },

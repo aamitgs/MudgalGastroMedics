@@ -45,7 +45,7 @@ const serviceGroups = [
   {
     title: "Symptom Clinics",
     text: "For common recurring symptoms that need structured evaluation and follow-up.",
-    slugs: ["ibs-constipation-bowel-disorder-clinic", "acidity-gerd-ulcer-clinic"]
+    slugs: ["ibs-constipation-bowel-disorder-clinic", "acidity-gerd-ulcer-clinic", "piles-fissure-care"]
   },
   {
     title: "Prevention & Metabolic Care",
