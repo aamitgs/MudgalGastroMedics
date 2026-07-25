@@ -2,11 +2,25 @@
 
 import type { RefObject } from "react";
 
-const quickOffsets = [3, 5, 7, 10, 15, 30];
+type QuickPick = { label: string; days?: number; months?: number };
 
-function isoDateAfter(days: number) {
+const quickPicks: QuickPick[] = [
+  { label: "3d", days: 3 },
+  { label: "5d", days: 5 },
+  { label: "7d", days: 7 },
+  { label: "10d", days: 10 },
+  { label: "15d", days: 15 },
+  { label: "1 month", months: 1 },
+  { label: "2 month", months: 2 },
+  { label: "3 month", months: 3 }
+];
+
+function isoDateAfter({ days, months }: QuickPick) {
   const date = new Date();
-  date.setDate(date.getDate() + days);
+  // Calendar-month math for the month picks (setMonth), not a 30-day
+  // approximation, so "1 month" lands on the same day next month.
+  if (months) date.setMonth(date.getMonth() + months);
+  if (days) date.setDate(date.getDate() + days);
   return date.toISOString().slice(0, 10);
 }
 
@@ -25,25 +39,25 @@ export function FollowUpQuickPicks({
   disabled?: boolean;
   onCommit: (value: string) => void;
 }) {
-  function pick(days: number) {
+  function pick(quick: QuickPick) {
     const el = dateInputRef.current;
     if (!el) return;
-    const value = isoDateAfter(days);
+    const value = isoDateAfter(quick);
     el.value = value;
     onCommit(value);
   }
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
-      {quickOffsets.map((days) => (
+      {quickPicks.map((quick) => (
         <button
-          key={days}
+          key={quick.label}
           type="button"
           disabled={disabled}
-          onClick={() => pick(days)}
+          onClick={() => pick(quick)}
           className="rounded-full border border-line bg-soft/60 px-2.5 py-1 text-xs font-semibold text-muted transition hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {days}d
+          {quick.label}
         </button>
       ))}
     </div>
