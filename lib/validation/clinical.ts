@@ -25,6 +25,14 @@ export const interactionAcknowledgedSchema = z.object({
   reason: z.string().trim().optional()
 });
 
+export const maxDoseAcknowledgedSchema = z.object({
+  visitId: z.string().trim().default(""),
+  drug: z.string().trim().default(""),
+  dailyDose: z.string().trim().optional(),
+  maxDose: z.string().trim().optional(),
+  reason: z.string().trim().optional()
+});
+
 export const dischargeSummaryDraftSchema = z.object({
   admissionId: z.string().trim().default("")
 });
