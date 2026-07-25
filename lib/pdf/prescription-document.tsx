@@ -4,7 +4,7 @@ import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { resolveInstructionText } from "@/lib/prescription-instructions";
 import { doctor, fullAddress, site } from "@/lib/site-data";
-import { PdfFooter, clinicalConfidentialityNote, generatedAtLabel, pdfColors, pdfStyles, stomachIconPath } from "@/lib/pdf/branding";
+import { PdfFooter, pdfColors, pdfStyles, stomachIconPath } from "@/lib/pdf/branding";
 
 const styles = StyleSheet.create({
   page: { ...pdfStyles.page, paddingTop: 148 },
@@ -239,7 +239,7 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
           </View>
         </View>
 
-        <PdfFooter confidentialityNote={`${clinicalConfidentialityNote} Not valid for medicolegal purposes. Generated ${generatedAtLabel()}.`} />
+        <PdfFooter confidentialityNote={`${site.email}   ${site.url.replace(/^https?:\/\//, "")}\nNot Valid for Medicolegal Purposes.`} />
       </Page>
     </Document>
   );
