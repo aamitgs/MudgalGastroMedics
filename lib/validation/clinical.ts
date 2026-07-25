@@ -33,6 +33,13 @@ export const maxDoseAcknowledgedSchema = z.object({
   reason: z.string().trim().optional()
 });
 
+export const cdsRecommendationSchema = z.object({
+  visitId: z.string().trim().default(""),
+  ruleId: z.string().trim().default(""),
+  category: z.string().trim().default(""),
+  reason: z.string().trim().optional()
+});
+
 export const dischargeSummaryDraftSchema = z.object({
   admissionId: z.string().trim().default("")
 });
