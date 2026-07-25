@@ -22,8 +22,7 @@ const vitalsFields: { key: VitalFieldKey; label: string; placeholder: string }[]
   { key: "vitalsWeight", label: "Weight", placeholder: "e.g. 62 kg" },
   { key: "vitalsBp", label: "Blood Pressure", placeholder: "e.g. 120/80" },
   { key: "vitalsPulse", label: "Pulse", placeholder: "e.g. 78/min" },
-  { key: "vitalsSpo2", label: "SpO2", placeholder: "e.g. 98%" },
-  { key: "vitalsBloodSugar", label: "Blood Sugar", placeholder: "e.g. 110 mg/dL" }
+  { key: "vitalsSpo2", label: "SpO2", placeholder: "e.g. 98%" }
 ];
 
 const opdExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
