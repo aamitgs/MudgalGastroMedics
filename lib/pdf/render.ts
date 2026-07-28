@@ -6,6 +6,11 @@ import { findPatientByPhone, getPatientById } from "@/lib/patient-store";
 import { registerPdfFonts } from "@/lib/pdf/branding";
 import { PrescriptionDocument } from "@/lib/pdf/prescription-document";
 import { InvoiceDocument } from "@/lib/pdf/invoice-document";
+import { ItemisedInvoiceDocument } from "@/lib/pdf/itemised-invoice-document";
+import { getInvoiceById, listInvoicesForVisit } from "@/lib/billing-store";
+import { invoiceUpiLink } from "@/lib/billing-upi";
+import type { Invoice } from "@/lib/billing-types";
+import QRCode from "qrcode";
 import { MedicalCertificateDocument } from "@/lib/pdf/medical-certificate-document";
 import { ReferralLetterDocument } from "@/lib/pdf/referral-letter-document";
 import { buildDischargeSummaryFooterTemplate, buildDischargeSummaryHeaderTemplate, buildDischargeSummaryHtml } from "@/lib/pdf/discharge-summary-html";
@@ -80,7 +85,49 @@ export async function renderReferralLetterPdf(visitId: string): Promise<PdfRende
   return { ok: true, buffer, filename: `referral-letter-${slugify(visit.patientName)}-${visit.token}.pdf` };
 }
 
-export async function renderInvoicePdf(visitId: string): Promise<PdfRenderResult> {
+/** PNG data URI for a QR payload, or undefined if it can't be produced — a missing QR must never break a bill. */
+async function qrDataUri(payload: string | null | undefined): Promise<string | undefined> {
+  if (!payload) return undefined;
+  try {
+    return await QRCode.toDataURL(payload, { margin: 1, width: 256, errorCorrectionLevel: "M" });
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The itemised invoice (Track 5.8). `copyNumber` above 1 stamps the document
+ * DUPLICATE — the caller gets that from lib/reprint-store.ts.
+ */
+export async function renderItemisedInvoicePdf(invoice: Invoice, copyNumber = 1): Promise<PdfRenderResult> {
+  registerPdfFonts();
+
+  const [upiQrDataUri, invoiceQrDataUri] = await Promise.all([
+    qrDataUri(invoiceUpiLink(invoice)),
+    qrDataUri(invoice.invoiceNo)
+  ]);
+
+  const buffer = await renderToBuffer(ItemisedInvoiceDocument({ invoice, upiQrDataUri, invoiceQrDataUri, copyNumber }));
+  return { ok: true, buffer, filename: `invoice-${slugify(invoice.invoiceNo)}.pdf` };
+}
+
+export async function renderInvoicePdfById(invoiceId: string, copyNumber = 1): Promise<PdfRenderResult> {
+  const invoice = await getInvoiceById(invoiceId);
+  if (!invoice) return { ok: false, error: "Invoice not found.", status: 404 };
+  return renderItemisedInvoicePdf(invoice, copyNumber);
+}
+
+/**
+ * Kept on the original `visitId` contract so every existing caller keeps
+ * working, but it now renders the *real* invoice when the visit has one —
+ * falling back to the legacy single-line document only for visits that predate
+ * the invoice entity.
+ */
+export async function renderInvoicePdf(visitId: string, copyNumber = 1): Promise<PdfRenderResult> {
+  const invoices = await listInvoicesForVisit(visitId);
+  const live = invoices.find((invoice) => invoice.status !== "Cancelled") ?? invoices[0];
+  if (live) return renderItemisedInvoicePdf(live, copyNumber);
+
   const visit = (await getOpdVisitById(visitId));
   if (!visit) return { ok: false, error: "Visit not found.", status: 404 };
 

@@ -8,6 +8,7 @@ import { listLabOrders } from "@/lib/lab-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { findPatientByPhone } from "@/lib/patient-store";
 import { listPharmacyDispenses } from "@/lib/pharmacy-store";
+import { walletBalancePaise } from "@/lib/wallet-store";
 
 function normalizePhone(value: string) {
   return value.replace(/\D/g, "").slice(-10);
@@ -42,14 +43,17 @@ export async function GET(request: Request) {
     device: auditRequestMetadata(request)
   });
 
-  const [patient, appointments, visits, admissions, allLabOrders, allDispenses, timeline] = await Promise.all([
+  const [patient, appointments, visits, admissions, allLabOrders, allDispenses, timeline, advancePaise] = await Promise.all([
     findPatientByPhone(phone),
     listPatientAppointments(phone),
     listPatientOpdVisits(phone),
     listPatientIpdAdmissions(phone),
     listLabOrders(),
     listPharmacyDispenses(),
-    buildPatientTimeline(phone)
+    buildPatientTimeline(phone),
+    // Reception needs the advance beside the dues: money already in hand can
+    // settle what is owed without asking the patient for anything (Track 5.5).
+    walletBalancePaise(phone)
   ]);
 
   const labOrders = allLabOrders.filter((order) => normalizePhone(order.phone) === key);
@@ -81,6 +85,7 @@ export async function GET(request: Request) {
       criticalUnacknowledged: labOrders.filter(
         (order) => order.criticalFlag && !order.criticalAcknowledgedAt && order.status !== "Cancelled"
       ).length,
+      advanceBalance: advancePaise / 100,
       outstanding: {
         amount: outstandingAmount,
         unpaidVisits: unpaidVisits.length,

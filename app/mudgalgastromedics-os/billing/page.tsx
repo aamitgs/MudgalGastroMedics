@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
-import { AdminBillingSummary } from "@/components/billing/AdminBillingSummary";
+import { BillingSurfaces } from "@/components/billing/BillingSurfaces";
 import { WorkspaceLauncher } from "@/components/chrome/WorkspaceLauncher";
 import { HospitalOsPageShell } from "@/components/hospital-os/HospitalOsPageShell";
 import { accessContextFromCookieStore, canOpenModule } from "@/lib/access/page-auth";
@@ -67,7 +67,7 @@ export default async function BillingSummaryPage() {
             Hospital-wide revenue summary and receipts.
           </p>
         </div>
-        <AdminBillingSummary />
+        <BillingSurfaces />
       </div>
     </HospitalOsPageShell>
   );

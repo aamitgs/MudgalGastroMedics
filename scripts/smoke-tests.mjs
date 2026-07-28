@@ -167,12 +167,28 @@ test("every HMS workspace has a dedicated Hospital OS route", () => {
     AdminProductionReadiness: "readiness"
   };
 
+  // A page may render its module directly, or compose several surfaces into
+  // one wrapper it imports (Billing does this — workspace / collection /
+  // revenue summary are tabs). What matters is that the component is genuinely
+  // wired into the route, so the search follows the page's own component
+  // imports one level down rather than demanding a literal import in page.tsx.
+  const reachableSources = (route) => {
+    const pageSource = read(route);
+    const imported = [...pageSource.matchAll(/from\s+"@\/(components\/[\w-]+\/[\w-]+)"/g)]
+      .map((match) => `${match[1]}.tsx`)
+      .filter((path) => exists(path))
+      .map((path) => read(path));
+    return [pageSource, ...imported];
+  };
+
   for (const [component, slug] of Object.entries(routeByComponent)) {
     const route = `app/mudgalgastromedics-os/${slug}/page.tsx`;
     assert.equal(exists(route), true, `${route} should exist`);
-    const source = read(route);
-    assert.match(source, new RegExp(`import\\s*\\{\\s*${component}\\s*\\}\\s*from\\s*"@/components/[\\w-]+/${component}"`), `${route} should import ${component}`);
-    assert.match(source, new RegExp(`<${component}\\s*/>`), `${route} should render <${component} />`);
+    const sources = reachableSources(route);
+    const importPattern = new RegExp(`import\\s*\\{\\s*${component}\\s*\\}\\s*from\\s*"@/components/[\\w-]+/${component}"`);
+    const renderPattern = new RegExp(`<${component}\\s*/>`);
+    assert.ok(sources.some((source) => importPattern.test(source)), `${route} should import ${component} (directly or via a composed surface)`);
+    assert.ok(sources.some((source) => renderPattern.test(source)), `${route} should render <${component} />`);
   }
 });
 

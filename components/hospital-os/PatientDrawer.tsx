@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CalendarClock, FlaskConical, Pill, ShieldAlert, Wallet } from "lucide-react";
+import { AlertTriangle, CalendarClock, FlaskConical, PiggyBank, Pill, ShieldAlert, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { AppointmentRecord } from "@/lib/appointment-types";
@@ -20,6 +20,8 @@ type PatientSummary = {
   recentLabOrders: LabOrder[];
   criticalUnacknowledged: number;
   outstanding: { amount: number; unpaidVisits: number; unpaidLabOrders: number; unpaidPharmacy: number };
+  /** Advance held against this patient (Track 5.5) — shown beside the dues so reception can settle from money already in hand. */
+  advanceBalance?: number;
   usesInsurance: boolean;
   timeline: ClinicalEvent[];
 };
@@ -169,6 +171,17 @@ export function PatientDrawer() {
                     <span className="font-semibold text-muted">No outstanding balance.</span>
                   )}
                 </p>
+                {summary.advanceBalance ? (
+                  <p className="mt-1.5 flex items-start gap-2 text-sm">
+                    <PiggyBank size={15} className="mt-0.5 shrink-0 text-teal-dark" />
+                    <span className="font-bold text-teal-dark">
+                      Rs {summary.advanceBalance.toLocaleString("en-IN")} advance available
+                      {summary.outstanding.amount > 0 ? (
+                        <span className="block text-xs font-semibold text-muted">Can be applied against the dues above.</span>
+                      ) : null}
+                    </span>
+                  </p>
+                ) : null}
                 <p className="mt-1.5 text-xs font-semibold text-muted">{summary.usesInsurance ? "Insurance used previously." : "Self-pay history."}</p>
               </Section>
 

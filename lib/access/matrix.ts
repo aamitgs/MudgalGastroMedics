@@ -33,6 +33,13 @@ export type AccessResource =
   | "lab-orders"
   | "pharmacy-inventory"
   | "billing"
+  /**
+   * Discounts, voids and bill cancellations — deliberately separate from
+   * "billing" so the front desk keeps raising and collecting bills (its
+   * "basic billing" grant below) without also being able to write money off.
+   * Reception is granted nothing here on purpose.
+   */
+  | "billing-adjustments"
   | "insurance"
   | "hr-records"
   | "reports"
@@ -55,6 +62,7 @@ export const accessResources: AccessResource[] = [
   "lab-orders",
   "pharmacy-inventory",
   "billing",
+  "billing-adjustments",
   "insurance",
   "hr-records",
   "reports",
@@ -190,6 +198,7 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
     // (app/api/finance/route.ts) — account ledger entries have no delete
     // path at all, so this doesn't widen anything about the cash ledger.
     billing: [...readWriteExport, "delete"],
+    "billing-adjustments": [...readWriteExport, "delete"],
     insurance: readWriteExport,
     "hr-records": readWriteExport,
     reports: ["view", "export"],
@@ -256,6 +265,9 @@ export const rolePermissions: Record<AccessRole, PermissionSet> = {
   },
   "billing-accounts": {
     billing: readWriteExport,
+    // The "Voids/refunds stay with Billing / Accounts" split the reception
+    // grant above describes, now actually enforceable.
+    "billing-adjustments": readWriteExport,
     insurance: readWriteExport,
     reports: ["view", "export"],
     patients: ["view"]
@@ -298,6 +310,19 @@ export function isAccessRole(value: string): value is AccessRole {
 
 /** Roles that must complete TOTP MFA setup before using the system. */
 export const mfaMandatoryRoles: AccessRole[] = ["super-admin", "admin"];
+
+/**
+ * Who may sign off each stage of the billing approval chain (Track 5.6).
+ *
+ * Held here beside the other role policies so the chain and the permission
+ * model cannot drift apart. Note this is *authorisation to sign*, not
+ * permission to request — a billing executive raises requests via the
+ * `billing-adjustments` grant and can never sign their own.
+ */
+export const approvalStageRoles: Record<"Accounts" | "Admin", AccessRole[]> = {
+  Accounts: ["billing-accounts", "admin", "super-admin"],
+  Admin: ["admin", "super-admin"]
+};
 
 /** Roles allowed to invoke break-glass emergency patient access. */
 export const breakGlassRoles: AccessRole[] = ["main-doctor", "duty-doctor"];
