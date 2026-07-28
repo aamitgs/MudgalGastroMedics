@@ -117,7 +117,7 @@ export function BlogConsultationForm({
           {errors.name ? <p role="alert" className="mt-1.5 text-xs font-semibold text-red-300">{errors.name.message}</p> : null}
         </div>
         <div>
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-2">
             <select {...register("countryCode")} autoComplete="tel-country-code" className={`${fieldClass} px-2`} aria-label="Country code">
               {countryCodes.map((code) => <option key={code}>{code}</option>)}
             </select>
@@ -139,7 +139,7 @@ export function BlogConsultationForm({
         <div className="mt-4 rounded-lg border border-white/14 bg-white/8 p-3">
           <p className="flex items-start gap-2 text-sm font-semibold text-cyan-50/88"><CheckCircle2 className="mt-0.5 shrink-0 text-teal" size={17} /> {message}</p>
           {requestId ? <p className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Request ID: {requestId}</p> : null}
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
             <a href={whatsappLink || `https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[linear-gradient(135deg,var(--site-teal),var(--site-teal-dark))] px-3 text-sm font-black text-white">
               <MessageCircle size={16} /> WhatsApp
             </a>

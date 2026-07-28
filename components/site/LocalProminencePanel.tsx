@@ -12,7 +12,7 @@ type LocalProminencePanelProps = {
 export function LocalProminencePanel({ compact = false }: LocalProminencePanelProps) {
   return (
     <div className="overflow-hidden rounded border border-line bg-white shadow-lift">
-      <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-0 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="bg-[linear-gradient(135deg,#e8fbfb,#ffffff)] p-6 md:p-8">
           <div className="flex items-center gap-4">
             <BrandIconTile className="h-14 w-14" />
@@ -36,7 +36,7 @@ export function LocalProminencePanel({ compact = false }: LocalProminencePanelPr
           </div>
         </div>
 
-        <div className="grid gap-4 p-6 md:grid-cols-2 md:p-8">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 p-6 md:grid-cols-2 md:p-8">
           <a
             href={site.googleReviewUrl}
             target="_blank"

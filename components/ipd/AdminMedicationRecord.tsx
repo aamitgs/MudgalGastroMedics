@@ -121,7 +121,7 @@ export function AdminMedicationRecord({ admissionId }: { admissionId: string }) 
         <Pill size={15} className="text-brand" /> Medication administration record
       </p>
 
-      <form onSubmit={addOrder} className="mb-3 grid gap-2 sm:grid-cols-2">
+      <form onSubmit={addOrder} className="mb-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
         <input name="drugName" required placeholder="Drug name" className={fieldClass} />
         <input name="dose" placeholder="Dose (e.g. 500mg)" className={fieldClass} />
         <select aria-label="Route" name="route" defaultValue="Oral" className={fieldClass}>

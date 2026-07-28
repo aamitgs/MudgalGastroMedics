@@ -261,7 +261,7 @@ export function AdminAiReviews() {
         </ActionButton>
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.5fr_1.5fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.5fr)_minmax(0,1.5fr)]">
         <form onSubmit={generateReview} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <BrainCircuit size={19} /> Generate review
@@ -392,7 +392,7 @@ export function AdminAiReviews() {
                 </ActionButton>
               </div>
               <p className="mt-4 rounded border border-line bg-soft/50 p-3 text-sm leading-relaxed text-muted">{editingReview.summary}</p>
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
                 <div>
                   <p className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
                     <ClipboardCheck size={16} /> Flags
@@ -420,7 +420,7 @@ export function AdminAiReviews() {
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Reception Script</p>
                 <p className="mt-2 text-sm leading-relaxed text-ink">{editingReview.receptionScript}</p>
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_220px]">
+              <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
                 <textarea
                   defaultValue={editingReview.doctorReviewNote}
                   onBlur={(event) => void updateReview(editingReview.id, { doctorReviewNote: event.target.value })}

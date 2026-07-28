@@ -467,7 +467,7 @@ export function AdminIpdBeds() {
         />
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.84fr_1.16fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
         <form onSubmit={createAdmission} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <BedDouble size={19} /> Admit patient
@@ -492,7 +492,7 @@ export function AdminIpdBeds() {
                   </option>
                 ))}
             </select>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <select aria-label="Admission type" name="admissionType" className={fieldClass} defaultValue="Observation">
                 {["Observation", "Post Procedure", "Planned", "Emergency"].map((type) => (
                   <option key={type}>{type}</option>
@@ -500,7 +500,7 @@ export function AdminIpdBeds() {
               </select>
               <input name="depositAmount" className={fieldClass} type="number" min="0" placeholder="Deposit amount" />
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <input name="admittingDoctor" className={fieldClass} placeholder="Admitting doctor" defaultValue="Dr. Deepak Kumar Sharma" />
               <input name="assignedNurse" className={fieldClass} placeholder="Assigned nurse" />
             </div>
@@ -606,7 +606,7 @@ export function AdminIpdBeds() {
                   Close
                 </ActionButton>
               </div>
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <select
                   aria-label="Bed"
                   value={editingAdmission.bedId}
@@ -632,7 +632,7 @@ export function AdminIpdBeds() {
                   placeholder="Deposit"
                 />
               </div>
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <input
                   defaultValue={editingAdmission.assignedNurse}
                   onBlur={(event) => void updateAdmission(editingAdmission.id, { assignedNurse: event.target.value })}

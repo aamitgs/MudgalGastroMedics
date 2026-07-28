@@ -64,7 +64,7 @@ export default function OperationsPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_1fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
             <p className="inline-lang mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
               <span data-en>Enterprise Healthcare Platform</span>
@@ -87,7 +87,7 @@ export default function OperationsPage() {
             </div>
           </div>
           <div className="rounded border border-white/16 bg-white/10 p-5 shadow-[0_28px_80px_rgba(2,22,29,0.25)] backdrop-blur-md">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {["Appointments", "OPD Queue", "Billing", "Pharmacy", "Inventory", "Reports"].map((item, index) => (
                 <div key={item} className="rounded border border-white/12 bg-white/10 p-4">
                   <span className="text-sm font-black text-cyan-100">{String(index + 1).padStart(2, "0")}</span>
@@ -100,7 +100,7 @@ export default function OperationsPage() {
       </section>
 
       <Section>
-        <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+        <div className="mb-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-end">
           <div>
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Core Modules</span>
@@ -118,7 +118,7 @@ export default function OperationsPage() {
             गहरे ऑपरेशन्स ऑटोमेशन जोड़ने से पहले, पहले आंतरिक रिलीज़ में रिसेप्शन, डॉक्टर समीक्षा, बिलिंग और रिपोर्ट अपलोड पर ध्यान देना चाहिए।
           </p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3">
           {coreModules.map((module) => (
             <PlatformFeatureCard key={module.title} {...module} />
           ))}
@@ -135,7 +135,7 @@ export default function OperationsPage() {
             <span data-en>Modules to activate as the workflow matures.</span>
             <span data-hi lang="hi">वर्कफ़्लो विकसित होने पर सक्रिय किए जाने वाले मॉड्यूल।</span>
           </h2>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {operationsFeatures.map((feature) => (
               <div key={feature} className="rounded border border-line bg-soft/60 p-4 font-semibold text-ink">
                 {feature}

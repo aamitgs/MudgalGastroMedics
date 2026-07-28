@@ -323,7 +323,7 @@ export function AdminCommunication() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -332,7 +332,7 @@ export function AdminCommunication() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[1fr_0.85fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
         <form onSubmit={submitCommLog} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Send size={19} /> Prepare patient message
@@ -352,7 +352,7 @@ export function AdminCommunication() {
                 ))}
               </select>
             </FormField>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Patient name" htmlFor="comm-patientName" error={commLogErrors.patientName?.message}>
                 <input id="comm-patientName" className={fieldClass} placeholder="Patient name" {...registerCommLog("patientName")} />
               </FormField>
@@ -360,7 +360,7 @@ export function AdminCommunication() {
                 <input id="comm-phone" className={fieldClass} placeholder="Phone" {...registerCommLog("phone")} />
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <FormField label="Channel" htmlFor="comm-channel" error={commLogErrors.channel?.message}>
                 <select id="comm-channel" className={fieldClass} {...registerCommLog("channel")}>
                   {communicationChannels.map((channel) => (
@@ -387,7 +387,7 @@ export function AdminCommunication() {
                 </select>
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Scheduled for" htmlFor="comm-scheduledFor" error={commLogErrors.scheduledFor?.message}>
                 <input id="comm-scheduledFor" className={fieldClass} type="datetime-local" {...registerCommLog("scheduledFor")} />
               </FormField>

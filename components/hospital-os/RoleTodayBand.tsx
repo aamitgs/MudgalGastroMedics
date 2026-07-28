@@ -35,7 +35,7 @@ export async function RoleTodayBand({ role }: { role: AccessRole }) {
           ))}
         </div>
       </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {dashboard.tiles.map((tile) => (
           <a key={tile.label} href={tile.href} className="group rounded border border-line bg-soft/60 p-3 transition hover:border-brand">
             <p className={`text-xl font-bold ${toneClass[tile.tone]}`}>{tile.value}</p>

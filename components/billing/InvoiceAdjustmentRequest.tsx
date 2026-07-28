@@ -82,7 +82,7 @@ export function InvoiceAdjustmentRequest({ invoice, busy, onRequest }: Props) {
         <Scale size={13} /> Raise a request
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
         <FormField label="Request" htmlFor="adjust-kind" required>
           <select id="adjust-kind" className={fieldClass} value={kind} onChange={(event) => setKind(event.target.value as ApprovalKind)}>
             <option value="Discount">Discount</option>

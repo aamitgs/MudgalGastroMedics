@@ -62,7 +62,7 @@ export default function LifeAtMgmPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Life@MGM</p>
             <h1 className="inline-lang max-w-4xl text-5xl font-black leading-tight md:text-7xl">
@@ -76,7 +76,7 @@ export default function LifeAtMgmPage() {
               मुदगल गैस्ट्रोमेडिक्स हॉस्पिटल में स्टाफ समारोहों, त्योहारों, जन्मदिनों, उपलब्धियों और रोज़मर्रा के टीम पलों के लिए एक विशेष स्थान।
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {[
               ["Team Moments", "टीम के पल", "Birthdays, festivals and gatherings", "जन्मदिन, त्योहार और सभाएं"],
               ["Hospital Culture", "अस्पताल संस्कृति", "Care, respect and collaboration", "देखभाल, सम्मान और सहयोग"],
@@ -107,7 +107,7 @@ export default function LifeAtMgmPage() {
           <p data-hi lang="hi">यह एक प्रीमियम गैलरी स्थान के रूप में डिज़ाइन किया गया है, जहां स्वीकृत स्टाफ तस्वीरें जोड़ी जाएंगी।</p>
         </SectionHead>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {celebrationCategories.map(({ title, titleHi, description, descriptionHi, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
             <article className="group h-full rounded border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
@@ -127,7 +127,7 @@ export default function LifeAtMgmPage() {
           ))}
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <div className="relative min-h-[420px] overflow-hidden rounded border border-line bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.22),transparent_30%),linear-gradient(135deg,#ecfeff,#ffffff)] p-6 shadow-soft">
             <div className="absolute inset-6 grid grid-cols-3 gap-3 opacity-80">
               {Array.from({ length: 9 }).map((_, index) => (
@@ -174,7 +174,7 @@ export default function LifeAtMgmPage() {
           <p data-en>Warmth and professionalism can sit together. This page is designed to show that balance.</p>
           <p data-hi lang="hi">गर्मजोशी और व्यावसायिकता साथ-साथ रह सकते हैं। यह पृष्ठ उसी संतुलन को दिखाने के लिए बनाया गया है।</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-4">
           {cultureValues.map(([title, titleHi, text, textHi]) => (
             <div key={title} className="rounded border border-line bg-white p-6 shadow-soft">
               <h3 className="inline-lang text-xl font-black">

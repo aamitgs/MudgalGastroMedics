@@ -182,7 +182,13 @@ export function DataTable<TData>({
   const hideableColumns = table.getAllLeafColumns().filter((column) => column.getCanHide());
 
   return (
-    <div className="rounded border border-line/80 bg-surface shadow-sm">
+    // `min-w-0` is load-bearing: this card is almost always a grid/flex item,
+    // and such items default to `min-width: auto` — meaning they refuse to
+    // shrink below their content. The table below carries an explicit pixel
+    // width from column sizing, so without this the card grows to the table's
+    // full width and pushes the whole page into horizontal scroll instead of
+    // letting the inner `overflow-auto` region scroll.
+    <div className="min-w-0 rounded border border-line/80 bg-surface shadow-sm">
       <div className="flex flex-wrap items-center gap-3 border-b border-line p-3">
         <input
           value={globalFilter}

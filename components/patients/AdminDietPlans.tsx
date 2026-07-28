@@ -150,7 +150,7 @@ export function AdminDietPlans() {
           <ModuleSkeleton />
         </div>
       ) : (
-        <div className="grid gap-5 p-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-2">
           <div className="grid gap-3">
             <p className="flex items-center gap-2 text-sm font-bold text-ink">
               <Salad size={16} className="text-brand" /> Patient diet plans

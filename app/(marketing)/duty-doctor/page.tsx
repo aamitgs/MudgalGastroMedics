@@ -93,7 +93,7 @@ export default function DutyDoctorPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dutyDoctorSchema) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Medical Team</p>
             <h1 className="max-w-4xl text-5xl font-black leading-tight md:text-7xl">Dr. Dushyant Nagayach</h1>
@@ -102,7 +102,7 @@ export default function DutyDoctorPage() {
             </p>
             <AppointmentCtaPanel className="mt-8 max-w-3xl" />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
             {[
               ["Role", "Duty Medical Officer", UserRound],
               ["Duty Timing", "8 PM-9 AM", Moon],
@@ -124,7 +124,7 @@ export default function DutyDoctorPage() {
       </Section>
 
       <Section className="relative z-10 pt-0">
-        <div className="grid items-start gap-8 lg:grid-cols-[0.88fr_1.12fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
           <MotionReveal>
           <article className="overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="relative bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_35%),linear-gradient(135deg,#ecfeff,#ffffff)] p-5">
@@ -161,7 +161,7 @@ export default function DutyDoctorPage() {
               Dr. Dushyant Nagayach provides overnight duty doctor support and coordinates with the consultant gastroenterology team according to clinical need.
             </p>
 
-            <dl className="mt-7 grid gap-4 sm:grid-cols-2">
+            <dl className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
               <div className="rounded border border-line bg-soft/70 p-5">
                 <dt className="text-sm font-black uppercase tracking-wide text-muted">Experience</dt>
                 <dd className="mt-2 text-lg font-black">4–5 years</dd>
@@ -188,7 +188,7 @@ export default function DutyDoctorPage() {
         <SectionHead eyebrow="Duty Support" title="How the duty doctor supports patients">
           <p>Clear initial assessment, overnight coordination and escalation to the consultant team when clinically needed.</p>
         </SectionHead>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {dutyDoctorSupport.map(({ title, description, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
             <article className="group h-full rounded border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
@@ -205,7 +205,7 @@ export default function DutyDoctorPage() {
 
       <Section muted>
         <SectionHead eyebrow="FAQs" title="Frequently asked questions about the duty doctor" />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {dutyDoctorFaqs.map((faq) => (
             <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
@@ -219,7 +219,7 @@ export default function DutyDoctorPage() {
       </Section>
 
       <Section>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Need assistance?</p>
             <h2 className="mt-2 text-3xl font-black">Call reception before visiting for duty availability.</h2>

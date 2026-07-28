@@ -134,7 +134,7 @@ export function PackageEstimatePanel({ balances, estimates, busy, onShare, onAcc
                       event.preventDefault();
                       void submitAcceptance(estimate);
                     }}
-                    className="grid gap-2 border-t border-line pt-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,160px)_auto]"
+                    className="grid grid-cols-[minmax(0,1fr)] gap-2 border-t border-line pt-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,160px)_auto]"
                   >
                     <FormField label="Patient's name, as given" htmlFor={`sig-${estimate.id}`} required>
                       <input

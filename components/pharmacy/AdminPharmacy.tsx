@@ -269,7 +269,7 @@ export function AdminPharmacy() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -278,7 +278,7 @@ export function AdminPharmacy() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <form onSubmit={issueDispense} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <PackageCheck size={19} /> Issue dispense
@@ -311,7 +311,7 @@ export function AdminPharmacy() {
               {draftItems.map((item, index) => {
                 const stockItem = inventory.find((entry) => entry.id === item.inventoryItemId);
                 return (
-                  <div key={index} className="grid gap-2 rounded border border-line bg-surface p-3 md:grid-cols-[1fr_90px_110px_auto] md:items-center">
+                  <div key={index} className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded border border-line bg-surface p-3 md:grid-cols-[minmax(0,1fr)_90px_110px_auto] md:items-center">
                     <select aria-label="Inventory item id" value={item.inventoryItemId} onChange={(event) => updateDraftItem(index, { inventoryItemId: event.target.value })} className={fieldClass} required>
                       <option value="">Select item</option>
                       {medicineItems.map((entry) => (
@@ -343,7 +343,7 @@ export function AdminPharmacy() {
               <Plus size={16} /> Add Item
             </ActionButton>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <input value={discount} onChange={(event) => setDiscount(event.target.value)} className={fieldClass} type="number" min="0" placeholder="Discount" />
               <select aria-label="Payment status" value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value as "Unpaid" | "Paid")} className={fieldClass}>
                 <option>Unpaid</option>

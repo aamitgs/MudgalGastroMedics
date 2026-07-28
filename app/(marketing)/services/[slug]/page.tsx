@@ -218,7 +218,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <MotionReveal>
             <div>
               <p className="mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
@@ -260,7 +260,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         <SectionHead eyebrow="Patient care pathway" title={`About ${page.shortTitle}`}>
           <p>{page.description}</p>
         </SectionHead>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-3">
           {page.sections.map((section) => (
             <MotionReveal key={section.title}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
@@ -287,7 +287,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         <SectionHead eyebrow="Related care" title="Connected Procedures & Conditions">
           <p>Use these related pages to understand the tests, procedures and conditions commonly linked with this service.</p>
         </SectionHead>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-4">
           {page.relatedLinks.map((link) => (
             <Link
               key={link.href}
@@ -305,7 +305,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
         <MotionReveal>
           <div className="relative overflow-hidden rounded border border-line bg-ink p-6 text-white shadow-lift md:p-8">
             <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.22),transparent_24rem),linear-gradient(135deg,rgba(8,145,178,0.42),rgba(5,150,105,0.22)_48%,rgba(2,22,29,0.96))]" />
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+            <div className="relative grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)] lg:items-end">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Patient Education Guide</p>
                 <h2 className="mt-3 max-w-4xl text-4xl font-black leading-tight md:text-5xl">{page.shortTitle}: complete guide for Indian patients</h2>
@@ -313,7 +313,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   Clear information about why this service is needed, what to bring, medicine precautions, testing, safety, follow-up, cost factors and when to call reception.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {["Bring previous reports", "Share all medicines", "Discuss blood thinners", "Call reception for urgent symptoms"].map((item) => (
                   <div key={item} className="rounded border border-white/15 bg-white/10 px-4 py-3 font-semibold text-cyan-50 backdrop-blur">
                     {item}
@@ -327,7 +327,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
       <Section muted>
         <SectionHead eyebrow="Patient Guide" title={`${page.shortTitle}: what patients should know`} />
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
           {guide.sections.map((section) => (
             <article key={section.title} className="rounded border border-line bg-white p-6 shadow-soft">
               <h3 className="text-2xl font-black leading-tight text-ink">{section.title}</h3>
@@ -349,7 +349,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
       <Section muted>
         <SectionHead eyebrow="Care Pathway" title="What patients can expect" />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {[
             { title: "Consultation", text: "Symptoms, history, medicines and previous reports are reviewed before deciding the next step.", icon: ClipboardList },
             { title: "Testing or treatment plan", text: "If needed, tests or procedures are planned with preparation and safety instructions.", icon: HeartPulse },
@@ -366,7 +366,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
       <Section>
         <SectionHead eyebrow="FAQs" title={`${page.shortTitle} FAQs`} />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {guide.faqs.map((faq) => (
             <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="cursor-pointer list-none text-lg font-black text-ink">
@@ -381,7 +381,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       {relatedBlogPosts.length ? (
         <Section muted>
           <SectionHead eyebrow="Related Reading" title={`Patient guides for ${page.shortTitle}`} />
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
             {relatedBlogPosts.map((post) => (
               <Link
                 key={post.slug}
@@ -407,7 +407,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       <Section muted>
         <div className="relative overflow-hidden rounded border border-line bg-white p-6 text-ink shadow-lift md:p-8">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-gold to-teal" />
-          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <div>
               <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Mudgal Gastromedics Hospital</p>
               <h2 className="max-w-3xl text-3xl font-black leading-tight text-ink md:text-5xl">Need help choosing the right service?</h2>

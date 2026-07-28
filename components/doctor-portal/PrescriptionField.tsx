@@ -167,7 +167,7 @@ export function PrescriptionField({
                       {item.status === "Modify" ? "Modified from last visit" : "Continued from last visit"}
                     </span>
                   ) : null}
-                  <div className="grid grid-cols-[1.3fr_0.8fr_auto] items-center gap-1.5">
+                  <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,0.8fr)_auto] items-center gap-1.5">
                     <MedicineAutocomplete
                       value={item.medicine}
                       onChange={(value) => updateItem(item.id, { medicine: value })}
@@ -194,7 +194,7 @@ export function PrescriptionField({
                       <Trash2 size={15} />
                     </button>
                   </div>
-                  <div className="grid grid-cols-[1.6fr_0.7fr] items-center gap-1.5">
+                  <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)] items-center gap-1.5">
                     <select
                       value={isKnownPreset ? item.instruction : "custom"}
                       onChange={(event) => commit(items.map((row) => (row.id === item.id ? withStatusUpgrade(row, { instruction: event.target.value === "custom" ? "" : event.target.value }) : row)))}

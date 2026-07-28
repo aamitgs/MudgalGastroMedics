@@ -97,7 +97,7 @@ export function AdvanceWalletPanel({ wallet, summary, openInvoiceBalancePaise, c
         className="grid gap-3 rounded border border-line bg-soft/60 p-3"
       >
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">Take a deposit</p>
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <FormField label="Amount" htmlFor="deposit-amount" required>
             <input
               id="deposit-amount"
@@ -144,7 +144,7 @@ export function AdvanceWalletPanel({ wallet, summary, openInvoiceBalancePaise, c
             {wallet.transactions.map((entry) => (
               <li
                 key={entry.id}
-                className="grid gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-3"
+                className="grid grid-cols-[minmax(0,1fr)] gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-3"
               >
                 <span className="font-semibold text-ink">
                   {entry.type}
@@ -181,7 +181,7 @@ export function AdvanceWalletPanel({ wallet, summary, openInvoiceBalancePaise, c
             className="grid gap-3 rounded border border-line bg-soft/60 p-3"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">Refund unused advance</p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               <FormField label="Amount" htmlFor="refund-amount" required hint={`Available ${formatPaise(balancePaise)}`}>
                 <input
                   id="refund-amount"

@@ -15,7 +15,7 @@ export default function PatientPortalPage() {
   return (
     <main>
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
           <div>
             <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">Patient Portal</p>
             <h1 className="max-w-4xl text-5xl font-black leading-[1.02] md:text-7xl">A simple patient account for every visit.</h1>
@@ -55,7 +55,7 @@ export default function PatientPortalPage() {
       </section>
 
       <Section>
-        <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+        <div className="mb-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-end">
           <div>
             <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Portal Features</p>
             <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">Patient-friendly, not complicated.</h2>
@@ -64,7 +64,7 @@ export default function PatientPortalPage() {
             The portal should reduce calls for routine tasks while still keeping reception reachable by phone and WhatsApp.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {portalFeatures.map((feature, index) => (
             <div key={feature} className="rounded border border-line/80 bg-white p-5 shadow-sm">
               <span className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{String(index + 1).padStart(2, "0")}</span>
@@ -75,7 +75,7 @@ export default function PatientPortalPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {[
             [CalendarCheck, "Appointment Timeline", "Show requested, confirmed, completed and follow-up visits in one place."],
             [FileUp, "Report Vault", "Allow PDFs and images for prior reports, prescriptions and test files."],

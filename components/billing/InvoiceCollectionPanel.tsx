@@ -207,7 +207,7 @@ export function InvoiceCollectionPanel({ invoice, onIssue, onCollect, onSyncChar
             {invoice.payments.map((payment) => (
               <li
                 key={payment.id}
-                className="grid gap-1 rounded border border-line bg-surface px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-4"
+                className="grid grid-cols-[minmax(0,1fr)] gap-1 rounded border border-line bg-surface px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-4"
               >
                 <span className="font-semibold text-ink">
                   {payment.method}
@@ -246,7 +246,7 @@ export function InvoiceCollectionPanel({ invoice, onIssue, onCollect, onSyncChar
             <BadgeIndianRupee size={13} /> Collect payment
           </p>
 
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
             <FormField label="Method" htmlFor="collect-method" required error={form.formState.errors.method?.message}>
               <select id="collect-method" className={fieldClass} {...form.register("method")}>
                 {invoicePaymentMethods.map((method: InvoicePaymentMethod) => (
@@ -321,7 +321,7 @@ export function InvoiceCollectionPanel({ invoice, onIssue, onCollect, onSyncChar
             {invoice.refunds.map((refund) => (
               <li
                 key={refund.id}
-                className="grid gap-1 rounded border border-line bg-surface px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-4"
+                className="grid grid-cols-[minmax(0,1fr)] gap-1 rounded border border-line bg-surface px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-4"
               >
                 <span className="font-semibold text-ink">
                   {refund.method}

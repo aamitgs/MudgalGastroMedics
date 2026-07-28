@@ -56,7 +56,7 @@ export default async function IpdPage() {
 
   return (
     <HospitalOsPageShell>
-      <div className="mx-auto grid w-full max-w-[1560px] gap-5 px-4 py-5 lg:px-6">
+      <div className="mx-auto grid w-full max-w-[1560px] grid-cols-[minmax(0,1fr)] gap-5 px-4 py-5 lg:px-6">
         <div className="rounded border border-line bg-surface p-5">
           <Link href="/mudgalgastromedics-os" className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline">
             <ArrowLeft size={13} /> Dashboard

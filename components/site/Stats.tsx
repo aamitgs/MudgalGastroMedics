@@ -49,7 +49,7 @@ export function Stats() {
         <div aria-hidden="true" className="absolute -right-24 -bottom-32 h-80 w-80 rounded-full bg-teal/20 blur-3xl" />
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42),transparent_38%,rgba(8,145,178,0.08))]" />
 
-      <div className="relative grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="relative grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-5">
         {stats.map(({ target, label, detail, icon: Icon }) => (
           <div
             key={label}

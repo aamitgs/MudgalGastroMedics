@@ -295,7 +295,7 @@ export function AdminReports() {
       ) : null}
 
       {report ? (
-        <div className="grid gap-5 p-4 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-3">
           <div className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
             <p className="text-sm font-bold text-ink">Appointment funnel</p>
             <div className="mt-4 grid gap-3">

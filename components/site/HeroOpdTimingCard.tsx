@@ -140,7 +140,7 @@ export function HeroOpdTimingCard() {
       />
       <div aria-hidden="true" className="absolute bottom-0 left-8 right-8 -z-10 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent" />
 
-      <div className="grid gap-4 lg:grid-cols-[0.95fr_1fr_1fr] lg:items-stretch">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch">
         <div className={`${glassPanelClass} p-5 sm:p-6`}>
           <div aria-hidden="true" className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-cyan-200/35 blur-3xl" />
           <div aria-hidden="true" className="absolute -bottom-28 left-8 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
@@ -312,7 +312,7 @@ export function HeroOpdTimingCard() {
           <p className="mt-5 text-base font-semibold leading-7 text-muted">
             OPD runs during morning and evening consultation hours. Hospital reception and care coordination remain available for patients and attendants.
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
             <div className="rounded-[22px] border border-cyan-100/70 bg-white/60 p-4 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_34px_rgba(8,64,84,0.08)] backdrop-blur-xl">
               <SunMedium className="mb-3 text-gold" size={22} />
               <p className="text-xs font-black uppercase tracking-[0.14em] text-muted">Day Care</p>

@@ -711,7 +711,7 @@ export default function FaqsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1fr_0.88fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.88fr)]">
           <div>
             <p className="inline-lang mb-4 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
               <span data-en>Patient FAQs</span>
@@ -744,7 +744,7 @@ export default function FaqsPage() {
               <span data-en>Quick Topics</span>
               <span data-hi lang="hi">त्वरित विषय</span>
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {faqCategories.map(({ title, titleHi, icon: Icon }) => (
                 <a key={title} href={`#${toAnchor(title)}`} className="flex min-h-16 items-center gap-3 rounded border border-white/14 bg-white/10 p-3 text-sm font-black text-white/88 transition hover:bg-white/16">
                   <Icon className="shrink-0 text-cyan-100" size={19} />
@@ -844,7 +844,7 @@ export default function FaqsPage() {
           <p data-en>Use these pages when a question points to a specific consultation, procedure or local care need.</p>
           <p data-hi lang="hi">जब कोई प्रश्न किसी विशिष्ट परामर्श, प्रक्रिया या स्थानीय देखभाल आवश्यकता की ओर इशारा करे, तो इन पेजों का उपयोग करें।</p>
         </SectionHead>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-3">
           {relatedFaqLinks.map((link) => (
             <Link
               key={link.href}
@@ -859,7 +859,7 @@ export default function FaqsPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Still Need Help?</span>

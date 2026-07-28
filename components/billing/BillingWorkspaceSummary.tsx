@@ -76,7 +76,7 @@ export function BillingWorkspaceSummary({
         <p className="text-xs text-muted">{[patient.uhid, patient.phone].filter(Boolean).join(" · ")}</p>
 
         {latestVisit ? (
-          <dl className="mt-3 grid gap-2 border-t border-line pt-3 text-sm sm:grid-cols-2">
+          <dl className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 border-t border-line pt-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted">Latest visit</dt>
               <dd className="flex items-center gap-1.5 font-semibold text-ink">
@@ -125,7 +125,7 @@ export function BillingWorkspaceSummary({
         </section>
       ) : null}
 
-      <section aria-label="Account totals" className="grid gap-3 sm:grid-cols-2">
+      <section aria-label="Account totals" className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
         <div className="rounded border border-line bg-soft/60 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Outstanding</p>
           <p className={`mt-1 text-2xl font-bold tabular-nums ${totals.outstandingPaise > 0 ? "text-coral" : "text-teal-dark"}`}>
@@ -149,7 +149,7 @@ export function BillingWorkspaceSummary({
           </p>
           <ul className="mt-2 grid gap-2">
             {insuranceClaims.map((claim) => (
-              <li key={claim.id} className="grid gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <li key={claim.id} className="grid grid-cols-[minmax(0,1fr)] gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div>
                   <span className="font-semibold text-ink">{claim.insurer}</span>
                   {claim.tpa ? <span className="ml-2 text-xs text-muted">TPA {claim.tpa}</span> : null}
@@ -176,7 +176,7 @@ export function BillingWorkspaceSummary({
                 <button
                   type="button"
                   onClick={() => onOpenInvoice(invoice.id)}
-                  className="grid w-full gap-1 rounded border border-line px-3 py-2 text-left text-sm transition hover:border-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3"
+                  className="grid grid-cols-[minmax(0,1fr)] w-full gap-1 rounded border border-line px-3 py-2 text-left text-sm transition hover:border-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3"
                 >
                   <span>
                     <span className="font-mono text-xs font-bold text-ink">{invoice.invoiceNo}</span>
@@ -202,7 +202,7 @@ export function BillingWorkspaceSummary({
             {payments.map((payment) => (
               <li
                 key={payment.paymentId}
-                className="grid gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-3"
+                className="grid grid-cols-[minmax(0,1fr)] gap-1 rounded border border-line px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-3"
               >
                 <span className="font-semibold text-ink">
                   {payment.method}

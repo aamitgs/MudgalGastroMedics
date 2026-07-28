@@ -289,7 +289,7 @@ export function AdminProcedures() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -298,7 +298,7 @@ export function AdminProcedures() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.84fr_1.16fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
         <form onSubmit={createSchedule} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <CalendarClock size={19} /> Schedule procedure
@@ -321,11 +321,11 @@ export function AdminProcedures() {
                 </option>
               ))}
             </select>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <input aria-label="Scheduled date" name="scheduledDate" className={fieldClass} type="date" required />
               <input aria-label="Scheduled time" name="scheduledTime" className={fieldClass} type="time" required />
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <select aria-label="Room" name="room" className={fieldClass} defaultValue="Endoscopy Room">
                 {procedureRooms.map((room) => (
                   <option key={room}>{room}</option>
@@ -450,7 +450,7 @@ export function AdminProcedures() {
                   <p className="text-sm font-bold text-cyan-900 dark:text-cyan-300">Checklist progress</p>
                   <p className="text-sm font-black text-brand">{checklistProgress(editingSchedule)}%</p>
                 </div>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-4">
                   {checklistLabels.map((item) => (
                     <label key={item.key} className="flex items-center gap-2 rounded border border-cyan-100 bg-surface px-3 py-2 text-xs font-bold text-ink dark:border-cyan-900">
                       <input
@@ -465,7 +465,7 @@ export function AdminProcedures() {
                 </div>
               </div>
 
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <input
                   defaultValue={editingSchedule.doctor}
                   onBlur={(event) => void updateSchedule(editingSchedule.id, { doctor: event.target.value })}

@@ -219,7 +219,7 @@ export function BedWardMap({
         ) : null}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard label="Hospital Occupancy" value={`${occupancy.hospitalOccupancyPercent}%`} delta={`${occupancy.occupiedBeds}/${occupancy.totalBeds} beds`} icon={BedIcon} tone="primary" />
         <MetricCard label="Avg Length of Stay" value={`${occupancy.averageLengthOfStayDays}d`} delta="Discharged admissions" icon={Clock} tone="success" />
         <MetricCard label="Pending Turnover" value={String(occupancy.bedsPendingTurnover)} delta={occupancy.bedsOverdueTurnover > 0 ? `${occupancy.bedsOverdueTurnover} overdue` : "On schedule"} icon={History} tone={occupancy.bedsOverdueTurnover > 0 ? "warning" : "success"} />
@@ -315,7 +315,7 @@ export function BedWardMap({
                       </div>
                     </div>
                     {vitalsAdmissionId === admission.id ? (
-                      <form onSubmit={(event) => submitVitals(event, admission.id)} className="mt-3 grid gap-2 sm:grid-cols-5">
+                      <form onSubmit={(event) => submitVitals(event, admission.id)} className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-5">
                         <input name="heartRate" type="number" placeholder="HR (bpm)" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />
                         <input name="spo2" type="number" placeholder="SpO2 (%)" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />
                         <input name="bloodPressure" placeholder="BP" className="min-h-9 rounded border border-[var(--hos-border)] bg-[var(--hos-surface)] px-2 text-sm text-[var(--hos-text)]" />

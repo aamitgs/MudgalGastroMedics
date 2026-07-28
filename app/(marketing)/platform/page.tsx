@@ -27,7 +27,7 @@ export default function PlatformPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg overflow-hidden py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,1.03fr)_minmax(0,0.97fr)]">
           <div>
             <p className="inline-lang mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
               <span data-en>Operations Platform + Website + Portal + AI</span>
@@ -77,7 +77,7 @@ export default function PlatformPage() {
       </section>
 
       <Section>
-        <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+        <div className="mb-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-end">
           <div>
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Connected Modules</span>
@@ -95,7 +95,7 @@ export default function PlatformPage() {
             प्रत्येक मॉड्यूल स्वतंत्र रूप से शुरू किया जा सकता है, लेकिन डेटा मॉडल को एक साथ योजनाबद्ध किया जाना चाहिए: मरीज़, अपॉइंटमेंट, विज़िट, बिलिंग, रिपोर्ट, इन्वेंटरी और संचार रिकॉर्ड।
           </p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-5">
           {platformModules.map((module, index) => (
             <PlatformFeatureCard key={module.title} {...module} icon={moduleIcons[index]} />
           ))}
@@ -103,7 +103,7 @@ export default function PlatformPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
           <div className="sticky top-28 rounded border border-line/80 bg-white p-7 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
               <span data-en>Architecture</span>
@@ -150,7 +150,7 @@ export default function PlatformPage() {
 
       <Section>
         <div className="rounded border border-line/80 bg-[linear-gradient(135deg,#0b3a46,#0f766e)] p-8 text-white shadow-[0_28px_80px_rgba(8,64,84,0.18)] md:p-10">
-          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <div>
               <p className="inline-lang text-xs font-black uppercase tracking-[0.16em] text-cyan-100">
                 <span data-en>Phase-one action</span>

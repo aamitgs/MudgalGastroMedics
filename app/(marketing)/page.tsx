@@ -179,7 +179,7 @@ export default async function Home() {
       </Section>
 
       <Section id="doctor" muted className="overflow-hidden">
-        <div className="grid items-center gap-10 lg:grid-cols-[0.96fr_1.04fr] xl:gap-14">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] xl:gap-14">
           <MotionReveal>
             <article className="relative isolate overflow-hidden rounded border border-line/80 bg-white shadow-[0_30px_90px_rgba(8,47,73,0.14)]">
               <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(34,211,238,0.18),transparent_24rem),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(236,254,255,0.86))]" />
@@ -225,14 +225,14 @@ export default async function Home() {
                           <p className="mt-2 text-base leading-relaxed text-muted">{doctor.designation}</p>
                         </div>
                       </div>
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
                         <span className="rounded-full border border-line bg-soft/80 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-teal-dark">{doctor.registration}</span>
                         <span className="rounded-full border border-line bg-soft/80 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-teal-dark">MGM 2019-Present</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                   {[
                     ["DM", "Gastroenterology"],
                     ["MD", "Medicine"],
@@ -267,7 +267,7 @@ export default async function Home() {
               <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted" data-hi lang="hi">
                 स्पष्ट प्रक्रिया योजना और फॉलो-अप मार्गदर्शन के साथ जटिल गैस्ट्रो, लिवर, अग्न्याशय और पित्त संबंधी चिंताओं के लिए विशेषज्ञ परामर्श।
               </p>
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                 {doctor.interests.map((interest) => (
                   <div key={interest} className="group flex items-center gap-3 rounded-full border border-line/90 bg-white/75 px-4 py-3 shadow-sm backdrop-blur transition hover:border-brand hover:bg-white">
                     <BrandIconTile className="h-8 w-8 shrink-0 rounded-full transition group-hover:bg-white" />
@@ -312,7 +312,7 @@ export default async function Home() {
               />
             </div>
           </div>
-          <div className="relative mb-10 grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-end">
+          <div className="relative mb-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] lg:items-end">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-gold" />
@@ -333,7 +333,7 @@ export default async function Home() {
               <p className="max-w-2xl text-lg leading-relaxed text-muted" data-hi lang="hi">
                 समर्पित मरीज़ जानकारी और अपॉइंटमेंट प्रक्रियाओं के साथ केंद्रित गैस्ट्रोएंटरोलॉजी, हेपेटोलॉजी और चिकित्सीय एंडोस्कोपी सेवाएं।
               </p>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                 {[
                   [CalendarCheck, "Planned consult", "नियोजित परामर्श"],
                   [Stethoscope, "Specialist procedure", "विशेषज्ञ प्रक्रिया"],
@@ -350,7 +350,7 @@ export default async function Home() {
               </div>
             </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3">
             {procedures.slice(0, 9).map((procedure, index) => (
               <MotionReveal key={procedure.slug} className="h-full" delay={Math.min(index * 0.03, 0.18)}>
                 <Link
@@ -380,7 +380,7 @@ export default async function Home() {
               </MotionReveal>
             ))}
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-4">
             {treatmentGroups.map((group) => (
               <div key={group.title} className="rounded border border-line/80 bg-[linear-gradient(180deg,#ffffff,#f7fbfb)] p-5 shadow-sm">
                 <h3 className="inline-lang text-sm font-semibold uppercase tracking-[0.14em] text-ink">
@@ -419,7 +419,7 @@ export default async function Home() {
       </Section>
 
       <Section muted className="overflow-hidden">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-stretch">
           <MotionReveal>
             <div className="relative h-full overflow-hidden rounded border border-line/80 bg-[linear-gradient(135deg,#0b3a46,#0f766e)] p-7 text-white shadow-[0_28px_80px_rgba(8,64,84,0.18)] md:p-8">
               <div aria-hidden="true" className="absolute -right-16 -top-16 h-48 w-48 rounded-full border border-white/15" />
@@ -442,7 +442,7 @@ export default async function Home() {
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/78" data-hi lang="hi">
                   पाचन, लिवर, अग्न्याशय और पित्त संबंधी स्थितियों के लिए एक केंद्रित केंद्र, जो स्पष्टीकरण, प्रक्रिया की तैयारी और व्यावहारिक फॉलो-अप पर आधारित है।
                 </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                   {[
                     ["Consultation", "परामर्श"],
                     ["Preparation", "तैयारी"],
@@ -460,7 +460,7 @@ export default async function Home() {
               </div>
             </div>
           </MotionReveal>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
             {trustReasons.map(({ title, titleHi, text, textHi }, index) => (
               <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
                 <article className="group h-full rounded border border-line/80 bg-white/90 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-soft">
@@ -492,7 +492,7 @@ export default async function Home() {
       </Section>
 
       <Section className="overflow-hidden">
-        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-center">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-gold" />
@@ -517,7 +517,7 @@ export default async function Home() {
             <div className="grid gap-4">
               {patientJourney.map(({ title, titleHi, text, textHi }, index) => (
                 <MotionReveal key={title} delay={Math.min(index * 0.04, 0.12)}>
-                  <article className="relative grid gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_1fr] md:items-start md:pl-4">
+                  <article className="relative grid grid-cols-[minmax(0,1fr)] gap-4 rounded border border-line/80 bg-white/90 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-brand hover:shadow-soft md:grid-cols-[auto_minmax(0,1fr)] md:items-start md:pl-4">
                     <BrandIconTile className="relative z-10 h-12 w-12 rounded-full border border-line shadow-sm" />
                     <div>
                       <div className="mb-2 flex flex-wrap items-center gap-3">

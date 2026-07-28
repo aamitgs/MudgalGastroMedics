@@ -330,7 +330,7 @@ export function AdminOpdQueue() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-xl font-bold text-ink">{stat.value}</p>
@@ -434,7 +434,7 @@ export function AdminOpdQueue() {
                 Close
               </ActionButton>
             </div>
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <select
                 aria-label="Payment method"
                 value={editingVisit.paymentMethod || "Cash"}
@@ -459,7 +459,7 @@ export function AdminOpdQueue() {
               <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
                 <HeartPulse size={16} /> Vitals — capture before the doctor sees the patient
               </span>
-              <div className="grid gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-4">
                 {vitalsFields.map((field) => (
                   <label key={field.key}>
                     <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-muted">{field.label}</span>

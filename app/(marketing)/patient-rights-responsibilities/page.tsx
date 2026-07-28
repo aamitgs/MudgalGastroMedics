@@ -52,7 +52,7 @@ export default function PatientRightsResponsibilitiesPage() {
       </section>
 
       <Section>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
           <PolicyCard title="Patient Rights" intro="Every patient has the right to:" items={patientRights} />
           <PolicyCard title="Patient Responsibilities" intro="Patients are expected to:" items={patientResponsibilities} />
         </div>

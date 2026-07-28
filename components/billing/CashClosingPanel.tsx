@@ -177,7 +177,7 @@ export function CashClosingPanel() {
               </div>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
               <label className="grid gap-1 text-xs font-semibold uppercase tracking-wide text-muted">
                 Opening cash
                 <input className={fieldClass} inputMode="decimal" value={openingCash} disabled={locked} onChange={(event) => setOpeningCash(event.target.value)} />

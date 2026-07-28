@@ -217,7 +217,7 @@ export function BillingApprovalsQueue() {
                 ) : null}
 
                 {canSign(approval) ? (
-                  <div className="grid gap-2 border-t border-line pt-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
+                  <div className="grid grid-cols-[minmax(0,1fr)] gap-2 border-t border-line pt-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
                     <input
                       aria-label={`Note on ${approval.kind} for ${approval.invoiceNo}`}
                       className="min-h-9 w-full rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"

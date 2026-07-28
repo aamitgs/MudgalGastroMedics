@@ -186,7 +186,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.98)_0%,rgba(8,64,84,0.88)_52%,rgba(8,145,178,0.34)_100%),url('/images/hospital/endoscopy-room.webp')] bg-cover bg-center" />
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.64),rgba(2,22,29,0.12)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.3))]" />
-          <div className="relative grid min-h-[610px] gap-10 px-6 py-12 md:px-14 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] xl:px-20 xl:py-16">
+          <div className="relative grid grid-cols-[minmax(0,1fr)] min-h-[610px] gap-10 px-6 py-12 md:px-14 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] xl:px-20 xl:py-16">
             <div className="flex min-w-0 max-w-3xl flex-col justify-center">
               <div className="mb-7 flex items-center gap-4">
                 <span className="h-0.5 w-12 bg-cyan-200" />
@@ -264,7 +264,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             unoptimized
           />
         </div>
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-4 shadow-[0_24px_70px_rgba(8,64,84,0.12)] md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-lg border border-line bg-white p-4 shadow-[0_24px_70px_rgba(8,64,84,0.12)] md:grid-cols-3">
           {[
             { label: "Category", value: post.category },
             { label: "Published", value: post.date },
@@ -304,11 +304,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       ) : null}
 
       <Section id="article">
-        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <article className="self-start rounded border border-line bg-white p-6 shadow-soft md:p-8">
             <div className="mb-8 rounded-xl border border-line bg-soft/35 p-5 shadow-sm">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-dark">In this guide</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                 <span className="rounded border border-line bg-white px-4 py-3 text-sm font-black text-muted shadow-sm">{post.readTime}</span>
                 <span className="rounded border border-line bg-white px-4 py-3 text-sm font-black text-muted shadow-sm">{post.category}</span>
               </div>
@@ -429,7 +429,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <SectionHead eyebrow="Related Reading" title="Continue with connected patient guides">
           <p>These articles connect with the same symptom, procedure or disease pathway.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {relatedPosts.map((related) => (
             <Link key={related.slug} href={`/blog/${related.slug}`} className="group rounded-xl border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lift">
               <p className="text-[11px] font-black uppercase tracking-[0.16em] text-brand-dark">{related.category}</p>
@@ -445,7 +445,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section muted>
         <SectionHead eyebrow="Patient Decision Guide" title="When to consult and what to prepare" />
-        <div className="grid gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-4">
           {[
             {
               title: "When to consult",
@@ -492,7 +492,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section muted>
         <SectionHead eyebrow="FAQs" title="Common patient questions" />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {post.faqs.map((faq) => (
             <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="cursor-pointer list-none text-lg font-black text-ink">{faq.question}</summary>
@@ -504,7 +504,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Section>
         <div className="rounded-2xl border border-line bg-white p-6 shadow-lift md:p-8">
-          <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-start">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-dark">Local Care Areas</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-4xl">Gastroenterology care for Agra and nearby cities</h2>
@@ -573,7 +573,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </Section>
 
       <Section>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Need medical guidance?</p>
             <h2 className="mt-2 text-3xl font-black">Call reception before planning your visit.</h2>

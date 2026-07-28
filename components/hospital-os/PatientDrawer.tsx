@@ -209,7 +209,7 @@ export function PatientDrawer() {
                 {summary.timeline.length ? (
                   <ul className="grid gap-2">
                     {summary.timeline.map((event, index) => (
-                      <li key={`${event.time}-${index}`} className="grid grid-cols-[92px_1fr] gap-2 text-xs leading-5">
+                      <li key={`${event.time}-${index}`} className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-xs leading-5">
                         <span className="font-semibold text-brand">{event.time}</span>
                         <span className="min-w-0 text-muted">
                           <span className="font-bold text-ink">{event.title}</span> — {event.detail}

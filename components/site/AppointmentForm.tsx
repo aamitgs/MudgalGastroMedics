@@ -204,14 +204,14 @@ export function AppointmentForm() {
             </div>
           </div>
         </div>
-        <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 p-5 md:p-6 lg:grid-cols-12">
           <label className="lg:col-span-4">
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Patient Name</span><span data-hi lang="hi">रोगी का नाम</span></span>
             <input name="name" required autoComplete="name" className={fieldClass} placeholder="Full name" />
           </label>
           <div className="lg:col-span-3">
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Phone</span><span data-hi lang="hi">फ़ोन नंबर</span></span>
-            <div className="grid grid-cols-[5.5rem_1fr] gap-2">
+            <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-2">
               <select name="countryCode" autoComplete="tel-country-code" className={`${fieldClass} px-3`} defaultValue="+91" aria-label="Country code">
                 {countryCodes.map((country) => (
                   <option key={country.code} value={country.code}>{country.code}</option>
@@ -257,7 +257,7 @@ export function AppointmentForm() {
           </label>
           <div className="lg:col-span-4">
             <p className="mb-2 text-sm font-semibold text-ink"><span data-en>Patient Type</span><span data-hi lang="hi">रोगी का प्रकार</span></p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {["New Patient", "Follow-up Visit"].map((option) => (
                 <label key={option} className={optionClass}>
                   <input type="radio" name="patientType" value={option} className="h-4 w-4 accent-brand" />
@@ -302,7 +302,7 @@ export function AppointmentForm() {
             </div>
           </div>
         </div>
-        <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 p-5 md:p-6 lg:grid-cols-12">
           <label className="lg:col-span-6">
             <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Appointment for</span><span data-hi lang="hi">अपॉइंटमेंट किसके लिए</span></span>
             <select name="service" required className={fieldClass}>
@@ -324,7 +324,7 @@ export function AppointmentForm() {
             </select>
           </label>
           {appointmentFor === "IPD" ? (
-            <div className="grid gap-4 rounded-xl border border-brand/15 bg-soft/55 p-4 lg:col-span-12 lg:grid-cols-12">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-xl border border-brand/15 bg-soft/55 p-4 lg:col-span-12 lg:grid-cols-12">
               <div className="lg:col-span-12">
                 <p className="text-sm font-black uppercase tracking-[0.16em] text-brand-dark">IPD admission details</p>
                 <p className="mt-1 text-sm text-muted">These details help reception prepare admission support before calling you.</p>
@@ -380,7 +380,7 @@ export function AppointmentForm() {
             </div>
           </div>
         </div>
-        <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 p-5 md:p-6 lg:grid-cols-12">
           <label className="lg:col-span-3">
             <span className="mb-2 block text-sm font-semibold text-ink">Priority</span>
             <select name="priority" className={fieldClass}>
@@ -475,7 +475,7 @@ export function AppointmentForm() {
             </div>
           </div>
         </div>
-        <div className="grid gap-3 p-5 text-sm md:grid-cols-2 lg:grid-cols-4 lg:p-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 p-5 text-sm md:grid-cols-2 lg:grid-cols-4 lg:p-6">
           {[
             ["Patient", draft.name || "Not entered"],
             ["Phone", normalizePhoneNumber(draft.phone, draft.countryCode || "+91") || "Not entered"],
@@ -493,7 +493,7 @@ export function AppointmentForm() {
           ))}
         </div>
       </div>
-      <div className="grid items-start gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-3 md:grid-cols-3">
         <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-5 font-bold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(8,145,178,0.34),inset_0_1px_0_rgba(255,255,255,0.22)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(8,145,178,0.42),inset_0_1px_0_rgba(255,255,255,0.28)] active:translate-y-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-cyan-200/60">
           <Send size={18} /> <span data-en>Submit Request</span><span data-hi lang="hi">अनुरोध भेजें</span>
         </button>
@@ -517,7 +517,7 @@ export function AppointmentForm() {
             </div>
             <CheckCircle2 className="text-teal" size={34} />
           </div>
-          <div className="mt-5 grid gap-3 rounded-xl border border-white/14 bg-white/8 p-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-3 rounded-xl border border-white/14 bg-white/8 p-3 sm:grid-cols-2 lg:grid-cols-4">
             <a href="/portal#appointment" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-cyan-300/20 bg-[image:var(--site-brand-gradient)] px-4 font-black text-white shadow-[0_18px_42px_rgba(8,145,178,0.28),inset_0_1px_0_rgba(255,255,255,0.22)] transition hover:-translate-y-0.5">
               <CalendarCheck size={17} /> Book Appointment
             </a>

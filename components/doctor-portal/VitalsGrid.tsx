@@ -34,7 +34,7 @@ export function VitalsGrid({
   return (
     <div>
       <span className="mb-2 block text-sm font-bold text-ink">Vitals</span>
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-4">
         {fields.map((field) => {
           const value = visit[field.key];
           const flag = field.flag?.(value);

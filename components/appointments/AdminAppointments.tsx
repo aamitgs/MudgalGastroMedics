@@ -453,7 +453,7 @@ export function AdminAppointments() {
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-4">
         {statTiles.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line/80 bg-surface p-4 shadow-sm">
             <div className="flex items-center justify-between gap-4">
@@ -485,7 +485,7 @@ export function AdminAppointments() {
             ) : null}
             <div className="grid gap-4">
               <FormSection title="Patient" description="Search by phone first — an existing patient's details load automatically, no retyping.">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                   <FormField label="Patient name" htmlFor="booking-name" required error={errors.name?.message}>
                     <input
                       id="booking-name"
@@ -557,7 +557,7 @@ export function AdminAppointments() {
 
                 {showMoreDetails && !duplicateMatch ? (
                   <div className="grid gap-3 rounded border border-line/70 bg-mist/40 p-3">
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                       <FormField label="Age" htmlFor="booking-age" error={errors.age?.message}>
                         <input id="booking-age" className={fieldClass} placeholder="Age" inputMode="numeric" {...register("age")} />
                       </FormField>
@@ -578,7 +578,7 @@ export function AdminAppointments() {
                         </select>
                       </FormField>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                       <FormField label="Email" htmlFor="booking-email" error={errors.email?.message}>
                         <input id="booking-email" className={fieldClass} placeholder="Email" type="email" {...register("email")} />
                       </FormField>
@@ -606,7 +606,7 @@ export function AdminAppointments() {
               </FormSection>
 
               <FormSection title="Visit">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                   <FormField label="Appointment type" htmlFor="booking-service" required error={errors.service?.message}>
                     <select id="booking-service" className={fieldClass} defaultValue="" {...register("service")}>
                       <option value="">Select type</option>
@@ -626,7 +626,7 @@ export function AdminAppointments() {
                     <input id="booking-date" type="date" className={fieldClass} {...register("date")} />
                   </FormField>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                   <FormField label="Preferred time" htmlFor="booking-time-slot" required error={errors.timeSlot?.message}>
                     <select id="booking-time-slot" className={fieldClass} {...register("timeSlot")}>
                       <option>{`Morning ${opdWindows[0].startLabel}-${opdWindows[0].endLabel}`}</option>
@@ -801,7 +801,7 @@ function PlanningNote({ appointment, onClose }: { appointment: AppointmentRecord
           </ActionButton>
         </div>
       </div>
-      <div className="grid gap-5 p-4 lg:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-3">
         <div>
           <p className="mb-3 text-sm font-bold text-ink">Review flags</p>
           <div className="grid gap-2">

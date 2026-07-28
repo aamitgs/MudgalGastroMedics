@@ -75,7 +75,7 @@ export default function AreasHubPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1fr_0.82fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)]">
           <div>
             <p className="inline-lang mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
               <span data-en>Local Care Areas</span>
@@ -122,7 +122,7 @@ export default function AreasHubPage() {
           <p data-en>Each guide explains the relevant symptoms, reports to bring, preparation notes and related care options.</p>
           <p data-hi lang="hi">प्रत्येक गाइड में संबंधित लक्षण, लाने योग्य रिपोर्ट, तैयारी संबंधी जानकारी और संबंधित देखभाल विकल्प बताए गए हैं।</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3">
           {localSeoPages.map((page) => (
             <Link
               key={page.slug}
@@ -158,7 +158,7 @@ export default function AreasHubPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Need Help Choosing?</span>

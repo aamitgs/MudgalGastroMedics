@@ -52,7 +52,7 @@ export default function AiPlanningPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_1fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
             <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">AI Planning Layer</p>
             <h1 className="max-w-4xl text-5xl font-black leading-[1.02] md:text-7xl">AI assistance for faster, clearer patient coordination.</h1>
@@ -79,7 +79,7 @@ export default function AiPlanningPage() {
                 </div>
               </div>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {["Human review", "Consent-led uploads", "Urgent flags", "Audit trail"].map((item) => (
                 <div key={item} className="rounded border border-white/12 bg-white/10 p-4 font-bold">{item}</div>
               ))}
@@ -89,7 +89,7 @@ export default function AiPlanningPage() {
       </section>
 
       <Section>
-        <div className="mb-10 grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+        <div className="mb-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-end">
           <div>
             <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-brand-dark">AI Modules</p>
             <h2 className="max-w-3xl text-4xl font-bold leading-[1.08] text-ink md:text-6xl">Useful support without unsafe automation.</h2>
@@ -98,7 +98,7 @@ export default function AiPlanningPage() {
             The right AI layer reduces repetitive work and improves patient clarity, while every clinical output remains reviewable.
           </p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-4">
           {aiModules.map((module) => (
             <PlatformFeatureCard key={module.title} {...module} />
           ))}
@@ -106,7 +106,7 @@ export default function AiPlanningPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
           <div className="rounded border border-line/80 bg-white p-7 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
             <span className="grid h-14 w-14 place-items-center rounded bg-soft text-brand-dark"><BrainCircuit size={25} /></span>
             <h2 className="mt-6 text-4xl font-bold leading-tight text-ink">AI planning scope</h2>
@@ -114,7 +114,7 @@ export default function AiPlanningPage() {
               These are the safe first-use cases before deeper integration with hospital operations records and doctor workflows.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
             {aiPlanningFeatures.map((feature) => (
               <div key={feature} className="flex gap-3 rounded border border-line/80 bg-white p-4 shadow-sm">
                 <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-soft text-brand-dark">

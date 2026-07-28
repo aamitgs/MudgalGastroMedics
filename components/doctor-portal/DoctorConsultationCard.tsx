@@ -302,7 +302,7 @@ export function DoctorConsultationCard({
           onAction={handleCdsAction}
         />
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
           <div className="rounded border border-line bg-soft/60 p-4">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Patient Context</p>
             <div className="mt-3 grid gap-2 text-sm text-muted">
@@ -366,7 +366,7 @@ export function DoctorConsultationCard({
               onApply={(template) => void applyClinicalTemplate(template)}
             />
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
             <label>
               <span className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-ink">Presenting Complaints</span>
@@ -419,7 +419,7 @@ export function DoctorConsultationCard({
 
           <VitalsGrid visit={visit} disabled={!identityConfirmed} onUpdate={(updates) => void updateVisit(visit.id, updates)} />
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
             <div>
               <label htmlFor="visit-general-examination">
                 <span className="mb-2 flex items-center justify-between gap-2">
@@ -526,7 +526,7 @@ export function DoctorConsultationCard({
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           <div className="grid gap-4">
             <div id="visit-section-diagnosis" className="scroll-mt-40">
               <DiagnosisField

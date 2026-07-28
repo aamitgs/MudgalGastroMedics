@@ -50,7 +50,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
         ))}
       </div>
 
-      <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((item, index) => (
           <motion.button
             key={`${item.category}-${item.title}`}

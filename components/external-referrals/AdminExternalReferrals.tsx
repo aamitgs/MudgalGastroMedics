@@ -357,7 +357,7 @@ export function AdminExternalReferrals() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -366,7 +366,7 @@ export function AdminExternalReferrals() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.85fr_1.15fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <form onSubmit={createReferral} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <ScanLine size={19} /> Create referral
@@ -412,7 +412,7 @@ export function AdminExternalReferrals() {
             </div>
             <input value={testName} onChange={(event) => setTestName(event.target.value)} className={fieldClass} placeholder="Test/scan name" required />
             <input name="facilityName" className={fieldClass} placeholder="External facility name (optional)" />
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <select aria-label="Priority" name="priority" className={fieldClass} defaultValue="Routine">
                 <option>Routine</option>
                 <option>Urgent</option>

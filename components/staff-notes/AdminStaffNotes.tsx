@@ -260,7 +260,7 @@ export function AdminStaffNotes() {
       </div>
 
       {composing ? (
-        <form onSubmit={submitNote} className="grid gap-3 rounded border border-line bg-soft/60 p-4 md:grid-cols-4">
+        <form onSubmit={submitNote} className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded border border-line bg-soft/60 p-4 md:grid-cols-4">
           <label className="md:col-span-1">
             <span className="mb-1 block text-xs font-bold text-muted">Type</span>
             <select value={category} onChange={(event) => setCategory(event.target.value as StaffNoteCategory)} className={fieldClass}>

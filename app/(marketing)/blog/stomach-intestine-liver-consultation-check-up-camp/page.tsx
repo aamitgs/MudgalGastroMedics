@@ -119,7 +119,7 @@ export default function CampBlogPostPage() {
       <section className="relative overflow-hidden bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.84)_52%,rgba(8,145,178,0.38)_100%),url('/images/hospital/waitingarea-full-hero.webp')] bg-cover bg-center py-16 text-white md:py-24">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.52),rgba(2,22,29,0.08)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.26))]" />
-        <div className="relative mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1fr_auto]">
+        <div className="relative mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
           <div>
             <Link href="/blog" className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-100/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-gold" />
@@ -160,7 +160,7 @@ export default function CampBlogPostPage() {
         <SectionHead eyebrow="Camp Patient Guide" title="Who should attend and what to prepare">
           <p>This camp has been completed. These archived details are kept for reference.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-4">
           {campGuide.map((block) => (
             <article key={block.title} className="rounded border border-line bg-white p-5 shadow-soft">
               <h2 className="text-2xl font-black leading-tight text-ink">{block.title}</h2>
@@ -180,7 +180,7 @@ export default function CampBlogPostPage() {
 
       <Section muted>
         <SectionHead eyebrow="FAQs" title="Camp FAQs" />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {campFaqs.map(([question, answer]) => (
             <details key={question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="cursor-pointer list-none text-lg font-black text-ink">{question}</summary>
@@ -191,7 +191,7 @@ export default function CampBlogPostPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-8 lg:grid-cols-[0.68fr_0.32fr] lg:items-start">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.68fr)_minmax(0,0.32fr)] lg:items-start">
           <article className="grid gap-6">
             <div className="rounded border border-line/80 bg-white p-6 shadow-sm md:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark">English Details</p>
@@ -207,7 +207,7 @@ export default function CampBlogPostPage() {
 
               <div className="mt-8">
                 <h3 className="text-xl font-bold text-ink">Special Offers</h3>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
                   {[
                     "Blood tests: 50% off",
                     "Endoscopy, Colonoscopy & Fibroscan: 25% off"

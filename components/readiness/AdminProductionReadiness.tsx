@@ -119,7 +119,7 @@ export function AdminProductionReadiness() {
 
       {readiness ? (
         <>
-          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
             {[
               ["Passing", readiness.summary.passing],
               ["Warnings", readiness.summary.warning],
@@ -145,7 +145,7 @@ export function AdminProductionReadiness() {
             </div>
           </div>
 
-          <div className="grid gap-5 p-4 xl:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-2">
             {checksByArea.map(([area, checks]) => (
               <section key={area} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
                 <p className="mb-4 text-lg font-bold text-ink">{area}</p>

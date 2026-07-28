@@ -272,7 +272,7 @@ export function AdminInventory() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-xl font-bold text-ink">{stat.value}</p>
@@ -281,7 +281,7 @@ export function AdminInventory() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <form onSubmit={submitItem} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Plus size={19} /> Add / update stock item
@@ -304,7 +304,7 @@ export function AdminInventory() {
             </FormSection>
 
             <FormSection title="Medicine details (optional)">
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                 <FormField label="Generic name" htmlFor="inventory-generic" error={errors.genericName?.message}>
                   <input id="inventory-generic" className={fieldClass} placeholder="e.g. Pantoprazole" {...register("genericName")} />
                 </FormField>
@@ -318,7 +318,7 @@ export function AdminInventory() {
             </FormSection>
 
             <FormSection title="Stock & tracking">
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                 <FormField label="Quantity" htmlFor="inventory-quantity" error={errors.quantity?.message}>
                   <input id="inventory-quantity" type="number" min="0" className={fieldClass} placeholder="Qty" {...register("quantity")} />
                 </FormField>
@@ -329,7 +329,7 @@ export function AdminInventory() {
                   <input id="inventory-unit" className={fieldClass} placeholder="Unit" {...register("unit")} />
                 </FormField>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                 <FormField label="Batch no." htmlFor="inventory-batch" error={errors.batchNumber?.message}>
                   <input id="inventory-batch" className={fieldClass} placeholder="Batch no." {...register("batchNumber")} />
                 </FormField>

@@ -185,7 +185,7 @@ export function PriceMasterPanel() {
               </div>
 
               <form
-                className="grid gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[1fr_1.5fr_1fr_1fr_auto] md:items-end"
+                className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
                 onSubmit={async (event) => {
                   event.preventDefault();
                   const ok = await post(
@@ -290,7 +290,7 @@ export function PriceMasterPanel() {
               </p>
 
               <form
-                className="grid gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[1fr_1fr_1.5fr_1fr_auto] md:items-end"
+                className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto] md:items-end"
                 onSubmit={async (event) => {
                   event.preventDefault();
                   const ok = await post(
@@ -363,7 +363,7 @@ export function PriceMasterPanel() {
               <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Packages</p>
 
               <form
-                className="grid gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[1fr_1.5fr_1fr_2fr_auto] md:items-end"
+                className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded border border-line bg-soft/60 p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,2fr)_auto] md:items-end"
                 onSubmit={async (event) => {
                   event.preventDefault();
                   // "CODE x QUANTITY" pairs, comma separated — the shortest

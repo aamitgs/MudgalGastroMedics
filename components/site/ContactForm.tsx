@@ -50,7 +50,7 @@ export function ContactForm() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
         <label>
           <span className="mb-2 block text-sm font-semibold text-ink"><span data-en>Your Name</span><span data-hi lang="hi">आपका नाम</span></span>
           <input name="name" required autoComplete="name" className={fieldClass} placeholder="Full name" />

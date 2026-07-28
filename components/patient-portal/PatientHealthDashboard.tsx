@@ -302,7 +302,7 @@ export function PatientHealthDashboard({
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="grid gap-6">
           <section className="rounded-lg border border-[var(--hos-border)] bg-[var(--hos-surface)] p-5">
             <h3 className="flex items-center gap-2 text-lg font-semibold text-[var(--hos-text)]"><CalendarClock size={18} className="text-[var(--hos-primary)]" /> Upcoming appointments</h3>
@@ -447,13 +447,13 @@ export function PatientHealthDashboard({
               )}
             </div>
             <form onSubmit={submitFamilyMember} className="mt-4 grid gap-2 border-t border-[var(--hos-border)] pt-4">
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
                 <input name="name" placeholder="Full name" required className="min-h-9 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] px-3 text-sm text-[var(--hos-text)]" />
                 <select name="relation" defaultValue="Spouse" className="min-h-9 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] px-3 text-sm text-[var(--hos-text)]">
                   {familyRelations.map((relation) => <option key={relation}>{relation}</option>)}
                 </select>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
                 <input name="age" placeholder="Age (optional)" className="min-h-9 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] px-3 text-sm text-[var(--hos-text)]" />
                 <input name="phone" placeholder="Phone (optional)" className="min-h-9 rounded-lg border border-[var(--hos-border)] bg-[var(--hos-bg)] px-3 text-sm text-[var(--hos-text)]" />
               </div>

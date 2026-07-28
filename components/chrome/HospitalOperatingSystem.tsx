@@ -80,9 +80,9 @@ function DashboardContent({ roleTodayBand }: { roleTodayBand?: ReactNode }) {
   }, [role]);
 
   return (
-    <div className="mx-auto grid w-full max-w-[1560px] gap-5 px-4 py-5 lg:px-6">
+    <div className="mx-auto grid w-full max-w-[1560px] grid-cols-[minmax(0,1fr)] gap-5 px-4 py-5 lg:px-6">
       <motion.section
-        className="grid gap-5 xl:grid-cols-[1fr_420px]"
+        className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_420px]"
         initial={reducedMotion ? false : { opacity: 0, y: 10 }}
         animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}

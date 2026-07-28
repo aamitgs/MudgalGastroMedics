@@ -181,7 +181,7 @@ export default function AboutPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">
               <span data-en>About {site.name}</span>
@@ -231,7 +231,7 @@ export default function AboutPage() {
           <article className="rounded border border-line bg-white p-7 shadow-lift md:p-9">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">About Mudgal Gastromedics Hospital</p>
             <h2 className="mt-2 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">Comprehensive digestive healthcare with clinical excellence and compassion</h2>
-            <div className="mt-6 grid gap-5 text-muted lg:grid-cols-3">
+            <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-5 text-muted lg:grid-cols-3">
               <p className="leading-relaxed">
                 Mudgal Gastromedics Hospital is a premier super-speciality center dedicated to the prevention, diagnosis, and treatment of diseases affecting the digestive system, liver, pancreas, gallbladder, and gastrointestinal tract. Located in Shaheed Nagar, Agra, our hospital is committed to delivering world-class gastroenterology and hepatology services through clinical excellence, advanced technology, evidence-based medicine, and compassionate patient care.
               </p>
@@ -247,7 +247,7 @@ export default function AboutPage() {
       </Section>
 
       <Section id="why-choose" muted>
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
           <MotionReveal>
             <article className="h-full rounded border border-line bg-white p-7 shadow-soft">
               <span className="mb-5 grid h-14 w-14 place-items-center rounded bg-brand text-white">
@@ -282,7 +282,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Our Mission" title="We are committed to">
           <p>Clear diagnosis, respectful communication, patient safety, and reliable specialized gastroenterology care for the community.</p>
         </SectionHead>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
           {missionCommitments.map((item, index) => (
             <MotionReveal key={item} delay={Math.min(index * 0.03, 0.18)}>
               <div className="flex h-full gap-4 rounded border border-line bg-white p-5 shadow-soft">
@@ -298,7 +298,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Comprehensive Gastroenterology & Liver Care" title="Specialized care for digestive, liver, pancreatic, and biliary diseases">
           <p>Mudgal Gastromedics Hospital provides focused evaluation and treatment planning for a wide range of digestive and liver conditions.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-4">
           {careAreas.map((area, index) => (
             <MotionReveal key={area.title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
@@ -321,7 +321,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Our Core Values" title="The values guiding every decision">
           <p>Our values define who we are and reflect our commitment to exceptional patient care and medical excellence.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-4">
           {coreValues.map(({ title, description, icon: Icon }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.03, 0.2)}>
               <article className="group h-full rounded border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
@@ -340,7 +340,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Why Choose Mudgal Gastromedics Hospital?" title="Specialized digestive healthcare with quality, safety, and personal attention">
           <p>Choosing the right healthcare provider is one of the most important decisions for you and your family.</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-3">
           {whyChoose.map(({ title, description }, index) => (
             <MotionReveal key={title} className="h-full" delay={Math.min(index * 0.04, 0.16)}>
               <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
@@ -350,7 +350,7 @@ export default function AboutPage() {
             </MotionReveal>
           ))}
         </div>
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
           <MotionReveal>
             <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <div className="flex items-center gap-3">
@@ -387,7 +387,7 @@ export default function AboutPage() {
       </Section>
 
       <Section>
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-3">
           {[
             {
               eyebrow: "Quality & Patient Safety",
@@ -423,7 +423,7 @@ export default function AboutPage() {
         <SectionHead eyebrow="Serving Patients Across Agra & Beyond" title="Specialized gastroenterology and liver care for the region">
           <p>Patients visit Mudgal Gastromedics Hospital from Shaheed Nagar and many nearby areas for digestive, liver, and advanced endoscopic care.</p>
         </SectionHead>
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
           <MotionReveal>
             <article className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <h2 className="text-2xl font-black text-ink">Agra local areas</h2>

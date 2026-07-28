@@ -142,7 +142,7 @@ export function AdminEnterpriseModules() {
       {error && modules.length > 0 ? <p className="border-b border-line bg-red-50 dark:bg-red-950 p-4 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
 
       {modules.length > 0 ? (
-        <div className="grid gap-4 border-b border-line p-4 md:grid-cols-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-5">
           {stats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded border border-line bg-soft/60 p-4">
               <div className="flex items-center justify-between gap-4">
@@ -172,8 +172,8 @@ export function AdminEnterpriseModules() {
       ) : null}
 
       {modules.length > 0 ? (
-        <div className="grid gap-5 p-4 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="grid max-h-[760px] gap-3 overflow-auto pr-1 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] max-h-[760px] gap-3 overflow-auto pr-1 md:grid-cols-2">
           {modules.map((module) => (
             <button
               key={module.id}
@@ -217,7 +217,7 @@ export function AdminEnterpriseModules() {
               <input type="hidden" name="moduleId" value={selected.id} />
               <p className="flex items-center gap-2 text-lg font-bold text-ink"><Plus size={18} /> Add module task / record</p>
               <input name="title" className={fieldClass} placeholder={`New ${selected.name} task`} required />
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
                 <select aria-label="Status" name="status" className={fieldClass} defaultValue="Pending">
                   {recordStatuses.map((status) => <option key={status}>{status}</option>)}
                 </select>

@@ -44,7 +44,7 @@ export function PatientTimelinePanel({ phone, patientName }: { phone?: string; p
     return (
       <div className="grid gap-3" aria-busy="true" aria-label="Loading patient timeline">
         {[0, 1, 2].map((row) => (
-          <div key={row} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-line p-4">
+          <div key={row} className="grid grid-cols-[110px_minmax(0,1fr)] gap-4 rounded-lg border border-line p-4">
             <div className="h-4 w-20 animate-pulse rounded bg-soft/70" />
             <div className="grid gap-2">
               <div className="h-4 w-48 animate-pulse rounded bg-soft/70" />
@@ -83,7 +83,7 @@ export function PatientTimelinePanel({ phone, patientName }: { phone?: string; p
   return (
     <div className="grid gap-3">
       {events.map((event, index) => (
-        <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[110px_1fr] gap-4 rounded-lg border border-line p-4">
+        <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[110px_minmax(0,1fr)] gap-4 rounded-lg border border-line p-4">
           <p className="text-sm font-semibold text-brand">{event.time}</p>
           <div>
             <h3 className="font-semibold">{event.title}</h3>

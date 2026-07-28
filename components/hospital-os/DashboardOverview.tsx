@@ -49,7 +49,7 @@ export function DashboardOverview({
           </div>
         </div>
         <div className="grid gap-4 p-5 pt-0">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="status" aria-busy={isLoading} aria-label={isLoading ? "Loading metrics" : undefined}>
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 xl:grid-cols-4" role="status" aria-busy={isLoading} aria-label={isLoading ? "Loading metrics" : undefined}>
             {isLoading
               ? Array.from({ length: 4 }).map((_, index) => <SkeletonBlock key={index} className="h-[94px]" />)
               : metrics.map((metric) => {
@@ -57,7 +57,7 @@ export function DashboardOverview({
                   return <MetricCard key={metric.label} {...metric} icon={Icon} />;
                 })}
           </div>
-          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
             {isLoading ? (
               <>
                 <SkeletonBlock className="h-[260px]" />

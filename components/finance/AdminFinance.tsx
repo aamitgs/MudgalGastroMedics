@@ -476,7 +476,7 @@ export function AdminFinance() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -485,7 +485,7 @@ export function AdminFinance() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-2">
         <form onSubmit={submitClaim} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <FileCheck2 size={19} /> Create insurance claim
@@ -531,7 +531,7 @@ export function AdminFinance() {
                 </select>
               </FormField>
             )}
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Insurer" htmlFor="claim-insurer" error={claimErrors.insurer?.message}>
                 <input id="claim-insurer" className={fieldClass} placeholder="Insurer" {...registerClaim("insurer")} />
               </FormField>
@@ -539,7 +539,7 @@ export function AdminFinance() {
                 <input id="claim-tpa" className={fieldClass} placeholder="TPA" {...registerClaim("tpa")} />
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Policy number" htmlFor="claim-policyNumber" error={claimErrors.policyNumber?.message}>
                 <input id="claim-policyNumber" className={fieldClass} placeholder="Policy number" {...registerClaim("policyNumber")} />
               </FormField>
@@ -547,7 +547,7 @@ export function AdminFinance() {
                 <input id="claim-claimNumber" className={fieldClass} placeholder="Claim number" {...registerClaim("claimNumber")} />
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <FormField label="Requested" htmlFor="claim-requestedAmount" error={claimErrors.requestedAmount?.message}>
                 <input id="claim-requestedAmount" className={fieldClass} type="number" min="0" placeholder="Requested" {...registerClaim("requestedAmount")} />
               </FormField>
@@ -575,7 +575,7 @@ export function AdminFinance() {
             <BadgeIndianRupee size={19} /> Add account entry
           </p>
           <div className="grid gap-3">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Date" htmlFor="entry-date" error={entryErrors.date?.message}>
                 <input id="entry-date" className={fieldClass} type="date" {...registerEntry("date")} />
               </FormField>
@@ -587,7 +587,7 @@ export function AdminFinance() {
                 </select>
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Category" htmlFor="entry-category" error={entryErrors.category?.message}>
                 <input id="entry-category" className={fieldClass} placeholder="Category" {...registerEntry("category")} />
               </FormField>
@@ -595,7 +595,7 @@ export function AdminFinance() {
                 <input id="entry-amount" className={fieldClass} type="number" min="0" placeholder="Amount" {...registerEntry("amount")} />
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Payment method" htmlFor="entry-method" error={entryErrors.method?.message}>
                 <select id="entry-method" className={fieldClass} {...registerEntry("method")}>
                   {accountEntryMethods.map((method) => (

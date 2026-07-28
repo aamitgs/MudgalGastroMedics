@@ -233,7 +233,7 @@ export function AdminPurchaseOrders() {
           <p className="mb-3 flex items-center gap-2 text-sm font-bold text-ink">
             <AlertTriangle size={16} className="text-red-600" /> Low stock, by vendor
           </p>
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {lowStockByVendor.map(([vendorName, stockItems]) => (
               <div key={vendorName} className="rounded border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950">
                 <p className="text-sm font-bold text-ink">{vendorName}</p>
@@ -255,7 +255,7 @@ export function AdminPurchaseOrders() {
         </div>
       ) : null}
 
-      <div className="grid gap-5 p-4 lg:grid-cols-[0.85fr_1.15fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <form onSubmit={submitOrder} className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Truck size={19} /> New purchase order
@@ -288,7 +288,7 @@ export function AdminPurchaseOrders() {
                   </div>
                 ))}
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_90px_auto]">
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-[minmax(0,1fr)_90px_auto]">
                 <select aria-label="Item to add" value={pendingItemId} onChange={(event) => setPendingItemId(event.target.value)} className={fieldClass}>
                   <option value="">Select item</option>
                   {items.map((item) => (

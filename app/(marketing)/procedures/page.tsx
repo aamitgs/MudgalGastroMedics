@@ -98,7 +98,7 @@ export default async function ProceduresPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="inline-lang mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
               <span data-en>Procedures</span>
@@ -152,7 +152,7 @@ export default async function ProceduresPage() {
           <p data-en>Each page explains what the procedure involves, preparation notes, what to expect and when it&apos;s advised.</p>
           <p data-hi lang="hi">प्रत्येक पेज में प्रक्रिया में क्या शामिल है, तैयारी की जानकारी, क्या अपेक्षा करें और कब सलाह दी जाती है, यह बताया गया है।</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3">
           {procedures.map((procedure) => (
             <Link
               key={procedure.slug}
@@ -204,7 +204,7 @@ export default async function ProceduresPage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Before Your Procedure</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-5xl">Bring reports and follow preparation instructions.</h2>
@@ -234,7 +234,7 @@ export default async function ProceduresPage() {
 
       <Section>
         <div className="rounded-2xl border border-line bg-ink p-6 text-white shadow-lift md:p-8">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Need help choosing?</p>
               <h2 className="mt-3 text-3xl font-black leading-tight md:text-5xl">Reception can guide the right procedure appointment.</h2>

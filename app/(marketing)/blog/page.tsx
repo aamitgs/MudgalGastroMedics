@@ -92,7 +92,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,43,52,0.97)_0%,rgba(8,64,84,0.86)_47%,rgba(8,145,178,0.36)_100%),url('/images/hospital/waitingarea-full-hero.webp')] bg-cover bg-center" />
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(255,255,255,0.06)_100%)] mix-blend-soft-light" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,22,29,0.62),rgba(2,22,29,0.12)),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_42%,rgba(2,22,29,0.28))]" />
-          <div className="relative grid min-h-[580px] gap-10 px-6 py-12 md:px-14 lg:grid-cols-[0.92fr_1.08fr] lg:px-20 lg:py-16">
+          <div className="relative grid grid-cols-[minmax(0,1fr)] min-h-[580px] gap-10 px-6 py-12 md:px-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-20 lg:py-16">
             <div className="flex max-w-2xl flex-col justify-center">
               <div className="mb-7 flex items-center gap-4">
                 <span className="h-0.5 w-12 bg-cyan-200" />
@@ -155,7 +155,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       </Section>
 
       <Section id="latest-guides" muted className="pt-8">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div>
             <div className="mb-7 flex flex-col gap-4 rounded-lg border border-line bg-white p-5 shadow-soft md:flex-row md:items-end md:justify-between">
               <div>

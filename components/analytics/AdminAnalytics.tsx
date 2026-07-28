@@ -211,7 +211,7 @@ export function AdminAnalytics() {
 
       {analytics ? (
         <>
-          <div className="grid gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-8">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-3 xl:grid-cols-8">
             {executiveCards.map(([label, value]) => (
               <div key={String(label)} className="rounded border border-line bg-soft/60 p-4">
                 <p className="text-xl font-bold text-ink">{value}%</p>
@@ -232,7 +232,7 @@ export function AdminAnalytics() {
             </div>
           </div>
 
-          <div className="grid gap-5 border-b border-line p-4 xl:grid-cols-[1fr_0.85fr]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 border-b border-line p-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
             <div className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className="flex items-center gap-2 text-lg font-bold text-ink"><TrendingUp size={19} /> Activity trend</p>
@@ -270,7 +270,7 @@ export function AdminAnalytics() {
             </div>
           </div>
 
-          <div className="grid gap-5 p-4 xl:grid-cols-5">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-5">
             <div className="rounded border border-line bg-surface p-4">
               <p className="mb-4 text-lg font-bold text-ink">Service mix</p>
               <BarList items={analytics.serviceMix} tone="brand" />
@@ -301,7 +301,7 @@ export function AdminAnalytics() {
             </div>
           </div>
 
-          <div className="grid gap-5 border-t border-line p-4 xl:grid-cols-[1fr_0.7fr]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 border-t border-line p-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
             <div className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
               <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink"><Activity size={19} /> Live workload</p>
               <BarList items={analytics.workload} />

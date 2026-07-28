@@ -133,7 +133,7 @@ export default function ServicesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
               Services
@@ -188,7 +188,7 @@ export default function ServicesPage() {
                   {group.slugs.length} services
                 </span>
               </div>
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
                 {group.slugs.map((slug) => {
                   const service = serviceBySlug(slug);
                   return (
@@ -222,7 +222,7 @@ export default function ServicesPage() {
 
       <Section muted>
         <SectionHead eyebrow="Choose Faster" title="Which service should I open first?" />
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3">
           {carePathways.map((pathway) => (
             <Link key={pathway.title} href={pathway.href} className="group rounded-xl border border-line bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:border-brand hover:shadow-lift">
               <Stethoscope className="text-brand-dark" size={30} />
@@ -237,7 +237,7 @@ export default function ServicesPage() {
       </Section>
 
       <Section>
-        <div className="grid gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded-2xl border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">Before You Visit</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-ink md:text-5xl">Bring reports and call early for urgent warning signs.</h2>
@@ -267,7 +267,7 @@ export default function ServicesPage() {
 
       <Section>
         <div className="rounded-2xl border border-line bg-ink p-6 text-white shadow-lift md:p-8">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Need help choosing?</p>
               <h2 className="mt-3 text-3xl font-black leading-tight md:text-5xl">Reception can guide the right appointment category.</h2>

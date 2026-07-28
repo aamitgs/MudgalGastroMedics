@@ -81,7 +81,7 @@ export function AdminSettings() {
         </p>
       </div>
 
-      <div className="grid gap-5 border-b border-line p-4 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 border-b border-line p-4 lg:grid-cols-2">
         <div className="rounded border border-line bg-soft/60 p-4">
           <p className="flex items-center gap-2 text-lg font-bold text-ink"><Building2 size={19} /> Hospital profile</p>
           <p className="mt-1 text-xs text-muted">Sourced from <code>lib/site-data.ts</code>. Update there and redeploy to change public-facing details.</p>
@@ -139,7 +139,7 @@ export function AdminSettings() {
         <p className="mt-1 text-xs text-muted">Pulled from the production readiness report. See the full report below for security and data checks.</p>
         {error && checks.length > 0 ? <p className="mt-3 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-3 text-sm font-semibold text-red-700 dark:text-red-300">{error}</p> : null}
         {loading ? (
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
             <ModuleSkeleton />
           </div>
         ) : null}
@@ -155,7 +155,7 @@ export function AdminSettings() {
           </div>
         ) : null}
         {!loading && checks.length > 0 ? (
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
             {checks.map((check) => (
               <div key={check.id} className={`rounded border p-4 ${statusTone(check.status)}`}>
                 <p className="font-bold">{check.label}</p>

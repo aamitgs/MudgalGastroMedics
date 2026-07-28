@@ -10,7 +10,7 @@ export function CtaBand() {
         <div className="relative isolate overflow-hidden rounded border border-white/12 bg-white/8 p-6 shadow-[0_30px_90px_rgba(2,22,29,0.24)] backdrop-blur md:p-8 lg:p-10">
           <div aria-hidden="true" className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-cyan-100/12" />
           <div aria-hidden="true" className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-brand via-gold to-teal" />
-          <div className="relative grid gap-8 xl:grid-cols-[1fr_0.72fr] xl:items-stretch">
+          <div className="relative grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.72fr)] xl:items-stretch">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-100/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-100">
                 <span className="h-2 w-2 rounded-full bg-gold" />

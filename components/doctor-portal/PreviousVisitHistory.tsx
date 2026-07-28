@@ -61,7 +61,7 @@ export function PreviousVisitHistory({ phone, patientName }: { phone: string; pa
         {!error && events?.length ? (
           <div className="grid gap-2">
             {events.map((event, index) => (
-              <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[100px_1fr] gap-3 rounded border border-line/70 p-2.5 text-xs">
+              <article key={`${event.time}-${event.title}-${index}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-3 rounded border border-line/70 p-2.5 text-xs">
                 <p className="font-bold text-brand">{event.time}</p>
                 <div>
                   <p className="font-semibold text-ink">{event.title}</p>

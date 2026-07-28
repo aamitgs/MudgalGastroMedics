@@ -332,7 +332,7 @@ export default function DoctorProfilePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       <section className="page-hero-bg overflow-hidden py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1280px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[1fr_0.72fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1280px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.72fr)]">
           <MotionReveal>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-100/35 bg-white/12 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-cyan-50 backdrop-blur">
               <Stethoscope size={16} />
@@ -378,7 +378,7 @@ export default function DoctorProfilePage() {
       </Section>
 
       <Section>
-        <div className="grid gap-10 lg:grid-cols-[0.72fr_1fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)]">
           <MotionReveal>
             <div className="sticky top-32 rounded border border-line bg-white p-6 shadow-soft">
               <p className="inline-lang text-xs font-black uppercase tracking-[0.16em] text-brand-dark">
@@ -437,7 +437,7 @@ export default function DoctorProfilePage() {
 
       <Section muted>
         <SectionHead eyebrow="Digestive & Liver Disorders" title="Comprehensive care for gastroenterology, liver and pancreato-biliary conditions" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-3">
           {expertise.map((item) => (
             <FeaturePill
               key={item.en}
@@ -459,7 +459,7 @@ export default function DoctorProfilePage() {
       </Section>
 
       <Section>
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-2">
           <ArticleCard
             eyebrow="Advanced Endoscopy"
             title="Diagnostic and therapeutic procedures in Agra"
@@ -486,7 +486,7 @@ export default function DoctorProfilePage() {
       </Section>
 
       <Section muted>
-        <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
           <MotionReveal>
             <SectionHead eyebrow="Why Patients Choose Dr. Sharma" title="Specialist consultation with clear diagnosis and follow-up care" />
             <p className="max-w-3xl text-lg leading-relaxed text-muted" data-en>
@@ -495,7 +495,7 @@ export default function DoctorProfilePage() {
             <p className="max-w-3xl text-lg leading-relaxed text-muted" data-hi lang="hi">
               मरीज़ विस्तृत परामर्श, सटीक निदान, नैतिक चिकित्सीय मार्गदर्शन और दयालु दृष्टिकोण के लिए डॉ. दीपक कुमार शर्मा को चुनते हैं। उनका ध्यान केवल लक्षणों के उपचार पर ही नहीं, बल्कि दीर्घकालिक पाचन और लिवर स्वास्थ्य के लिए मूल कारण की पहचान और व्यक्तिगत उपचार योजना बनाने पर भी है।
             </p>
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <div className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {whyChoose.map((item) => (
                 <FeaturePill
                   key={item.en}
@@ -517,7 +517,7 @@ export default function DoctorProfilePage() {
               </h3>
               <div className="mt-5 divide-y divide-line">
                 {educationRows.map(([label, labelHi, value]) => (
-                  <div key={label} className="grid gap-1 py-4 sm:grid-cols-[0.45fr_1fr]">
+                  <div key={label} className="grid grid-cols-[minmax(0,1fr)] gap-1 py-4 sm:grid-cols-[minmax(0,0.45fr)_minmax(0,1fr)]">
                     <p className="inline-lang font-black text-ink">
                       <span data-en>{label}</span>
                       <span data-hi lang="hi">{labelHi}</span>
@@ -533,7 +533,7 @@ export default function DoctorProfilePage() {
 
       <Section>
         <SectionHead eyebrow="Gastroenterology & Liver Care" title="Complete digestive care at Mudgal Gastromedics Hospital" />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
           <p className="text-lg leading-relaxed text-muted" data-en>
             At Mudgal Gastromedics Hospital, patients receive complete care for digestive diseases, liver disorders, pancreatic conditions, gallbladder diseases, and advanced endoscopy procedures. The hospital combines modern medical facilities with a patient-first approach to provide safe, effective, and comfortable treatment.
           </p>
@@ -567,7 +567,7 @@ export default function DoctorProfilePage() {
           <p data-en>Use this guide before booking an appointment with Dr. Deepak Kumar Sharma.</p>
           <p data-hi lang="hi">डॉ. दीपक कुमार शर्मा के साथ अपॉइंटमेंट बुक करने से पहले इस गाइड का उपयोग करें।</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-4">
           {consultationGuide.map((block) => (
             <article key={block.title} className="rounded border border-line bg-white p-5 shadow-soft">
               <h2 className="inline-lang text-2xl font-black leading-tight text-ink">
@@ -596,7 +596,7 @@ export default function DoctorProfilePage() {
 
       <Section>
         <SectionHead eyebrow="Care Pathway" title="How the visit is usually planned" />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {[
             { title: "Consultation", titleHi: "परामर्श", text: "Symptoms, duration, medicine history and previous reports are reviewed carefully.", textHi: "लक्षण, अवधि, दवा इतिहास और पिछली रिपोर्ट की सावधानीपूर्वक समीक्षा की जाती है।", icon: Stethoscope },
             { title: "Diagnosis plan", titleHi: "निदान योजना", text: "Blood tests, imaging, endoscopy, colonoscopy, FibroScan or ERCP are advised only when clinically useful.", textHi: "रक्त जांच, इमेजिंग, एंडोस्कोपी, कोलोनोस्कोपी, फाइब्रोस्कैन या ईआरसीपी की सलाह केवल तभी दी जाती है जब यह चिकित्सकीय रूप से उपयोगी हो।", icon: HeartPulse },
@@ -621,7 +621,7 @@ export default function DoctorProfilePage() {
 
       <Section muted>
         <SectionHead eyebrow="FAQs" title="Frequently asked questions about Dr. Deepak Kumar Sharma" />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {faqs.map(({ question, questionHi, answer, answerHi }) => (
             <details key={question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
@@ -643,7 +643,7 @@ export default function DoctorProfilePage() {
       {relatedBlogPosts.length ? (
         <Section muted>
           <SectionHead eyebrow="Related Reading" title="Patient guides from Dr. Deepak Kumar Sharma" />
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
             {relatedBlogPosts.map((post) => (
               <Link
                 key={post.slug}
@@ -690,7 +690,7 @@ function ArticleCard({ eyebrow, title, text, items }: { eyebrow: string; title: 
         <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-dark">{eyebrow}</p>
         <h2 className="mt-3 text-3xl font-black leading-tight text-ink">{title}</h2>
         <p className="inline-lang mt-4 leading-relaxed text-muted">{text}</p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
           {items.map((item) => (
             <FeaturePill
               key={item.en}

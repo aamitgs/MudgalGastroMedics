@@ -24,9 +24,9 @@ export function HospitalOsRouteLoading() {
         </aside>
         <section className="flex-1">
           <div className="h-16 border-b border-line bg-surface" />
-          <div className="mx-auto grid max-w-[1560px] gap-5 p-5">
+          <div className="mx-auto grid max-w-[1560px] grid-cols-[minmax(0,1fr)] gap-5 p-5">
             <div className="h-72 rounded-lg border border-line bg-surface" />
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)]">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)]">
               <div className="h-96 rounded-lg border border-line bg-surface" />
               <div className="h-96 rounded-lg border border-line bg-surface" />
             </div>

@@ -264,7 +264,7 @@ export function AdminDoctorWorkflow() {
               </ActionButton>
             </div>
 
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
               <label>
                 <span className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
                   <FileText size={16} /> Clinical Note

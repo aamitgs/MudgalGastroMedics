@@ -452,7 +452,7 @@ export function BillingWorkspace() {
             </ActionButton>
           </div>
         ) : view ? (
-          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
             <BillingWorkspaceSummary
               patient={view.patient}
               latestVisit={view.latestVisit}

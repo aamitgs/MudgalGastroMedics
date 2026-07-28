@@ -32,19 +32,28 @@ export function TopNav({
         <ActionButton variant="outline" size="sm" className="h-9 w-9 px-0 lg:hidden" onClick={onOpenSidebar} aria-label="Open navigation">
           <Menu size={18} />
         </ActionButton>
+        {/*
+          `min-w-0` is load-bearing: the placeholder below is `truncate`, which
+          sets `white-space: nowrap`, so this flex item's min-content width is
+          the full sentence. Without it the button refuses to shrink and pushes
+          the whole right-hand cluster past the viewport — 77px of horizontal
+          page scroll on every OS module route.
+        */}
         <ActionButton
           variant="outline"
           onClick={onOpenPalette}
-          className="min-h-10 flex-1 justify-start gap-3 bg-mist px-3 text-left text-sm font-normal text-muted hover:bg-mist"
+          className="min-h-10 min-w-0 flex-1 justify-start gap-3 bg-mist px-3 text-left text-sm font-normal text-muted hover:bg-mist"
         >
           <Search size={17} />
           <span className="truncate">Search patients, UHID, doctor, invoice, medicine, bed, room, procedure...</span>
           <span className="ml-auto hidden rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold sm:block">Ctrl K</span>
         </ActionButton>
-        <LiveClockWeather variant="os" />
+        <div className="shrink-0">
+          <LiveClockWeather variant="os" />
+        </div>
         <Popover>
           <PopoverTrigger asChild>
-            <ActionButton variant="outline" className="hidden min-h-10 gap-2 md:inline-flex">
+            <ActionButton variant="outline" className="hidden min-h-10 shrink-0 gap-2 md:inline-flex">
               <Building2 size={17} /> Agra Main
             </ActionButton>
           </PopoverTrigger>
@@ -53,14 +62,14 @@ export function TopNav({
             <p className="mt-2 text-sm text-muted">Multi-branch switching is stubbed for v1 and not connected to a backend.</p>
           </PopoverContent>
         </Popover>
-        <ActionButton variant="outline" size="sm" className="h-9 w-9 px-0" onClick={onOpenShortcuts} aria-label="Keyboard shortcuts">
+        <ActionButton variant="outline" size="sm" className="h-9 w-9 shrink-0 px-0" onClick={onOpenShortcuts} aria-label="Keyboard shortcuts">
           <Command size={18} />
         </ActionButton>
         <NotificationCenter />
-        <ActionButton variant="outline" size="sm" className="h-9 w-9 px-0" onClick={onToggleTheme} aria-label="Toggle theme">
+        <ActionButton variant="outline" size="sm" className="h-9 w-9 shrink-0 px-0" onClick={onToggleTheme} aria-label="Toggle theme">
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </ActionButton>
-        <ProfilePhotoButton hasPhoto={hasPhoto} onPhotoUpdated={onPhotoUpdated} avatarClassName="h-10 w-10 border border-line" />
+        <ProfilePhotoButton hasPhoto={hasPhoto} onPhotoUpdated={onPhotoUpdated} avatarClassName="h-10 w-10 shrink-0 border border-line" />
       </div>
       <div className="border-t border-line px-4 py-2 text-xs font-medium text-muted lg:px-6">
         Realtime: <span className="capitalize text-brand">{realtimeStatus}</span>

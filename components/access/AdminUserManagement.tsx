@@ -472,7 +472,7 @@ export function AdminUserManagement() {
                   </label>
                 ))}
               </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <select aria-label="Default role" value={defaultDraft} onChange={(event) => setDefaultDraft(event.target.value as AccessRole)} className={fieldClass} disabled={!isSuperAdmin}>
                   {roleDraft.map((role) => (
                     <option key={role} value={role}>
@@ -501,7 +501,7 @@ export function AdminUserManagement() {
 
       <form onSubmit={createUser} className="grid gap-3 border-t border-line p-4">
         <p className="text-sm font-bold text-ink">Add a staff account</p>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
           <input value={newName} onChange={(event) => setNewName(event.target.value)} className={fieldClass} placeholder="Full name" required />
           <input value={newUsername} onChange={(event) => setNewUsername(event.target.value)} className={fieldClass} placeholder="Username (e.g. asha.verma)" required />
         </div>

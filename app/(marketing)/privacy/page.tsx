@@ -181,7 +181,7 @@ export default function PrivacyPage() {
                   </div>
                 ) : null}
                 {"groups" in section && section.groups ? (
-                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
                     {section.groups.map((group) => (
                       <div key={group.title} className="rounded border border-line bg-soft/50 p-4">
                         <h3 className="font-black text-ink">{group.title}</h3>

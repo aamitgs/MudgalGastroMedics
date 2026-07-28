@@ -307,7 +307,7 @@ export function PatientPortalAccess() {
 
   return (
     <>
-    <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
       <div className="rounded border border-line/80 bg-white p-6 shadow-[0_24px_70px_rgba(8,64,84,0.1)]">
         <span className="grid h-12 w-12 place-items-center rounded bg-soft text-brand-dark">
           <ShieldCheck size={22} />

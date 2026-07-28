@@ -45,7 +45,7 @@ export default function ContactPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div>
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">
               <span data-en>Contact & Appointments</span>
@@ -62,7 +62,7 @@ export default function ContactPage() {
             आज ही अपॉइंटमेंट बुक करें। कॉल करें, व्हाट्सएप करें, अपॉइंटमेंट फॉर्म भरें, या आगरा के शहीद नगर स्थित मुदगल गैस्ट्रोमेडिक्स हॉस्पिटल के लिए दिशा-निर्देश प्राप्त करें।
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {quickActions.map(({ title, value, href, icon: Icon, tone }) => (
               <a key={title} href={href} className="group flex items-center gap-4 rounded border border-white/20 bg-white/12 p-4 shadow-[0_18px_45px_rgba(2,22,29,0.18)] backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/18">
                 <span className={`grid h-12 w-12 shrink-0 place-items-center rounded ${tone}`}>
@@ -113,7 +113,7 @@ export default function ContactPage() {
       </Section>
 
       <Section muted className="pt-0">
-        <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr] lg:items-stretch">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:items-stretch">
           <MotionReveal>
             <div className="h-full rounded border border-line bg-white p-6 shadow-soft">
               <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
@@ -176,7 +176,7 @@ export default function ContactPage() {
           <p data-en>Keep reports, prescriptions and prior investigation details ready so the care team can guide you faster.</p>
           <p data-hi lang="hi">रिपोर्ट, प्रिस्क्रिप्शन और पिछली जांच का विवरण तैयार रखें ताकि केयर टीम आपकी तेज़ी से मदद कर सके।</p>
         </SectionHead>
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {[
             [
               "Bring Reports",

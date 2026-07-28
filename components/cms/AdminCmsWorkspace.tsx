@@ -323,7 +323,7 @@ export function AdminCmsWorkspace() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line bg-soft/60 p-4">
             <div className="flex items-center justify-between gap-4">
@@ -335,14 +335,14 @@ export function AdminCmsWorkspace() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <div className="grid gap-5">
           <form onSubmit={submitCms} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
             <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
               <Plus size={19} /> Add content item
             </p>
             <div className="grid gap-3">
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <FormField label="Type" htmlFor="cms-type" error={cmsErrors.type?.message}>
                   <select id="cms-type" className={fieldClass} {...registerCms("type")}>
                     {cmsContentTypes.map((type) => (
@@ -376,7 +376,7 @@ export function AdminCmsWorkspace() {
               <FormField label="Media URL" htmlFor="cms-mediaUrl" error={cmsErrors.mediaUrl?.message}>
                 <input id="cms-mediaUrl" className={fieldClass} placeholder="Media URL, if applicable" {...registerCms("mediaUrl")} />
               </FormField>
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <FormField label="Owner" htmlFor="cms-owner" error={cmsErrors.owner?.message}>
                   <input id="cms-owner" className={fieldClass} placeholder="Owner" {...registerCms("owner")} />
                 </FormField>

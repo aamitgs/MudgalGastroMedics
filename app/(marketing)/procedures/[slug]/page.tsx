@@ -980,7 +980,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="inline-lang mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">
               <span data-en>Gastroenterology Hospital in Agra</span>
@@ -996,7 +996,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
               <span data-en>Quick Information</span>
               <span data-hi lang="hi">त्वरित जानकारी</span>
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {quickFacts.map(([label, labelHi, value, valueHi]) => (
                 <div key={label} className="rounded border border-white/15 bg-white/10 p-4">
                   <p className="inline-lang text-xs font-black uppercase tracking-wider text-white/55">
@@ -1030,7 +1030,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
       ) : null}
 
       <Section className={`${showOpdTimingCard ? "" : "-mt-10"} relative z-10 pt-0`}>
-        <div className="grid items-start gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
           <MotionReveal>
           <article className="overflow-hidden rounded border border-line bg-white shadow-lift">
             <div className="relative aspect-[4/3] bg-soft">
@@ -1091,7 +1091,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
         <MotionReveal>
           <div className="relative overflow-hidden rounded border border-line bg-ink p-6 text-white shadow-lift md:p-8">
             <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.22),transparent_24rem),linear-gradient(135deg,rgba(8,145,178,0.42),rgba(5,150,105,0.22)_48%,rgba(2,22,29,0.96))]" />
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+            <div className="relative grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)] lg:items-end">
               <div>
                 <p className="inline-lang text-xs font-black uppercase tracking-[0.16em] text-cyan-100">
                   <span data-en>Patient Education Guide</span>
@@ -1105,7 +1105,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
                   यह क्यों किया जाता है, तैयारी, दवा संबंधी सावधानियां, सुरक्षा, रिकवरी, लागत कारक और रिसेप्शन को कब कॉल करें, इसके बारे में स्पष्ट जानकारी।
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {[
                   ["Bring previous reports", "पिछली रिपोर्ट लाएं"],
                   ["Ask about fasting", "उपवास के बारे में पूछें"],
@@ -1125,7 +1125,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
 
       <Section muted>
         <SectionHead eyebrow="Patient Guide" title={`${procedure.title}: what patients should know`} />
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
           {article.sections.map((section) => (
             <article key={section.title} className="rounded border border-line bg-white p-6 shadow-soft">
               <h3 className="inline-lang text-2xl font-black leading-tight text-ink">
@@ -1159,7 +1159,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
 
       <Section muted>
         <SectionHead eyebrow="Care Pathway" title="What patients can expect" />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
           {[
             { ...pageCopy.pathway[0], icon: ClipboardList },
             { ...pageCopy.pathway[1], icon: HeartPulse },
@@ -1182,7 +1182,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
 
       <Section>
         <SectionHead eyebrow="FAQs" title={`${procedure.title} FAQs`} />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {article.faqs.map((faq) => (
             <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
               <summary className="inline-lang cursor-pointer list-none text-lg font-black text-ink">
@@ -1199,7 +1199,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
       {relatedBlogPosts.length ? (
         <Section muted>
           <SectionHead eyebrow="Related Reading" title={`Patient guides for ${procedure.title}`} />
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
             {relatedBlogPosts.map((post) => (
               <Link
                 key={post.slug}
@@ -1223,7 +1223,7 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
       </Section>
 
       <Section>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="inline-lang text-xs font-black uppercase tracking-[0.12em] text-brand-dark">
               <span data-en>Need guidance?</span>

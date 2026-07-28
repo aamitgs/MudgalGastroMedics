@@ -107,7 +107,7 @@ export function AppointmentWaitlistPanel() {
         <p className="mt-1 text-sm text-muted">When a scheduled appointment is cancelled, the oldest matching entry here is automatically offered that slot — you&apos;ll get a notification to contact them.</p>
       </div>
 
-      <form onSubmit={addEntry} className="grid gap-2 border-b border-line p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <form onSubmit={addEntry} className="grid grid-cols-[minmax(0,1fr)] gap-2 border-b border-line p-4 sm:grid-cols-2 lg:grid-cols-5">
         <input name="name" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
         <input name="phone" required placeholder="Phone" className="min-h-9 rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
         <input name="service" required placeholder="Service" className="min-h-9 rounded border border-line bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />

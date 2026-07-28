@@ -575,7 +575,7 @@ export function AdminHR() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -584,13 +584,13 @@ export function AdminHR() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-2">
         <form onSubmit={submitStaff} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <UserRoundPlus size={19} /> Add staff member
           </p>
           <div className="grid gap-3">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Full name" htmlFor="staff-name" error={staffErrors.name?.message}>
                 <input id="staff-name" className={fieldClass} placeholder="Full name" {...registerStaff("name")} />
               </FormField>
@@ -598,7 +598,7 @@ export function AdminHR() {
                 <input id="staff-phone" className={fieldClass} placeholder="Phone" {...registerStaff("phone")} />
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <FormField label="Role" htmlFor="staff-role" error={staffErrors.role?.message}>
                 <select id="staff-role" className={fieldClass} {...registerStaff("role")}>
                   {staffRoles.map((role) => (
@@ -617,7 +617,7 @@ export function AdminHR() {
                 </select>
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <FormField label="Email" htmlFor="staff-email" error={staffErrors.email?.message}>
                 <input id="staff-email" className={fieldClass} placeholder="Email" {...registerStaff("email")} />
               </FormField>
@@ -658,7 +658,7 @@ export function AdminHR() {
                 ))}
               </select>
             </FormField>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Date" htmlFor="attendance-date" error={attendanceErrors.date?.message}>
                 <input id="attendance-date" className={fieldClass} type="date" {...registerAttendance("date")} />
               </FormField>
@@ -670,7 +670,7 @@ export function AdminHR() {
                 </select>
               </FormField>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <FormField label="Check in" htmlFor="attendance-checkIn" error={attendanceErrors.checkIn?.message}>
                 <input id="attendance-checkIn" className={fieldClass} type="time" {...registerAttendance("checkIn")} />
               </FormField>

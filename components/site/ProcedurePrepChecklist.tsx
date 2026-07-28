@@ -14,7 +14,7 @@ export function ProcedurePrepChecklist({ slug, title, checklist }: ProcedurePrep
   const pageUrl = `${site.url}/procedures/${slug}`;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.9fr)]">
       <div className="rounded border border-line bg-white p-6 shadow-soft">
         <ol className="grid gap-4">
           {checklist.map((item, index) => (

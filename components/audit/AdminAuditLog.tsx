@@ -169,7 +169,7 @@ export function AdminAuditLog() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line bg-soft/60 p-4">
             <div className="flex items-center justify-between gap-4">
@@ -257,7 +257,7 @@ export function AdminAuditLog() {
                 Close
               </ActionButton>
             </div>
-            <div className="mt-3 grid gap-2 text-sm text-muted md:grid-cols-[1fr_1fr]">
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 text-sm text-muted md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <p>
                 <span className="font-bold text-ink">Entity:</span> {viewingEvent.entityId}
               </p>

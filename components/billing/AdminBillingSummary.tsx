@@ -284,7 +284,7 @@ export function AdminBillingSummary() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-5">
         {[
           { label: "Today's Revenue", value: formatAmount(billing.todayRevenue), icon: Banknote },
           { label: "Paid Total", value: formatAmount(billing.paidTotal), icon: BadgeIndianRupee },
@@ -332,7 +332,7 @@ export function AdminBillingSummary() {
         )}
       </div>
 
-      <div className="grid gap-5 p-4 lg:grid-cols-[0.4fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 lg:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)]">
         <div className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="text-sm font-bold text-ink">Payment method split</p>
           <div className="mt-4 grid gap-3">
@@ -455,7 +455,7 @@ export function AdminBillingSummary() {
                   </ActionButton>
                 </div>
               ) : (
-                <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+                <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
                   <select
                     aria-label="Payment method"
                     value={paymentMethodDraft}

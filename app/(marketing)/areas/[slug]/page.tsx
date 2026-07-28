@@ -150,7 +150,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       <section className="page-hero-bg py-20 text-white md:py-28">
-        <div className="mx-auto grid w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-cyan-100/35 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
               Local Gastro Care
@@ -190,7 +190,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
         <SectionHead eyebrow="Local Care Guide" title={`${page.shortTitle} near you`}>
           <p>{page.description}</p>
         </SectionHead>
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.72fr)]">
           <article className="rounded border border-line bg-white p-6 shadow-soft md:p-8">
             <BrandIconTile className="mb-5 h-14 w-14" />
             <h2 className="text-3xl font-black leading-tight text-ink">Why patients choose this care</h2>
@@ -233,7 +233,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
           <SectionHead eyebrow="Before You Visit" title={`Prepare for ${page.shortTitle.toLowerCase()}`}>
             <p>These notes are specific to this local care pathway and help reception guide timing, reports and preparation.</p>
           </SectionHead>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-4">
             {detail.preparationNotes.map((note) => (
               <article key={note} className="rounded border border-line bg-white p-5 shadow-soft">
                 <ShieldCheck className="mb-4 text-teal" size={22} />
@@ -248,7 +248,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
         <SectionHead eyebrow="Related Care" title="Services and guides linked to this search">
           <p>These pages help patients understand the related care pathway before booking a visit.</p>
         </SectionHead>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-4">
           {page.relatedLinks.map((link) => (
             <Link
               key={link.href}
@@ -278,7 +278,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
       {detail?.faqs.length ? (
         <Section muted>
           <SectionHead eyebrow="Local FAQs" title={`Common questions about ${page.shortTitle.toLowerCase()}`} />
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
             {detail.faqs.map((faq) => (
               <details key={faq.question} className="group rounded border border-line bg-white p-5 shadow-sm">
                 <summary className="flex cursor-pointer list-none items-start gap-3 font-black text-ink">
@@ -297,7 +297,7 @@ export default async function LocalAreaPage({ params }: LocalAreaPageProps) {
       </Section>
 
       <Section muted>
-        <div className="grid gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded border border-line bg-white p-6 shadow-lift lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Book / Call / Directions</p>
             <h2 className="mt-2 text-3xl font-black text-ink">Need help choosing the right next step?</h2>

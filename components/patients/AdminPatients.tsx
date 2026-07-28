@@ -401,7 +401,10 @@ export function AdminPatients() {
 
   return (
     <div className="grid gap-4">
-      <div className="rounded border border-line/80 bg-surface shadow-sm">
+      {/* min-w-0: this card wraps the patient DataTable, and a grid item
+          without it refuses to shrink below its content — pushing the page
+          into horizontal scroll rather than letting the table scroll itself. */}
+      <div className="min-w-0 rounded border border-line/80 bg-surface shadow-sm">
         <div className="flex flex-col justify-between gap-4 border-b border-line p-4 md:flex-row md:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">Patient Master / UHID</p>
@@ -412,7 +415,7 @@ export function AdminPatients() {
           </div>
         </div>
 
-        <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
           {statTiles.map((stat) => (
             <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
               <p className="text-xl font-bold text-ink">{stat.value}</p>
@@ -431,7 +434,7 @@ export function AdminPatients() {
             ) : null}
             <div className="grid gap-4">
               <FormSection title="Identity">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
                   <FormField label="Patient name" htmlFor="patient-name" required error={errors.name?.message}>
                     <input
                       id="patient-name"
@@ -450,7 +453,7 @@ export function AdminPatients() {
                     />
                   </FormField>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
                   <FormField label="Age" htmlFor="patient-age" error={errors.age?.message}>
                     <input id="patient-age" className={fieldClass} placeholder="Age" inputMode="numeric" {...register("age")} />
                   </FormField>

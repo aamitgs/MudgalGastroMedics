@@ -404,7 +404,7 @@ export function AdminLab() {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
         {statTiles.map((stat) => (
           <div key={stat.label} className="rounded border border-line bg-soft/60 p-4">
             <p className="text-2xl font-bold text-ink">{stat.value}</p>
@@ -413,7 +413,7 @@ export function AdminLab() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.85fr_1.15fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <form onSubmit={submitLabOrder} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <FlaskConical size={19} /> Create lab order
@@ -447,7 +447,7 @@ export function AdminLab() {
               </div>
             </div>
             <input value={customTests} onChange={(event) => setCustomTests(event.target.value)} className={fieldClass} placeholder="Other tests, comma separated" />
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
               <FormField label="Priority" htmlFor="lab-priority" error={labOrderErrors.priority?.message}>
                 <select id="lab-priority" className={fieldClass} {...registerLabOrder("priority")}>
                   {labOrderPriorities.map((priority) => (

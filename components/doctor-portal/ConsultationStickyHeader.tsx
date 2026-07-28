@@ -78,7 +78,7 @@ export function ConsultationStickyHeader({
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2">
-          <div className="grid gap-2 sm:grid-cols-3 md:min-w-[440px]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-3 md:min-w-[440px]">
             <ActionButton variant="primary" onClick={() => onStatusChange("In Consultation")}>Start</ActionButton>
             <ActionButton id="visit-complete-button" variant="success" onClick={() => onStatusChange("Completed")}>Complete</ActionButton>
             <select

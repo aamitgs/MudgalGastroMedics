@@ -59,7 +59,7 @@ export function PatientClinicalSnapshot({ activePatient }: { activePatient: Pati
   const primaryConcern = visit?.symptoms?.length ? visit.symptoms.join(", ") : activePatient.department;
 
   return (
-    <div className="grid gap-4 lg:col-span-3 lg:grid-cols-[330px_1fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:col-span-3 lg:grid-cols-[330px_minmax(0,1fr)]">
       <div className="rounded-lg border border-line bg-mist p-4">
         <p className="text-xs font-semibold uppercase text-muted">Clinical brief</p>
         <dl className="mt-4 grid gap-3 text-sm">
@@ -77,7 +77,7 @@ export function PatientClinicalSnapshot({ activePatient }: { activePatient: Pati
         </dl>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
         {!activePatient.phone ? (
           <p className="rounded-lg border border-line p-4 text-sm text-muted md:col-span-3">
             No registered contact number for this record, so clinical note, prescription and next-action context cannot be matched.

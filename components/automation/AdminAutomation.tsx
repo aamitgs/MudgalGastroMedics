@@ -375,7 +375,7 @@ export function AdminAutomation() {
         </ActionButton>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
         {[
           { label: "Open", value: stats.open },
           { label: "Queued", value: stats.queued },
@@ -389,7 +389,7 @@ export function AdminAutomation() {
         ))}
       </div>
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[0.35fr_1.65fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 p-4 xl:grid-cols-[minmax(0,0.35fr)_minmax(0,1.65fr)]">
         <form onSubmit={submitTask} noValidate className="rounded border border-line bg-[linear-gradient(135deg,var(--site-surface),var(--site-mist))] p-4">
           <p className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
             <Bot size={19} /> Add manual task

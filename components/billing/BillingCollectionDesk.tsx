@@ -315,7 +315,7 @@ export function BillingCollectionDesk() {
         </p>
       </div>
 
-      <div className="grid gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 sm:grid-cols-2 md:grid-cols-4">
         {tiles.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line bg-soft/60 p-4">
             <div className="flex items-center justify-between gap-4">

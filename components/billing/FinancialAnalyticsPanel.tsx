@@ -157,7 +157,7 @@ export function FinancialAnalyticsPanel() {
           </div>
         ) : (
           <div className="grid gap-4">
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 md:grid-cols-4">
               {tiles.map((tile) => (
                 <div key={tile.label} className="rounded border border-line bg-soft/60 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">{tile.label}</p>
@@ -166,7 +166,7 @@ export function FinancialAnalyticsPanel() {
               ))}
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               <div className="rounded border border-line bg-surface p-4">
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">Cash vs digital</p>
                 <div className="mt-2 grid gap-1.5 text-sm">
