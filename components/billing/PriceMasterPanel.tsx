@@ -123,6 +123,53 @@ export function PriceMasterPanel() {
     await load();
   }
 
+  /**
+   * Shared PATCH for a fee rule or package. Both already had server support;
+   * without this the only way to correct a mistyped fee was an API call, which
+   * meant a wrong price stayed live until an engineer was free.
+   */
+  async function patchEntity(url: string, body: Record<string, unknown>, successMessage: string) {
+    setBusy(true);
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).catch(() => null);
+    const data = ((await response?.json().catch(() => ({}))) ?? {}) as { ok: boolean; error?: string };
+    setBusy(false);
+    if (!data.ok) {
+      notify.error(data.error || "Unable to save that change.");
+      return;
+    }
+    notify.success(successMessage);
+    await load();
+  }
+
+  async function changeFee(rule: ConsultationFeeRule) {
+    const next = window.prompt(
+      `New fee for ${rule.doctorName ?? "Hospital default"} · ${rule.visitType} (currently ${formatPaise(rule.feePaise)})`,
+      String(rule.feePaise / 100)
+    );
+    if (next === null) return;
+    const amount = Number(next);
+    if (!Number.isFinite(amount) || amount < 0) {
+      notify.error("Enter a valid fee.");
+      return;
+    }
+    await patchEntity("/api/pricing", { kind: "consultation-fee", id: rule.id, fee: amount }, "Consultation fee updated");
+  }
+
+  async function changePackagePrice(entry: ServicePackage) {
+    const next = window.prompt(`New bundle price for ${entry.name} (currently ${formatPaise(entry.pricePaise)})`, String(entry.pricePaise / 100));
+    if (next === null) return;
+    const amount = Number(next);
+    if (!Number.isFinite(amount) || amount < 0) {
+      notify.error("Enter a valid price.");
+      return;
+    }
+    await patchEntity("/api/billing/packages", { id: entry.id, price: amount }, `${entry.name} updated`);
+  }
+
   async function toggleActive(entry: ServicePrice) {
     setBusy(true);
     await fetch("/api/pricing", {
@@ -349,6 +396,22 @@ export function PriceMasterPanel() {
                           </StatusBadge>
                         ) : null}
                         <span className="font-bold tabular-nums text-ink">{formatPaise(rule.feePaise)}</span>
+                        <ActionButton variant="ghost" size="sm" onClick={() => void changeFee(rule)}>
+                          Change fee
+                        </ActionButton>
+                        <ActionButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            void patchEntity(
+                              "/api/pricing",
+                              { kind: "consultation-fee", id: rule.id, active: !rule.active },
+                              rule.active ? "Fee rule retired" : "Fee rule restored"
+                            )
+                          }
+                        >
+                          {rule.active ? "Retire" : "Restore"}
+                        </ActionButton>
                       </span>
                     </li>
                   ))}
@@ -410,7 +473,30 @@ export function PriceMasterPanel() {
                         <span className="font-semibold text-ink">
                           {entry.name} <span className="font-mono text-xs text-muted">{entry.code}</span>
                         </span>
-                        <span className="font-bold tabular-nums text-ink">{formatPaise(entry.pricePaise)}</span>
+                        <span className="flex items-center gap-2">
+                          {!entry.active ? (
+                            <StatusBadge tone="inactive" className="rounded-full px-2 py-0.5 text-[10px] uppercase">
+                              Retired
+                            </StatusBadge>
+                          ) : null}
+                          <span className="font-bold tabular-nums text-ink">{formatPaise(entry.pricePaise)}</span>
+                          <ActionButton variant="ghost" size="sm" onClick={() => void changePackagePrice(entry)}>
+                            Change price
+                          </ActionButton>
+                          <ActionButton
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              void patchEntity(
+                                "/api/billing/packages",
+                                { id: entry.id, active: !entry.active },
+                                entry.active ? `${entry.name} retired` : `${entry.name} restored`
+                              )
+                            }
+                          >
+                            {entry.active ? "Retire" : "Restore"}
+                          </ActionButton>
+                        </span>
                       </span>
                       <span className="text-xs text-muted">
                         {entry.items.map((item) => `${item.name} ×${item.quantity}`).join(", ")}
