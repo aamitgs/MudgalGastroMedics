@@ -1,3 +1,4 @@
+import { rupeesToPaise } from "@/lib/billing-calc";
 import type { OpdVisit } from "@/lib/opd-types";
 
 export type BillingSortField = "patientName" | "token" | "service" | "paymentMethod" | "amount" | "createdAt";
@@ -20,9 +21,16 @@ export type BillingQueryResult = {
   pageCount: number;
 };
 
+/**
+ * Rupee value of the free-text `estimatedAmount` field.
+ *
+ * Delegates to the invoice module's parser rather than keeping a second one:
+ * this previously stripped non-digits, which read the "." in a "Rs." prefix as
+ * a decimal point and turned "Rs. 1,500" into 0.15. The field is free text, so
+ * a formatted amount typed by any staff member hit that.
+ */
 export function amountValue(value: string | undefined) {
-  const parsed = Number(String(value || "").replace(/[^\d.]/g, ""));
-  return Number.isFinite(parsed) ? parsed : 0;
+  return rupeesToPaise(value) / 100;
 }
 
 function matchesQuery(visit: OpdVisit, query: string) {

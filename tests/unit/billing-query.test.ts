@@ -37,6 +37,15 @@ describe("amountValue", () => {
     expect(amountValue(undefined)).toBe(0);
     expect(amountValue("")).toBe(0);
   });
+
+  // estimatedAmount is a free-text field, so a formatted amount typed by staff
+  // has always been possible; digit-stripping used to read "Rs. 1,500" as 0.15.
+  it("parses formatted amounts staff may have typed into the free-text field", () => {
+    expect(amountValue("Rs. 1,500")).toBe(1500);
+    expect(amountValue("1,500")).toBe(1500);
+    expect(amountValue("1500/-")).toBe(1500);
+    expect(amountValue("1500.50")).toBe(1500.5);
+  });
 });
 
 describe("queryBillingVisits", () => {
