@@ -26,7 +26,21 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] }
+      use: { ...devices["Desktop Chrome"] },
+      // Billing is split out below and must not run inside this project.
+      testIgnore: /billing\.spec\.ts/
+    },
+    {
+      // The billing specs bill against real OPD visits, which they create.
+      // The patient-flow specs assert against the deterministic demo dataset,
+      // and the snapshot API only serves that while no real OPD data exists
+      // (see tests/e2e/global-setup.ts). So billing runs last, after those
+      // have made their assertions — expressed as a dependency rather than
+      // relying on filenames sorting the right way.
+      name: "billing",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /billing\.spec\.ts/,
+      dependencies: ["chromium"]
     }
   ]
 });
