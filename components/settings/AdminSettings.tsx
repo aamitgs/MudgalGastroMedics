@@ -157,7 +157,17 @@ export function AdminSettings() {
         {!loading && checks.length > 0 ? (
           <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
             {checks.map((check) => (
-              <div key={check.id} className={`rounded border p-4 ${statusTone(check.status)}`}>
+              /*
+                `min-w-0` and `break-words` are both load-bearing. A grid item
+                keeps `min-width: auto` — its min-content width — even in a
+                `minmax(0, 1fr)` track, and these labels carry tokens no
+                browser will break on its own ("PDF generation
+                (prescription/invoice/discharge)" is 32 unbroken characters,
+                and the details name packages like @react-pdf/renderer). Below
+                a 1024px viewport that pushed the whole settings page into
+                horizontal scroll.
+              */
+              <div key={check.id} className={`min-w-0 break-words rounded border p-4 ${statusTone(check.status)}`}>
                 <p className="font-bold">{check.label}</p>
                 <p className="mt-1 text-sm">{check.detail}</p>
               </div>

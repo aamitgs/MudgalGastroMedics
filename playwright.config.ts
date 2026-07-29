@@ -27,8 +27,19 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // Billing is split out below and must not run inside this project.
-      testIgnore: /billing\.spec\.ts/
+      // Billing and layout are split out below and must not run inside this
+      // project — both seed real data the demo-dataset specs cannot tolerate.
+      testIgnore: /(billing|os-layout)\.spec\.ts/
+    },
+    {
+      // Seeds real appointments so the tables it measures are the width they
+      // are in a working hospital. An empty table is narrow and would pass
+      // straight through the overflow this suite exists to catch, so the
+      // seeding has the same demo-dataset conflict billing does.
+      name: "layout",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /os-layout\.spec\.ts/,
+      dependencies: ["chromium"]
     },
     {
       // The billing specs bill against real OPD visits, which they create.

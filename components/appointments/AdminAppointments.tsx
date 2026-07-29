@@ -452,7 +452,15 @@ export function AdminAppointments() {
   );
 
   return (
-    <div className="grid gap-4">
+    /*
+      The single column is declared rather than left implicit. A grid with no
+      `grid-template-columns` falls back to one implicit `auto` track, which
+      cannot size below its content's min-content width — so the appointments
+      table held this whole page 234px wider than the shell and put every
+      viewport into horizontal scroll. `minmax(0, …)` lets the track shrink and
+      hands scrolling back to the table's own overflow region, where it belongs.
+    */
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-4">
         {statTiles.map(({ label, value, icon: Icon }) => (
           <div key={label} className="rounded border border-line/80 bg-surface p-4 shadow-sm">
