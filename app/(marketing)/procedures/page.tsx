@@ -104,7 +104,7 @@ export default async function ProceduresPage() {
               <span data-en>Procedures</span>
               <span data-hi lang="hi">प्रक्रियाएं</span>
             </p>
-            <h1 className="inline-lang max-w-5xl break-words text-4xl font-black leading-[0.98] sm:text-5xl md:text-7xl">
+            <h1 className="inline-lang max-w-5xl text-4xl font-black leading-[0.98] sm:text-5xl md:text-7xl">
               <span data-en>Gastroenterology and liver procedures in Agra.</span>
               <span data-hi lang="hi">आगरा में गैस्ट्रोएंटरोलॉजी और लिवर प्रक्रियाएं।</span>
             </h1>

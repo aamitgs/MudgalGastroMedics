@@ -46,7 +46,7 @@ export default function PatientRightsResponsibilitiesPage() {
       <section className="page-hero-bg py-24 text-white">
         <div className="mx-auto w-[min(1160px,calc(100%-32px))]">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-cyan-200">Patient Information</p>
-          <h1 className="break-words text-4xl font-black sm:text-5xl md:text-7xl">Patient Rights & Responsibilities</h1>
+          <h1 className="text-4xl font-black sm:text-5xl md:text-7xl">Patient Rights & Responsibilities</h1>
           <p className="mt-5 max-w-3xl text-white/85">Mudgal Gastromedics Hospital is committed to providing safe, ethical, and compassionate healthcare.</p>
         </div>
       </section>

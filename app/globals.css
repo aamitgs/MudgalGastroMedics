@@ -738,4 +738,22 @@ body.lang-hi .inline-lang [data-hi] {
   html {
     @apply font-sans;
   }
+  /*
+    A heading must never push the page sideways. Medical vocabulary is long —
+    "Gastroenterology," is 447px at hero size, wider than a 320px phone — and
+    at large type a single such word exceeds the viewport and forces horizontal
+    scroll, which fails WCAG 2.1 SC 1.4.10 (Reflow). Six public routes did
+    exactly that before this.
+
+    Applied here rather than as a utility on each heading because the hero
+    headings are written inline on 28 marketing pages with no shared component,
+    and the next long word added to any of them would reintroduce the defect.
+    `break-word` only ever acts on a word that cannot fit on a line of its own,
+    so headings that already fit are rendered identically.
+  */
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: break-word;
+  }
 }

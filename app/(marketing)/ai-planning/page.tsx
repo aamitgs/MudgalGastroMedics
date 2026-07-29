@@ -55,7 +55,7 @@ export default function AiPlanningPage() {
         <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-[min(1180px,calc(100%-32px))] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
             <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">AI Planning Layer</p>
-            <h1 className="max-w-4xl break-words text-4xl font-black leading-[1.02] sm:text-5xl md:text-7xl">AI assistance for faster, clearer patient coordination.</h1>
+            <h1 className="max-w-4xl text-4xl font-black leading-[1.02] sm:text-5xl md:text-7xl">AI assistance for faster, clearer patient coordination.</h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/82">
               AI can support reception, report review, preparation instructions and follow-up planning while keeping medical decisions with the doctor.
             </p>
