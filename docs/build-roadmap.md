@@ -194,6 +194,38 @@ change-sets (5.0–5.11), module-by-module, each additive.
 
 ---
 
+### Track 5 hardening — after the feature work
+
+Everything below followed the twelve change-sets above and was found by testing
+or reviewing them rather than by building anything new. Recorded because two of
+these were defects in Track 5's own code.
+
+| # | Item | Status / decisions | Size |
+|---|------|--------------------|------|
+| 5.13 | ✅ **End-to-end cover for the money-critical invariants** | Done 2026-07-28. `tests/e2e/billing.spec.ts`. Track 5 shipped with 585 unit tests and nothing exercising the flows end to end, so a regression in the rules deciding what a patient is charged would have reached a counter unnoticed. Weighted toward invariants where a mistake costs real money — double-charging, over-collecting, self-approved write-offs, an advance drawn from the wrong wallet — asserted against the live API, because that is where the rules live and where a UI change cannot quietly bypass them. **Both guards were mutation-checked**: breaking the overpayment check and the `sourceRef` de-duplication each made its test fail, so the cover is real rather than incidental. Billing runs as its own Playwright project after the default one — it bills against real OPD visits it creates, and the patient-flow specs assert against the demo dataset the snapshot API only serves while no real OPD data exists | M |
+| 5.14 | ✅ **Backfill legacy OPD billing into invoices** | Done 2026-07-28. `lib/billing-backfill.ts` (pure planner), `app/api/billing/backfill/route.ts`. The legacy revenue-summary surface exists because it is the only view of visits billed before the invoice entity did; retiring it means converting that history. Deliberately conservative: GET is a dry run, POST demands an explicit confirmation token and an administrator. It never invents an amount (a visit marked paid with none recorded is raised for a human, not converted at zero), never converts twice (anything already carrying an invoice is skipped, so an interrupted run is safe to repeat), and refuses legacy refunds, which have no approval record to carry and would otherwise be forged or silently dropped. **Not yet run against real data — the legacy tab stays until it has been, and the flagged cases resolved** | M |
+| 5.15 | ✅ **Security review of the fourteen new billing routes** | Done 2026-07-29. Found one real vulnerability, in Track 5's own code: `settleClaimAgainstInvoice()` loaded a claim and an invoice by id and **never checked they described the same patient**. Every other guard on that path is bounded by amount — remaining cover, outstanding balance — all of which a wrong-patient settlement passes cleanly. Reachable with `billing:edit`, which reception holds, and the claim ids are handed to any `billing:view` caller for any phone number. Confirmed by disabling the check: patient B's bill was written off and patient A, whose claim it was, was then told "Only Rs. 0 of approved cover remains" on their own bill. Fixed in `lib/patient-identity.ts` — `isSamePatient` tolerates a country code on one side only, matching the lookups in `finance-store`/`opd-store`/`lab-store`, since a claim filed as `+919876543210` and a bill raised as `9876543210` are one patient and refusing that pairing would block real work. The module also absorbs two byte-identical private `patientKey` copies; `patientKey` keeps exact-digits semantics because it is a storage key. The rule restored is the one package redemption already followed. Everything else came back clean: every route handler calls `authorize()` first, the `billing`/`billing-adjustments` split is coherent, the backfill is double-gated, and no injection surface | M |
+| 5.16 | ✅ **Horizontal scroll removed across the OS and the public site** | Done 2026-07-28/29. Five causes across `TopNav`, `DataTable`, ~140 grid declarations, `AdminSettings`, `AdminAppointments`, `BlogPostSearch` and four marketing heroes — all one underlying rule, a flex or grid item refusing to shrink below its content. Two are worth remembering: a grid with **no** `grid-template-columns` at all falls back to one implicit `auto` track that cannot size below its content (the appointments page was 466px too wide at 1024), and the public site failed WCAG 2.1 SC 1.4.10 (Reflow) on six routes at 320px because hero headings sat at 48px from the smallest breakpoint and medical vocabulary is long. Guarded by `tests/e2e/os-layout.spec.ts` (29 OS routes at 1024/1280) and `tests/e2e/site-layout.spec.ts` (23 public routes at 320/390), both mutation-checked. **Both specs refuse to pass on a page that did not render** — an earlier manual sweep reported every route clean while the site was failing to build, because an error overlay has nothing to overflow | M |
+
+**Known and deliberately left:**
+
+- **§15 payment-link status tracking** needs a payment-gateway account. The UPI
+  deep link works and is honest that confirmation is still recorded at the
+  counter. The only Track 5 item that cannot be finished without a new
+  dependency and credentials — a commercial decision, not an engineering one.
+- **The backfill has not been run against real data**, so the legacy
+  `AdminBillingSummary` tab stays. `GET /api/billing/backfill` is a dry run that
+  writes nothing and is the safe first step.
+- **A mobile type scale for the marketing site.** At 320px a few very long words
+  still wrap mid-word; no font size both fits "Responsibilities" and reads as a
+  hero. The other 24 pages share the same hero pattern and would break the same
+  way given a long enough word. A design decision, not a bug fix.
+- **~112 further `grid gap-N` containers with no columns declared.** Latent, not
+  currently breaking anything, and now caught by the two layout specs if one
+  does. Worth a measured pass, never a blind sweep.
+
+---
+
 ## Recommended execution order
 
 *Reordered to honor the Part 8 decision hierarchy (Patient Safety → … → Visual Design last).*
