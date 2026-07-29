@@ -187,7 +187,7 @@ export default function AboutPage() {
               <span data-en>About {site.name}</span>
               <span data-hi lang="hi">{site.name} के बारे में</span>
             </p>
-            <h1 className="inline-lang max-w-4xl text-5xl font-black leading-tight md:text-7xl">
+            <h1 className="inline-lang max-w-4xl break-words text-4xl font-black leading-tight sm:text-5xl md:text-7xl">
               <span data-en>Advanced Gastroenterology, Liver Care & Therapeutic Endoscopy in Agra</span>
               <span data-hi lang="hi">आगरा में उन्नत गैस्ट्रोएंटरोलॉजी, लिवर केयर और चिकित्सीय एंडोस्कोपी।</span>
             </h1>
@@ -477,7 +477,7 @@ export default function AboutPage() {
         <MotionReveal>
           <div className="rounded border border-line bg-white p-8 text-center shadow-lift md:p-10">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-brand-dark">Your Digestive Health is Our Priority</p>
-            <h2 className="mx-auto mt-3 max-w-4xl text-3xl font-black leading-tight text-ink md:text-5xl">
+            <h2 className="mx-auto mt-3 max-w-4xl break-words text-3xl font-black leading-tight text-ink md:text-5xl">
               Experience trusted gastroenterology, advanced liver care, and modern endoscopic treatment at Mudgal Gastromedics Hospital.
             </h2>
             <p className="mx-auto mt-5 max-w-3xl leading-relaxed text-muted">

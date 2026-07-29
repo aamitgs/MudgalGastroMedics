@@ -27,7 +27,11 @@ export function BlogPostSearch({ posts }: { posts: BlogSearchPost[] }) {
     : undefined;
 
   return (
-    <div className="grid gap-2">
+    // The single column is declared, not left implicit: a grid with no
+    // `grid-template-columns` gets one `auto` track that cannot shrink below
+    // its content, and the search field's own minimum width then pushed the
+    // blog pages into horizontal scroll on a 320px phone.
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
       <form
         className={`flex min-h-14 items-center gap-3 rounded-xl border bg-[linear-gradient(180deg,#ffffff,#f3fbfc)] px-4 text-ink shadow-[0_18px_42px_rgba(8,64,84,0.11),inset_0_1px_0_rgba(255,255,255,0.95)] transition focus-within:bg-white focus-within:ring-4 ${
           status ? "border-coral/35 focus-within:ring-coral/10" : "border-line focus-within:border-brand focus-within:ring-brand/10"

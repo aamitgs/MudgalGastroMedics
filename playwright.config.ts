@@ -39,7 +39,12 @@ export default defineConfig({
       name: "layout",
       use: { ...devices["Desktop Chrome"] },
       testMatch: /os-layout\.spec\.ts/,
-      dependencies: ["chromium"]
+      // After billing, not merely after chromium. Projects sharing a single
+      // dependency run in parallel, so measuring layout while the billing
+      // specs were still creating invoices made this race the data it was
+      // measuring. Running last also means it measures the fullest tables,
+      // which is the stronger test.
+      dependencies: ["chromium", "billing"]
     },
     {
       // The billing specs bill against real OPD visits, which they create.
