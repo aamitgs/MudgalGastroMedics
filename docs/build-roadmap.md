@@ -217,9 +217,12 @@ these were defects in Track 5's own code.
   `AdminBillingSummary` tab stays. `GET /api/billing/backfill` is a dry run that
   writes nothing and is the safe first step.
 - **A mobile type scale for the marketing site.** At 320px a few very long words
-  still wrap mid-word; no font size both fits "Responsibilities" and reads as a
-  hero. The other 24 pages share the same hero pattern and would break the same
-  way given a long enough word. A design decision, not a bug fix.
+  still wrap *mid-word*; no font size both fits "Responsibilities" and reads as
+  a hero. Purely cosmetic now — a base `overflow-wrap: break-word` on h1/h2/h3
+  in `app/globals.css` means no heading can force horizontal scroll on any page,
+  verified by stripping a hero's size step and watching the rule hold 320px on
+  its own. What remains is choosing a scale so long words wrap *between* words
+  instead. A design decision, not a bug fix.
 - **~112 further `grid gap-N` containers with no columns declared.** Latent, not
   currently breaking anything, and now caught by the two layout specs if one
   does. Worth a measured pass, never a blind sweep.
