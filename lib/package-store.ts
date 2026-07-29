@@ -4,6 +4,7 @@ import { createDocumentStore } from "@/lib/document-store";
 import { generateId } from "@/lib/id";
 import { expiryFor, findRedeemablePurchase, isExpired, remainingQuantity } from "@/lib/package-calc";
 import type { PackageEntitlement, PackagePurchase, PackageStatus, ServicePackage } from "@/lib/package-types";
+import { patientKey } from "@/lib/patient-identity";
 import { resolveServicePrice } from "@/lib/pricing-calc";
 import { getServicePriceByCode, listServicePrices } from "@/lib/pricing-store";
 
@@ -26,10 +27,6 @@ function normalizeText(value: unknown) {
 
 function normalizeCode(value: unknown) {
   return normalizeText(value).toUpperCase().replace(/\s+/g, "-");
-}
-
-function patientKey(phone: string) {
-  return phone.replace(/\D/g, "");
 }
 
 export async function listPackages() {

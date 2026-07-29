@@ -312,3 +312,66 @@ test.describe("collection desk UI", () => {
     }).toPass({ timeout: 10_000 });
   });
 });
+
+test.describe("insurance settlement stays with the insured patient", () => {
+  /**
+   * A claim takes its patient from the visit it is filed against and is always
+   * created as Draft, so approving it is a second call.
+   */
+  async function approvedClaim(request: APIRequestContext, visitId: string, approvedAmount: number) {
+    const created = await json<{ ok: boolean; claim: { id: string } }>(
+      await request.post("/api/finance", {
+        data: { mode: "claim", visitId, insurer: "Star Health", requestedAmount: approvedAmount }
+      })
+    );
+    expect(created.ok, JSON.stringify(created)).toBe(true);
+    const approved = await json<{ ok: boolean; claim: { id: string; status: string } }>(
+      await request.patch("/api/finance", { data: { id: created.claim.id, status: "Approved", approvedAmount } })
+    );
+    expect(approved.claim.status).toBe("Approved");
+    return approved.claim;
+  }
+
+  async function settle(request: APIRequestContext, claimId: string, invoiceId: string, amount: number) {
+    const response = await request.post("/api/billing/assistant", {
+      data: { action: "settle-insurance", claimId, invoiceId, amount }
+    });
+    return { status: response.status(), body: await json<{ ok: boolean; error?: string; settledPaise?: number }>(response) };
+  }
+
+  /**
+   * The guard is identity-based, and every other check on the path is bounded
+   * by amount only — which a wrong-patient settlement passes cleanly. Without
+   * it, one patient's approved cover writes off another patient's bill and the
+   * insured patient is left unable to use cover they still need.
+   */
+  test("one patient's approved cover cannot settle another patient's bill", async ({ request }) => {
+    const [visitA, visitB] = [await seedVisit(request, "ins-a"), await seedVisit(request, "ins-b")];
+    const invoiceA = await seedInvoice(request, visitA.id, [
+      { source: "OPD", description: "Consultation", category: "Consultation", quantity: 1, unitPrice: 5000 }
+    ]);
+    const invoiceB = await seedInvoice(request, visitB.id, [
+      { source: "OPD", description: "Consultation", category: "Consultation", quantity: 1, unitPrice: 5000 }
+    ]);
+    const claimA = await approvedClaim(request, visitA.id, 5000);
+
+    const crossPatient = await settle(request, claimA.id, invoiceB.id, 5000);
+    expect(crossPatient.status).toBe(400);
+    expect(crossPatient.body.ok).toBe(false);
+    expect(crossPatient.body.error).toMatch(/belongs to/i);
+
+    // Refused before anything is written, on both sides of the money.
+    const bAfter = await readInvoice(request, invoiceB.id);
+    expect(bAfter.paidPaise).toBe(0);
+    expect(bAfter.balancePaise).toBe(500_000);
+
+    // The insured patient's own cover is still intact and still usable.
+    const ownBill = await settle(request, claimA.id, invoiceA.id, 5000);
+    expect(ownBill.status, JSON.stringify(ownBill.body)).toBe(200);
+    expect(ownBill.body.settledPaise).toBe(500_000);
+
+    const aAfter = await readInvoice(request, invoiceA.id);
+    expect(aAfter.balancePaise).toBe(0);
+    expect(aAfter.payments.some((payment) => payment.method === "Insurance")).toBe(true);
+  });
+});

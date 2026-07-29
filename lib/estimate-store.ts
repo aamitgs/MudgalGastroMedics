@@ -6,6 +6,7 @@ import { createDocumentStore } from "@/lib/document-store";
 import { calculateEstimateTotals, canConvert, effectiveStatus } from "@/lib/estimate-calc";
 import type { AcceptanceMethod, Estimate } from "@/lib/estimate-types";
 import { generateId } from "@/lib/id";
+import { patientKey } from "@/lib/patient-identity";
 
 type EstimateStore = {
   estimates: Estimate[];
@@ -18,10 +19,6 @@ const docStore = createDocumentStore<EstimateStore>("billing-estimates", (parsed
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
-}
-
-function patientKey(phone: string) {
-  return phone.replace(/\D/g, "");
 }
 
 /** `MGM-EST-<yyyymmdd>-<nnn>`, matching the invoice and receipt numbering staff already read. */

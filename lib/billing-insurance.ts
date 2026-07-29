@@ -3,6 +3,7 @@ import { formatPaise } from "@/lib/billing-calc";
 import { getInvoiceById, recordInvoicePayment } from "@/lib/billing-store";
 import { listInsuranceClaims, updateInsuranceClaim } from "@/lib/finance-store";
 import type { InsuranceClaim } from "@/lib/finance-types";
+import { isSamePatient } from "@/lib/patient-identity";
 
 /**
  * Links insurance claims to the bills they pay (Track 5.11, §19).
@@ -44,6 +45,18 @@ export async function settleClaimAgainstInvoice(
 
   const invoice = await getInvoiceById(input.invoiceId);
   if (!invoice) return { error: "Invoice not found." };
+
+  // A claim is approved for one named patient. Settling it against a different
+  // patient's bill writes that bill off from cover its payer never held, and
+  // silently consumes the cover the insured patient still needs — so the two
+  // halves have to be the same person before any money moves. Every other
+  // guard below is amount-bounded, which a wrong-patient settlement passes
+  // cleanly. Same rule as package redemption, which scopes entitlements to the
+  // invoice's own patient.
+  if (!isSamePatient(claim.phone, invoice.phone)) {
+    return { error: `That claim belongs to ${claim.patientName}, not ${invoice.patientName}.` };
+  }
+
   if (invoice.status === "Draft") return { error: "Issue this invoice before settling insurance against it." };
   if (invoice.status === "Cancelled") return { error: "This invoice is cancelled." };
 
