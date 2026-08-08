@@ -207,6 +207,25 @@ export async function createAnalyticsSnapshot(windowDays = 14, doctor?: string) 
 
 export type AnalyticsSnapshot = Awaited<ReturnType<typeof createAnalyticsSnapshot>>;
 
+/**
+ * Names every contributor behind the Critical Alerts count.
+ *
+ * The count sums three separate risks, but the subtext used to read
+ * "1 stock, 1 urgent" — which named only two of them and left the reader to
+ * guess what "stock" and "urgent" counted. An escalated AI review therefore
+ * pushed the headline number above the sum of the parts shown underneath it.
+ * Only non-zero risks are listed, so the line stays short on a normal day.
+ */
+function describeCriticalAlerts(risks: AnalyticsSnapshot["risks"]): string {
+  const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;
+  const parts = [
+    risks.lowStockItems ? plural(risks.lowStockItems, "low-stock item") : "",
+    risks.urgentAppointments ? plural(risks.urgentAppointments, "urgent appointment") : "",
+    risks.escalatedAiReviews ? plural(risks.escalatedAiReviews, "escalated review") : ""
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "No active alerts";
+}
+
 /** Real KPI tiles for the Hospital OS command center, replacing static demo figures. */
 export async function createHospitalOsDashboardMetrics(precomputed?: AnalyticsSnapshot): Promise<DashboardMetric[]> {
   const snapshot = precomputed ?? (await createAnalyticsSnapshot());
@@ -244,7 +263,7 @@ export async function createHospitalOsDashboardMetrics(precomputed?: AnalyticsSn
     {
       label: "Critical Alerts",
       value: String(criticalAlerts),
-      delta: `${snapshot.risks.lowStockItems} stock, ${snapshot.risks.urgentAppointments} urgent`,
+      delta: describeCriticalAlerts(snapshot.risks),
       tone: criticalAlerts > 0 ? "danger" : "success",
       dataKey: "alerts"
     }

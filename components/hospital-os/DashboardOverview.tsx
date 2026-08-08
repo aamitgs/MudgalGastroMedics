@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Plus } from "lucide-react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { MetricCard } from "@/components/design-system/MetricCard";
 import { StatusBadge } from "@/components/design-system/StatusBadge";
@@ -65,9 +65,18 @@ export function DashboardOverview({
               </>
             ) : (
               <>
-                <div className="h-[260px] rounded-lg border border-line bg-mist p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={series}>
+                {/*
+                  Both charts plot the last 7 days. The revenue series arrives
+                  pre-divided by 100000 (lib/analytics.ts), so the unit has to
+                  be stated on the axis — a bare "1.2" against a rupee figure
+                  is unreadable otherwise.
+                */}
+                <figure className="m-0 h-[260px] rounded-lg border border-line bg-mist p-4">
+                  <figcaption className="mb-1 text-xs font-bold text-ink">
+                    Revenue, last 7 days <span className="font-semibold text-muted">(Rs lakh per day)</span>
+                  </figcaption>
+                  <ResponsiveContainer width="100%" height="88%">
+                    <AreaChart data={series} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                       <defs>
                         <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563EB" stopOpacity={0.24} />
@@ -76,23 +85,41 @@ export function DashboardOverview({
                       </defs>
                       <CartesianGrid stroke="var(--site-line)" vertical={false} />
                       <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="revenue" stroke="#2563EB" fill="url(#revenueFill)" strokeWidth={2} name="Revenue in lakh" />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        fontSize={12}
+                        width={52}
+                        label={{ value: "Rs lakh", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "var(--site-muted)" } }}
+                      />
+                      <Tooltip formatter={(value: unknown): [string, string] => [`Rs ${Number(value ?? 0)} lakh`, "Revenue"]} />
+                      <Legend verticalAlign="bottom" height={18} wrapperStyle={{ fontSize: 11 }} />
+                      <Area type="monotone" dataKey="revenue" stroke="#2563EB" fill="url(#revenueFill)" strokeWidth={2} name="Revenue (Rs lakh)" />
                     </AreaChart>
                   </ResponsiveContainer>
-                </div>
-                <div className="h-[260px] rounded-lg border border-line bg-mist p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={series}>
+                </figure>
+                <figure className="m-0 h-[260px] rounded-lg border border-line bg-mist p-4">
+                  <figcaption className="mb-1 text-xs font-bold text-ink">
+                    OPD footfall, last 7 days <span className="font-semibold text-muted">(patients per day)</span>
+                  </figcaption>
+                  <ResponsiveContainer width="100%" height="88%">
+                    <BarChart data={series} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                       <CartesianGrid stroke="var(--site-line)" vertical={false} />
                       <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
-                      <YAxis tickLine={false} axisLine={false} fontSize={12} />
-                      <Tooltip />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        fontSize={12}
+                        width={52}
+                        allowDecimals={false}
+                        label={{ value: "Patients", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "var(--site-muted)" } }}
+                      />
+                      <Tooltip formatter={(value: unknown): [string, string] => [`${Number(value ?? 0)} patients`, "OPD"]} />
+                      <Legend verticalAlign="bottom" height={18} wrapperStyle={{ fontSize: 11 }} />
                       <Bar dataKey="opd" fill="#16A34A" radius={[6, 6, 0, 0]} name="OPD patients" />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </figure>
               </>
             )}
           </div>
