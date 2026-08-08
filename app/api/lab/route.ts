@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { recordPatientRecordAccess } from "@/lib/audit-patient-access";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
 import { queryLabOrders, type LabSortField, type SortDirection } from "@/lib/lab-query";
 import { createLabOrder, deleteLabOrder, listLabOrders, listPatientLabOrders, updateLabOrder } from "@/lib/lab-store";
@@ -21,6 +22,10 @@ export async function GET(request: Request) {
   // patient's lab history to the browser just to filter one out client-side.
   const phoneParam = params.get("phone");
   if (phoneParam !== null) {
+    // Lab results are among the most sensitive things this system holds, and
+    // this is a named-patient lookup rather than a worklist, so the read is
+    // audited (docs/privacy-review.md §4).
+    await recordPatientRecordAccess(request, auth.context, "lab-orders", phoneParam);
     return NextResponse.json({ ok: true, orders: await listPatientLabOrders(phoneParam) });
   }
 

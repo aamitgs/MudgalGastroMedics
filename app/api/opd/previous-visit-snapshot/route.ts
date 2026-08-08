@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { recordPatientRecordAccess } from "@/lib/audit-patient-access";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 
 /**
@@ -21,6 +22,8 @@ export async function GET(request: Request) {
   if (!phone) {
     return NextResponse.json({ ok: false, error: "A patient phone number is required." }, { status: 400 });
   }
+
+  await recordPatientRecordAccess(request, auth.context, "previous-visit-snapshot", phone);
 
   const visits = await listPatientOpdVisits(phone);
   const previous = visits

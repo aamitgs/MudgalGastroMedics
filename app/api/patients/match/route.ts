@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
+import { recordPatientRecordAccess } from "@/lib/audit-patient-access";
 import { findPatientByPhone } from "@/lib/patient-store";
 
 /**
@@ -25,6 +26,13 @@ export async function GET(request: Request) {
 
   const patient = await findPatientByPhone(phone);
   if (!patient) return NextResponse.json({ ok: true, match: null });
+
+  // Audited only once a patient was actually matched. This endpoint fires
+  // while staff type a phone number, so logging every call would record
+  // thousands of lookups that disclosed nothing and bury the entries that
+  // did. The auditable event is the disclosure — this response carries the
+  // patient's allergies and blood group — not the keystroke.
+  await recordPatientRecordAccess(request, auth.context, "identity-match", patient.phone);
 
   return NextResponse.json({
     ok: true,

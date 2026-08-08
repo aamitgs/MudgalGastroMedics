@@ -18,3 +18,19 @@ export function isValidPhoneNumber(value: string) {
   const digits = value.replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15;
 }
+
+/**
+ * Stable identity key for a patient's phone number — the last ten digits.
+ *
+ * Distinct from `normalizePhoneNumber` above, which formats a number for
+ * display. This one exists to make two records of the same patient compare
+ * equal: the number reaches the system as "+91 98765 43210" from a patient
+ * record and "9876543210" from a typed search, and anything keyed on the raw
+ * string treats those as two different people.
+ *
+ * Used for audit entity ids, where splitting one patient across several ids
+ * would make the access trail unable to answer who opened whose record.
+ */
+export function patientIdentityKey(value: string | null | undefined) {
+  return String(value ?? "").replace(/\D/g, "").slice(-10);
+}

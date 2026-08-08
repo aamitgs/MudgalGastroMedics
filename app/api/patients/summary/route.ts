@@ -7,12 +7,9 @@ import { listPatientIpdAdmissions } from "@/lib/ipd-store";
 import { listLabOrders } from "@/lib/lab-store";
 import { listPatientOpdVisits } from "@/lib/opd-store";
 import { findPatientByPhone } from "@/lib/patient-store";
+import { patientIdentityKey } from "@/lib/phone";
 import { listPharmacyDispenses } from "@/lib/pharmacy-store";
 import { walletBalancePaise } from "@/lib/wallet-store";
-
-function normalizePhone(value: string) {
-  return value.replace(/\D/g, "").slice(-10);
-}
 
 function amountValue(value: string | undefined) {
   const parsed = Number(String(value || "").replace(/[^\d.]/g, ""));
@@ -29,7 +26,7 @@ export async function GET(request: Request) {
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
   const phone = new URL(request.url).searchParams.get("phone")?.trim() ?? "";
-  const key = normalizePhone(phone);
+  const key = patientIdentityKey(phone);
   if (key.length < 6) {
     return NextResponse.json({ ok: false, error: "A valid patient phone number is required." }, { status: 400 });
   }
@@ -56,8 +53,8 @@ export async function GET(request: Request) {
     walletBalancePaise(phone)
   ]);
 
-  const labOrders = allLabOrders.filter((order) => normalizePhone(order.phone) === key);
-  const dispenses = allDispenses.filter((record) => normalizePhone(record.phone) === key && record.status !== "Cancelled");
+  const labOrders = allLabOrders.filter((order) => patientIdentityKey(order.phone) === key);
+  const dispenses = allDispenses.filter((record) => patientIdentityKey(record.phone) === key && record.status !== "Cancelled");
 
   const activeAdmission = admissions.find((admission) => admission.status === "Admitted") ?? null;
   const nextAppointment =
