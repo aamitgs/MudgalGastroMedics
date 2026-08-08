@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { createAppointment, getAppointmentById } from "@/lib/appointment-store";
 import { auditRequestMetadata, recordAuditEvent } from "@/lib/audit-store";
+import { canMarkVisitPaid } from "@/lib/billing-query";
 import { queryOpdVisits, type OpdSortField, type SortDirection } from "@/lib/opd-query";
 import { createOpdVisit, deleteOpdVisit, getOpdVisitById, listOpdVisits, updateOpdVisit } from "@/lib/opd-store";
 import { opdVisitStatuses } from "@/lib/opd-types";
@@ -138,6 +139,18 @@ export async function PATCH(request: Request) {
   // mutates the same object in place, so an uncloned reference would equal
   // `after` by the time the audit diff runs.
   const before = structuredClone(await getOpdVisitById(id));
+
+  // Cross-field rule, so it cannot live in the Zod schema: whether this update
+  // is legal depends on the amount already stored on the visit. The invoice
+  // path (billing-store's syncVisitBilling) always sends an amount alongside
+  // Paid, so it is unaffected.
+  if (before && billingStatus === "Paid" && !canMarkVisitPaid(before.estimatedAmount, estimatedAmount)) {
+    return NextResponse.json(
+      { ok: false, error: "Record the amount collected before marking this visit paid." },
+      { status: 400 }
+    );
+  }
+
   const visit = (await updateOpdVisit({
     id,
     status: status as OpdVisitStatus | undefined,

@@ -33,6 +33,23 @@ export function amountValue(value: string | undefined) {
   return rupeesToPaise(value) / 100;
 }
 
+/**
+ * Whether a visit may be moved to billingStatus "Paid".
+ *
+ * Marking a visit paid mints its receipt id, so doing that with no amount
+ * recorded issues a receipt for an unknown sum. Those records then count
+ * towards "paid receipts" while contributing nothing to the revenue total —
+ * the rollup is right, the record is simply hollow. `planBackfill` already
+ * refuses to convert them for the same reason; this is the rule that stops
+ * new ones being created.
+ *
+ * `incomingAmount` is the value on the update (undefined when the update does
+ * not touch the amount), `currentAmount` what the visit already holds.
+ */
+export function canMarkVisitPaid(currentAmount: string | undefined, incomingAmount?: string) {
+  return amountValue(incomingAmount !== undefined ? incomingAmount : currentAmount) > 0;
+}
+
 function matchesQuery(visit: OpdVisit, query: string) {
   const haystack = [visit.token, visit.uhid, visit.patientName, visit.phone, visit.service, visit.receiptId].filter(Boolean).join(" ").toLowerCase();
   return haystack.includes(query.toLowerCase());

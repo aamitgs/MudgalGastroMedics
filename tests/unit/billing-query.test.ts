@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { OpdVisit } from "@/lib/opd-types";
-import { amountValue, queryBillingVisits } from "@/lib/billing-query";
+import { amountValue, canMarkVisitPaid, queryBillingVisits } from "@/lib/billing-query";
 
 function visit(overrides: Partial<OpdVisit> = {}): OpdVisit {
   return {
@@ -106,5 +106,34 @@ describe("queryBillingVisits", () => {
   it("caps pageSize at 100 and floors it at 1", () => {
     expect(queryBillingVisits(fixture, { page: 0, pageSize: 0 }).visits.length).toBeLessThanOrEqual(1);
     expect(queryBillingVisits(fixture, { page: 0, pageSize: 500 }).total).toBe(4);
+  });
+});
+
+describe("canMarkVisitPaid", () => {
+  // Three live visits reached "Paid" with an empty estimatedAmount, which is
+  // why the billing summary could show 3 paid receipts against a Rs 0 total.
+  it("refuses to mark a visit paid when no amount was ever recorded", () => {
+    expect(canMarkVisitPaid("")).toBe(false);
+    expect(canMarkVisitPaid(undefined)).toBe(false);
+  });
+
+  it("refuses when the update itself clears the amount", () => {
+    expect(canMarkVisitPaid("1500", "")).toBe(false);
+  });
+
+  it("refuses a zero or unparseable amount", () => {
+    expect(canMarkVisitPaid("0")).toBe(false);
+    expect(canMarkVisitPaid("Rs. 0")).toBe(false);
+    expect(canMarkVisitPaid("not a number")).toBe(false);
+  });
+
+  it("allows an amount already stored on the visit when the update omits it", () => {
+    expect(canMarkVisitPaid("1500")).toBe(true);
+    expect(canMarkVisitPaid("Rs. 1,500")).toBe(true);
+  });
+
+  it("allows an amount supplied by the update itself", () => {
+    expect(canMarkVisitPaid("", "2000")).toBe(true);
+    expect(canMarkVisitPaid(undefined, "Rs. 2,000")).toBe(true);
   });
 });
