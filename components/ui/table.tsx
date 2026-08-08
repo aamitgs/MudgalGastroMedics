@@ -2,20 +2,25 @@
 
 import * as React from "react"
 
+import { ScrollHintRegion } from "@/components/design-system/ScrollHintRegion"
 import { cn } from "@/lib/utils"
 
+/**
+ * The off-screen column affordance is applied here rather than by each caller
+ * because this container is the element that actually scrolls: every `<Table>`
+ * renders its own `overflow-x-auto` wrapper, so a scroll region added around a
+ * table never receives the horizontal scroll. One change here covers
+ * DataTable, OperationsTable, the billing panels and the price master.
+ */
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
-    >
+    <ScrollHintRegion scrollerClassName="relative" scrollerProps={{ "data-slot": "table-container" }}>
       <table
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    </div>
+    </ScrollHintRegion>
   )
 }
 

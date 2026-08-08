@@ -2,6 +2,7 @@
 
 import { ArrowLeftRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ScrollHintRegion } from "@/components/design-system/ScrollHintRegion";
 import type { OpdVisit, PrescriptionItem } from "@/lib/opd-types";
 
 type VitalsSnapshotKey =
@@ -92,7 +93,7 @@ export function TimelineComparisonPanel({ visit }: { visit: OpdVisit }) {
         {!error && snapshot === undefined ? <p className="text-sm text-muted">Loading…</p> : null}
         {!error && snapshot === null ? <p className="text-sm text-muted">No previous visit found for this patient.</p> : null}
         {!error && snapshot ? (
-          <div className="overflow-x-auto">
+          <ScrollHintRegion>
             <table className="w-full min-w-[560px] border-collapse text-sm">
               <thead>
                 <tr>
@@ -132,7 +133,7 @@ export function TimelineComparisonPanel({ visit }: { visit: OpdVisit }) {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollHintRegion>
         ) : null}
       </div>
     </details>

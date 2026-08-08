@@ -8,6 +8,7 @@ import { fullAddress, site } from "@/lib/site-data";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { ModuleEmptyState } from "@/components/design-system/ModuleEmptyState";
 import { ModuleSkeleton } from "@/components/design-system/ModuleSkeleton";
+import { ScrollHintRegion } from "@/components/design-system/ScrollHintRegion";
 import { getStatusToneClass } from "@/components/design-system/StatusBadge";
 
 type ReadinessResponse = {
@@ -109,7 +110,7 @@ export function AdminSettings() {
       <div className="border-b border-line p-4">
         <p className="flex items-center gap-2 text-lg font-bold text-ink"><ShieldCheck size={19} /> Hospital OS role access reference</p>
         <p className="mt-1 text-xs text-muted">Which staff roles see which Hospital OS sections. Enforced in the Hospital OS sidebar, content sections and command palette.</p>
-        <div className="mt-4 overflow-x-auto rounded border border-line">
+        <ScrollHintRegion className="mt-4 rounded border border-line" scrollerClassName="rounded">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-soft text-xs font-black uppercase tracking-[0.08em] text-muted">
               <tr>
@@ -126,7 +127,7 @@ export function AdminSettings() {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollHintRegion>
       </div>
 
       <div className="p-4">

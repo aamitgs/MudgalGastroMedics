@@ -287,6 +287,9 @@ export function DataTable<TData>({
       ) : data.length === 0 ? (
         <ModuleEmptyState {...emptyState} />
       ) : (
+        // Vertical scrolling only. The horizontal scroll — and its off-screen
+        // column affordance — belongs to the container `<Table>` renders; see
+        // components/ui/table.tsx.
         <div className="max-h-[min(70vh,720px)] overflow-auto">
           <Table style={{ width: table.getTotalSize() }}>
             <TableHeader className="sticky top-0 z-10 bg-surface">

@@ -101,3 +101,49 @@ for (const width of WIDTHS) {
     expect(overflowing, `horizontal scroll at ${width}px on: ${overflowing.join(", ")}`).toEqual([]);
   });
 }
+
+/**
+ * A table that scrolls sideways must say so on a phone.
+ *
+ * The OS keeps full column sets on mobile rather than hiding columns, so the
+ * stock list and its peers scroll horizontally by design — but the rightmost
+ * visible column then looks like the last column, and staff never discover
+ * the rest. This asserts the cue exists and tracks scroll position.
+ *
+ * It is measured in a browser because the first attempt at this fix was
+ * attached to the wrong element: `<Table>` renders its own overflow-x-auto
+ * container, so a scroll region added around it never receives the horizontal
+ * scroll and the affordance silently never rendered.
+ */
+test("a horizontally scrollable table shows an off-screen column cue on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.request.post("/api/admin/session", { data: { username: "admin", password: "mgm-admin" } });
+  await page.goto("/mudgalgastromedics-os/inventory", { waitUntil: "networkidle" });
+
+  const container = page.locator('[data-slot="table-container"]').first();
+  await expect(container).toBeVisible();
+
+  // Guard the premise: if the table ever stops overflowing at this width the
+  // assertions below would pass vacuously.
+  const overflow = await container.evaluate((node) => node.scrollWidth - node.clientWidth);
+  expect(overflow, "stock table is expected to overflow at 390px").toBeGreaterThan(0);
+
+  await expect(page.locator('[data-scroll-hint="right"]')).toBeVisible();
+  await expect(page.locator('[data-scroll-hint="text"]')).toBeVisible();
+  // Nothing is hidden to the left until the user has actually scrolled.
+  await expect(page.locator('[data-scroll-hint="left"]')).toHaveCount(0);
+
+  await container.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+  await expect(page.locator('[data-scroll-hint="left"]')).toBeVisible();
+  await expect(page.locator('[data-scroll-hint="right"]')).toHaveCount(0);
+});
+
+test("the off-screen column cue stays out of the way on a desktop width", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.request.post("/api/admin/session", { data: { username: "admin", password: "mgm-admin" } });
+  await page.goto("/mudgalgastromedics-os/inventory", { waitUntil: "networkidle" });
+
+  // The swipe wording is touch-specific; the fades may still apply if the
+  // table is wide, but the instruction must not reach a mouse user.
+  await expect(page.locator('[data-scroll-hint="text"]')).toBeHidden();
+});
