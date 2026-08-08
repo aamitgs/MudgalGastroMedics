@@ -1,5 +1,7 @@
 import "server-only";
 
+import { retentionPolicyBlockers } from "@/lib/retention/policy";
+
 export type ProductionCheckStatus = "pass" | "warn" | "fail";
 
 export type ProductionCheck = {
@@ -25,6 +27,7 @@ function check(id: string, label: string, area: ProductionCheck["area"], status:
 
 export function createProductionReadiness() {
   const nodeEnv = process.env.NODE_ENV || "development";
+  const retentionBlockers = retentionPolicyBlockers();
   const checks: ProductionCheck[] = [
     check(
       "admin-passcode",
@@ -127,6 +130,20 @@ export function createProductionReadiness() {
       hasEnv("PRIVACY_REVIEWED_AT") ? "pass" : "fail",
       hasEnv("PRIVACY_REVIEWED_AT") ? "Privacy review date is configured." : "Privacy/compliance review has not been recorded.",
       "Complete legal review for patient data, consent, retention and access logs."
+    ),
+    // Warning rather than blocker: indefinite retention is a real DPDP §8(7)
+    // failure, but it is missing functionality rather than a broken control,
+    // and the periods are counsel's to set. Surfaced here so it stays visible
+    // instead of living only in docs/privacy-review.md §5.
+    check(
+      "data-retention",
+      "Data retention",
+      "Compliance",
+      retentionBlockers.length === 0 ? "pass" : "warn",
+      retentionBlockers.length === 0
+        ? "Retention periods are approved and enforceable."
+        : `Nothing is ever deleted. ${retentionBlockers.length} item(s) block a purge: ${retentionBlockers.map((blocker) => blocker.summary).join(" ")}`,
+      "Confirm the periods in docs/privacy-review.md §5, then close the schema gaps listed by retentionPolicyBlockers()."
     ),
     check(
       "environment",
