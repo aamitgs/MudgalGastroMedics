@@ -259,10 +259,17 @@ export function AdminReports() {
         <div className="grid grid-cols-2 gap-2 border-b border-line p-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
           {kpis.map(({ label, value, icon: Icon, metric }) => {
             const tile = (
+              // Labels wrap to two lines rather than truncating: these tiles sit
+              // seven-across on a wide screen, so "Appointments Today" and
+              // "Patient Records" were being cut to "APPOINTMENTS…". A title
+              // tooltip alone would not have fixed it — these tiles are read on
+              // tablets at the desk, where there is no hover. min-h keeps the
+              // value row aligned across tiles whether the label runs one line
+              // or two.
               <div className="rounded border border-line bg-soft/60 px-3 py-2.5 hover:border-brand">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted" title={label}>{label}</p>
-                  <Icon className="shrink-0 text-brand" size={14} />
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-h-8 text-[11px] font-semibold uppercase leading-4 tracking-tight text-muted" title={label}>{label}</p>
+                  <Icon className="mt-0.5 shrink-0 text-brand" size={14} />
                 </div>
                 <p className="mt-1 text-lg font-bold leading-tight text-ink">{value}</p>
               </div>
