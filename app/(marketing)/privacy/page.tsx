@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/site/Section";
 import { breadcrumbSchema } from "@/lib/seo-schema";
+import { fullAddress, site } from "@/lib/site-data";
 
 const breadcrumbLd = {
   "@context": "https://schema.org",
@@ -195,18 +196,90 @@ export default function PrivacyPage() {
               </section>
             ))}
 
+            {/*
+              Contact details come from lib/site-data so this page cannot drift
+              from the rest of the site — a privacy policy listing a number the
+              hospital no longer answers is worse than one listing none, since
+              this is the channel a patient must use to exercise a legal right.
+            */}
             <section className="border-t border-line pt-8">
               <h2 className="text-2xl font-black leading-tight text-ink md:text-3xl">13. Contact Us</h2>
               <p className="mt-4 leading-relaxed text-muted">
                 If you have any questions regarding this Privacy Policy, the collection or processing of your personal information, or wish to exercise your rights under applicable data protection laws, please contact us:
               </p>
               <div className="mt-5 rounded border border-line bg-soft/60 p-5">
-                <p className="font-black text-ink">Mudgal Gastromedics Hospital</p>
-                <p className="mt-2 text-muted">16, H.I.G., Behind Police Chowki, Shaheed Nagar, Agra, Uttar Pradesh, India</p>
-                <p className="mt-2 text-muted">Phone: <a href="tel:+919828912257" className="font-semibold text-brand-dark hover:text-brand-dark">+91-9828912257</a></p>
+                <p className="font-black text-ink">{site.name}</p>
+                <p className="mt-2 text-muted">{fullAddress}, {site.country}</p>
+                <p className="mt-2 text-muted">
+                  Phone: <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="font-semibold text-brand-dark hover:text-brand-dark">{site.mobile}</a>
+                  {" · "}
+                  <a href={`tel:${site.phone.replace(/[^\d+]/g, "")}`} className="font-semibold text-brand-dark hover:text-brand-dark">{site.phone}</a>
+                </p>
+                {/*
+                  `overflow-wrap: anywhere`, not `break-words`. The email is a
+                  28-character token with nowhere to wrap, and these sections
+                  are grid items — which default to `min-width: auto` and so
+                  refuse to shrink below their content's min-content width.
+                  `break-word` permits a mid-word break when laying out but
+                  does not reduce that min-content contribution, so the grid
+                  stayed 303px wide inside a 286px article and pushed the page
+                  into horizontal scroll at 320px (WCAG 2.1 SC 1.4.10 Reflow).
+                  `anywhere` is the value that counts for intrinsic sizing.
+                */}
+                <p className="mt-2 [overflow-wrap:anywhere] text-muted">
+                  Email: <a href={`mailto:${site.email}`} className="font-semibold text-brand-dark hover:text-brand-dark">{site.email}</a>
+                </p>
               </div>
               <p className="mt-4 leading-relaxed text-muted">
                 Our team will make reasonable efforts to respond to your enquiries and resolve your concerns promptly in accordance with applicable laws and hospital policies.
+              </p>
+            </section>
+
+            {/*
+              Required by the Digital Personal Data Protection Act, 2023 §13: a
+              Data Fiduciary must publish a contact point able to answer a data
+              principal's questions about the processing of her personal data,
+              and provide a readily available means of grievance redressal.
+              Section 8 above already lists the rights; without a published
+              channel and a response commitment, those rights have no route.
+            */}
+            <section className="border-t border-line pt-8">
+              <h2 className="text-2xl font-black leading-tight text-ink md:text-3xl">14. Grievance Redressal</h2>
+              <p className="mt-4 leading-relaxed text-muted">
+                If you wish to exercise any of the rights described in Section 8, or you believe your personal or medical information has been handled in a way that does not follow this Privacy Policy, you may raise a grievance with our Grievance Officer. You do not need to give a reason for making a request.
+              </p>
+              <div className="mt-5 rounded border border-line bg-soft/60 p-5">
+                <p className="font-black text-ink">Grievance Officer</p>
+                <p className="mt-1 text-muted">{site.name}</p>
+                <p className="mt-2 text-muted">{fullAddress}, {site.country}</p>
+                {/*
+                  `overflow-wrap: anywhere`, not `break-words`. The email is a
+                  28-character token with nowhere to wrap, and these sections
+                  are grid items — which default to `min-width: auto` and so
+                  refuse to shrink below their content's min-content width.
+                  `break-word` permits a mid-word break when laying out but
+                  does not reduce that min-content contribution, so the grid
+                  stayed 303px wide inside a 286px article and pushed the page
+                  into horizontal scroll at 320px (WCAG 2.1 SC 1.4.10 Reflow).
+                  `anywhere` is the value that counts for intrinsic sizing.
+                */}
+                <p className="mt-2 [overflow-wrap:anywhere] text-muted">
+                  Email: <a href={`mailto:${site.email}`} className="font-semibold text-brand-dark hover:text-brand-dark">{site.email}</a>
+                </p>
+                <p className="mt-2 text-muted">
+                  Phone: <a href={`tel:${site.mobile.replace(/\s/g, "")}`} className="font-semibold text-brand-dark hover:text-brand-dark">{site.mobile}</a>
+                </p>
+              </div>
+              <PolicyList
+                items={[
+                  "We acknowledge every grievance within 72 hours of receipt.",
+                  "We aim to resolve grievances within 30 days, and will tell you if a matter needs longer and why.",
+                  "Please include your full name, registered mobile number and, where relevant, your UHID so we can locate your records accurately.",
+                  "If you are dissatisfied with our response, you may escalate the matter to the Data Protection Board of India under the Digital Personal Data Protection Act, 2023."
+                ]}
+              />
+              <p className="mt-4 leading-relaxed text-muted">
+                Please note that certain medical records must be retained for periods fixed by healthcare regulations. Where a deletion request covers records we are legally required to keep, we will explain what we are retaining and why, and delete the remainder.
               </p>
             </section>
 
