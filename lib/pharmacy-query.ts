@@ -22,7 +22,7 @@ export type PharmacyQueryResult = {
 };
 
 function matchesQuery(record: PharmacyDispenseRecord, query: string) {
-  const haystack = [record.id, record.token, record.uhid, record.patientName, record.phone, record.service, record.items.map((item) => item.name).join(" ")]
+  const haystack = [record.id, record.dispenseNo, record.visitNo, record.token, record.uhid, record.patientName, record.phone, record.service, record.items.map((item) => item.name).join(" ")]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

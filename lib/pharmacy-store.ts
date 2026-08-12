@@ -1,6 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import { adjustInventoryQuantity, listInventoryItems } from "@/lib/inventory-store";
 import type { OpdVisit } from "@/lib/opd-types";
 import { getOpdVisitById } from "@/lib/opd-store";
@@ -73,10 +73,12 @@ export async function createPharmacyDispense(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const record: PharmacyDispenseRecord = {
     id: generateId("PH"),
+    dispenseNo: nextSerialNumber("PHA", doc.dispenses.map((item) => item.dispenseNo)),
     createdAt: now,
     updatedAt: now,
     status: "Dispensed",
     visitId: visit.id,
+    visitNo: visit.visitNo,
     token: visit.token,
     patientId: visit.patientId,
     uhid: visit.uhid,

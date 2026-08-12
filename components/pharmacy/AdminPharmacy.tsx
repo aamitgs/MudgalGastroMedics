@@ -4,7 +4,8 @@ import { BadgeIndianRupee, Download, Eye, PackageCheck, Plus, Trash2 } from "luc
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { InventoryItem } from "@/lib/inventory-types";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
+import { registerReference } from "@/lib/id";
 import type { PharmacyDispenseRecord } from "@/lib/pharmacy-types";
 import type { PharmacyPaymentFilter, PharmacySortField } from "@/lib/pharmacy-query";
 import { downloadCsv } from "@/lib/table-export";
@@ -13,18 +14,20 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
-const dispenseExportHeaders = ["Token", "Patient", "Phone", "Status", "Items", "Total", "Payment Status", "Created"];
+const dispenseExportHeaders = ["Dispense No.", "Visit No.", "Patient", "Phone", "Status", "Items", "Total", "Payment Status", "Created", "OPD Token"];
 
 function dispenseExportRow(record: PharmacyDispenseRecord) {
   return [
-    record.token,
+    registerReference(record.dispenseNo, record.token),
+    record.visitNo ?? "",
     record.patientName,
     record.phone,
     record.status,
     record.items.map((item) => `${item.name} x${item.quantity}`).join("; "),
     String(record.total),
     record.paymentStatus,
-    record.createdAt
+    record.createdAt,
+    record.token
   ];
 }
 
@@ -179,12 +182,12 @@ export function AdminPharmacy() {
   const columns = useMemo<ColumnDef<PharmacyDispenseRecord, unknown>[]>(
     () => [
       {
-        accessorKey: "token",
-        header: "Token",
-        size: 110,
+        accessorKey: "dispenseNo",
+        header: "Dispense No.",
+        size: 140,
         cell: ({ row }) => (
           <div>
-            <span className="font-mono text-xs font-bold text-ink">{row.original.token}</span>
+            <span className="font-mono text-xs font-bold text-ink">{registerReference(row.original.dispenseNo, row.original.token)}</span>
             {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
           </div>
         )
@@ -290,7 +293,7 @@ export function AdminPharmacy() {
                 <option value="">Select OPD visit</option>
                 {visits.map((visit) => (
                   <option key={visit.id} value={visit.id}>
-                    {visit.token} | {visit.patientName}
+                    {visitReference(visit)} | {visit.patientName}
                     {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
                   </option>
                 ))}
@@ -441,7 +444,8 @@ export function AdminPharmacy() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.12em] text-brand">
-                    {viewingRecord.id} · {viewingRecord.token}
+                    {registerReference(viewingRecord.dispenseNo, viewingRecord.token)}
+                    {viewingRecord.visitNo ? ` · ${viewingRecord.visitNo}` : ""}
                     {viewingRecord.uhid ? ` · ${viewingRecord.uhid}` : ""}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-ink">{viewingRecord.patientName}</h3>

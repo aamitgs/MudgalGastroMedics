@@ -1,7 +1,9 @@
 import "server-only";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { getOpdVisitById } from "@/lib/opd-store";
+import { visitReference } from "@/lib/opd-types";
 import { listIpdAdmissions, listVitals } from "@/lib/ipd-store";
+import { admissionReference } from "@/lib/ipd-types";
 import { findPatientByPhone, getPatientById } from "@/lib/patient-store";
 import { registerPdfFonts } from "@/lib/pdf/branding";
 import { PrescriptionDocument } from "@/lib/pdf/prescription-document";
@@ -47,7 +49,7 @@ export async function renderPrescriptionPdf(visitId: string): Promise<PdfRenderR
   registerPdfFonts();
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(PrescriptionDocument({ visit, patient }));
-  return { ok: true, buffer, filename: `prescription-${slugify(visit.patientName)}-${visit.token}.pdf` };
+  return { ok: true, buffer, filename: `prescription-${slugify(visit.patientName)}-${slugify(visitReference(visit))}.pdf` };
 }
 
 export async function renderPatientEducationPdf(visitId: string, sheetKey: string): Promise<PdfRenderResult> {
@@ -69,7 +71,7 @@ export async function renderMedicalCertificatePdf(visitId: string): Promise<PdfR
   registerPdfFonts();
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(MedicalCertificateDocument({ visit, patient }));
-  return { ok: true, buffer, filename: `medical-certificate-${slugify(visit.patientName)}-${visit.token}.pdf` };
+  return { ok: true, buffer, filename: `medical-certificate-${slugify(visit.patientName)}-${slugify(visitReference(visit))}.pdf` };
 }
 
 export async function renderReferralLetterPdf(visitId: string): Promise<PdfRenderResult> {
@@ -82,7 +84,7 @@ export async function renderReferralLetterPdf(visitId: string): Promise<PdfRende
   registerPdfFonts();
   const patient = await findPatientForVisit(visit.patientId, visit.phone);
   const buffer = await renderToBuffer(ReferralLetterDocument({ visit, patient }));
-  return { ok: true, buffer, filename: `referral-letter-${slugify(visit.patientName)}-${visit.token}.pdf` };
+  return { ok: true, buffer, filename: `referral-letter-${slugify(visit.patientName)}-${slugify(visitReference(visit))}.pdf` };
 }
 
 /** PNG data URI for a QR payload, or undefined if it can't be produced — a missing QR must never break a bill. */
@@ -99,15 +101,43 @@ async function qrDataUri(payload: string | null | undefined): Promise<string | u
  * The itemised invoice (Track 5.8). `copyNumber` above 1 stamps the document
  * DUPLICATE — the caller gets that from lib/reprint-store.ts.
  */
+/**
+ * The stay a bill was raised for. Read from the invoice, where it is stamped at
+ * creation; only looked up for IPD bills issued before that field existed, so
+ * that reprinting an old one still cites its admission rather than silently
+ * dropping the reference.
+ */
+async function resolveAdmissionNo(invoice: Invoice) {
+  if (invoice.admissionNo) return invoice.admissionNo;
+  if (!invoice.admissionId) return undefined;
+  const admission = (await listIpdAdmissions()).find((entry) => entry.id === invoice.admissionId);
+  // Deliberately not admissionReference(): a bill that prints the OPD token
+  // under "Admission No." is worse than one that prints nothing there. Stays
+  // still awaiting the backfill simply omit the line.
+  return admission?.admissionNo;
+}
+
+/** The OPD encounter a bill was raised for; same read-then-fall-back-to-lookup rule. */
+async function resolveVisitNo(invoice: Invoice) {
+  if (invoice.visitNo) return invoice.visitNo;
+  if (!invoice.visitId) return undefined;
+  const visit = await getOpdVisitById(invoice.visitId);
+  // Not visitReference(), for the reason above — a daily token under a
+  // "Visit No." label is the confusion this replaced.
+  return visit?.visitNo;
+}
+
 export async function renderItemisedInvoicePdf(invoice: Invoice, copyNumber = 1): Promise<PdfRenderResult> {
   registerPdfFonts();
 
-  const [upiQrDataUri, invoiceQrDataUri] = await Promise.all([
+  const [upiQrDataUri, invoiceQrDataUri, admissionNo, visitNo] = await Promise.all([
     qrDataUri(invoiceUpiLink(invoice)),
-    qrDataUri(invoice.invoiceNo)
+    qrDataUri(invoice.invoiceNo),
+    resolveAdmissionNo(invoice),
+    resolveVisitNo(invoice)
   ]);
 
-  const buffer = await renderToBuffer(ItemisedInvoiceDocument({ invoice, upiQrDataUri, invoiceQrDataUri, copyNumber }));
+  const buffer = await renderToBuffer(ItemisedInvoiceDocument({ invoice, admissionNo, visitNo, upiQrDataUri, invoiceQrDataUri, copyNumber }));
   return { ok: true, buffer, filename: `invoice-${slugify(invoice.invoiceNo)}.pdf` };
 }
 
@@ -134,7 +164,7 @@ export async function renderInvoicePdf(visitId: string, copyNumber = 1): Promise
   registerPdfFonts();
   const buffer = await renderToBuffer(InvoiceDocument({ visit }));
   const prefix = visit.billingStatus === "Paid" ? "receipt" : "invoice";
-  return { ok: true, buffer, filename: `${prefix}-${slugify(visit.patientName)}-${visit.receiptId || visit.token}.pdf` };
+  return { ok: true, buffer, filename: `${prefix}-${slugify(visit.patientName)}-${slugify(visit.receiptId || visitReference(visit))}.pdf` };
 }
 
 export async function renderPurchaseOrderPdf(orderId: string): Promise<PdfRenderResult> {
@@ -178,5 +208,5 @@ export async function renderDischargeSummaryPdf(admissionId: string): Promise<Pd
     headerTemplate: buildDischargeSummaryHeaderTemplate(admission),
     footerTemplate: buildDischargeSummaryFooterTemplate()
   });
-  return { ok: true, buffer, filename: `discharge-summary-${slugify(admission.patientName)}-${admission.token}.pdf` };
+  return { ok: true, buffer, filename: `discharge-summary-${slugify(admission.patientName)}-${slugify(admissionReference(admission))}.pdf` };
 }

@@ -1,3 +1,5 @@
+import { registerReference } from "@/lib/id";
+
 export type OpdVisitStatus = "Waiting" | "In Consultation" | "Completed" | "Cancelled";
 
 /**
@@ -18,7 +20,24 @@ export type PrescriptionItem = {
 
 export type OpdVisit = {
   id: string;
+  /**
+   * Today's queue position — "Token 14, please come in." Genuinely useful, and
+   * deliberately kept: it is reset every morning and repeats, which is exactly
+   * right for calling patients in and exactly wrong for identifying the visit
+   * afterwards. Anything that outlives the day uses `visitNo` instead.
+   */
   token: string;
+  /**
+   * Human-readable register number for this encounter — OPD-2026-00123 —
+   * issued once at check-in and never reissued. This is what a prescription,
+   * certificate or bill cites, and what staff quote when a patient rings up
+   * about a consultation from three weeks ago.
+   *
+   * Not `id`, which stays the internal handle every child record already links
+   * through. Optional because visits recorded before this existed carry none
+   * until scripts/backfill-register-numbers.mjs has run.
+   */
+  visitNo?: string;
   appointmentId: string;
   patientId?: string;
   uhid?: string;
@@ -86,5 +105,10 @@ export type OpdVisit = {
   refundedAt?: string;
   refundedBy?: string;
 };
+
+/** Working-surface reference for a visit — see registerReference in lib/id.ts for the rule. */
+export function visitReference(visit: OpdVisit): string {
+  return registerReference(visit.visitNo, visit.token);
+}
 
 export const opdVisitStatuses: OpdVisitStatus[] = ["Waiting", "In Consultation", "Completed", "Cancelled"];

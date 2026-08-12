@@ -1,7 +1,7 @@
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { StaffMember } from "@/lib/hr-types";
 import type { InventoryItem } from "@/lib/inventory-types";
-import type { IpdAdmission } from "@/lib/ipd-types";
+import { admissionReference, type IpdAdmission } from "@/lib/ipd-types";
 import type { LabOrder } from "@/lib/lab-types";
 import type { PatientRecord } from "@/lib/patient-types";
 
@@ -99,10 +99,12 @@ export function searchAdmissions(query: string, admissions: IpdAdmission[]): Sea
       id: admission.id,
       category: "Admissions" as const,
       title: admission.patientName,
-      subtitle: `${admission.ward} · Bed ${admission.bedLabel} · ${admission.status}`,
+      subtitle: `${admissionReference(admission)} · ${admission.ward} · Bed ${admission.bedLabel} · ${admission.status}`,
       href: "/mudgalgastromedics-os/ipd",
       patientPhone: admission.phone,
-      score: fieldScore(query, admission.patientName, admission.phone, admission.bedLabel, admission.diagnosis)
+      // Admission number and UHID are searchable because staff arrive holding
+      // one of them — off a discharge summary, a bill, or a phone call.
+      score: fieldScore(query, admission.patientName, admission.phone, admission.admissionNo, admission.uhid, admission.bedLabel, admission.diagnosis)
     }))
     .filter((result) => result.score > 0);
 }

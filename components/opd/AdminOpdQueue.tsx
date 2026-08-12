@@ -25,10 +25,13 @@ const vitalsFields: { key: VitalFieldKey; label: string; placeholder: string }[]
   { key: "vitalsSpo2", label: "SpO2", placeholder: "e.g. 98%" }
 ];
 
-const opdExportHeaders = ["Token", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
+// Unlike the IPD export, the token keeps its column: an OPD export is often
+// today's queue, where the token is the useful handle. Visit No. is added
+// beside it for the exports that get filed and looked at later.
+const opdExportHeaders = ["Token", "Visit No.", "Patient", "Phone", "Service", "Status", "Billing Status", "Created"];
 
 function opdExportRow(visit: OpdVisit) {
-  return [visit.token, visit.patientName, visit.phone, visit.service, visit.status, visit.billingStatus, visit.createdAt];
+  return [visit.token, visit.visitNo ?? "", visit.patientName, visit.phone, visit.service, visit.status, visit.billingStatus, visit.createdAt];
 }
 
 type OpdListResponse = {
@@ -424,8 +427,12 @@ export function AdminOpdQueue() {
           <div className="mt-4 rounded border border-line bg-surface p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
+                {/* Token first — this panel is opened off today's queue, where
+                    the token is what everyone is calling out. The visit number
+                    follows for anything that outlives today. */}
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
                   {editingVisit.token}
+                  {editingVisit.visitNo ? ` · ${editingVisit.visitNo}` : ""}
                   {editingVisit.uhid ? ` · ${editingVisit.uhid}` : ""}
                 </p>
                 <h3 className="mt-1 text-lg font-bold text-ink">{editingVisit.patientName}</h3>

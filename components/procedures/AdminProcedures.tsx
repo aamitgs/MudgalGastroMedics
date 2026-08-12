@@ -3,7 +3,8 @@
 import { CalendarClock, ClipboardCheck, Download, Edit3 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
+import { registerReference } from "@/lib/id";
 import type { ProcedureChecklist, ProcedureSchedule, ProcedureScheduleStatus } from "@/lib/procedure-types";
 import { procedureRooms, procedureScheduleStatuses } from "@/lib/procedure-types";
 import type { ProcedureScheduleSortField } from "@/lib/procedure-schedule-query";
@@ -13,10 +14,12 @@ import { DataTable } from "@/components/design-system/DataTable";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
-const procedureExportHeaders = ["Patient", "Phone", "Procedure", "Scheduled Date", "Scheduled Time", "Room", "Doctor", "Priority", "Status"];
+const procedureExportHeaders = ["Procedure No.", "Visit No.", "Patient", "Phone", "Procedure", "Scheduled Date", "Scheduled Time", "Room", "Doctor", "Priority", "Status"];
 
 function procedureExportRow(schedule: ProcedureSchedule) {
   return [
+    registerReference(schedule.scheduleNo, schedule.token),
+    schedule.visitNo ?? "",
     schedule.patientName,
     schedule.phone,
     schedule.procedureTitle,
@@ -308,7 +311,7 @@ export function AdminProcedures() {
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>
-                  {visit.token} | {visit.patientName}
+                  {visitReference(visit)} | {visit.patientName}
                   {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
                 </option>
               ))}
@@ -413,7 +416,8 @@ export function AdminProcedures() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
-                    {editingSchedule.id} | {editingSchedule.token}
+                    {registerReference(editingSchedule.scheduleNo, editingSchedule.token)}
+                    {editingSchedule.visitNo ? ` | ${editingSchedule.visitNo}` : ""}
                     {editingSchedule.uhid ? ` | ${editingSchedule.uhid}` : ""}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-ink">{editingSchedule.procedureTitle}</h3>

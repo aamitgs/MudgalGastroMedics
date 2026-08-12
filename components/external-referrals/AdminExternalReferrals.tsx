@@ -9,16 +9,18 @@ import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { ExternalReferral, ExternalReferralStatus, ExternalReferralType } from "@/lib/external-referral-types";
 import { commonPathologyTests, commonRadiologyTests, externalReferralStatuses, externalReferralTypes } from "@/lib/external-referral-types";
 import type { ExternalReferralSortField } from "@/lib/external-referral-query";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
+import { registerReference } from "@/lib/id";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
-const referralExportHeaders = ["Token", "Patient", "Phone", "Type", "Test/Scan", "Facility", "Priority", "Status", "Payment Status", "Created"];
+const referralExportHeaders = ["Referral No.", "Visit No.", "Patient", "Phone", "Type", "Test/Scan", "Facility", "Priority", "Status", "Payment Status", "Created", "OPD Token"];
 
 function referralExportRow(referral: ExternalReferral) {
   return [
-    referral.token,
+    registerReference(referral.referralNo, referral.token),
+    referral.visitNo ?? "",
     referral.patientName,
     referral.phone,
     referral.type,
@@ -27,7 +29,8 @@ function referralExportRow(referral: ExternalReferral) {
     referral.priority,
     referral.status,
     referral.paymentStatus,
-    referral.createdAt
+    referral.createdAt,
+    referral.token
   ];
 }
 
@@ -206,12 +209,12 @@ export function AdminExternalReferrals() {
   const columns = useMemo<ColumnDef<ExternalReferral, unknown>[]>(
     () => [
       {
-        accessorKey: "token",
-        header: "Token",
-        size: 130,
+        accessorKey: "referralNo",
+        header: "Referral No.",
+        size: 140,
         cell: ({ row }) => (
           <div>
-            <span className="font-mono text-xs font-bold text-ink">{row.original.token}</span>
+            <span className="font-mono text-xs font-bold text-ink">{registerReference(row.original.referralNo, row.original.token)}</span>
             {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
           </div>
         )
@@ -376,7 +379,7 @@ export function AdminExternalReferrals() {
               <option value="">Select OPD visit</option>
               {visits.map((visit) => (
                 <option key={visit.id} value={visit.id}>
-                  {visit.token} | {visit.patientName}
+                  {visitReference(visit)} | {visit.patientName}
                   {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
                 </option>
               ))}
@@ -506,7 +509,8 @@ export function AdminExternalReferrals() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
-                    {editingReferral.token}
+                    {registerReference(editingReferral.referralNo, editingReferral.token)}
+                    {editingReferral.visitNo ? ` · ${editingReferral.visitNo}` : ""}
                     {editingReferral.uhid ? ` · ${editingReferral.uhid}` : ""}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-ink">{editingReferral.patientName}</h3>

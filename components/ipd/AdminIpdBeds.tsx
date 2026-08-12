@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedWardMap";
 import type { BedStatus, BedTransfer, HospitalBed, HospitalWard, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
-import { computeHduEscalation, ipdAdmissionStatuses } from "@/lib/ipd-types";
+import { admissionReference, computeHduEscalation, ipdAdmissionStatuses } from "@/lib/ipd-types";
 import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admission-query";
 import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -17,11 +17,16 @@ import { notify } from "@/lib/notify";
 import { downloadCsv } from "@/lib/table-export";
 import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 
-const ipdExportHeaders = ["Token", "UHID", "Patient", "Phone", "Ward", "Bed", "Status", "Diagnosis", "Admitting Doctor", "Assigned Nurse", "Admitted"];
+// The leading column now carries the admission number rather than the OPD
+// token that used to sit there: a token repeats every morning, so exports
+// filed against it could not tell two stays apart. The token is kept, moved to
+// the end and labelled for what it actually is, so nothing is lost from
+// spreadsheets already built on this export.
+const ipdExportHeaders = ["Admission No.", "UHID", "Patient", "Phone", "Ward", "Bed", "Status", "Diagnosis", "Admitting Doctor", "Assigned Nurse", "Admitted", "OPD Token"];
 
 function ipdExportRow(admission: IpdAdmission) {
   return [
-    admission.token,
+    admissionReference(admission),
     admission.uhid ?? "",
     admission.patientName,
     admission.phone,
@@ -31,7 +36,8 @@ function ipdExportRow(admission: IpdAdmission) {
     admission.diagnosis,
     admission.admittingDoctor,
     admission.assignedNurse ?? "",
-    admission.createdAt
+    admission.createdAt,
+    admission.token
   ];
 }
 
@@ -346,12 +352,12 @@ export function AdminIpdBeds() {
   const columns = useMemo<ColumnDef<IpdAdmission, unknown>[]>(
     () => [
       {
-        accessorKey: "token",
-        header: "Token",
-        size: 110,
+        accessorKey: "admissionNo",
+        header: "Admission No.",
+        size: 130,
         cell: ({ row }) => (
           <div>
-            <span className="font-mono text-xs font-bold text-ink">{row.original.token}</span>
+            <span className="font-mono text-xs font-bold text-ink">{admissionReference(row.original)}</span>
             {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
           </div>
         )
@@ -596,8 +602,11 @@ export function AdminIpdBeds() {
             <div className="mt-4 rounded border border-line bg-surface p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
+                  {/* The two numbers staff actually quote — this stay, then the patient
+                      for life. The internal id is not shown: it identifies nothing a
+                      clinician can act on, and both of these are searchable. */}
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
-                    {editingAdmission.id} · {editingAdmission.token}
+                    {admissionReference(editingAdmission)}
                     {editingAdmission.uhid ? ` · ${editingAdmission.uhid}` : ""}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-ink">{editingAdmission.patientName}</h3>

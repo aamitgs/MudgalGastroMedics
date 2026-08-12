@@ -1,6 +1,6 @@
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
-export type OpdSortField = "patientName" | "token" | "status" | "service" | "createdAt";
+export type OpdSortField = "patientName" | "token" | "visitNo" | "status" | "service" | "createdAt";
 export type SortDirection = "asc" | "desc";
 
 export type OpdQueryParams = {
@@ -22,7 +22,7 @@ export type OpdQueryResult = {
 };
 
 function matchesQuery(visit: OpdVisit, query: string) {
-  const haystack = [visit.token, visit.uhid, visit.patientName, visit.phone, visit.service, visit.status]
+  const haystack = [visit.token, visit.visitNo, visit.uhid, visit.patientName, visit.phone, visit.service, visit.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

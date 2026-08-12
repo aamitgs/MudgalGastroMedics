@@ -30,6 +30,7 @@ export function DoctorPrintableSummary({ visit, patient }: { visit: OpdVisit; pa
         </div>
         <dl className="print-grid">
           {visit.uhid ? <div><dt>UHID</dt><dd>{visit.uhid}</dd></div> : null}
+          {visit.visitNo ? <div><dt>Visit No.</dt><dd>{visit.visitNo}</dd></div> : null}
           <div><dt>Service</dt><dd>{visit.service}</dd></div>
           <div><dt>Phone</dt><dd>{visit.phone}</dd></div>
           <div><dt>Age / Gender</dt><dd>{[patient?.age, patient?.gender].filter(Boolean).join(" / ") || "-"}</dd></div>

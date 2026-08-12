@@ -12,7 +12,8 @@ import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 import { commonLabTests, labOrderPriorities, labOrderStatuses, labPaymentStatuses } from "@/lib/lab-types";
 import type { LabSortField } from "@/lib/lab-query";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
+import { registerReference } from "@/lib/id";
 import { downloadCsv } from "@/lib/table-export";
 import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
@@ -20,10 +21,23 @@ import { usePatientDrawerStore } from "@/stores/patient-drawer-store";
 import { useAdvancedForm } from "@/hooks/useAdvancedForm";
 import { labOrderCreateSchema, type LabOrderCreateInput } from "@/lib/validation/lab";
 
-const labExportHeaders = ["Token", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created"];
+// Order No. leads and the visit it came from follows; the daily token is kept
+// at the end, labelled, because it identifies nothing once the day is over.
+const labExportHeaders = ["Order No.", "Visit No.", "Patient", "Phone", "Tests", "Priority", "Status", "Payment Status", "Created", "OPD Token"];
 
 function labExportRow(order: LabOrder) {
-  return [order.token, order.patientName, order.phone, order.tests.join("; "), order.priority, order.status, order.paymentStatus, order.createdAt];
+  return [
+    registerReference(order.orderNo, order.token),
+    order.visitNo ?? "",
+    order.patientName,
+    order.phone,
+    order.tests.join("; "),
+    order.priority,
+    order.status,
+    order.paymentStatus,
+    order.createdAt,
+    order.token
+  ];
 }
 
 type LabListResponse = {
@@ -253,12 +267,12 @@ export function AdminLab() {
   const columns = useMemo<ColumnDef<LabOrder, unknown>[]>(
     () => [
       {
-        accessorKey: "token",
-        header: "Token",
-        size: 130,
+        accessorKey: "orderNo",
+        header: "Order No.",
+        size: 140,
         cell: ({ row }) => (
           <div>
-            <span className="font-mono text-xs font-bold text-ink">{row.original.token}</span>
+            <span className="font-mono text-xs font-bold text-ink">{registerReference(row.original.orderNo, row.original.token)}</span>
             {row.original.uhid ? <span className="mt-0.5 block text-[10px] text-muted">{row.original.uhid}</span> : null}
           </div>
         )
@@ -424,7 +438,7 @@ export function AdminLab() {
                 <option value="">Select OPD visit</option>
                 {visits.map((visit) => (
                   <option key={visit.id} value={visit.id}>
-                    {visit.token} | {visit.patientName}
+                    {visitReference(visit)} | {visit.patientName}
                     {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
                   </option>
                 ))}
@@ -577,7 +591,8 @@ export function AdminLab() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-brand">
-                    {editingOrder.token}
+                    {registerReference(editingOrder.orderNo, editingOrder.token)}
+                    {editingOrder.visitNo ? ` · ${editingOrder.visitNo}` : ""}
                     {editingOrder.uhid ? ` · ${editingOrder.uhid}` : ""}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-ink">{editingOrder.patientName}</h3>

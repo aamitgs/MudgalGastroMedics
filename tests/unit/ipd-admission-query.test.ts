@@ -62,6 +62,22 @@ describe("queryIpdAdmissions", () => {
     expect(byBed.admissions.map((a) => a.id)).toEqual(["A2"]);
   });
 
+  it("finds a stay by its admission number", () => {
+    const numbered = [...fixture, admission({ id: "A5", admissionNo: "IPD-2026-00045" })];
+    const result = queryIpdAdmissions(numbered, { page: 0, pageSize: 10, query: "IPD-2026-00045" });
+    expect(result.admissions.map((a) => a.id)).toEqual(["A5"]);
+  });
+
+  it("sorts by admission number", () => {
+    const numbered = [
+      admission({ id: "B2", admissionNo: "IPD-2026-00002" }),
+      admission({ id: "B1", admissionNo: "IPD-2026-00001" }),
+      admission({ id: "B3", admissionNo: "IPD-2026-00003" })
+    ];
+    const result = queryIpdAdmissions(numbered, { page: 0, pageSize: 10, sortBy: "admissionNo", sortDir: "asc" });
+    expect(result.admissions.map((a) => a.admissionNo)).toEqual(["IPD-2026-00001", "IPD-2026-00002", "IPD-2026-00003"]);
+  });
+
   it("filters by status", () => {
     const result = queryIpdAdmissions(fixture, { page: 0, pageSize: 10, status: "Discharged" });
     expect(result.admissions.map((a) => a.id)).toEqual(["A3"]);

@@ -68,6 +68,10 @@ export async function createInsuranceClaim(input: Record<string, unknown>) {
     createdAt: now,
     updatedAt: now,
     admissionId: admission?.id,
+    // The real number only — never admissionReference()'s token fallback. This
+    // is quoted to a TPA as the stay's identifier, and a daily queue number
+    // would not survive that conversation.
+    admissionNo: admission?.admissionNo,
     visitId: visit?.id || admission?.visitId,
     patientId: source.patientId,
     uhid: source.uhid,

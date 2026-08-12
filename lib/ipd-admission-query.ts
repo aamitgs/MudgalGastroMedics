@@ -1,6 +1,6 @@
 import type { IpdAdmission, IpdAdmissionStatus } from "@/lib/ipd-types";
 
-export type IpdAdmissionSortField = "patientName" | "token" | "status" | "ward" | "createdAt";
+export type IpdAdmissionSortField = "patientName" | "admissionNo" | "token" | "status" | "ward" | "createdAt";
 export type SortDirection = "asc" | "desc";
 
 export type IpdAdmissionQueryParams = {
@@ -24,7 +24,7 @@ export type IpdAdmissionQueryResult = {
 };
 
 function matchesQuery(admission: IpdAdmission, query: string) {
-  const haystack = [admission.id, admission.token, admission.uhid, admission.patientName, admission.phone, admission.bedLabel, admission.status, admission.diagnosis]
+  const haystack = [admission.id, admission.admissionNo, admission.token, admission.uhid, admission.patientName, admission.phone, admission.bedLabel, admission.status, admission.diagnosis]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

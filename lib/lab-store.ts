@@ -1,7 +1,7 @@
 import "server-only";
 import { evaluateLabCritical } from "@/lib/clinical/lab-critical";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { LabOrder, LabOrderStatus } from "@/lib/lab-types";
 
@@ -59,9 +59,11 @@ export async function createLabOrder(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const order: LabOrder = {
     id: generateId("LAB"),
+    orderNo: nextSerialNumber("LAB", doc.orders.map((item) => item.orderNo)),
     createdAt: now,
     updatedAt: now,
     visitId: visit.id,
+    visitNo: visit.visitNo,
     token: visit.token,
     patientId: visit.patientId,
     uhid: visit.uhid,

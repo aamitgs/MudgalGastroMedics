@@ -67,6 +67,7 @@ export function ConsultationStickyHeader({
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-black uppercase tracking-[0.16em] text-brand">
             <span>{visit.token} | {visit.status}</span>
+            {visit.visitNo ? <span className="font-mono normal-case tracking-normal text-muted">{visit.visitNo}</span> : null}
             {elapsed ? <span className="normal-case tracking-normal text-ink">· {elapsed} elapsed</span> : null}
             <SaveStatusIndicator state={aggregateSaveState} />
           </p>

@@ -5,6 +5,12 @@ export type InsuranceClaim = {
   createdAt: string;
   updatedAt: string;
   admissionId?: string;
+  /**
+   * The stay's register number, denormalized alongside the patient identity
+   * below — a TPA queries a claim by the admission it covers, and that
+   * reference has to survive unchanged for the life of the claim.
+   */
+  admissionNo?: string;
   visitId?: string;
   patientId?: string;
   uhid?: string;

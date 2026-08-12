@@ -1,6 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import { getPublicProcedures } from "@/lib/cms-public";
 import { getOpdVisitById } from "@/lib/opd-store";
 import { defaultProcedureChecklist, procedureScheduleStatuses } from "@/lib/procedure-types";
@@ -51,9 +51,11 @@ export async function createProcedureSchedule(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const schedule: ProcedureSchedule = {
     id: generateId("PROC"),
+    scheduleNo: nextSerialNumber("PRC", doc.schedules.map((item) => item.scheduleNo)),
     createdAt: now,
     updatedAt: now,
     visitId: visit.id,
+    visitNo: visit.visitNo,
     token: visit.token,
     patientId: visit.patientId,
     uhid: visit.uhid,

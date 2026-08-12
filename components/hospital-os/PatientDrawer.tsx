@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { ClinicalEvent } from "@/lib/hospital-os-data";
-import type { IpdAdmission } from "@/lib/ipd-types";
+import { admissionReference, type IpdAdmission } from "@/lib/ipd-types";
 import type { LabOrder } from "@/lib/lab-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
@@ -138,6 +138,9 @@ export function PatientDrawer() {
                     Admitted · {summary.activeAdmission.ward}, bed {summary.activeAdmission.bedLabel}
                     <span className="block font-normal text-muted">
                       {summary.activeAdmission.diagnosis || "Diagnosis not noted"} · {summary.activeAdmission.admittingDoctor}
+                    </span>
+                    <span className="block font-mono text-xs font-normal text-muted">
+                      {admissionReference(summary.activeAdmission)}
                     </span>
                   </p>
                 ) : (

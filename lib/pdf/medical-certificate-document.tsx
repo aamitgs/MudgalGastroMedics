@@ -1,6 +1,6 @@
 import "server-only";
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { doctor } from "@/lib/site-data";
 import { PdfFooter, PdfHeader, clinicalConfidentialityNote, generatedAtLabel, pdfColors, pdfStyles } from "@/lib/pdf/branding";
@@ -28,7 +28,7 @@ export function MedicalCertificateDocument({ visit, patient }: { visit: OpdVisit
   return (
     <Document title={`Medical Certificate - ${visit.patientName}`}>
       <Page size="A4" style={pdfStyles.page}>
-        <PdfHeader docType="Medical Certificate" reference={visit.token} />
+        <PdfHeader docType="Medical Certificate" reference={visitReference(visit)} />
 
         <View style={styles.patientRow}>
           <View>

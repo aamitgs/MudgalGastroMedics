@@ -89,7 +89,7 @@ export function InvoiceCollectionPanel({ invoice, onIssue, onCollect, onSyncChar
           </p>
           <h3 className="mt-1 text-lg font-bold text-ink">{invoice.patientName}</h3>
           <p className="text-xs text-muted">
-            {[invoice.uhid, invoice.phone, invoice.department, invoice.doctorName].filter(Boolean).join(" · ")}
+            {[invoice.uhid, invoice.admissionNo ?? invoice.visitNo, invoice.phone, invoice.department, invoice.doctorName].filter(Boolean).join(" · ")}
           </p>
         </div>
         <ActionButton variant="ghost" size="sm" onClick={onClose}>

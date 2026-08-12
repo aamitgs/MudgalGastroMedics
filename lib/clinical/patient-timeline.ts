@@ -63,7 +63,10 @@ export async function buildPatientTimeline(phone: string): Promise<ClinicalEvent
       visit.createdAt,
       "consult",
       `OPD visit · ${visit.status}`,
-      `${visit.service} · Token ${visit.token}${visit.clinicalNote ? ` · ${visit.clinicalNote}` : ""}`
+      // A timeline is read long after the day of the visit, where a repeating
+      // daily token identifies nothing — cite the durable number when there is
+      // one, and fall back to the token only for visits awaiting the backfill.
+      `${visit.service} · ${visit.visitNo ? `Visit ${visit.visitNo}` : `Token ${visit.token}`}${visit.clinicalNote ? ` · ${visit.clinicalNote}` : ""}`
     ));
     const prescriptionText = prescriptionSummaryText(visit);
     if (prescriptionText) {

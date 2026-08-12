@@ -117,7 +117,22 @@ export type Invoice = {
   patientName: string;
   phone: string;
   visitId?: string;
+  /**
+   * The OPD encounter's register number, stamped on at creation for the same
+   * reason the patient identity above is. Undefined on IPD bills, and on OPD
+   * bills raised before visit numbers existed — those resolve it from the
+   * visit at render time instead.
+   */
+  visitNo?: string;
   admissionId?: string;
+  /**
+   * The stay's register number, stamped on at creation for the same reason the
+   * patient identity above is: a bill must keep citing the admission it was
+   * raised for, readable exactly as issued. Undefined on OPD bills, and on IPD
+   * bills raised before admission numbers existed — those resolve it from the
+   * admission at render time instead.
+   */
+  admissionNo?: string;
   department?: string;
   doctorName?: string;
   lineItems: InvoiceLineItem[];

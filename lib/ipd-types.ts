@@ -1,3 +1,5 @@
+import { registerReference } from "@/lib/id";
+
 export type BedStatus = "Vacant" | "Occupied" | "Reserved" | "Cleaning" | "Maintenance" | "Isolation";
 
 export type IpdAdmissionStatus = "Admitted" | "Discharged" | "Cancelled";
@@ -21,6 +23,21 @@ export type WardMeta = {
 
 export type IpdAdmission = {
   id: string;
+  /**
+   * Human-readable register number for this stay — IPD-2026-00045 — issued
+   * once at admission and never reissued, including for a cancelled or
+   * discharged stay. This is the number staff quote and PDFs carry.
+   *
+   * Deliberately not `id`: every billing sourceRef in ipd-billing.ts and the
+   * discharge-summary PDF route key off `id`, so that stays the internal
+   * handle. Deliberately not `token` either — that is the originating OPD
+   * visit's queue position on the day of admission, which repeats every
+   * morning and so identifies nothing a week into a stay.
+   *
+   * Optional because admissions written before this existed carry none until
+   * scripts/backfill-register-numbers.mjs has run against the store.
+   */
+  admissionNo?: string;
   createdAt: string;
   updatedAt: string;
   dischargedAt?: string;
@@ -51,6 +68,11 @@ export type IpdAdmission = {
   consentRecorded?: boolean;
   consentRecordedAt?: string;
 };
+
+/** Working-surface reference for a stay — see registerReference in lib/id.ts for the rule. */
+export function admissionReference(admission: IpdAdmission): string {
+  return registerReference(admission.admissionNo, admission.token);
+}
 
 export type VitalsReading = {
   id: string;

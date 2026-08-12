@@ -6,9 +6,19 @@ export type LabPaymentStatus = "Unpaid" | "Paid";
 
 export type LabOrder = {
   id: string;
+  /**
+   * This order's own register number — LAB-2026-00001 — issued once and never
+   * reissued. A visit can raise several lab orders, so the encounter's number
+   * cannot identify one of them; this is what goes on a sample and what a tech
+   * quotes back. Optional until scripts/backfill-register-numbers.mjs has run.
+   */
+  orderNo?: string;
   createdAt: string;
   updatedAt: string;
   visitId: string;
+  /** The encounter this order came out of, denormalized like the patient identity below. */
+  visitNo?: string;
+  /** The originating visit's queue position on the day it was ordered — same-day useful, repeats after that. Superseded by orderNo as this order's identity. */
   token: string;
   patientId?: string;
   uhid?: string;

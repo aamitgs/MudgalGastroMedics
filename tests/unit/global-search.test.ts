@@ -169,6 +169,19 @@ describe("searchAdmissions", () => {
     const [result] = searchAdmissions("HDU-01", [admission()]);
     expect(result).toMatchObject({ category: "Admissions", href: "/mudgalgastromedics-os/ipd", patientPhone: "9876522222" });
   });
+
+  // Staff arrive holding one of these off a bill, a discharge summary or a
+  // phone call — pasting it has to land on the stay.
+  it("matches an exact admission number and UHID", () => {
+    const stay = admission({ admissionNo: "IPD-2026-00045", uhid: "MGM-2026-00015" });
+    expect(searchAdmissions("IPD-2026-00045", [stay])[0]?.score).toBe(100);
+    expect(searchAdmissions("MGM-2026-00015", [stay])[0]?.score).toBe(100);
+  });
+
+  it("leads the subtitle with the admission number, falling back to the token", () => {
+    expect(searchAdmissions("Meena", [admission({ admissionNo: "IPD-2026-00045" })])[0].subtitle).toMatch(/^IPD-2026-00045 · /);
+    expect(searchAdmissions("Meena", [admission()])[0].subtitle).toMatch(/^T-9 · /);
+  });
 });
 
 describe("searchStaff", () => {

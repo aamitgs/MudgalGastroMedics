@@ -1,6 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import type { AppointmentRecord } from "@/lib/appointment-types";
 import type { OpdVisit, OpdVisitStatus } from "@/lib/opd-types";
 
@@ -41,6 +41,9 @@ export async function createOpdVisit(appointment: AppointmentRecord) {
   const visit: OpdVisit = {
     id: generateId("OPD"),
     token: `MGM-${String(sequence).padStart(3, "0")}`,
+    // Derived from the numbers in this same freshly-loaded document and saved
+    // before it is released — the same issuing rule the IPD register uses.
+    visitNo: nextSerialNumber("OPD", doc.visits.map((item) => item.visitNo)),
     appointmentId: appointment.id,
     patientId: appointment.patientId,
     uhid: appointment.uhid,

@@ -156,10 +156,14 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ invoic
   let department = normalizeText(input.department) || undefined;
   let doctorName = normalizeText(input.doctorName) || undefined;
   const visitId = normalizeText(input.visitId) || undefined;
+  let visitNo: string | undefined;
 
   if (visitId) {
     const visit = await getOpdVisitById(visitId);
     if (!visit) return { error: "OPD visit not found." };
+    // Denormalized like the patient identity below, and for the same reason:
+    // a bill must keep citing the encounter it was raised for.
+    visitNo = visit.visitNo;
 
     // One live bill per visit: a second invoice against the same encounter is
     // the most common way a patient gets charged twice for one consultation.
@@ -175,15 +179,22 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ invoic
   }
 
   const admissionId = normalizeText(input.admissionId) || undefined;
-  if (admissionId && (!patientName || !phone)) {
+  let admissionNo: string | undefined;
+  if (admissionId) {
     const admission = (await listIpdAdmissions()).find((entry) => entry.id === admissionId);
-    if (!admission) return { error: "Admission not found." };
-    patientName = patientName || admission.patientName;
-    phone = phone || admission.phone;
-    patientId = patientId ?? admission.patientId;
-    uhid = uhid ?? admission.uhid;
-    department = department ?? `IPD — ${admission.ward}`;
-    doctorName = doctorName ?? admission.admittingDoctor;
+    const fillFromAdmission = !patientName || !phone;
+    // Unchanged: a missing admission only blocks the invoice when it was the
+    // source the identity fields were about to be filled from.
+    if (!admission && fillFromAdmission) return { error: "Admission not found." };
+    admissionNo = admission?.admissionNo;
+    if (admission && fillFromAdmission) {
+      patientName = patientName || admission.patientName;
+      phone = phone || admission.phone;
+      patientId = patientId ?? admission.patientId;
+      uhid = uhid ?? admission.uhid;
+      department = department ?? `IPD — ${admission.ward}`;
+      doctorName = doctorName ?? admission.admittingDoctor;
+    }
   }
 
   if (!patientName) return { error: "Patient name is required." };
@@ -203,7 +214,9 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<{ invoic
     patientName,
     phone,
     visitId,
+    visitNo,
     admissionId,
+    admissionNo,
     department,
     doctorName,
     lineItems,

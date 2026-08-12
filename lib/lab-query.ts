@@ -22,7 +22,7 @@ export type LabQueryResult = {
 };
 
 function matchesQuery(order: LabOrder, query: string) {
-  const haystack = [order.id, order.token, order.uhid, order.patientName, order.phone, order.tests.join(" "), order.status]
+  const haystack = [order.id, order.orderNo, order.visitNo, order.token, order.uhid, order.patientName, order.phone, order.tests.join(" "), order.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

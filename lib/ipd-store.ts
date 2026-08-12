@@ -1,6 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type {
   BedStatus,
@@ -290,6 +290,11 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const admission: IpdAdmission = {
     id: generateId("IPD"),
+    // Derived from the numbers in this same freshly-loaded document and
+    // written back before it is released, so the only way to collide is the
+    // whole-document write race document-store.ts already documents as
+    // accepted at a single branch's volumes.
+    admissionNo: nextSerialNumber("IPD", doc.admissions.map((item) => item.admissionNo)),
     createdAt: now,
     updatedAt: now,
     status: "Admitted",

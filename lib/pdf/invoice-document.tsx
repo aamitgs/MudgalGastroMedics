@@ -1,6 +1,6 @@
 import "server-only";
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { OpdVisit } from "@/lib/opd-types";
+import { visitReference, type OpdVisit } from "@/lib/opd-types";
 import { PdfFooter, PdfHeader, financialConfidentialityNote, generatedAtLabel, pdfColors, pdfStyles } from "@/lib/pdf/branding";
 
 const styles = StyleSheet.create({
@@ -31,7 +31,7 @@ export function InvoiceDocument({ visit }: { visit: OpdVisit }) {
   return (
     <Document title={`Invoice - ${visit.patientName}`}>
       <Page size="A4" style={pdfStyles.page}>
-        <PdfHeader docType={isPaid ? "Receipt" : "Invoice"} reference={visit.receiptId || visit.token} />
+        <PdfHeader docType={isPaid ? "Receipt" : "Invoice"} reference={visit.receiptId || visitReference(visit)} />
 
         <View style={styles.patientRow}>
           <View>

@@ -1,6 +1,6 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
 import type { ExternalReferral, ExternalReferralStatus, ExternalReferralType } from "@/lib/external-referral-types";
 
@@ -45,9 +45,11 @@ export async function createExternalReferral(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const referral: ExternalReferral = {
     id: generateId("EXT"),
+    referralNo: nextSerialNumber("REF", doc.referrals.map((item) => item.referralNo)),
     createdAt: now,
     updatedAt: now,
     visitId: visit.id,
+    visitNo: visit.visitNo,
     token: visit.token,
     patientId: visit.patientId,
     uhid: visit.uhid,

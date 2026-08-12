@@ -11,9 +11,19 @@ export type ExternalReferralStatus = "Ordered" | "Sent" | "Result Received" | "R
 
 export type ExternalReferral = {
   id: string;
+  /**
+   * This referral's own register number — REF-2026-00001 — issued once and
+   * never reissued. It is the reference an outside facility quotes when
+   * returning a result, so it has to stay unique for good. Optional until
+   * scripts/backfill-register-numbers.mjs has run.
+   */
+  referralNo?: string;
   createdAt: string;
   updatedAt: string;
   visitId: string;
+  /** The encounter this referral came out of, denormalized like the patient identity below. */
+  visitNo?: string;
+  /** The originating visit's queue position that day — repeats afterwards; referralNo is this record's identity. */
   token: string;
   patientId?: string;
   uhid?: string;

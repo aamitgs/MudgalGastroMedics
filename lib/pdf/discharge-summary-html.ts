@@ -1,6 +1,6 @@
 import "server-only";
 import { readFileSync } from "node:fs";
-import type { IpdAdmission, VitalsReading } from "@/lib/ipd-types";
+import { admissionReference, type IpdAdmission, type VitalsReading } from "@/lib/ipd-types";
 import { doctor, fullAddress, site } from "@/lib/site-data";
 import { clinicalConfidentialityNote, generatedAtLabel, logoPath, pdfColors } from "@/lib/pdf/branding";
 
@@ -81,6 +81,7 @@ export function buildDischargeSummaryHtml(admission: IpdAdmission, vitals: Vital
     <div class="patient-row">
       <div><p class="patient-label">Patient</p><p class="patient-value">${escapeHtml(admission.patientName)}</p></div>
       ${admission.uhid ? `<div><p class="patient-label">UHID</p><p class="patient-value">${escapeHtml(admission.uhid)}</p></div>` : ""}
+      ${admission.admissionNo ? `<div><p class="patient-label">Admission No.</p><p class="patient-value">${escapeHtml(admission.admissionNo)}</p></div>` : ""}
       <div><p class="patient-label">Phone</p><p class="patient-value">${escapeHtml(admission.phone)}</p></div>
       <div><p class="patient-label">Ward / Bed</p><p class="patient-value">${escapeHtml(admission.ward)} / ${escapeHtml(admission.bedLabel)}</p></div>
       <div><p class="patient-label">Admitted</p><p class="patient-value">${escapeHtml(admittedAt)}</p></div>
@@ -120,7 +121,7 @@ export function buildDischargeSummaryHeaderTemplate(admission: IpdAdmission) {
       </div>
       <div style="text-align: right;">
         <p style="font-weight: 700; font-size: 10px; color: ${pdfColors.brand}; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Discharge Summary</p>
-        <p style="font-size: 7px; color: ${pdfColors.muted}; margin: 3px 0 0;">Ref: ${escapeHtml(admission.token)}</p>
+        <p style="font-size: 7px; color: ${pdfColors.muted}; margin: 3px 0 0;">Ref: ${escapeHtml(admissionReference(admission))}</p>
       </div>
     </div>
   `;

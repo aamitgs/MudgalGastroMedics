@@ -55,6 +55,24 @@ describe("queryOpdVisits", () => {
     expect(byPhone.visits.map((v) => v.id)).toEqual(["V3"]);
   });
 
+  // Patients ring up about a consultation weeks later quoting the number off
+  // their prescription; the token they were called in on is long since reused.
+  it("finds a visit by its visit number", () => {
+    const numbered = [...fixture, visit({ id: "V5", visitNo: "OPD-2026-00123" })];
+    const result = queryOpdVisits(numbered, { page: 0, pageSize: 10, query: "OPD-2026-00123" });
+    expect(result.visits.map((v) => v.id)).toEqual(["V5"]);
+  });
+
+  it("sorts by visit number", () => {
+    const numbered = [
+      visit({ id: "B2", visitNo: "OPD-2026-00002" }),
+      visit({ id: "B1", visitNo: "OPD-2026-00001" }),
+      visit({ id: "B3", visitNo: "OPD-2026-00003" })
+    ];
+    const result = queryOpdVisits(numbered, { page: 0, pageSize: 10, sortBy: "visitNo", sortDir: "asc" });
+    expect(result.visits.map((v) => v.visitNo)).toEqual(["OPD-2026-00001", "OPD-2026-00002", "OPD-2026-00003"]);
+  });
+
   it("filters by status", () => {
     const result = queryOpdVisits(fixture, { page: 0, pageSize: 10, status: "Cancelled" });
     expect(result.visits.map((v) => v.id)).toEqual(["V4"]);

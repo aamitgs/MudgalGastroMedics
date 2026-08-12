@@ -23,7 +23,7 @@ export type ExternalReferralQueryResult = {
 };
 
 function matchesQuery(referral: ExternalReferral, query: string) {
-  const haystack = [referral.id, referral.token, referral.uhid, referral.patientName, referral.phone, referral.testName, referral.facilityName, referral.status]
+  const haystack = [referral.id, referral.referralNo, referral.visitNo, referral.token, referral.uhid, referral.patientName, referral.phone, referral.testName, referral.facilityName, referral.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

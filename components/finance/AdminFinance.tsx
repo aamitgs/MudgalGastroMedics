@@ -11,7 +11,7 @@ import { queryAccountEntries } from "@/lib/account-entry-query";
 import { hospitalRoleToAccessRole } from "@/lib/hospital-os-data";
 import type { InsuranceClaimSortField } from "@/lib/insurance-claim-query";
 import { queryInsuranceClaims } from "@/lib/insurance-claim-query";
-import type { IpdAdmission } from "@/lib/ipd-types";
+import { admissionReference, type IpdAdmission } from "@/lib/ipd-types";
 import type { OpdVisit } from "@/lib/opd-types";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -372,6 +372,8 @@ export function AdminFinance() {
               {row.original.patientName}
             </button>
             {row.original.uhid ? <span className="ml-2 rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-black uppercase text-brand dark:border-cyan-900 dark:bg-cyan-950">{row.original.uhid}</span> : null}
+            {/* The stay a TPA will quote back when querying this claim. */}
+            {row.original.admissionNo ? <span className="mt-0.5 block font-mono text-[10px] text-muted">{row.original.admissionNo}</span> : null}
           </div>
         )
       },
@@ -512,7 +514,7 @@ export function AdminFinance() {
                   <option value="">Select admission</option>
                   {admissions.map((admission) => (
                     <option key={admission.id} value={admission.id}>
-                      {admission.id} | {admission.patientName}
+                      {admissionReference(admission)} | {admission.patientName}
                       {admission.uhid ? ` | ${admission.uhid}` : ""}
                     </option>
                   ))}

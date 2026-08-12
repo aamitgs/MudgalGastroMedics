@@ -56,6 +56,9 @@ export function createDoctorSummaryText(visit: OpdVisit, patient?: PatientRecord
     `Patient: ${visit.patientName}`,
     visit.uhid ? `UHID: ${visit.uhid}` : "",
     `Token: ${visit.token}`,
+    // The copied summary gets pasted into referrals and WhatsApp messages that
+    // outlive today, so it carries the durable number alongside the token.
+    visit.visitNo ? `Visit No: ${visit.visitNo}` : "",
     `Service: ${visit.service}`,
     patient?.allergies ? `Allergies: ${patient.allergies}` : "",
     visit.presentingComplaints ? `Presenting complaints: ${visit.presentingComplaints}` : "",

@@ -54,6 +54,10 @@ function dateLabel(iso: string) {
 
 export type ItemisedInvoiceProps = {
   invoice: Invoice;
+  /** The stay this bill covers; absent on OPD bills. Resolved by the caller. */
+  admissionNo?: string;
+  /** The OPD encounter this bill covers; absent on IPD bills. Resolved by the caller. */
+  visitNo?: string;
   /** Data-URI PNG of the `upi://pay` link; omitted when UPI isn't configured or nothing is owed. */
   upiQrDataUri?: string;
   /** Data-URI PNG encoding the invoice number, so a counter can scan the bill back up. */
@@ -70,7 +74,7 @@ export type ItemisedInvoiceProps = {
  * invoices carried real line items, tax, split payments and refunds. A patient
  * is entitled to see what they are being charged for.
  */
-export function ItemisedInvoiceDocument({ invoice, upiQrDataUri, invoiceQrDataUri, copyNumber = 1 }: ItemisedInvoiceProps) {
+export function ItemisedInvoiceDocument({ invoice, admissionNo, visitNo, upiQrDataUri, invoiceQrDataUri, copyNumber = 1 }: ItemisedInvoiceProps) {
   const settled = invoice.balancePaise <= 0;
   const refunds = invoice.refunds ?? [];
 
@@ -94,6 +98,20 @@ export function ItemisedInvoiceDocument({ invoice, upiQrDataUri, invoiceQrDataUr
             <View>
               <Text style={styles.metaLabel}>UHID</Text>
               <Text style={styles.metaValue}>{invoice.uhid}</Text>
+            </View>
+          ) : null}
+          {/* A bill belongs to exactly one encounter, so at most one of these
+              renders — an IPD stay or an OPD visit, never both. */}
+          {admissionNo ? (
+            <View>
+              <Text style={styles.metaLabel}>Admission No.</Text>
+              <Text style={styles.metaValue}>{admissionNo}</Text>
+            </View>
+          ) : null}
+          {!admissionNo && visitNo ? (
+            <View>
+              <Text style={styles.metaLabel}>Visit No.</Text>
+              <Text style={styles.metaValue}>{visitNo}</Text>
             </View>
           ) : null}
           <View>

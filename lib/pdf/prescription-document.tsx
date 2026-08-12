@@ -179,9 +179,13 @@ export function PrescriptionDocument({ visit, patient }: { visit: OpdVisit; pati
           <View style={styles.patientDetailRow}>
             <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Address: </Text>{patient?.address || "Not recorded"}</Text>
             <Text style={styles.patientDetailCell}><Text style={styles.patientDetailLabel}>Mobile No: </Text>{visit.phone}</Text>
+            {/* Token stays because the printed pad has always carried it; the
+                visit number joins it as the reference that still means
+                something when this prescription resurfaces months later. */}
             <Text style={styles.patientDetailCell}>
               <Text style={styles.patientDetailLabel}>Date: </Text>{visitDateLabel(new Date(visit.createdAt))}
               <Text style={styles.patientDetailLabel}>, Token No: - </Text>{visit.token}
+              {visit.visitNo ? <><Text style={styles.patientDetailLabel}>, Visit No: - </Text>{visit.visitNo}</> : null}
             </Text>
           </View>
         </View>
