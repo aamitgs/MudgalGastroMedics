@@ -1,15 +1,26 @@
 import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
-import { generateId } from "@/lib/id";
+import { generateId, nextSerialNumber } from "@/lib/id";
 import type { PatientRecord, PatientStatus } from "@/lib/patient-types";
 
 type PatientStore = {
   patients: PatientRecord[];
+  /**
+   * UHIDs belonging to hard-deleted patients. Kept because deletePatient
+   * removes the record but cannot un-print the card the patient was given:
+   * without this, the next registration would be issued a number someone is
+   * still carrying. Numbers only, no patient data — this is a list of what may
+   * not be reused, not a shadow copy of deleted records.
+   */
+  retiredUhids: string[];
 };
 
 const store = createDocumentStore<PatientStore>("patients", (parsed) => {
   const doc = parsed as Partial<PatientStore> | undefined;
-  return { patients: Array.isArray(doc?.patients) ? (doc.patients as PatientRecord[]) : [] };
+  return {
+    patients: Array.isArray(doc?.patients) ? (doc.patients as PatientRecord[]) : [],
+    retiredUhids: Array.isArray(doc?.retiredUhids) ? (doc.retiredUhids as string[]) : []
+  };
 });
 
 function normalizeText(value: unknown) {
@@ -20,9 +31,19 @@ function normalizePhone(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-function createUhid(existingCount: number) {
-  const year = new Date().getFullYear();
-  return `MGM-${year}-${String(existingCount + 1).padStart(5, "0")}`;
+/**
+ * A UHID is lifelong and gets printed on a card the patient keeps, so it is
+ * issued from the highest number ever used — live patients and retired numbers
+ * together — rather than from the patient count. Counting live rows would hand
+ * the next person to register a number someone is still walking around with,
+ * and the most likely deletion of all is the mis-registration that was created
+ * moments ago, whose number is the highest one issued.
+ *
+ * Same MGM-YYYY-00001 shape the count-based version produced, so every number
+ * already out in the world keeps working.
+ */
+function createUhid(doc: PatientStore) {
+  return nextSerialNumber("MGM", [...doc.patients.map((patient) => patient.uhid), ...doc.retiredUhids]);
 }
 
 function findByPhoneIn(patients: PatientRecord[], phone: string) {
@@ -84,7 +105,7 @@ export async function upsertPatientFromInput(input: Record<string, unknown>) {
 
   const patient: PatientRecord = {
     id: generateId("PAT"),
-    uhid: createUhid(doc.patients.length),
+    uhid: createUhid(doc),
     createdAt: now,
     updatedAt: now,
     status: "Active",
@@ -125,7 +146,7 @@ export async function createPatient(input: Record<string, unknown>) {
   const now = new Date().toISOString();
   const patient: PatientRecord = {
     id: generateId("PAT"),
-    uhid: createUhid(doc.patients.length),
+    uhid: createUhid(doc),
     createdAt: now,
     updatedAt: now,
     status: "Active",
@@ -195,6 +216,10 @@ export async function deletePatient(id: string) {
   if (!patient) return { error: "Patient not found." };
 
   doc.patients = doc.patients.filter((item) => item.id !== id);
+  // The record goes; the number does not come back. A card or wristband
+  // carrying this UHID may already be in the patient's hands, so reissuing it
+  // would point their identifier at a different person.
+  if (patient.uhid && !doc.retiredUhids.includes(patient.uhid)) doc.retiredUhids.push(patient.uhid);
   await store.save(doc);
   return { patient };
 }
