@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart3, CalendarClock, CheckCircle2, ChevronsLeft, ChevronsRight, FileText, RefreshCw, Search, Stethoscope, UserPlus, UserRound } from "lucide-react";
-import { useLayoutEffect, useMemo, useState, type FormEvent } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import type { OpdVisit } from "@/lib/opd-types";
 import type { PatientRecord } from "@/lib/patient-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
@@ -16,6 +16,7 @@ import { RecallBadge, type PatientRecallAlert } from "@/components/doctor-portal
 import { computeDoctorAnalytics } from "@/lib/clinical/doctor-analytics";
 import { evaluateRecalls } from "@/lib/clinical/recall";
 import { notify } from "@/lib/notify";
+import { WalkInVisitForm } from "@/components/opd/WalkInVisitForm";
 import { clearQueuedSaveForFields, enqueueSave, listQueuedSaves, removeQueuedSave } from "@/lib/offline-save-queue";
 
 type OpdResponse = {
@@ -53,7 +54,6 @@ export function DoctorPortalWorkspace({
   const [error, setError] = useState("");
   const [printable, setPrintable] = useState<PrintableDoctorSummary | null>(null);
   const [showNewConsultation, setShowNewConsultation] = useState(false);
-  const [creatingConsultation, setCreatingConsultation] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [queueOpen, setQueueOpen] = useState(false);
@@ -179,53 +179,11 @@ export function DoctorPortalWorkspace({
     else if (listQueuedSaves().length > 0) notify.error("Unable to sync queued changes. Check your connection and try again.");
   }
 
-  // Takes the form element itself (captured synchronously at submit time),
-  // never the synthetic event — React nulls event.currentTarget once the
-  // handler's synchronous phase ends, which this function outlives via
-  // multiple awaits, and the retry closure re-invokes this same function
-  // much later still.
-  async function submitWalkIn(form: HTMLFormElement) {
-    const formData = new FormData(form);
-    const patientName = String(formData.get("patientName") || "").trim();
-    const phone = String(formData.get("phone") || "").trim();
-    if (!patientName || !phone) {
-      notify.error("Patient name and phone are required.");
-      return;
-    }
-    setCreatingConsultation(true);
-    const symptoms = String(formData.get("symptoms") || "")
-      .split(",")
-      .map((symptom) => symptom.trim())
-      .filter(Boolean);
-    const priority = formData.get("priority");
-    let response: Response;
-    try {
-      response = await fetch("/api/opd", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority })
-      });
-    } catch {
-      setCreatingConsultation(false);
-      notify.retryable("Unable to reach the server. Check your connection and retry.", () => void submitWalkIn(form));
-      return;
-    }
-    const data = (await response.json().catch(() => ({}))) as OpdResponse;
-    setCreatingConsultation(false);
-    if (!response.ok || !data.ok || !data.visit) {
-      notify.error(data.error || "Unable to start consultation.");
-      return;
-    }
-    setVisits((items) => [data.visit as OpdVisit, ...items]);
-    setSelectedVisitId(data.visit.id);
+  function handleWalkInCreated(visit: OpdVisit) {
+    setVisits((items) => [visit, ...items]);
+    setSelectedVisitId(visit.id);
     setShowNewConsultation(false);
-    form.reset();
-    notify.success(`Consultation started for ${data.visit.patientName}.`);
-  }
-
-  function createWalkInConsultation(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    void submitWalkIn(event.currentTarget);
+    notify.success(`Consultation started for ${visit.patientName}.`);
   }
 
   const filteredVisits = useMemo(() => {
@@ -398,26 +356,9 @@ export function DoctorPortalWorkspace({
                       </div>
                     </div>
                     {showNewConsultation ? (
-                      <form onSubmit={createWalkInConsultation} className="mt-4 grid grid-cols-1 gap-2 rounded border border-line bg-soft/60 p-3">
-                        <p className="text-xs font-bold text-ink">Start a walk-in consultation (no appointment needed)</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          <input name="patientName" required placeholder="Patient name" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                          <input name="phone" required type="tel" placeholder="Phone number" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                        </div>
-                        <input name="symptoms" placeholder="Symptoms, comma separated (optional)" className="min-h-9 rounded border border-line bg-white px-3 text-sm focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10" />
-                        <div className="flex flex-wrap items-center gap-2">
-                          <select name="priority" defaultValue="Routine" className="min-h-9 rounded border border-line bg-white px-2 text-sm font-semibold text-ink">
-                            <option>Routine</option>
-                            <option>Urgent</option>
-                          </select>
-                          <ActionButton type="submit" variant="primary" size="sm" disabled={creatingConsultation}>
-                            {creatingConsultation ? "Starting…" : "Start Consultation"}
-                          </ActionButton>
-                          <ActionButton type="button" variant="ghost" size="sm" onClick={() => setShowNewConsultation(false)}>
-                            Cancel
-                          </ActionButton>
-                        </div>
-                      </form>
+                      <div className="mt-4">
+                        <WalkInVisitForm onCreated={handleWalkInCreated} onCancel={() => setShowNewConsultation(false)} />
+                      </div>
                     ) : null}
                     <label className="relative mt-4 block">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />

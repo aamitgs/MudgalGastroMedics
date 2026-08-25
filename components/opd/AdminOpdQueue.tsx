@@ -11,6 +11,7 @@ import type { OpdSortField } from "@/lib/opd-query";
 import { downloadCsv } from "@/lib/table-export";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
+import { WalkInVisitForm } from "@/components/opd/WalkInVisitForm";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { notify } from "@/lib/notify";
 import { useHospitalOsStore } from "@/stores/hospital-os-store";
@@ -54,8 +55,14 @@ export function AdminOpdQueue() {
   // server-side (reserved for admin/super-admin) on every request, same as
   // every other mutation in the app.
   const canDelete = roleHasPermission(hospitalRoleToAccessRole[role], "appointments", "delete");
+  // Same UI-convenience-only gate: POST /api/opd re-checks appointments:create
+  // server-side. Reception holds it, which is the point — a walk-in is the only
+  // way to open a visit for a patient with no appointment dated today, and IPD
+  // admission cannot proceed without a visit.
+  const canStartWalkIn = roleHasPermission(hospitalRoleToAccessRole[role], "appointments", "create");
 
   const [visits, setVisits] = useState<OpdVisit[]>([]);
+  const [showWalkIn, setShowWalkIn] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCount, setPageCount] = useState(1);
   const [stats, setStats] = useState({ waiting: 0, inConsultation: 0, completed: 0, paid: 0 });
@@ -326,11 +333,38 @@ export function AdminOpdQueue() {
 
   return (
     <div className="rounded border border-line/80 bg-surface shadow-sm">
-      <div className="flex flex-col justify-between gap-4 border-b border-line p-4 md:flex-row md:items-center">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">OPD Queue</p>
-          <h2 className="mt-1 text-xl font-bold text-ink">Today&apos;s patient tokens</h2>
+      <div className="border-b border-line p-4">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand">OPD Queue</p>
+            <h2 className="mt-1 text-xl font-bold text-ink">Today&apos;s patient tokens</h2>
+          </div>
+          {canStartWalkIn ? (
+            <ActionButton
+              variant="primary"
+              size="sm"
+              aria-expanded={showWalkIn}
+              onClick={() => setShowWalkIn((current) => !current)}
+            >
+              <Stethoscope size={14} /> {showWalkIn ? "Close walk-in" : "New walk-in visit"}
+            </ActionButton>
+          ) : null}
         </div>
+        {canStartWalkIn && showWalkIn ? (
+          <div className="mt-4">
+            <WalkInVisitForm
+              onCreated={(visit) => {
+                setShowWalkIn(false);
+                notify.success(`Walk-in token ${visit.token} created for ${visit.patientName}.`);
+                void loadVisits();
+              }}
+              onCancel={() => setShowWalkIn(false)}
+              submitLabel="Create walk-in visit"
+              busyLabel="Creating…"
+              heading="Walk-in visit — for a patient with no appointment dated today"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 border-b border-line p-4 md:grid-cols-4">
