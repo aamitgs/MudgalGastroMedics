@@ -57,7 +57,7 @@ function blogHref(category?: string, page?: number) {
 }
 
 function getBlogCoverImage(post: { slug: string }) {
-  if (post.slug === campPostSlug) return "/images/hospital/campbanner.jpeg";
+  if (post.slug === campPostSlug) return "/images/hospital/hospital-front-banner.jpg";
   return `/images/blog/generated/${post.slug}-cover.svg`;
 }
 

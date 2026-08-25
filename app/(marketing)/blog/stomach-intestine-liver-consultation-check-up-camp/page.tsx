@@ -83,7 +83,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description: `${campDate}, ${campTime} at ${site.name}, Shaheed Nagar, Agra.`,
-    images: ["/images/hospital/campbanner.jpeg"],
+    images: ["/images/hospital/hospital-front-banner.jpg"],
     type: "article"
   }
 };
@@ -93,7 +93,7 @@ export default function CampBlogPostPage() {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: title,
-    image: `${site.url}/images/hospital/campbanner.jpeg`,
+    image: `${site.url}/images/hospital/hospital-front-banner.jpg`,
     datePublished: "2026-07-07",
     dateModified: "2026-07-07",
     author: {
@@ -141,10 +141,10 @@ export default function CampBlogPostPage() {
       <Section className="-mt-10 relative z-10 pt-0">
         <div className="overflow-hidden rounded border border-line/80 bg-white p-2 shadow-[0_28px_80px_rgba(8,64,84,0.14)]">
           <Image
-            src="/images/hospital/campbanner.jpeg"
-            alt="Mudgal Gastromedics stomach, intestine and liver consultation and check-up camp banner"
-            width={1600}
-            height={810}
+            src="/images/hospital/hospital-front-banner.jpg"
+            alt="Mudgal Gastromedics Hospital, Shaheed Nagar, Agra — venue of the stomach, intestine and liver consultation and check-up camp"
+            width={1848}
+            height={1100}
             sizes="(min-width: 1180px) 1180px, calc(100vw - 32px)"
             className="h-auto w-full rounded object-contain"
             priority
