@@ -389,8 +389,14 @@ export function AdminAppointments() {
         enableHiding: false,
         cell: ({ row }) => {
           const cancelled = row.original.status === "Cancelled";
-          const onAppointmentDate = !row.original.date || row.original.date === todayDateString();
-          const canCreateOpdToken = !cancelled && onAppointmentDate;
+          // Today or earlier, not a strict same-day match: a patient who was
+          // never checked in on the booked day is exactly the one who turns up
+          // late, and locking the token to that one date left them with no way
+          // into the OPD queue — and so no way to be admitted to IPD, which
+          // requires a visit. Future dates stay locked, or the token would sit
+          // in the wrong day's queue. Plain YYYY-MM-DD compares chronologically.
+          const notFutureDated = !row.original.date || row.original.date <= todayDateString();
+          const canCreateOpdToken = !cancelled && notFutureDated;
           return (
             <div className="flex items-center gap-1">
               <a
@@ -422,7 +428,7 @@ export function AdminAppointments() {
               <ActionButton
                 variant="success"
                 size="sm"
-                title={canCreateOpdToken ? "Create OPD Token" : cancelled ? "Cancelled — locked" : "Available on the appointment date"}
+                title={canCreateOpdToken ? "Create OPD Token" : cancelled ? "Cancelled — locked" : "Available from the appointment date onwards"}
                 disabled={!canCreateOpdToken}
                 onClick={() => void createOpdToken(row.original.id)}
                 className="h-8 w-8 min-h-8 px-0"
