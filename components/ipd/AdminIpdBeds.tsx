@@ -6,7 +6,7 @@ import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { BedWardMap, type OccupancyStats } from "@/components/design-system/BedWardMap";
 import type { BedStatus, BedTransfer, HospitalBed, HospitalWard, IpdAdmission, IpdAdmissionStatus, VitalsReading } from "@/lib/ipd-types";
 import { admissionReference, computeHduEscalation, ipdAdmissionStatuses } from "@/lib/ipd-types";
-import { queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admission-query";
+import { admissibleVisits, queryIpdAdmissions, type IpdAdmissionSortField } from "@/lib/ipd-admission-query";
 import type { OpdVisit } from "@/lib/opd-types";
 import { ActionButton } from "@/components/design-system/ActionButton";
 import { DataTable } from "@/components/design-system/DataTable";
@@ -53,6 +53,8 @@ type IpdResponse = {
   transfer?: BedTransfer;
   reading?: VitalsReading;
   occupancy?: OccupancyStats;
+  /** Set when the chosen visit already held an active admission, so nothing was created. */
+  alreadyAdmitted?: boolean;
   error?: string;
 };
 
@@ -80,6 +82,9 @@ export function AdminIpdBeds() {
   const [occupancy, setOccupancy] = useState<OccupancyStats>(emptyOccupancy);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // "visit" is the planned route and stays the default; "direct" is the
+  // emergency who never sat in the OPD queue.
+  const [admissionRoute, setAdmissionRoute] = useState<"visit" | "direct">("visit");
 
   const [pageIndex, setPageIndex] = useState(0);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -258,8 +263,17 @@ export function AdminIpdBeds() {
       notify.error(data.error || "Unable to admit patient.");
       return;
     }
-    setAdmissions((items) => [data.admission as IpdAdmission, ...items.filter((item) => item.id !== data.admission?.id)]);
+    const admission = data.admission as IpdAdmission;
+    setAdmissions((items) => [admission, ...items.filter((item) => item.id !== admission.id)]);
     setBeds((current) => data.beds ?? current);
+    if (data.alreadyAdmitted) {
+      // Reported as a warning, not a success: this visit was already an
+      // inpatient, so no new admission exists to act on.
+      notify.warning(`Already admitted as ${admissionReference(admission)}`, {
+        description: `${admission.patientName} is in ${admission.bedLabel} (${admission.ward}). No new admission was created.`
+      });
+      return;
+    }
     notify.success("Patient admitted");
     event.currentTarget.reset();
   }
@@ -316,6 +330,12 @@ export function AdminIpdBeds() {
     }
     return ids;
   }, [admissions, vitals, now]);
+
+  // Only the visits that can actually produce a new admission — see
+  // admissibleVisits() for why cancelled and already-admitted ones are dropped.
+  const selectableVisits = useMemo(() => admissibleVisits(visits, admissions), [visits, admissions]);
+
+  const vacantBedCount = useMemo(() => beds.filter((bed) => bed.status === "Vacant").length, [beds]);
 
   // Client-side pagination against the already-loaded admissions array — see
   // lib/ipd-admission-query.ts for why this module doesn't server-paginate.
@@ -479,15 +499,84 @@ export function AdminIpdBeds() {
             <BedDouble size={19} /> Admit patient
           </p>
           <div className="grid gap-3">
-            <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
-              <option value="">Select OPD visit</option>
-              {visits.map((visit) => (
-                <option key={visit.id} value={visit.id}>
-                  {visit.token} | {visit.patientName}
-                  {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service}
-                </option>
-              ))}
-            </select>
+            {/* Radios, not a dropdown: which route this is changes what the
+                rest of the form asks for, and that has to be visible without
+                opening anything. */}
+            <fieldset className="rounded border border-line bg-surface/70 p-3">
+              <legend className="px-1 text-xs font-black uppercase tracking-[0.12em] text-brand">Admission route</legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {(
+                  [
+                    { value: "visit", label: "From OPD visit", hint: "Consultation happened first" },
+                    { value: "direct", label: "Direct admission", hint: "Emergency — no OPD visit" }
+                  ] as const
+                ).map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex cursor-pointer items-start gap-2 rounded border p-2.5 text-sm transition ${
+                      admissionRoute === option.value ? "border-brand bg-cyan-50 dark:bg-cyan-950" : "border-line bg-surface"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="admissionRoute"
+                      value={option.value}
+                      checked={admissionRoute === option.value}
+                      onChange={() => setAdmissionRoute(option.value)}
+                      className="mt-0.5 h-4 w-4 accent-cyan-700"
+                    />
+                    <span>
+                      <span className="block font-bold text-ink">{option.label}</span>
+                      <span className="block text-xs text-muted">{option.hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {admissionRoute === "visit" ? (
+              <>
+                <select aria-label="OPD visit" name="visitId" className={fieldClass} required>
+                  <option value="">Select OPD visit</option>
+                  {selectableVisits.map((visit) => (
+                    <option key={visit.id} value={visit.id}>
+                      {/* Visit date is part of the label because an old token reads
+                          exactly like today's one otherwise — the queue keeps
+                          issuing MGM-001 every morning. */}
+                      {visit.token} | {visit.patientName}
+                      {visit.uhid ? ` | ${visit.uhid}` : ""} | {visit.service} | {visit.createdAt.slice(0, 10)}
+                    </option>
+                  ))}
+                </select>
+                {!loading && selectableVisits.length === 0 ? (
+                  <p className="rounded border border-amber-300 bg-amber-50 p-3 text-sm font-semibold leading-relaxed text-ink dark:border-amber-900 dark:bg-amber-950">
+                    No OPD visit is available to admit. Switch to <span className="font-bold">Direct admission</span> for an
+                    emergency, or open the OPD Queue module and use <span className="font-bold">New walk-in visit</span> to
+                    start one.
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
+                  <input aria-label="Patient name" name="patientName" className={fieldClass} placeholder="Patient name" required />
+                  <input aria-label="Phone" name="phone" type="tel" className={fieldClass} placeholder="Phone number" required />
+                </div>
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
+                  <input aria-label="Age" name="age" className={fieldClass} placeholder="Age (optional)" />
+                  <select aria-label="Gender" name="gender" className={fieldClass} defaultValue="">
+                    <option value="">Gender (optional)</option>
+                    {["Male", "Female", "Other"].map((gender) => (
+                      <option key={gender}>{gender}</option>
+                    ))}
+                  </select>
+                </div>
+                <p className="rounded border border-line bg-surface p-3 text-xs font-semibold leading-relaxed text-muted">
+                  The patient record is matched on the phone number, or registered with a new UHID if there is none. This
+                  stay carries no OPD token — it is filed under its admission number.
+                </p>
+              </>
+            )}
             <select aria-label="Bed" name="bedId" className={fieldClass} required>
               <option value="">Select vacant bed</option>
               {beds
@@ -498,8 +587,23 @@ export function AdminIpdBeds() {
                   </option>
                 ))}
             </select>
+            {!loading && vacantBedCount === 0 ? (
+              <p className="rounded border border-amber-300 bg-amber-50 p-3 text-sm font-semibold leading-relaxed text-ink dark:border-amber-900 dark:bg-amber-950">
+                Every bed is occupied or being cleaned. Free a bed on the ward map above — mark a cleaned bed Vacant, or
+                discharge a patient — before admitting.
+              </p>
+            ) : null}
             <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
-              <select aria-label="Admission type" name="admissionType" className={fieldClass} defaultValue="Observation">
+              {/* Remounted on route change (key) so the uncontrolled default
+                  actually follows it — a direct admission is an emergency far
+                  more often than an observation stay. */}
+              <select
+                key={admissionRoute}
+                aria-label="Admission type"
+                name="admissionType"
+                className={fieldClass}
+                defaultValue={admissionRoute === "direct" ? "Emergency" : "Observation"}
+              >
                 {["Observation", "Post Procedure", "Planned", "Emergency"].map((type) => (
                   <option key={type}>{type}</option>
                 ))}

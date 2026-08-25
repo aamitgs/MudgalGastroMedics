@@ -2,6 +2,7 @@ import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { generateId, nextSerialNumber } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
+import { upsertPatientFromInput } from "@/lib/patient-store";
 import type {
   BedStatus,
   BedTransfer,
@@ -276,16 +277,57 @@ export async function getOccupancyStats() {
 }
 
 export async function createIpdAdmission(input: Record<string, unknown>) {
-  const visit = await getOpdVisitById(normalizeText(input.visitId));
-  if (!visit) return { error: "OPD visit not found." };
+  const visitId = normalizeText(input.visitId);
+
+  // Two ways in, and the schema guarantees exactly one of them arrives:
+  //
+  //   OPD visit — the planned route. The consultation happened, the doctor
+  //   advised admission, and the stay inherits the visit's patient and token.
+  //
+  //   Direct — an emergency who never sat in the queue. The patient record is
+  //   matched by phone or registered on the spot, and the stay carries no
+  //   visit or token. Nothing downstream needs one: invoices and insurance
+  //   claims already key off admissionId (billing-store.ts, finance-store.ts),
+  //   and admissionReference() falls back to the register number, which every
+  //   admission is issued.
+  const visit = visitId ? await getOpdVisitById(visitId) : null;
+  if (visitId && !visit) return { error: "OPD visit not found." };
+
+  const patient = visit
+    ? null
+    : await upsertPatientFromInput({
+        name: normalizeText(input.patientName),
+        phone: normalizeText(input.phone),
+        age: normalizeText(input.age),
+        gender: normalizeText(input.gender)
+      });
+
+  const identity = visit
+    ? { visitId: visit.id, token: visit.token, patientId: visit.patientId, uhid: visit.uhid, patientName: visit.patientName, phone: visit.phone }
+    : { visitId: "", token: "", patientId: patient!.id, uhid: patient!.uhid, patientName: patient!.name, phone: patient!.phone };
 
   const doc = await store.load();
+
+  // Checked ahead of the bed so the patient-level fact wins: re-submitting
+  // someone who is already an inpatient used to surface as "<bed> is not
+  // vacant", which sends staff hunting for a bed problem that isn't there.
+  // Re-submitting is idempotent rather than an error, but the caller has to be
+  // able to tell nothing was created, or the UI reports an admission that
+  // doesn't exist.
+  //
+  // Matched on the patient, not only the visit: the same person reaching this
+  // twice — a second visit, or a direct admission for someone already on a
+  // ward — must not end up occupying two beds and accruing two bills.
+  const existing = doc.admissions.find(
+    (item) =>
+      item.status === "Admitted" &&
+      ((identity.visitId && item.visitId === identity.visitId) || (identity.patientId && item.patientId === identity.patientId))
+  );
+  if (existing) return { admission: existing, alreadyAdmitted: true };
+
   const bed = doc.beds.find((item) => item.id === normalizeText(input.bedId));
   if (!bed) return { error: "Bed not found." };
   if (bed.status !== "Vacant") return { error: `${bed.label} is not vacant.` };
-
-  const existing = doc.admissions.find((item) => item.visitId === visit.id && item.status === "Admitted");
-  if (existing) return { admission: existing };
 
   const now = new Date().toISOString();
   const admission: IpdAdmission = {
@@ -298,12 +340,7 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
     createdAt: now,
     updatedAt: now,
     status: "Admitted",
-    visitId: visit.id,
-    token: visit.token,
-    patientId: visit.patientId,
-    uhid: visit.uhid,
-    patientName: visit.patientName,
-    phone: visit.phone,
+    ...identity,
     bedId: bed.id,
     bedLabel: bed.label,
     ward: bed.ward,

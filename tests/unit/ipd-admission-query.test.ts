@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IpdAdmission } from "@/lib/ipd-types";
-import { queryIpdAdmissions } from "@/lib/ipd-admission-query";
+import { admissibleVisits, queryIpdAdmissions } from "@/lib/ipd-admission-query";
 
 function admission(overrides: Partial<IpdAdmission> = {}): IpdAdmission {
   return {
@@ -117,5 +117,44 @@ describe("queryIpdAdmissions", () => {
   it("caps pageSize at 100 and floors it at 1", () => {
     expect(queryIpdAdmissions(fixture, { page: 0, pageSize: 0 }).admissions.length).toBeLessThanOrEqual(1);
     expect(queryIpdAdmissions(fixture, { page: 0, pageSize: 500 }).total).toBe(4);
+  });
+});
+
+describe("admissibleVisits", () => {
+  const visits = [
+    { id: "V-1", status: "Waiting" },
+    { id: "V-2", status: "In Consultation" },
+    { id: "V-3", status: "Completed" },
+    { id: "V-4", status: "Cancelled" }
+  ];
+
+  it("keeps a completed visit — the consultation ending is when admission is advised", () => {
+    expect(admissibleVisits(visits, []).map((visit) => visit.id)).toEqual(["V-1", "V-2", "V-3"]);
+  });
+
+  it("drops a cancelled visit", () => {
+    expect(admissibleVisits(visits, []).some((visit) => visit.id === "V-4")).toBe(false);
+  });
+
+  it("drops a visit that already holds an active admission", () => {
+    const held = [admission({ visitId: "V-2", status: "Admitted" })];
+    expect(admissibleVisits(visits, held).map((visit) => visit.id)).toEqual(["V-1", "V-3"]);
+  });
+
+  it("keeps a visit whose only admission was discharged or cancelled — a readmission is legitimate", () => {
+    const past = [
+      admission({ id: "A-old", visitId: "V-1", status: "Discharged" }),
+      admission({ id: "A-void", visitId: "V-3", status: "Cancelled" })
+    ];
+    expect(admissibleVisits(visits, past).map((visit) => visit.id)).toEqual(["V-1", "V-2", "V-3"]);
+  });
+
+  it("returns nothing admissible when every visit is spent — the Admit form's empty state", () => {
+    const all = [
+      admission({ id: "A1", visitId: "V-1", status: "Admitted" }),
+      admission({ id: "A2", visitId: "V-2", status: "Admitted" }),
+      admission({ id: "A3", visitId: "V-3", status: "Admitted" })
+    ];
+    expect(admissibleVisits(visits, all)).toEqual([]);
   });
 });

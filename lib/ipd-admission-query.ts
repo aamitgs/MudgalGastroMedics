@@ -79,3 +79,22 @@ export function queryIpdAdmissions(allAdmissions: IpdAdmission[], params: IpdAdm
     pageCount
   };
 }
+
+/**
+ * The OPD visits that can still produce a *new* admission.
+ *
+ * A cancelled visit never becomes an inpatient, and a visit that already holds
+ * an active admission resolves to that existing record server-side rather than
+ * creating one — offering either in the Admit form is offering a dead end that
+ * reports success. "Completed" deliberately stays admissible: a consultation
+ * ending is precisely when the doctor advises admission.
+ */
+export function admissibleVisits<T extends { id: string; status: string }>(
+  visits: readonly T[],
+  admissions: readonly IpdAdmission[]
+): T[] {
+  const alreadyAdmitted = new Set(
+    admissions.filter((admission) => admission.status === "Admitted").map((admission) => admission.visitId)
+  );
+  return visits.filter((visit) => visit.status !== "Cancelled" && !alreadyAdmitted.has(visit.id));
+}

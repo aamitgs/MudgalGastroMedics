@@ -115,6 +115,60 @@ check("RBAC reception denied CMS (403)", receptionCms.status === 403, String(rec
 const wrongRole = await api(jar(), "POST", "/api/auth/login", { username, password: newPassword, role: "admin" });
 check("role-not-held rejected (403)", wrongRole.status === 403, String(wrongRole.status));
 
+console.log("-- IPD direct admission: needs patients:create, not just beds:edit --");
+// A direct admission registers or updates a patient record on the way in, so
+// it is gated on patients:create as well as beds:edit. Without that second
+// gate, every role that can manage a ward (Nurse holds beds:edit and only
+// patients:view) would gain patient-registration rights through the IPD form.
+// The OPD-visit route into admission must stay open to those roles — its
+// patient already exists.
+const nurseSuffix = Math.random().toString(36).slice(2, 7);
+const nurseUsername = `verify.nurse.${nurseSuffix}`;
+const nurseCreated = await api(admin, "POST", "/api/access/users", {
+  name: `Verify Nurse ${nurseSuffix}`,
+  username: nurseUsername,
+  roles: ["nurse"],
+  defaultRole: "nurse"
+});
+check("nurse user created", nurseCreated.data.ok === true, JSON.stringify(nurseCreated.data).slice(0, 140));
+
+const nurse = jar();
+await api(nurse, "POST", "/api/auth/login", { username: nurseUsername, password: nurseCreated.data.temporaryPassword });
+const nursePassword = `Nz#${Math.random().toString(36).slice(2, 8)}Qw9!mZt4`;
+await api(nurse, "POST", "/api/auth/password", { currentPassword: nurseCreated.data.temporaryPassword, newPassword: nursePassword });
+const nurseMe = await api(nurse, "GET", "/api/auth/me");
+check("nurse resolves to nurse role", nurseMe.data.activeRole === "nurse", JSON.stringify(nurseMe.data).slice(0, 120));
+
+const probeBed = await api(admin, "POST", "/api/ipd", {
+  type: "bed",
+  ward: "General",
+  label: `Auth probe ${nurseSuffix}`,
+  dailyRate: 1000
+});
+const probeBedId = probeBed.data.bed?.id;
+
+const nurseDirect = await api(nurse, "POST", "/api/ipd", {
+  patientName: `Verify Direct ${nurseSuffix}`,
+  phone: `98123${nurseSuffix.replace(/\D/g, "4").padEnd(5, "6")}`,
+  bedId: probeBedId,
+  diagnosis: "probe",
+  consentRecorded: "true"
+});
+check("nurse denied direct admission (403)", nurseDirect.status === 403, String(nurseDirect.status));
+
+const nurseBoard = await api(nurse, "GET", "/api/ipd");
+const admittedVisitIds = new Set(
+  (nurseBoard.data.admissions ?? []).filter((entry) => entry.status === "Admitted").map((entry) => entry.visitId)
+);
+const openVisit = (nurseBoard.data.visits ?? []).find((visit) => visit.status !== "Cancelled" && !admittedVisitIds.has(visit.id));
+const nurseViaVisit = await api(nurse, "POST", "/api/ipd", {
+  visitId: openVisit?.id,
+  bedId: probeBedId,
+  diagnosis: "probe via visit",
+  consentRecorded: "true"
+});
+check("nurse can still admit from an OPD visit", nurseViaVisit.status === 200, String(nurseViaVisit.status));
+
 console.log("-- staff: sessions + suspension revokes access --");
 const sessions = await api(staff, "GET", "/api/auth/sessions");
 check("session list works", sessions.data.ok === true && sessions.data.sessions.length >= 1);

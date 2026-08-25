@@ -90,9 +90,29 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
+
+  // A direct admission registers or updates a patient record on the way in, so
+  // it needs patients:create as well as beds:edit — beds:edit alone would hand
+  // patient-registration rights to every role that can manage a ward. The OPD
+  // route into admission is unaffected: its patient already exists.
+  const directAdmission = !parsed.data.visitId;
+  if (directAdmission) {
+    const patientAuth = await authorize(request, "patients", "create");
+    if (!patientAuth.ok) {
+      return NextResponse.json({ ok: false, error: patientAuth.error }, { status: patientAuth.status });
+    }
+  }
+
   const result = (await createIpdAdmission(parsed.data));
   if ("error" in result) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+  }
+
+  // Nothing was created — this patient already holds an active admission. No
+  // creation audit event for a creation that did not happen, and the flag lets
+  // the UI say so instead of confirming a new admission.
+  if (result.alreadyAdmitted) {
+    return NextResponse.json({ ok: true, admission: result.admission, alreadyAdmitted: true, beds: (await listBeds()) });
   }
 
   await recordAuditEvent({
@@ -101,6 +121,10 @@ export async function POST(request: Request) {
     action: "ipd.admission.created",
     entityType: "ipd_admission",
     entityId: result.admission.id,
+    // A stay with no originating visit is worth being able to find in the
+    // trail — it is the emergency route, and the patient record may have been
+    // created by this same request.
+    metadata: { directAdmission },
     after: result.admission,
     device: auditRequestMetadata(request)
   });

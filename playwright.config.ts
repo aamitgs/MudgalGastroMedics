@@ -48,9 +48,10 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // Billing and layout are split out below and must not run inside this
-      // project — both seed real data the demo-dataset specs cannot tolerate.
-      testIgnore: /(billing|os-layout)\.spec\.ts/
+      // Billing, IPD admission and layout are split out below and must not run
+      // inside this project — all three seed real data the demo-dataset specs
+      // cannot tolerate.
+      testIgnore: /(billing|ipd-admission|os-layout)\.spec\.ts/
     },
     {
       // Seeds real appointments so the tables it measures are the width they
@@ -74,9 +75,13 @@ export default defineConfig({
       // (see tests/e2e/global-setup.ts). So billing runs last, after those
       // have made their assertions — expressed as a dependency rather than
       // relying on filenames sorting the right way.
+      // ipd-admission rides in this project rather than its own: it seeds real
+      // OPD visits and IPD stays, so it has the same demo-dataset conflict, and
+      // sharing the slot keeps "layout" (which depends on this project) still
+      // running last against the fullest tables.
       name: "billing",
       use: { ...devices["Desktop Chrome"] },
-      testMatch: /billing\.spec\.ts/,
+      testMatch: /(billing|ipd-admission)\.spec\.ts/,
       dependencies: ["chromium"]
     }
   ]
