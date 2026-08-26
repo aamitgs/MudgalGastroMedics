@@ -85,6 +85,58 @@ export function AdminIpdBeds() {
   // "visit" is the planned route and stays the default; "direct" is the
   // emergency who never sat in the OPD queue.
   const [admissionRoute, setAdmissionRoute] = useState<"visit" | "direct">("visit");
+  // Within "direct": "existing" looks an already-registered patient up by
+  // Patient ID/UHID instead of retyping demographics (the common case — most
+  // emergencies have been to this hospital before); "new" keeps the original
+  // register-on-the-spot fields for someone truly never seen here.
+  const [directPatientMode, setDirectPatientMode] = useState<"existing" | "new">("existing");
+  const [directPatientId, setDirectPatientId] = useState("");
+  const [directPatientMatch, setDirectPatientMatch] = useState<{
+    id: string;
+    uhid: string;
+    name: string;
+    phone: string;
+    age: string;
+    gender: string;
+  } | null>(null);
+  const [directPatientLookup, setDirectPatientLookup] = useState<"idle" | "loading" | "found" | "not-found">("idle");
+
+  function resetDirectPatientLookup() {
+    setDirectPatientId("");
+    setDirectPatientMatch(null);
+    setDirectPatientLookup("idle");
+  }
+
+  // Clearing the field is a direct response to the keystroke, not the
+  // debounced lookup below — handled here so the effect only ever does one
+  // thing: fetch a match for a non-empty query after the debounce.
+  function updateDirectPatientId(value: string) {
+    setDirectPatientId(value);
+    if (!value.trim()) {
+      setDirectPatientMatch(null);
+      setDirectPatientLookup("idle");
+    }
+  }
+
+  // Debounced Patient ID/UHID lookup, mirroring the phone-match pattern in
+  // AdminPatients.tsx's checkDuplicate — but resolving an explicit ID rather
+  // than fuzzy-matching a phone number.
+  useEffect(() => {
+    if (admissionRoute !== "direct" || directPatientMode !== "existing") return;
+    const query = directPatientId.trim();
+    if (!query) return;
+    const timer = window.setTimeout(() => {
+      setDirectPatientLookup("loading");
+      void (async () => {
+        const response = await fetch(`/api/patients/match?id=${encodeURIComponent(query)}`, { cache: "no-store" });
+        const data = await response.json().catch(() => ({}));
+        const match = response.ok && data.ok ? data.match : null;
+        setDirectPatientMatch(match);
+        setDirectPatientLookup(match ? "found" : "not-found");
+      })();
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [directPatientId, admissionRoute, directPatientMode]);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -246,7 +298,15 @@ export function AdminIpdBeds() {
 
   async function createAdmission(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+    // React nulls out event.currentTarget once this handler's synchronous
+    // portion returns, so a reference taken after the first `await` below
+    // would throw — capture the form element itself up front.
+    const form = event.currentTarget;
+    if (admissionRoute === "direct" && directPatientMode === "existing" && !directPatientMatch) {
+      notify.error("Enter a Patient ID that matches a registered patient before admitting.");
+      return;
+    }
+    const payload = Object.fromEntries(new FormData(form).entries());
     let response: Response;
     try {
       response = await fetch("/api/ipd", {
@@ -275,7 +335,8 @@ export function AdminIpdBeds() {
       return;
     }
     notify.success("Patient admitted");
-    event.currentTarget.reset();
+    form.reset();
+    resetDirectPatientLookup();
   }
 
   async function updateAdmission(
@@ -558,23 +619,107 @@ export function AdminIpdBeds() {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
-                  <input aria-label="Patient name" name="patientName" className={fieldClass} placeholder="Patient name" required />
-                  <input aria-label="Phone" name="phone" type="tel" className={fieldClass} placeholder="Phone number" required />
+                <div className="flex flex-wrap gap-2 text-xs font-bold">
+                  {(
+                    [
+                      { value: "existing", label: "Existing patient — Patient ID" },
+                      { value: "new", label: "New patient — register now" }
+                    ] as const
+                  ).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setDirectPatientMode(option.value);
+                        resetDirectPatientLookup();
+                      }}
+                      aria-pressed={directPatientMode === option.value}
+                      className={`rounded-full border px-3 py-1.5 transition ${
+                        directPatientMode === option.value ? "border-brand bg-brand text-white" : "border-line bg-surface text-muted"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
-                  <input aria-label="Age" name="age" className={fieldClass} placeholder="Age (optional)" />
-                  <select aria-label="Gender" name="gender" className={fieldClass} defaultValue="">
-                    <option value="">Gender (optional)</option>
-                    {["Male", "Female", "Other"].map((gender) => (
-                      <option key={gender}>{gender}</option>
-                    ))}
-                  </select>
-                </div>
-                <p className="rounded border border-line bg-surface p-3 text-xs font-semibold leading-relaxed text-muted">
-                  The patient record is matched on the phone number, or registered with a new UHID if there is none. This
-                  stay carries no OPD token — it is filed under its admission number.
-                </p>
+
+                {directPatientMode === "existing" ? (
+                  <>
+                    <label className="grid gap-1 text-xs font-semibold text-muted">
+                      Patient ID / UHID
+                      <input
+                        aria-label="Patient ID or UHID"
+                        value={directPatientId}
+                        onChange={(event) => updateDirectPatientId(event.target.value)}
+                        className={fieldClass}
+                        placeholder="e.g. MGM-2026-00007"
+                        required
+                      />
+                    </label>
+                    {/* The typed value doubles as the submitted field — the
+                        server re-resolves it (getPatientById accepts id or
+                        uhid) and rejects a no-match, so this preview lookup
+                        is a UX aid, not the source of truth. */}
+                    <input type="hidden" name="patientId" value={directPatientId.trim()} />
+
+                    {directPatientLookup === "loading" ? <p className="text-xs font-semibold text-muted">Looking up patient…</p> : null}
+
+                    {directPatientLookup === "found" && directPatientMatch ? (
+                      <div className="rounded border border-emerald-300 bg-emerald-50 p-3 text-sm dark:border-emerald-900 dark:bg-emerald-950" role="status">
+                        <p className="font-black uppercase tracking-[0.1em] text-emerald-700 dark:text-emerald-300">Patient found</p>
+                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                          <p>
+                            <span className="block text-xs text-muted">Name</span>
+                            <span className="font-semibold text-ink">{directPatientMatch.name}</span>
+                          </p>
+                          <p>
+                            <span className="block text-xs text-muted">Phone</span>
+                            <span className="font-semibold text-ink">{directPatientMatch.phone}</span>
+                          </p>
+                          <p>
+                            <span className="block text-xs text-muted">Age</span>
+                            <span className="font-semibold text-ink">{directPatientMatch.age || "—"}</span>
+                          </p>
+                          <p>
+                            <span className="block text-xs text-muted">Gender</span>
+                            <span className="font-semibold text-ink">{directPatientMatch.gender || "—"}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {directPatientLookup === "not-found" ? (
+                      <p
+                        className="rounded border border-red-300 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+                        role="alert"
+                      >
+                        No patient found with this ID. Check the Patient ID/UHID, or switch to{" "}
+                        <span className="font-bold">New patient — register now</span>{" "}
+                        if they haven&apos;t been registered yet.
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
+                      <input aria-label="Patient name" name="patientName" className={fieldClass} placeholder="Patient name" required />
+                      <input aria-label="Phone" name="phone" type="tel" className={fieldClass} placeholder="Phone number" required />
+                    </div>
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
+                      <input aria-label="Age" name="age" className={fieldClass} placeholder="Age (optional)" />
+                      <select aria-label="Gender" name="gender" className={fieldClass} defaultValue="">
+                        <option value="">Gender (optional)</option>
+                        {["Male", "Female", "Other"].map((gender) => (
+                          <option key={gender}>{gender}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <p className="rounded border border-line bg-surface p-3 text-xs font-semibold leading-relaxed text-muted">
+                      The patient record is matched on the phone number, or registered with a new UHID if there is none. This
+                      stay carries no OPD token — it is filed under its admission number.
+                    </p>
+                  </>
+                )}
               </>
             )}
             <select aria-label="Bed" name="bedId" className={fieldClass} required>

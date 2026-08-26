@@ -2,7 +2,8 @@ import "server-only";
 import { createDocumentStore } from "@/lib/document-store";
 import { generateId, nextSerialNumber } from "@/lib/id";
 import { getOpdVisitById } from "@/lib/opd-store";
-import { upsertPatientFromInput } from "@/lib/patient-store";
+import { getPatientById, upsertPatientFromInput } from "@/lib/patient-store";
+import type { PatientRecord } from "@/lib/patient-types";
 import type {
   BedStatus,
   BedTransfer,
@@ -278,29 +279,41 @@ export async function getOccupancyStats() {
 
 export async function createIpdAdmission(input: Record<string, unknown>) {
   const visitId = normalizeText(input.visitId);
+  const patientId = normalizeText(input.patientId);
 
-  // Two ways in, and the schema guarantees exactly one of them arrives:
+  // Three ways in, and the schema guarantees at least one of them arrives:
   //
   //   OPD visit — the planned route. The consultation happened, the doctor
   //   advised admission, and the stay inherits the visit's patient and token.
   //
-  //   Direct — an emergency who never sat in the queue. The patient record is
-  //   matched by phone or registered on the spot, and the stay carries no
-  //   visit or token. Nothing downstream needs one: invoices and insurance
-  //   claims already key off admissionId (billing-store.ts, finance-store.ts),
-  //   and admissionReference() falls back to the register number, which every
-  //   admission is issued.
+  //   Direct, existing patient — an emergency already on file (registered at
+  //   an earlier visit or by front desk before this admission). Staff key in
+  //   the Patient ID/UHID instead of retyping demographics, so the identity
+  //   is looked up rather than matched-or-created.
+  //
+  //   Direct, new patient — an emergency never seen before. The patient
+  //   record is matched by phone or registered on the spot. Neither direct
+  //   path carries a visit or token. Nothing downstream needs one: invoices
+  //   and insurance claims already key off admissionId (billing-store.ts,
+  //   finance-store.ts), and admissionReference() falls back to the register
+  //   number, which every admission is issued.
   const visit = visitId ? await getOpdVisitById(visitId) : null;
   if (visitId && !visit) return { error: "OPD visit not found." };
 
-  const patient = visit
-    ? null
-    : await upsertPatientFromInput({
+  let patient: PatientRecord | null = null;
+  if (!visit) {
+    if (patientId) {
+      patient = await getPatientById(patientId);
+      if (!patient) return { error: "Patient not found for the given Patient ID." };
+    } else {
+      patient = await upsertPatientFromInput({
         name: normalizeText(input.patientName),
         phone: normalizeText(input.phone),
         age: normalizeText(input.age),
         gender: normalizeText(input.gender)
       });
+    }
+  }
 
   const identity = visit
     ? { visitId: visit.id, token: visit.token, patientId: visit.patientId, uhid: visit.uhid, patientName: visit.patientName, phone: visit.phone }

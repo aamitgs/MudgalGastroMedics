@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorize } from "@/lib/access/guard";
 import { recordPatientRecordAccess } from "@/lib/audit-patient-access";
-import { findPatientByPhone } from "@/lib/patient-store";
+import { findPatientByPhone, getPatientById } from "@/lib/patient-store";
 
 /**
  * Duplicate-patient detection at registration (Clinical Safety, Track 0.3) —
@@ -14,17 +14,26 @@ import { findPatientByPhone } from "@/lib/patient-store";
  * wrong-patient edits (e.g. a shared number). age/gender/bloodGroup/allergies
  * are included so booking can show useful context inline without a second
  * lookup or navigating to the patient's own record.
+ *
+ * The `id` param is a second, unrelated lookup mode reusing the same shape:
+ * IPD direct admission resolves a staff-entered Patient ID/UHID to a record
+ * (getPatientById already accepts either) so an emergency already on file can
+ * be admitted without retyping demographics.
  */
 export async function GET(request: Request) {
   const auth = await authorize(request, "patients", "view");
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const phone = new URL(request.url).searchParams.get("phone")?.trim() ?? "";
-  if (phone.replace(/\D/g, "").length < 6) {
-    return NextResponse.json({ ok: true, match: null });
-  }
+  const params = new URL(request.url).searchParams;
+  const id = params.get("id")?.trim() ?? "";
+  const phone = params.get("phone")?.trim() ?? "";
 
-  const patient = await findPatientByPhone(phone);
+  let patient = null;
+  if (id) {
+    patient = await getPatientById(id);
+  } else if (phone.replace(/\D/g, "").length >= 6) {
+    patient = await findPatientByPhone(phone);
+  }
   if (!patient) return NextResponse.json({ ok: true, match: null });
 
   // Audited only once a patient was actually matched. This endpoint fires

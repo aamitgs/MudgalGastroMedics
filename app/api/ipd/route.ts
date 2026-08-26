@@ -91,13 +91,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: firstZodIssueMessage(parsed.error) }, { status: 400 });
   }
 
-  // A direct admission registers or updates a patient record on the way in, so
-  // it needs patients:create as well as beds:edit — beds:edit alone would hand
-  // patient-registration rights to every role that can manage a ward. The OPD
-  // route into admission is unaffected: its patient already exists.
+  // A direct admission either registers/updates a patient record on the way
+  // in (needs patients:create) or, when a Patient ID was given, only reads
+  // one that already exists (needs patients:view) — beds:edit alone would
+  // otherwise hand patient-registration rights to every role that can manage
+  // a ward. The OPD route into admission is unaffected: its patient already
+  // exists.
   const directAdmission = !parsed.data.visitId;
   if (directAdmission) {
-    const patientAuth = await authorize(request, "patients", "create");
+    const usesExistingPatientId = Boolean(parsed.data.patientId);
+    const patientAuth = await authorize(request, "patients", usesExistingPatientId ? "view" : "create");
     if (!patientAuth.ok) {
       return NextResponse.json({ ok: false, error: patientAuth.error }, { status: patientAuth.status });
     }

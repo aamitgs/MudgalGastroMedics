@@ -21,9 +21,12 @@ export const ipdAdmissionCreateSchema = z
     // every admission to a visit left that patient with no way in at all.
     // Callers that send a visitId behave exactly as before.
     visitId: optionalText,
-    // Direct-admission path — identifies the patient instead of a visit. The
-    // record is matched by phone or registered on the spot, so intake is one
-    // form rather than register-then-admit.
+    // Direct-admission path — identifies the patient instead of a visit.
+    // patientId short-circuits to an already-registered record (looked up by
+    // Patient ID/UHID, no re-entry of demographics); without it, the record
+    // is matched by phone or registered on the spot, so intake is one form
+    // rather than register-then-admit.
+    patientId: optionalText,
     patientName: optionalText,
     phone: optionalText,
     age: optionalText,
@@ -44,8 +47,8 @@ export const ipdAdmissionCreateSchema = z
     // never a real boolean — so this matches the literal string, not `true`.
     consentRecorded: z.literal("true", { error: "Patient/family consent must be confirmed before admission." })
   })
-  .refine((data) => Boolean(data.visitId) || Boolean(data.patientName && data.phone), {
-    message: "Select an OPD visit, or give a patient name and phone for a direct admission."
+  .refine((data) => Boolean(data.visitId) || Boolean(data.patientId) || Boolean(data.patientName && data.phone), {
+    message: "Select an OPD visit, choose an existing patient by ID, or give a patient name and phone for a direct admission."
   });
 
 export const ipdBedUpdateSchema = z.object({
