@@ -31,7 +31,7 @@ export async function listPatientOpdVisits(phone: string) {
   });
 }
 
-export async function createOpdVisit(appointment: AppointmentRecord) {
+export async function createOpdVisit(appointment: AppointmentRecord, options?: { medicoLegal?: boolean }) {
   const doc = await store.load();
   const existing = doc.visits.find((visit) => visit.appointmentId === appointment.id && visit.status !== "Cancelled");
   if (existing) return existing;
@@ -54,6 +54,7 @@ export async function createOpdVisit(appointment: AppointmentRecord) {
     service: appointment.service,
     priority: appointment.priority,
     symptoms: appointment.symptoms,
+    medicoLegal: options?.medicoLegal ?? false,
     billingStatus: "Not Started",
     estimatedAmount: "",
     paymentMethod: "Cash",

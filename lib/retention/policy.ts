@@ -169,17 +169,15 @@ export type RetentionBlocker = { id: string; summary: string; fix: string };
  * missing capability, and no amount of per-record care compensates for one.
  */
 export function retentionPolicyBlockers(): RetentionBlocker[] {
+  // medico-legal-marker and date-of-birth are deliberately not listed here
+  // any more: both fields now exist (OpdVisit.medicoLegal, IpdAdmission.medicoLegal,
+  // PatientRecord.dateOfBirth) and are captured at registration/admission going
+  // forward. That closes the *capability* gap this list tracks. It does not
+  // backfill records written before the fields existed — assessRetention()
+  // still correctly returns "undecidable" for those on a per-record basis
+  // (input.medicoLegal === undefined, or age unparseable), which is a data
+  // gap, not a policy blocker.
   const blockers: RetentionBlocker[] = [
-    {
-      id: "medico-legal-marker",
-      summary: "No medico-legal case marker exists on clinical records.",
-      fix: "Add a medicoLegal flag to OPD visits and IPD admissions, set at registration/admission. Until then every clinical record is undecidable."
-    },
-    {
-      id: "date-of-birth",
-      summary: "Patients store an age captured at registration, not a date of birth.",
-      fix: "Capture date of birth so a minor's retention (to three years past majority) can be computed. Age alone cannot be aged forward."
-    },
     {
       id: "erasure-requests",
       summary: "There is no record of patient erasure requests to honour or refuse.",

@@ -370,7 +370,11 @@ export async function createIpdAdmission(input: Record<string, unknown>) {
     // Track 0.7: validated required at the route (ipdAdmissionCreateSchema),
     // so reaching here means it was confirmed.
     consentRecorded: true,
-    consentRecordedAt: now
+    consentRecordedAt: now,
+    // Optional at the route (unlike consentRecorded above), so this always
+    // resolves to a real boolean rather than staying unset — see the
+    // medicoLegal doc on IpdAdmission.
+    medicoLegal: input.medicoLegal === "true"
   };
 
   setBedStatus(bed, "Occupied");

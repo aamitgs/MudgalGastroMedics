@@ -45,7 +45,12 @@ export const ipdAdmissionCreateSchema = z
     // checkbox is inside a FormData-submitted form, which always sends the
     // string "true" when checked and omits the key entirely when unchecked —
     // never a real boolean — so this matches the literal string, not `true`.
-    consentRecorded: z.literal("true", { error: "Patient/family consent must be confirmed before admission." })
+    consentRecorded: z.literal("true", { error: "Patient/family consent must be confirmed before admission." }),
+    // Same FormData-checkbox convention as consentRecorded above (present as
+    // the string "true" when checked, absent when not) but not required —
+    // medico-legal is the rare case, not a gate on every admission.
+    // docs/privacy-review.md §5.
+    medicoLegal: z.literal("true").optional()
   })
   .refine((data) => Boolean(data.visitId) || Boolean(data.patientId) || Boolean(data.patientName && data.phone), {
     message: "Select an OPD visit, choose an existing patient by ID, or give a patient name and phone for a direct admission."

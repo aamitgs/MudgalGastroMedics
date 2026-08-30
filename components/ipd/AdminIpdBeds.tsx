@@ -771,6 +771,10 @@ export function AdminIpdBeds() {
                 Patient/family consent for admission and care has been explained and confirmed. Admission is rejected server-side without this.
               </span>
             </label>
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+              <input type="checkbox" name="medicoLegal" value="true" className="h-3.5 w-3.5 accent-amber-600" />
+              Medico-legal case (assault, accident, poisoning, or similar)
+            </label>
             <ActionButton type="submit" variant="primary">
               Create Admission
             </ActionButton>

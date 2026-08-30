@@ -7,6 +7,16 @@ function hasEnoughDigits(phone: string) {
   return phone.replace(/\D/g, "").length >= 6;
 }
 
+// Not required: `age` remains the primary field, and plenty of walk-in
+// registrations never learn an exact birth date. When given, it must be a
+// real calendar date, not in the future — see lib/patient-types.ts's
+// dateOfBirth doc for why this unlocks a minor's retention period.
+const optionalDateOfBirth = z
+  .string()
+  .trim()
+  .refine((value) => value === "" || (/^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(value).getTime()) && new Date(value).getTime() <= Date.now()), "Enter a valid date of birth.")
+  .optional();
+
 export const patientCreateSchema = z.object({
   name: z.string().trim().min(1, "Patient name is required."),
   phone: z.string().trim().refine(hasEnoughDigits, "Enter a valid phone number."),
@@ -17,6 +27,7 @@ export const patientCreateSchema = z.object({
   alternatePhone: optionalText,
   email: optionalText,
   age: optionalText,
+  dateOfBirth: optionalDateOfBirth,
   gender: optionalText,
   bloodGroup: optionalText,
   address: optionalText,
@@ -36,6 +47,7 @@ export const patientUpdateSchema = z.object({
   alternatePhone: optionalText,
   email: optionalText,
   age: optionalText,
+  dateOfBirth: optionalDateOfBirth,
   gender: optionalText,
   bloodGroup: optionalText,
   address: optionalText,

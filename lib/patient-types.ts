@@ -11,6 +11,8 @@ export type PatientRecord = {
   alternatePhone?: string;
   email?: string;
   age?: string;
+  /** ISO date (YYYY-MM-DD). Additive alongside `age`: unlocks a minor's extended retention period (lib/retention/policy.ts, docs/privacy-review.md §5), which an age captured once at registration cannot be aged forward to compute. */
+  dateOfBirth?: string;
   gender?: string;
   bloodGroup?: string;
   address?: string;

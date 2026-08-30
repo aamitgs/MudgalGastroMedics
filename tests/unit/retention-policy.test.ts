@@ -104,10 +104,19 @@ describe("retention policy blockers", () => {
     expect(retentionPolicyBlockers().map((blocker) => blocker.id)).toContain("policy-unapproved");
   });
 
-  it("names the schema gaps that make clinical records undecidable", () => {
+  // medicoLegal and dateOfBirth were added to OpdVisit/IpdAdmission/PatientRecord,
+  // closing these two as policy-level blockers — assessRetention() still
+  // correctly refuses per-record when a legacy record predates the fields
+  // (covered above), which is a data gap, not a missing capability.
+  it("no longer blocks on medico-legal marker or date of birth — both fields now exist", () => {
     const ids = retentionPolicyBlockers().map((blocker) => blocker.id);
-    expect(ids).toContain("medico-legal-marker");
-    expect(ids).toContain("date-of-birth");
+    expect(ids).not.toContain("medico-legal-marker");
+    expect(ids).not.toContain("date-of-birth");
+  });
+
+  it("still names the remaining real gaps", () => {
+    const ids = retentionPolicyBlockers().map((blocker) => blocker.id);
+    expect(ids).toContain("erasure-requests");
   });
 
   it("gives every blocker an actionable fix rather than just a complaint", () => {

@@ -56,12 +56,13 @@ export function WalkInVisitForm({
       .map((symptom) => symptom.trim())
       .filter(Boolean);
     const priority = formData.get("priority");
+    const medicoLegal = formData.get("medicoLegal") === "true";
     let response: Response;
     try {
       response = await fetch("/api/opd", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority })
+        body: JSON.stringify({ patientName, phone, service: "OPD", symptoms, priority, medicoLegal })
       });
     } catch {
       setSubmitting(false);
@@ -101,6 +102,10 @@ export function WalkInVisitForm({
           <option>Routine</option>
           <option>Urgent</option>
         </select>
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-muted">
+          <input type="checkbox" name="medicoLegal" value="true" className="h-3.5 w-3.5 accent-amber-600" />
+          Medico-legal case
+        </label>
         <ActionButton type="submit" variant="primary" size="sm" disabled={submitting}>
           {submitting ? busyLabel : submitLabel}
         </ActionButton>

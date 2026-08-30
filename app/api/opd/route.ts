@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Appointment not found." }, { status: 404 });
   }
 
-  const visit = (await createOpdVisit(appointment));
+  const visit = (await createOpdVisit(appointment, { medicoLegal: parsed.data.medicoLegal }));
 
   await recordAuditEvent({
     actorRole: auth.context.activeRole,

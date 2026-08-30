@@ -26,7 +26,7 @@ import { useFormDraft } from "@/hooks/useFormDraft";
 import { useRecentValues } from "@/hooks/useRecentValues";
 import { patientCreateSchema, type PatientCreateInput } from "@/lib/validation/patients";
 
-const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Gender", "Blood Group", "City", "Status", "Last Visit"];
+const patientExportHeaders = ["UHID", "Name", "Phone", "Email", "Age", "Date of Birth", "Gender", "Blood Group", "City", "Status", "Last Visit"];
 
 function patientExportRow(patient: PatientRecord) {
   return [
@@ -35,6 +35,7 @@ function patientExportRow(patient: PatientRecord) {
     patient.phone,
     patient.email ?? "",
     patient.age ?? "",
+    patient.dateOfBirth ?? "",
     patient.gender ?? "",
     patient.bloodGroup ?? "",
     patient.city ?? "",
@@ -453,9 +454,12 @@ export function AdminPatients() {
                     />
                   </FormField>
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-4">
                   <FormField label="Age" htmlFor="patient-age" error={errors.age?.message}>
                     <input id="patient-age" className={fieldClass} placeholder="Age" inputMode="numeric" {...register("age")} />
+                  </FormField>
+                  <FormField label="Date of birth" htmlFor="patient-dob" error={errors.dateOfBirth?.message}>
+                    <input id="patient-dob" className={fieldClass} type="date" max={new Date().toISOString().slice(0, 10)} {...register("dateOfBirth")} />
                   </FormField>
                   <FormField label="Gender" htmlFor="patient-gender">
                     <select id="patient-gender" className={fieldClass} defaultValue="" {...register("gender")}>

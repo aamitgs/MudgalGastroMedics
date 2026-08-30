@@ -60,7 +60,11 @@ export const opdVisitCreateSchema = z
     phone: optionalText,
     service: optionalText,
     symptoms: z.array(z.string()).optional(),
-    priority: optionalText
+    priority: optionalText,
+    // Sent as a real boolean (client builds a plain JS object before
+    // JSON.stringify here, not a FormData-derived string) — see the IPD
+    // schema below for the string-checkbox variant. docs/privacy-review.md §5.
+    medicoLegal: z.boolean().optional()
   })
   .refine((data) => Boolean(data.appointmentId) || Boolean(data.patientName && data.phone && data.service), {
     message: "Provide an appointment id, or a patient name, phone and service for a walk-in visit."

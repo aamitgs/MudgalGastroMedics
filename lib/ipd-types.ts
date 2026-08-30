@@ -67,6 +67,8 @@ export type IpdAdmission = {
   /** Recorded at intake (Track 0.7) — admission creation is rejected without it. */
   consentRecorded?: boolean;
   consentRecordedAt?: string;
+  /** Captured at admission on every new stay (createIpdAdmission always sets it true/false, never leaves it unset) — but optional here since admissions written before this existed carry none, matching admissionNo above. lib/retention/policy.ts's assessRetention() treats an undefined flag as undecidable, which is exactly right for that backlog. docs/privacy-review.md §5. */
+  medicoLegal?: boolean;
 };
 
 /** Working-surface reference for a stay — see registerReference in lib/id.ts for the rule. */

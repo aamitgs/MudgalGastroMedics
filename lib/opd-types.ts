@@ -48,6 +48,8 @@ export type OpdVisit = {
   service: string;
   priority?: string;
   symptoms: string[];
+  /** Captured at registration on every new visit (createOpdVisit always sets it true/false, never leaves it unset) — but optional here since visits written before this existed carry none, matching visitNo above. lib/retention/policy.ts's assessRetention() treats an undefined flag as undecidable, which is exactly right for that backlog. docs/privacy-review.md §5. */
+  medicoLegal?: boolean;
   billingStatus: "Not Started" | "Estimate Shared" | "Paid";
   estimatedAmount?: string;
   paymentMethod?: "Cash" | "UPI" | "Card" | "Insurance" | "Other";

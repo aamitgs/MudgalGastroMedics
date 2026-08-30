@@ -139,19 +139,19 @@ It is surfaced on the readiness page as the `data-retention` check.
 
 It is built to refuse rather than guess — the same principle
 `lib/billing-backfill.ts` applies to financial records, because a wrong call
-here destroys a medical record instead of mis-stating a total. Two schema gaps
-currently make **every clinical record undecidable**, and both must be closed
-before a purge tool can be written at all:
+here destroys a medical record instead of mis-stating a total.
 
-1. **No medico-legal marker.** Medico-legal cases are retained permanently or
-   per court direction, and no record carries the flag. Absence of the flag is
-   absence of evidence, not evidence of absence — so the policy will not expire
-   any clinical record until one exists.
-2. **No date of birth.** The patients store holds `age` captured once at
-   registration. A minor's record runs to three years past majority, which
-   cannot be computed from an age that was true on some earlier date.
+**Update, 2026-08-30**: the two schema gaps that made every clinical record
+undecidable are closed. `OpdVisit.medicoLegal` and `IpdAdmission.medicoLegal`
+are now captured (defaulting to `false`, never left unset) at registration and
+admission respectively; `PatientRecord.dateOfBirth` is now an optional field
+alongside `age` on the registration form. `lib/retention/policy.ts`'s
+`retentionPolicyBlockers()` no longer reports either as a blocker. This closes
+the *capability* gap only — records written before these fields existed still
+correctly resolve as `undecidable` in `assessRetention()` (a per-record data
+gap, not a policy blocker), and nothing has been backfilled or deleted.
 
-A third gap is procedural: there is no log of DPDP erasure requests, so
+One gap remains procedural: there is no log of DPDP erasure requests, so
 retention decisions and patients' exercised rights cannot be reconciled.
 
 Statutory baseline for an Indian hospital, to be confirmed by counsel:
@@ -172,16 +172,20 @@ not a neutral default, it is a compliance failure.
 
 1. Confirm the periods above with counsel, then set `POLICY_APPROVED` to `true`
    in `lib/retention/policy.ts`.
-2. Add a medico-legal flag to OPD visits and IPD admissions, captured at
-   registration/admission.
-3. Capture date of birth on the patient record (keep `age` for display; derive
-   it from DOB where present).
+2. ~~Add a medico-legal flag to OPD visits and IPD admissions, captured at
+   registration/admission.~~ **Done, 2026-08-30** — `medicoLegal` on both.
+3. ~~Capture date of birth on the patient record (keep `age` for display; derive
+   it from DOB where present).~~ **Done, 2026-08-30** — `PatientRecord.dateOfBirth`,
+   optional alongside `age`; nothing derives from it yet (display/backfill is
+   separate follow-up work, not done here).
 4. Log erasure requests and their outcomes.
 5. Only then write the purge/archival job — and have it refuse to run while
    `POLICY_APPROVED` is false or any record assesses as `undecidable`.
 
-Steps 2 and 3 are additive schema changes, which the standing contract allows;
-neither breaks an existing record.
+Steps 2 and 3 were additive schema changes, per the standing contract; neither
+broke an existing record. Steps 1 and 4 remain open, and are not something an
+engineering change can close — 1 needs counsel's sign-off, 4 needs a product
+decision on how erasure requests reach the system before they can be logged.
 
 ## 6. Security of processing
 

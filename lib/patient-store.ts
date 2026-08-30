@@ -155,6 +155,7 @@ export async function createPatient(input: Record<string, unknown>) {
     alternatePhone: normalizeText(input.alternatePhone),
     email: normalizeText(input.email),
     age: normalizeText(input.age),
+    dateOfBirth: normalizeText(input.dateOfBirth),
     gender: normalizeText(input.gender),
     bloodGroup: normalizeText(input.bloodGroup),
     address: normalizeText(input.address),
@@ -184,6 +185,7 @@ export async function updatePatient(input: Record<string, unknown>) {
   if (typeof input.alternatePhone === "string") patient.alternatePhone = normalizeText(input.alternatePhone);
   if (typeof input.email === "string") patient.email = normalizeText(input.email);
   if (typeof input.age === "string") patient.age = normalizeText(input.age);
+  if (typeof input.dateOfBirth === "string") patient.dateOfBirth = normalizeText(input.dateOfBirth);
   if (typeof input.gender === "string") patient.gender = normalizeText(input.gender);
   if (typeof input.bloodGroup === "string") patient.bloodGroup = normalizeText(input.bloodGroup);
   if (typeof input.address === "string") patient.address = normalizeText(input.address);
