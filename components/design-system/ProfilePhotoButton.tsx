@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { notify } from "@/lib/notify";
@@ -80,7 +81,7 @@ export function ProfilePhotoButton({
         <Avatar className={avatarClassName ?? "h-10 w-10 border border-line"}>
           {hasPhoto ? <AvatarImage src={`/api/account/photo?v=${photoVersion}`} alt="" className="object-cover" /> : null}
           <AvatarFallback className="bg-white p-1.5">
-            <img src="/mgm-icon.png" alt="" className="h-full w-full object-contain" />
+            <Image src="/mgm-icon.png" alt="" width={40} height={40} className="h-full w-full object-contain" />
           </AvatarFallback>
         </Avatar>
       </button>
