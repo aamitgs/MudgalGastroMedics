@@ -7,6 +7,7 @@ import { BlogPostSearch } from "@/components/site/BlogPostSearch";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { Section, SectionHead } from "@/components/site/Section";
 import { seoBlogPosts } from "@/lib/blog-posts";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 import { fullAddress, site } from "@/lib/site-data";
 
 const title = "Stomach, Intestine & Liver Consultation and Check-Up Camp";
@@ -91,25 +92,34 @@ export const metadata: Metadata = {
 export default function CampBlogPostPage() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: title,
-    image: `${site.url}/images/hospital/hospital-front-banner.jpg`,
-    datePublished: "2026-07-07",
-    dateModified: "2026-07-07",
-    author: {
-      "@type": "Organization",
-      name: site.name
-    },
-    publisher: {
-      "@type": "Organization",
-      name: site.name,
-      logo: {
-        "@type": "ImageObject",
-        url: `${site.url}/mgm-logo.png`
-      }
-    },
-    mainEntityOfPage: `${site.url}${slug}`,
-    description: metadata.description
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        headline: title,
+        image: `${site.url}/images/hospital/hospital-front-banner.jpg`,
+        datePublished: "2026-07-07",
+        dateModified: "2026-07-07",
+        author: {
+          "@type": "Organization",
+          name: site.name
+        },
+        publisher: {
+          "@type": "Organization",
+          name: site.name,
+          logo: {
+            "@type": "ImageObject",
+            url: `${site.url}/mgm-logo.png`
+          }
+        },
+        mainEntityOfPage: `${site.url}${slug}`,
+        description: metadata.description
+      },
+      breadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: "Blog", url: "/blog" },
+        { name: title, url: slug }
+      ])
+    ]
   };
 
   return (

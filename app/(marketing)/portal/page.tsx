@@ -3,6 +3,7 @@ import { AppointmentForm } from "@/components/site/AppointmentForm";
 import { HeroOpdTimingCard } from "@/components/site/HeroOpdTimingCard";
 import { PatientPortalAccess } from "@/components/patient-portal/PatientPortalAccess";
 import { Section } from "@/components/site/Section";
+import { breadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "Patient Portal & Appointment Booking",
@@ -11,9 +12,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/portal" }
 };
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  ...breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Patient Portal & Appointment Booking", url: "/portal" }
+  ])
+};
+
 export default function PortalPage() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="page-hero-bg py-16 text-white md:py-20">
         <div className="mx-auto w-[min(1180px,calc(100%-32px))]">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">Patient Portal</p>
