@@ -26,17 +26,6 @@ export const platformModules = [
   }
 ];
 
-export const portalFeatures = [
-  "Mobile OTP login",
-  "Appointment history",
-  "Report and prescription upload",
-  "Procedure preparation checklist",
-  "Follow-up reminders",
-  "WhatsApp status updates",
-  "Payment link support",
-  "Doctor instruction downloads"
-];
-
 export const operationsFeatures = [
   "Patient registration",
   "OPD queue board",
