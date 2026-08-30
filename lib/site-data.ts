@@ -603,7 +603,7 @@ export function hospitalSchema() {
       `${site.url}/images/hospital/hospital-front-view.jpg`,
       `${site.url}/images/hospital/reception-waiting-area.jpg`,
       `${site.url}/images/hospital/endoscopy-room.jpg`,
-      `${site.url}/images/hospital/fibroscan-room.jpg`
+      `${site.url}/images/hospital/fibroscan.jpg`
     ],
     telephone: [site.phone, site.mobile],
     sameAs: [site.googleBusinessProfileUrl, site.facebookUrl, site.youtubeUrl, site.whatsappChannelUrl],
