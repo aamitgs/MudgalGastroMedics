@@ -9,6 +9,8 @@ type SiteGalleryItem = (typeof galleryItems)[number];
 export type PublicProcedure = SiteProcedure & {
   seoTitle?: string;
   seoDescription?: string;
+  /** Only set for a CMS-tracked override or CMS-only entry — the static procedures array (lib/site-data.ts) carries no edit timestamp. Powers sitemap.ts's lastModified for the pages where a real one exists, rather than fabricating "just now" on every deploy. */
+  updatedAt?: string;
 };
 
 export type PublicGalleryItem = SiteGalleryItem & {
@@ -36,7 +38,8 @@ export async function getPublicProcedures(): Promise<PublicProcedure[]> {
       title: override.title || procedure.title,
       summary: override.summary || procedure.summary,
       seoTitle: override.seoTitle,
-      seoDescription: override.seoDescription
+      seoDescription: override.seoDescription,
+      updatedAt: override.updatedAt
     };
   });
 
@@ -51,7 +54,8 @@ export async function getPublicProcedures(): Promise<PublicProcedure[]> {
         summary: item.summary,
         hiSummary: item.summary,
         seoTitle: item.seoTitle,
-        seoDescription: item.seoDescription
+        seoDescription: item.seoDescription,
+        updatedAt: item.updatedAt
       }];
     });
 
