@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { FloatingActionHub } from "@/components/site/FloatingActionHub";
 import { localSeoPages } from "@/lib/local-seo-pages";
-import { site } from "@/lib/site-data";
+import { fullAddress, site } from "@/lib/site-data";
 
 const companyLinks = [
   { href: "/about", label: "About MGM" },
@@ -44,11 +44,11 @@ const supportLinks = [
 const areaLinks = localSeoPages.slice(0, 5).map((page) => ({ href: `/areas/${page.slug}`, label: page.title }));
 
 const socialLinks = [
-  { label: "WhatsApp Channel", href: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d", color: "#25D366" },
-  { label: "Facebook", href: "https://www.facebook.com/MudgalGastromedics", color: "#1877F2" },
+  { label: "WhatsApp Channel", href: site.whatsappChannelUrl, color: "#25D366" },
+  { label: "Facebook", href: site.facebookUrl, color: "#1877F2" },
   { label: "Instagram", href: "https://www.instagram.com/explore/locations/616704098791502/mudgal-gastromedics/", color: "#E1306C" },
-  { label: "X", href: "https://x.com/gastromedics", color: "#000000" },
-  { label: "YouTube", href: "https://www.youtube.com/@mudgalgastromedics9355", color: "#FF0000" }
+  { label: "X", href: site.xUrl, color: "#000000" },
+  { label: "YouTube", href: site.youtubeUrl, color: "#FF0000" }
 ];
 
 export function Footer() {
@@ -79,7 +79,7 @@ export function Footer() {
             <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-ink">Contact Us</h3>
             <div className="grid gap-3">
               <ContactLine icon={<Phone size={16} />} label="Landline" value={site.phone} href={`tel:${site.phone.replace(/\s/g, "")}`} />
-              <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile}`} />
+              <ContactLine icon={<Phone size={16} />} label="Mobile" value={site.mobile} href={`tel:${site.mobile.replace(/\s/g, "")}`} />
               <ContactLine icon={<MessageCircle size={16} />} label="WhatsApp" value={site.mobile} href={`https://wa.me/${site.whatsapp}`} />
             </div>
           </div>
@@ -90,7 +90,7 @@ export function Footer() {
               <GoogleQr />
             </a>
             <p className="mt-4 text-sm">Scan to view reviews</p>
-            <p className="mt-2 max-w-56 text-xs leading-5">Mudgal Gastromedics Hospital, Shaheed Nagar, Agra</p>
+            <p className="mt-2 max-w-56 text-xs leading-5">{site.name}, {fullAddress}</p>
           </div>
         </div>
 

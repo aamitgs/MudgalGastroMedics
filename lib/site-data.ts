@@ -4,7 +4,6 @@ export const site = {
   tagline: "Advanced Gastroenterology, Hepatology & Endoscopy Centre",
   secondaryTagline: "A Gastro & Liver Superspeciality Centre",
   url: "https://www.mudgalgastromedics.com",
-  alternateUrl: "https://www.mudgalgastromedics.in",
   addressLine1: "16 HIG, Shaheed Nagar",
   addressLine2: "Behind Shaheed Nagar Police Chowki",
   city: "Agra",
@@ -24,6 +23,7 @@ export const site = {
   googleReviewUrl: "https://maps.app.goo.gl/EHcBzTLo2GUqdLtt5",
   facebookUrl: "https://www.facebook.com/MudgalGastromedics",
   youtubeUrl: "https://www.youtube.com/@mudgalgastromedics9355",
+  xUrl: "https://x.com/gastromedics",
   whatsappChannelUrl: "https://whatsapp.com/channel/0029VaLI8y2J93wdMvMwWM2d",
   mapEmbed:
     "https://www.google.com/maps?q=Mudgal%20Gastromedics%20Hospital%2016%20HIG%20Shaheed%20Nagar%20Agra&output=embed"
@@ -606,7 +606,7 @@ export function hospitalSchema() {
       `${site.url}/images/hospital/fibroscan.jpg`
     ],
     telephone: [site.phone, site.mobile],
-    sameAs: [site.googleBusinessProfileUrl, site.facebookUrl, site.youtubeUrl, site.whatsappChannelUrl],
+    sameAs: [site.googleBusinessProfileUrl, site.facebookUrl, site.youtubeUrl, site.xUrl, site.whatsappChannelUrl],
     priceRange: "₹₹",
     additionalType: ["Gastroenterology Hospital", "Liver Care Centre", "Endoscopy Centre"],
     medicalSpecialty: ["Gastroenterology", "Hepatology", "Endoscopy"],
