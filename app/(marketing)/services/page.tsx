@@ -13,7 +13,7 @@ import { hospitalEntityId, site } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "Digestive, Liver & Endoscopy Services in Agra",
   description:
-    "Browse gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan, GI bleeding, pancreas, bowel, GERD, screening and weight management services at Mudgal Gastromedics Hospital, Agra.",
+    "Browse gastroenterology, liver care, endoscopy, colonoscopy, ERCP, FibroScan, GERD and preventive screening services at Mudgal Gastromedics Hospital, Agra.",
   alternates: { canonical: "/services" },
   openGraph: {
     title: `Digestive, Liver & Endoscopy Services in Agra | ${site.name}`,

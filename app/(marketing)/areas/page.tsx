@@ -13,7 +13,7 @@ import { fullAddress, hospitalEntityId, site } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "Local Gastroenterology Care Areas",
   description:
-    "Find local gastroenterology, liver care, endoscopy, colonoscopy, ERCP and FibroScan guidance pages for Agra, Shaheed Nagar, Fatehabad Road, Tajganj, Agra Cantt and nearby areas.",
+    "Find local gastroenterology, liver care, endoscopy, colonoscopy, ERCP and FibroScan guidance for Agra, Shaheed Nagar, Fatehabad Road and nearby areas.",
   alternates: { canonical: "/areas" },
   openGraph: {
     title: `Local Gastroenterology Care Areas | ${site.name}`,

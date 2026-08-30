@@ -13,7 +13,7 @@ import { hospitalEntityId, site } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "Gastroenterology Procedures in Agra",
   description:
-    "Browse endoscopy, colonoscopy, ERCP, FibroScan and other gastroenterology and liver procedures at Mudgal Gastromedics Hospital, Agra — what each involves, preparation notes and when it's advised.",
+    "Endoscopy, colonoscopy, ERCP, FibroScan and other gastro & liver procedures at Mudgal Gastromedics Hospital, Agra — what each involves and when it's advised.",
   alternates: { canonical: "/procedures" },
   openGraph: {
     title: `Gastroenterology Procedures in Agra | ${site.name}`,
